@@ -1,0 +1,341 @@
+[33m❯[39m Building...
+[32m✔[39m Building...
+[35mPrerendered 0 static routes.[39m
+Application bundle generation failed. [28.355 seconds]
+
+
+STDERR:
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mCannot find module 'chroma-js'
+Require stack:
+- C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\src\@fuse\tailwind\utils\generate-palette.js[0m [1m[35m[plugin angular-sass][0m
+
+  This error came from the "onLoad" callback registered here:
+
+    node_modules/@angular/build/src/tools/esbuild/stylesheets/stylesheet-plugin-factory.js:108:22:
+[37m      108 │                 build.[32monLoad[37m({ filter: language.componentFilter, ...
+          ╵                       [32m~~~~~~[0m
+
+    at setup (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\@angular\build\src\tools\esbuild\stylesheets\stylesheet-plugin-factory.js:108:23)
+    at handlePlugins (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:1150:21)
+    at buildOrContextImpl (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:873:5)
+    at Object.buildOrContext (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:699:5)
+    at C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:2024:15
+    at new Promise (<anonymous>)
+    at Object.build (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:2023:25)
+    at build (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:1874:51)
+    at #performBundle (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\@angular\build\src\tools\esbuild\bundler-context.js:166:52)
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mCannot find module 'chroma-js'
+Require stack:
+- C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\src\@fuse\tailwind\utils\generate-palette.js[0m [1m[35m[plugin angular-sass][0m
+
+  This error came from the "onLoad" callback registered here:
+
+    node_modules/@angular/build/src/tools/esbuild/stylesheets/stylesheet-plugin-factory.js:108:22:
+[37m      108 │                 build.[32monLoad[37m({ filter: language.componentFilter, ...
+          ╵                       [32m~~~~~~[0m
+
+    at setup (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\@angular\build\src\tools\esbuild\stylesheets\stylesheet-plugin-factory.js:108:23)
+    at handlePlugins (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:1150:21)
+    at buildOrContextImpl (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:873:5)
+    at Object.buildOrContext (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:699:5)
+    at C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:2024:15
+    at new Promise (<anonymous>)
+    at Object.build (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:2023:25)
+    at build (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:1874:51)
+    at #performBundle (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\@angular\build\src\tools\esbuild\bundler-context.js:166:52)
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mCannot find module 'chroma-js'
+Require stack:
+- C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\src\@fuse\tailwind\utils\generate-palette.js[0m [1m[35m[plugin angular-sass][0m
+
+  This error came from the "onLoad" callback registered here:
+
+    node_modules/@angular/build/src/tools/esbuild/stylesheets/stylesheet-plugin-factory.js:115:22:
+[37m      115 │                 build.[32monLoad[37m({ filter: language.fileFilter, names...
+          ╵                       [32m~~~~~~[0m
+
+    at setup (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\@angular\build\src\tools\esbuild\stylesheets\stylesheet-plugin-factory.js:115:23)
+    at handlePlugins (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:1150:21)
+    at buildOrContextImpl (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:873:5)
+    at Object.buildOrContext (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:699:5)
+    at C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:2024:15
+    at new Promise (<anonymous>)
+    at Object.build (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:2023:25)
+    at build (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:1874:51)
+    at #performBundle (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\@angular\build\src\tools\esbuild\bundler-context.js:166:52)
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mCannot find module 'chroma-js'
+Require stack:
+- C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\src\@fuse\tailwind\utils\generate-palette.js[0m [1m[35m[plugin angular-sass][0m
+
+  This error came from the "onLoad" callback registered here:
+
+    node_modules/@angular/build/src/tools/esbuild/stylesheets/stylesheet-plugin-factory.js:115:22:
+[37m      115 │                 build.[32monLoad[37m({ filter: language.fileFilter, names...
+          ╵                       [32m~~~~~~[0m
+
+    at setup (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\@angular\build\src\tools\esbuild\stylesheets\stylesheet-plugin-factory.js:115:23)
+    at handlePlugins (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:1150:21)
+    at buildOrContextImpl (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:873:5)
+    at Object.buildOrContext (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:699:5)
+    at C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:2024:15
+    at new Promise (<anonymous>)
+    at Object.build (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:2023:25)
+    at build (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:1874:51)
+    at #performBundle (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\@angular\build\src\tools\esbuild\bundler-context.js:166:52)
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mCannot find module 'chroma-js'
+Require stack:
+- C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\src\@fuse\tailwind\utils\generate-palette.js[0m [1m[35m[plugin angular-sass][0m
+
+  This error came from the "onLoad" callback registered here:
+
+    node_modules/@angular/build/src/tools/esbuild/stylesheets/stylesheet-plugin-factory.js:115:22:
+[37m      115 │                 build.[32monLoad[37m({ filter: language.fileFilter, names...
+          ╵                       [32m~~~~~~[0m
+
+    at setup (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\@angular\build\src\tools\esbuild\stylesheets\stylesheet-plugin-factory.js:115:23)
+    at handlePlugins (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:1150:21)
+    at buildOrContextImpl (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:873:5)
+    at Object.buildOrContext (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:699:5)
+    at C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:2024:15
+    at new Promise (<anonymous>)
+    at Object.build (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:2023:25)
+    at build (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:1874:51)
+    at #performBundle (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\@angular\build\src\tools\esbuild\bundler-context.js:166:52)
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mCannot find module 'chroma-js'
+Require stack:
+- C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\src\@fuse\tailwind\utils\generate-palette.js[0m [1m[35m[plugin angular-sass][0m
+
+  This error came from the "onLoad" callback registered here:
+
+    node_modules/@angular/build/src/tools/esbuild/stylesheets/stylesheet-plugin-factory.js:115:22:
+[37m      115 │                 build.[32monLoad[37m({ filter: language.fileFilter, names...
+          ╵                       [32m~~~~~~[0m
+
+    at setup (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\@angular\build\src\tools\esbuild\stylesheets\stylesheet-plugin-factory.js:115:23)
+    at handlePlugins (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:1150:21)
+    at buildOrContextImpl (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:873:5)
+    at Object.buildOrContext (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:699:5)
+    at C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:2024:15
+    at new Promise (<anonymous>)
+    at Object.build (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:2023:25)
+    at build (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:1874:51)
+    at #performBundle (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\@angular\build\src\tools\esbuild\bundler-context.js:166:52)
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mCannot find module 'chroma-js'
+Require stack:
+- C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\src\@fuse\tailwind\utils\generate-palette.js[0m [1m[35m[plugin angular-sass][0m
+
+  This error came from the "onLoad" callback registered here:
+
+    node_modules/@angular/build/src/tools/esbuild/stylesheets/stylesheet-plugin-factory.js:115:22:
+[37m      115 │                 build.[32monLoad[37m({ filter: language.fileFilter, names...
+          ╵                       [32m~~~~~~[0m
+
+    at setup (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\@angular\build\src\tools\esbuild\stylesheets\stylesheet-plugin-factory.js:115:23)
+    at handlePlugins (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:1150:21)
+    at buildOrContextImpl (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:873:5)
+    at Object.buildOrContext (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:699:5)
+    at C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:2024:15
+    at new Promise (<anonymous>)
+    at Object.build (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:2023:25)
+    at build (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:1874:51)
+    at #performBundle (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\@angular\build\src\tools\esbuild\bundler-context.js:166:52)
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mCannot find module 'chroma-js'
+Require stack:
+- C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\src\@fuse\tailwind\utils\generate-palette.js[0m [1m[35m[plugin angular-sass][0m
+
+  This error came from the "onLoad" callback registered here:
+
+    node_modules/@angular/build/src/tools/esbuild/stylesheets/stylesheet-plugin-factory.js:115:22:
+[37m      115 │                 build.[32monLoad[37m({ filter: language.fileFilter, names...
+          ╵                       [32m~~~~~~[0m
+
+    at setup (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\@angular\build\src\tools\esbuild\stylesheets\stylesheet-plugin-factory.js:115:23)
+    at handlePlugins (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:1150:21)
+    at buildOrContextImpl (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:873:5)
+    at Object.buildOrContext (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:699:5)
+    at C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:2024:15
+    at new Promise (<anonymous>)
+    at Object.build (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:2023:25)
+    at build (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:1874:51)
+    at #performBundle (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\@angular\build\src\tools\esbuild\bundler-context.js:166:52)
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mCannot find module 'chroma-js'
+Require stack:
+- C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\src\@fuse\tailwind\utils\generate-palette.js[0m [1m[35m[plugin angular-sass][0m
+
+  This error came from the "onLoad" callback registered here:
+
+    node_modules/@angular/build/src/tools/esbuild/stylesheets/stylesheet-plugin-factory.js:115:22:
+[37m      115 │                 build.[32monLoad[37m({ filter: language.fileFilter, names...
+          ╵                       [32m~~~~~~[0m
+
+    at setup (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\@angular\build\src\tools\esbuild\stylesheets\stylesheet-plugin-factory.js:115:23)
+    at handlePlugins (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:1150:21)
+    at buildOrContextImpl (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:873:5)
+    at Object.buildOrContext (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:699:5)
+    at C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:2024:15
+    at new Promise (<anonymous>)
+    at Object.build (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:2023:25)
+    at build (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:1874:51)
+    at #performBundle (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\@angular\build\src\tools\esbuild\bundler-context.js:166:52)
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mCannot find module 'chroma-js'
+Require stack:
+- C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\src\@fuse\tailwind\utils\generate-palette.js[0m [1m[35m[plugin angular-sass][0m
+
+  This error came from the "onLoad" callback registered here:
+
+    node_modules/@angular/build/src/tools/esbuild/stylesheets/stylesheet-plugin-factory.js:115:22:
+[37m      115 │                 build.[32monLoad[37m({ filter: language.fileFilter, names...
+          ╵                       [32m~~~~~~[0m
+
+    at setup (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\@angular\build\src\tools\esbuild\stylesheets\stylesheet-plugin-factory.js:115:23)
+    at handlePlugins (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:1150:21)
+    at buildOrContextImpl (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:873:5)
+    at Object.buildOrContext (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:699:5)
+    at C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:2024:15
+    at new Promise (<anonymous>)
+    at Object.build (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:2023:25)
+    at build (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:1874:51)
+    at #performBundle (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\@angular\build\src\tools\esbuild\bundler-context.js:166:52)
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mCannot find module 'chroma-js'
+Require stack:
+- C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\src\@fuse\tailwind\utils\generate-palette.js[0m [1m[35m[plugin angular-sass][0m
+
+  This error came from the "onLoad" callback registered here:
+
+    node_modules/@angular/build/src/tools/esbuild/stylesheets/stylesheet-plugin-factory.js:115:22:
+[37m      115 │                 build.[32monLoad[37m({ filter: language.fileFilter, names...
+          ╵                       [32m~~~~~~[0m
+
+    at setup (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\@angular\build\src\tools\esbuild\stylesheets\stylesheet-plugin-factory.js:115:23)
+    at handlePlugins (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:1150:21)
+    at buildOrContextImpl (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:873:5)
+    at Object.buildOrContext (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:699:5)
+    at C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:2024:15
+    at new Promise (<anonymous>)
+    at Object.build (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:2023:25)
+    at build (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:1874:51)
+    at #performBundle (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\@angular\build\src\tools\esbuild\bundler-context.js:166:52)
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to '&#64;expandCollapse' since it isn't a known property of 'div'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/admin/ui/animations/animations.component.html:107:32:
+[37m      107 │ ...          [32m[&#64;expandCollapse]="animationStates.expandCollapse"[37m>
+          ╵              [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AnimationsComponent.
+
+    src/app/modules/admin/ui/animations/animations.component.ts:6:19:
+[37m      6 │     templateUrl  : [32m'./animations.component.html'[37m,
+        ╵                    [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to '&#64;shake' since it isn't a known property of 'div'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/admin/ui/animations/animations.component.html:203:36:
+[37m      203 │ ...                      [32m[&#64;shake]="animationStates.shake.shake"[37m>
+          ╵                          [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AnimationsComponent.
+
+    src/app/modules/admin/ui/animations/animations.component.ts:6:19:
+[37m      6 │     templateUrl  : [32m'./animations.component.html'[37m,
+        ╵                    [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to '&#64;fadeIn' since it isn't a known property of 'div'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/admin/ui/animations/animations.component.html:318:36:
+[37m      318 │ ...                       [32m[&#64;fadeIn]="animationStates.fadeIn.in"[37m>
+          ╵                           [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AnimationsComponent.
+
+    src/app/modules/admin/ui/animations/animations.component.ts:6:19:
+[37m      6 │     templateUrl  : [32m'./animations.component.html'[37m,
+        ╵                    [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to '&#64;fadeOut' since it isn't a known property of 'div'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/admin/ui/animations/animations.component.html:751:36:
+[37m      751 │ ...                    [32m[&#64;fadeOut]="animationStates.fadeOut.out"[37m>
+          ╵                        [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AnimationsComponent.
+
+    src/app/modules/admin/ui/animations/animations.component.ts:6:19:
+[37m      6 │     templateUrl  : [32m'./animations.component.html'[37m,
+        ╵                    [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to '&#64;zoomIn' since it isn't a known property of 'div'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/admin/ui/animations/animations.component.html:1873:36:
+[37m      1873 │ ...                      [32m[&#64;zoomIn]="animationStates.zoomIn.in"[37m>
+           ╵                          [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AnimationsComponent.
+
+    src/app/modules/admin/ui/animations/animations.component.ts:6:19:
+[37m      6 │     templateUrl  : [32m'./animations.component.html'[37m,
+        ╵                    [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mNG8002: Can't bind to '&#64;zoomOut' since it isn't a known property of 'div'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/modules/admin/ui/animations/animations.component.html:1971:36:
+[37m      1971 │ ...                   [32m[&#64;zoomOut]="animationStates.zoomOut.out"[37m>
+           ╵                       [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+  Error occurs in the template of component AnimationsComponent.
+
+    src/app/modules/admin/ui/animations/animations.component.ts:6:19:
+[37m      6 │     templateUrl  : [32m'./animations.component.html'[37m,
+        ╵                    [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mCannot find module 'chroma-js'
+Require stack:
+- C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\src\@fuse\tailwind\utils\generate-palette.js[0m [1m[35m[plugin angular-sass][0m
+
+    angular:styles/global:styles:1:8:
+[37m      1 │ @import [32m'src/styles.scss'[37m;
+        ╵         [32m~~~~~~~~~~~~~~~~~[0m
+
+  This error came from the "onLoad" callback registered here:
+
+    node_modules/@angular/build/src/tools/esbuild/stylesheets/stylesheet-plugin-factory.js:115:22:
+[37m      115 │                 build.[32monLoad[37m({ filter: language.fileFilter, names...
+          ╵                       [32m~~~~~~[0m
+
+    at setup (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\@angular\build\src\tools\esbuild\stylesheets\stylesheet-plugin-factory.js:115:23)
+    at handlePlugins (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:1150:21)
+    at buildOrContextImpl (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:873:5)
+    at Object.buildOrContext (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:699:5)
+    at C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:2024:15
+    at new Promise (<anonymous>)
+    at Object.build (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:2023:25)
+    at build (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\esbuild\lib\main.js:1874:51)
+    at #performBundle (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\@angular\build\src\tools\esbuild\bundler-context.js:166:52)
+
+[39m[22m

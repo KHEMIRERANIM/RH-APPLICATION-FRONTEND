@@ -1,0 +1,121 @@
+<div class="auth-sign-in-page flex flex-col lg:flex-row flex-auto min-w-0 relative overflow-hidden">
+
+    <!-- Colonne gauche : formulaire -->
+    <div class="relative z-10 flex flex-col flex-auto lg:w-1/2 items-center justify-center px-4 py-10 sm:py-14 lg:py-16 lg:px-12">
+        <div class="auth-glass-card w-full max-w-md rounded-3xl p-8 sm:p-10">
+
+            <!-- Logo + titre -->
+            <div class="flex flex-col items-center text-center">
+                <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-sky-100 ring-1 ring-sky-200">
+                    <mat-icon class="icon-size-8 text-sky-600" [svgIcon]="'heroicons_outline:office-building'"></mat-icon>
+                </div>
+                <h1 class="mt-6 text-3xl sm:text-4xl font-bold tracking-tight auth-gradient-title">
+                    Portail RH & RSE
+                </h1>
+                <p class="mt-2 text-sm text-slate-600">
+                    Connectez-vous pour <strong class="text-slate-800">accéder à l’application</strong>
+                </p>
+            </div>
+
+            <div class="mt-8"></div>
+
+            <!-- Alert -->
+            <fuse-alert
+                class="mt-6 -mb-2"
+                *ngIf="showAlert"
+                [appearance]="'outline'"
+                [showIcon]="false"
+                [type]="alert.type"
+                [@shake]="alert.type === 'error'">
+                {{alert.message}}
+            </fuse-alert>
+
+            <!-- Formulaire : ngSubmit pour une entrée fiable dans l’app -->
+            <form class="mt-6" [formGroup]="signInForm" #signInNgForm="ngForm" (ngSubmit)="signIn()">
+
+                <mat-form-field class="w-full fuse-mat-dense">
+                    <mat-label>Adresse email</mat-label>
+                    <mat-icon matPrefix class="icon-size-5 mr-2 text-slate-500" [svgIcon]="'heroicons_outline:mail'"></mat-icon>
+                    <input id="email" matInput [formControlName]="'email'" autocomplete="email" placeholder="exemple@entreprise.com">
+                    <mat-error *ngIf="signInForm.get('email').hasError('required')">L'email est requis</mat-error>
+                    <mat-error *ngIf="signInForm.get('email').hasError('email')">Adresse email invalide</mat-error>
+                </mat-form-field>
+
+                <mat-form-field class="w-full fuse-mat-dense mt-2">
+                    <mat-label>Mot de passe</mat-label>
+                    <mat-icon matPrefix class="icon-size-5 mr-2 text-slate-500" [svgIcon]="'heroicons_outline:lock-closed'"></mat-icon>
+                    <input id="password" matInput type="password" [formControlName]="'password'" #passwordField autocomplete="current-password">
+                    <button
+                        mat-icon-button
+                        type="button"
+                        matSuffix
+                        (click)="passwordField.type === 'password' ? passwordField.type = 'text' : passwordField.type = 'password'">
+                        <mat-icon class="icon-size-5" *ngIf="passwordField.type === 'password'" [svgIcon]="'heroicons_outline:eye'"></mat-icon>
+                        <mat-icon class="icon-size-5" *ngIf="passwordField.type === 'text'" [svgIcon]="'heroicons_outline:eye-off'"></mat-icon>
+                    </button>
+                    <mat-error>Le mot de passe est requis</mat-error>
+                </mat-form-field>
+
+                <div class="flex flex-wrap items-center justify-between gap-2 mt-2">
+                    <mat-checkbox [color]="'primary'" [formControlName]="'rememberMe'" class="text-sm text-slate-700">
+                        Se souvenir de moi
+                    </mat-checkbox>
+                    <a class="text-sm font-medium text-sky-700 hover:text-sky-800" [routerLink]="['/forgot-password']">
+                        Mot de passe oublié ?
+                    </a>
+                </div>
+
+                <button
+                    type="submit"
+                    class="fuse-mat-button-large w-full mt-6 h-12 text-base font-semibold rounded-xl"
+                    mat-flat-button
+                    [color]="'primary'"
+                    [disabled]="signInForm.disabled">
+                    <span *ngIf="!signInForm.disabled">Entrer dans l’application</span>
+                    <mat-progress-spinner *ngIf="signInForm.disabled" [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+                </button>
+
+                <div class="mt-6 pt-6 border-t border-slate-200 text-center">
+                    <span class="text-sm text-slate-600">Vous postulez ?</span>
+                    <a class="ml-1 text-sm font-semibold text-sky-700 hover:text-sky-800" [routerLink]="['/sign-up']">
+                        Créer un compte candidat
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Colonne droite : visuel clair -->
+    <div class="auth-hero-panel relative hidden lg:flex lg:w-1/2 flex-col justify-center p-12 xl:p-20 overflow-hidden">
+        <div class="absolute top-10 right-10 w-64 h-64 rounded-full bg-sky-200/40 blur-3xl pointer-events-none"></div>
+        <div class="absolute bottom-10 left-10 w-48 h-48 rounded-full bg-indigo-200/35 blur-3xl pointer-events-none"></div>
+
+        <div class="relative z-10 max-w-lg">
+            <p class="text-sky-700 text-sm font-semibold tracking-wide uppercase mb-4">Une plateforme tout-en-un</p>
+            <h2 class="text-4xl xl:text-5xl font-bold text-slate-900 leading-tight">
+                Pilotez vos ressources humaines avec sérénité
+            </h2>
+            <p class="mt-6 text-lg text-slate-600 leading-relaxed">
+                Après connexion, vous accédez au tableau de bord, aux formations, congés, recrutement et à tous les modules RH.
+            </p>
+
+            <div class="mt-10 grid grid-cols-2 gap-4">
+                <div class="rounded-2xl bg-white/80 border border-slate-200/80 p-4 shadow-sm">
+                    <div class="text-2xl font-bold text-slate-900">24/7</div>
+                    <div class="text-sm text-slate-600 mt-1">Accès sécurisé</div>
+                </div>
+                <div class="rounded-2xl bg-white/80 border border-slate-200/80 p-4 shadow-sm">
+                    <div class="text-2xl font-bold text-slate-900">RGPD</div>
+                    <div class="text-sm text-slate-600 mt-1">Données protégées</div>
+                </div>
+            </div>
+
+            <div class="flex items-center mt-10 -space-x-2">
+                <img class="w-11 h-11 rounded-full ring-2 ring-white shadow object-cover" src="assets/images/avatars/female-18.jpg" alt="">
+                <img class="w-11 h-11 rounded-full ring-2 ring-white shadow object-cover" src="assets/images/avatars/male-09.jpg" alt="">
+                <img class="w-11 h-11 rounded-full ring-2 ring-white shadow object-cover" src="assets/images/avatars/female-11.jpg" alt="">
+                <span class="pl-6 text-sm text-slate-600">Des entreprises nous font confiance</span>
+            </div>
+        </div>
+    </div>
+</div>

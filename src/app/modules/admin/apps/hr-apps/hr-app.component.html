@@ -1,0 +1,44 @@
+<div class="flex flex-col flex-auto min-w-0">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-6 sm:px-8 border-b bg-card">
+        <div class="flex items-center min-w-0">
+            <div class="flex items-center justify-center w-12 h-12 rounded-lg bg-primary-100 dark:bg-primary-900">
+                <mat-icon [svgIcon]="icon" class="icon-size-8 text-primary-600 dark:text-primary-400"></mat-icon>
+            </div>
+            <div class="ml-4 min-w-0">
+                <h2 class="text-xl font-semibold truncate">{{ title }}</h2>
+                <p class="text-secondary truncate" *ngIf="description">{{ description }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="flex flex-col flex-auto p-6 sm:p-8">
+        <div class="max-w-2xl mx-auto w-full">
+            <div class="flex flex-col items-center text-center p-8 sm:p-12 rounded-2xl bg-card border shadow-sm">
+                <div class="flex items-center justify-center w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-800">
+                    <mat-icon [svgIcon]="icon" class="icon-size-12 text-gray-400"></mat-icon>
+                </div>
+                <h3 class="mt-6 text-2xl font-semibold">{{ title }}</h3>
+                <p class="mt-2 text-secondary">{{ description }}</p>
+                
+                <div class="mt-8 w-full max-w-md" *ngIf="features?.length">
+                    <div class="text-sm font-medium text-left mb-3">Fonctionnalités à venir :</div>
+                    <ul class="space-y-2 text-left text-secondary">
+                        <li *ngFor="let f of features" class="flex items-center">
+                            <mat-icon class="icon-size-5 mr-2 text-green-500" [svgIcon]="'heroicons_solid:check-circle'"></mat-icon>
+                            {{ f }}
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="mt-8 flex items-center justify-center space-x-4">
+                    <a mat-stroked-button [routerLink]="['/dashboards/project']">
+                        <mat-icon class="icon-size-5 mr-2" [svgIcon]="'heroicons_outline:arrow-left'"></mat-icon>
+                        Retour au tableau de bord
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
