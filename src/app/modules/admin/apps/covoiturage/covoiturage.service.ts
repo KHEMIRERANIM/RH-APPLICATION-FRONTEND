@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 export interface Vehicule {
   id?: string;
@@ -39,8 +40,9 @@ export class CovoiturageService {
   // --- VEHICULES ---
   
   getVehiculesByEmployeId(employeId: string): Observable<Vehicule[]> {
-    // Assuming standard Spring Data REST or custom controller endpoint
-    return this.http.get<Vehicule[]>(`${this.apiUrl}/vehicules/employe/${employeId}`);
+    return this.http.get<Vehicule[]>(`${this.apiUrl}/vehicules`).pipe(
+      map(vehicules => vehicules.filter(v => v.employeId === employeId))
+    );
   }
 
   creerVehicule(vehicule: Vehicule): Observable<Vehicule> {
@@ -57,11 +59,17 @@ export class CovoiturageService {
 
   // --- TRAJETS ---
 
-  getTrajetsProposesByEmploye(employeId: string): Observable<Trajet[]> {
-    return this.http.get<Trajet[]>(`${this.apiUrl}/trajets/employe/${employeId}`);
+  getTrajetsByEmployeId(employeId: string): Observable<Trajet[]> {
+    return this.http.get<Trajet[]>(`${this.apiUrl}/trajets`).pipe(
+      map(trajets => trajets.filter(t => t.employeId === employeId))
+    );
   }
 
   creerTrajet(trajet: Trajet): Observable<Trajet> {
     return this.http.post<Trajet>(`${this.apiUrl}/trajets`, trajet);
+  }
+
+  deleteTrajet(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/trajets/${id}`);
   }
 }

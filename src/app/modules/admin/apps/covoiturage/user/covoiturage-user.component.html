@@ -570,12 +570,13 @@
             </label>
             <div class="flex flex-wrap gap-2">
               <button
-                *ngFor="let day of days"
-                (click)="toggleDay(day)"
-                [class]="'flex-1 min-w-[3rem] h-10 rounded-lg font-medium transition-all ' + (selectedDays.includes(day) ? 'bg-[#1D9E75] text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200')"
-              >
-                {{ day }}
-              </button>
+  type="button"
+  *ngFor="let day of days"
+  (click)="toggleDay(day)"
+  [class]="'flex-1 min-w-[3rem] h-10 rounded-lg font-medium transition-all ' + (selectedDays.includes(day) ? 'bg-[#1D9E75] text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200')"
+>
+  {{ day }}
+</button>
             </div>
           </div>
 
@@ -601,7 +602,7 @@
                   <span class="font-medium text-[15px] text-gray-600">{{ getVehicleName(transport.vehiculeId) }}</span>
                 </div>
                 <!-- Assuming you have a deleteTrajet method, I bind it here -->
-                <button class="px-4 py-1.5 bg-[#E94560] text-white text-sm font-semibold rounded-lg hover:bg-red-600 transition-colors shadow-sm">
+                <button (click)="deleteTrajet(transport.id)" class="px-4 py-1.5 bg-[#E94560] text-white text-sm font-semibold rounded-lg hover:bg-red-600 transition-colors shadow-sm">
                   Supprimer
                 </button>
               </div>
@@ -722,10 +723,8 @@
 
   <app-vehicle-modal
     [isOpen]="showVehicleModal"
-    [vehicles]="vehicules"
+    [employeId]="employeId"
     (closeModal)="closeVehicleModal()"
-    (addVehicle)="onAddVehicle($event)"
-    (updateVehicle)="onUpdateVehicle($event)"
-    (deleteVehicle)="onDeleteVehicle($event)"
+    (vehiclesChanged)="loadVehicules()"
   ></app-vehicle-modal>
 </div>

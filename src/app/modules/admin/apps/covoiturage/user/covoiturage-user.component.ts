@@ -244,7 +244,7 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
 
   loadTrajets() {
     if (!this.employeId) return;
-    this.covoiturageService.getTrajetsProposesByEmploye(this.employeId).subscribe({
+    this.covoiturageService.getTrajetsByEmployeId(this.employeId).subscribe({
        next: (res) => {
          this.backendTrajets = res;
          this.cdr.detectChanges();
@@ -302,37 +302,14 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     this.showVehicleModal = false;
   }
 
-  onAddVehicle(vehicle: Vehicule) {
-    if (!this.employeId) return;
-    vehicle.employeId = this.employeId;
-    this.covoiturageService.creerVehicule(vehicle).subscribe({
-      next: () => {
-        this.loadVehicules();
-      },
-      error: (err) => console.error("Erreur création véhicule", err)
-    });
-  }
-
-  onUpdateVehicle(event: {id: string, vehicle: Partial<Vehicule>}) {
-    if (!this.employeId) return;
-    event.vehicle.employeId = this.employeId;
-    this.covoiturageService.updateVehicule(event.id, event.vehicle).subscribe({
-      next: () => {
-        this.loadVehicules();
-      },
-      error: (err) => console.error("Erreur mise à jour véhicule", err)
-    });
-  }
-
-  onDeleteVehicle(id: string) {
-    if (!confirm("Êtes-vous sûr de vouloir supprimer ce véhicule ?")) return;
-    this.covoiturageService.deleteVehicule(id).subscribe({
-      next: () => {
-        this.loadVehicules();
-      },
-      error: (err) => console.error("Erreur suppression véhicule", err)
-    });
-  }
+  deleteTrajet(id?: string): void {
+  if (!id) return;
+  if (!confirm('Êtes-vous sûr de vouloir supprimer ce trajet ?')) return;
+  this.covoiturageService.deleteTrajet(id).subscribe({
+    next: () => this.loadTrajets(),
+    error: (err) => console.error('Erreur suppression trajet', err)
+  });
+}
 
   ngAfterViewInit() {
     if (this.activeSection === 'utilises') {
