@@ -15,6 +15,8 @@ export interface Vehicule {
 }
 
 export interface Trajet {
+
+  
   id?: string;
   employeId?: string;
   vehiculeId?: string;
@@ -27,6 +29,24 @@ export interface Trajet {
   placesRestantes: number;
   statut: 'ACTIF' | 'COMPLET' | 'ANNULE';
   dateCreation?: string;
+}
+
+export interface ReservationRequest {
+  trajetId: string;
+  employeId: string;
+  statut: 'EN_ATTENTE' | 'CONFIRMEE' | 'ANNULEE';
+}
+
+export interface ReservationResponse {
+  id: string;
+  trajetId: string;
+  employeId: string;
+  statut: 'EN_ATTENTE' | 'CONFIRMEE' | 'ANNULEE';
+  dateReservation: string;
+  co2AvecCovoit?: number;
+  co2EconomiseKg?: number;
+  pointsEco?: number;
+  dateCalcul?: string;
 }
 
 @Injectable({
@@ -72,4 +92,25 @@ export class CovoiturageService {
   deleteTrajet(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/trajets/${id}`);
   }
+
+  private reservationsUrl = 'http://localhost:8081/api/reservations';
+
+getReservationsByEmploye(employeId: string): Observable<ReservationResponse[]> {
+  return this.http.get<ReservationResponse[]>(`${this.reservationsUrl}/employe/${employeId}`);
+}
+
+getTotalPointsEco(employeId: string): Observable<number> {
+  return this.http.get<number>(`${this.reservationsUrl}/employe/${employeId}/points`);
+}
+
+creerReservation(request: ReservationRequest): Observable<ReservationResponse> {
+  return this.http.post<ReservationResponse>(this.reservationsUrl, request);
+}
+
+annulerReservation(id: string): Observable<void> {
+  return this.http.delete<void>(`${this.reservationsUrl}/${id}`);
+}
+getAllTrajets(): Observable<Trajet[]> {
+  return this.http.get<Trajet[]>(`${this.apiUrl}/trajets`);
+}
 }
