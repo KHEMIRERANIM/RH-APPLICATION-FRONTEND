@@ -1,17 +1,8 @@
 // src/app/modules/admin/apps/covoiturage/covoiturage.module.ts
-import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
-import {
-  LucideMapPin,
-  LucideClock,
-  LucideUsers,
-  LucideMessageCircle,
-  LucideCheckCircle,
-  LucideGift,
-  LucideTrendingUp
-} from '@lucide/angular';
+import { MatIconModule } from '@angular/material/icon';
 
 import { CovoiturageUserComponent } from './user/covoiturage-user.component';
 import { CovoiturageAdminComponent } from './admin/covoiturage-admin.component';
@@ -26,18 +17,9 @@ import { CovoiturageRoutingModule } from './covoiturage-routing.module';
   imports: [
     CommonModule,
     FormsModule,
-    CovoiturageRoutingModule,
-
-    // Icons Lucide
-    LucideMapPin,
-    LucideClock,
-    LucideUsers,
-    LucideMessageCircle,
-    LucideCheckCircle,
-    LucideGift,
-    LucideTrendingUp
+    MatIconModule,
+    CovoiturageRoutingModule
   ],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA],   // ← AJOUTE CETTE LIGNE
   exports: [
     CovoiturageUserComponent
   ]
