@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, OnDestroy, ElementRef, Renderer2, ViewChild, ChangeDetectorRef, NgZone } from '@angular/core';
+import { Component, AfterViewInit, OnDestroy, ElementRef, Renderer2, ViewChild, ChangeDetectorRef, NgZone, ApplicationRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -73,6 +73,82 @@ export class CovoiturageUserComponent implements AfterViewInit, OnDestroy {
     }
   ];
 
+  myShuttleReservations = [
+    {
+      id: 1,
+      shuttleName: 'Navette Ligne A',
+      route: 'Gare Centrale → Siège Social',
+      departureTime: '07:30',
+      arrivalTime: '08:00',
+      days: ['L', 'M', 'Me', 'J', 'V'],
+      busNumber: 'BUS-101'
+    },
+    {
+      id: 2,
+      shuttleName: 'Navette Zone Industrielle',
+      route: 'Métro Ligne 1 → Zone Industrielle',
+      departureTime: '08:15',
+      arrivalTime: '08:45',
+      days: ['L', 'M', 'Me', 'J', 'V'],
+      busNumber: 'BUS-205'
+    }
+  ];
+
+  availableShuttles = [
+    {
+      id: 1,
+      name: 'Navette Ligne A',
+      route: 'Gare Centrale → Siège Social',
+      stops: ['Gare Centrale', 'République', 'Avenue Bourguiba', 'Siège Social'],
+      schedule: 'Toutes les 30 min',
+      firstDeparture: '06:30',
+      lastDeparture: '20:00',
+      capacity: 25,
+      available: 18,
+      busNumber: 'BUS-101',
+      image: 'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=400'
+    },
+    {
+      id: 2,
+      name: 'Navette Zone Industrielle',
+      route: 'Métro Ligne 1 → Zone Industrielle',
+      stops: ['Métro République', 'Centre Ville', 'Rond-Point Ghazela', 'Zone Industrielle'],
+      schedule: 'Toutes les 45 min',
+      firstDeparture: '06:00',
+      lastDeparture: '22:00',
+      capacity: 30,
+      available: 22,
+      busNumber: 'BUS-205',
+      image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=400'
+    },
+    {
+      id: 3,
+      name: 'Navette Express Lac',
+      route: 'Tunis Centre → Berges du Lac',
+      stops: ['Place Barcelone', 'Passage', 'Lac 1', 'Lac 2', 'Berges du Lac'],
+      schedule: 'Toutes les 20 min',
+      firstDeparture: '07:00',
+      lastDeparture: '19:00',
+      capacity: 40,
+      available: 35,
+      busNumber: 'BUS-310',
+      image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=400'
+    },
+    {
+      id: 4,
+      name: 'Navette Aéroport-Bureau',
+      route: 'Aéroport Tunis-Carthage → Siège',
+      stops: ['Aéroport Terminal 1', 'Aéroport Terminal 2', 'Centre Urbain Nord', 'Siège Social'],
+      schedule: 'Toutes les 60 min',
+      firstDeparture: '05:30',
+      lastDeparture: '21:30',
+      capacity: 20,
+      available: 15,
+      busNumber: 'BUS-401',
+      image: 'https://images.unsplash.com/photo-1557223562-6c77ef16210f?w=400'
+    }
+  ];
+
   myProposedTransports = [
     {
       id: 1,
@@ -112,10 +188,11 @@ export class CovoiturageUserComponent implements AfterViewInit, OnDestroy {
   private destinationMarker: any;
   private currentLocationMarker: any;
   private polyline: any;
+  private routeTooltip: any;
 
   @ViewChild('mapElement', { static: false }) mapDiv!: ElementRef;
 
-  constructor(private renderer: Renderer2, private cdr: ChangeDetectorRef, private ngZone: NgZone) {}
+  constructor(private renderer: Renderer2, private cdr: ChangeDetectorRef, private ngZone: NgZone, private appRef: ApplicationRef) {}
 
   ngAfterViewInit() {
     if (this.activeSection === 'utilises') {
@@ -273,26 +350,69 @@ export class CovoiturageUserComponent implements AfterViewInit, OnDestroy {
         });
         this.destinationMarker = L.marker([lat, lng], {icon: customIcon}).addTo(this.map).bindPopup("Arrivée").openPopup();
         
-        // Tracer la route (ligne)
-        this.polyline = L.polyline([this.departureMarker.getLatLng(), this.destinationMarker.getLatLng()], {
-          color: '#0F3460',
-          weight: 4,
-          opacity: 0.7,
-          dashArray: '10, 10'
-        }).addTo(this.map);
+        const startLat = this.departureMarker.getLatLng().lat;
+        const startLng = this.departureMarker.getLatLng().lng;
         
-        // Ajuster la caméra pour montrer les deux points
-        this.map.fitBounds(this.polyline.getBounds(), { padding: [50, 50] });
-
-        // Calculer Distance, Durée, CO2
+        // Calcul de secours (ligne droite) immédiatement au cas où l'API OSRM prend du temps
         const distanceMts = this.departureMarker.getLatLng().distanceTo(this.destinationMarker.getLatLng());
         const distanceKm = distanceMts / 1000;
-        const durationMn = Math.round((distanceKm / 40) * 60); // Assuming 40km/h avg speed city
-        const co2Saved = distanceKm * 0.12; // 120g/km avg car emissions
+        const durationMn = Math.round((distanceKm / 40) * 60); 
+        const co2Saved = distanceKm * 0.12; 
         
+        this.ngZone.run(() => {
           this.routeDistance = distanceKm.toFixed(1) + ' km';
           this.routeDuration = durationMn.toString() + ' min';
           this.routeCo2 = co2Saved.toFixed(2) + ' kg';
+          this.cdr.markForCheck();
+          this.cdr.detectChanges();
+          setTimeout(() => this.appRef.tick(), 10); // Force global update
+        });
+
+        // Requête OSRM pour un vrai itinéraire
+        fetch(`https://router.project-osrm.org/route/v1/driving/${startLng},${startLat};${lng},${lat}?overview=full&geometries=geojson`)
+          .then(res => res.json())
+          .then(data => {
+            if (data.routes && data.routes.length > 0) {
+              const route = data.routes[0];
+              const coords = route.geometry.coordinates.map((c: any) => [c[1], c[0]]);
+              
+              this.ngZone.run(() => {
+                // Tracer la vraie route (alignée sur les rues)
+                this.polyline = L.polyline(coords, {
+                  color: '#3B82F6', // Bleu style Google Maps
+                  weight: 5,
+                  opacity: 0.9
+                }).addTo(this.map);
+                
+                this.map.fitBounds(this.polyline.getBounds(), { padding: [50, 50] });
+
+                const realDistanceKm = route.distance / 1000;
+                const realDurationMn = Math.round(route.duration / 60);
+                const realCo2Saved = realDistanceKm * 0.12;
+
+                this.routeDistance = realDistanceKm.toFixed(1) + ' km';
+                this.routeDuration = realDurationMn.toString() + ' min';
+                this.routeCo2 = realCo2Saved.toFixed(2) + ' kg';
+
+                // Bulle (Tooltip) au centre de la route "comme un vrai map"
+                const midPoint = coords[Math.floor(coords.length / 2)];
+                const tooltipHtml = `<div style="text-align:center; font-family:sans-serif;">
+                  <span style="font-weight:900; font-size:14px; color:#1A1A2E;">${realDurationMn} min</span><br>
+                  <span style="font-size:12px; color:#6b7280; font-weight:600;">${realDistanceKm.toFixed(1)} km</span>
+                </div>`;
+                
+                this.routeTooltip = L.tooltip({ permanent: true, direction: 'center', className: 'bg-white rounded-xl shadow-lg border-0' })
+                  .setLatLng(midPoint)
+                  .setContent(tooltipHtml)
+                  .addTo(this.map);
+
+                this.cdr.markForCheck();
+                this.cdr.detectChanges();
+                setTimeout(() => this.appRef.tick(), 10);
+              });
+            }
+          })
+          .catch(err => console.error("OSRM Error:", err));
 
           // Reverse Geocoding
           this.getAddressFromCoords(lat, lng).then(addr => {
@@ -307,6 +427,9 @@ export class CovoiturageUserComponent implements AfterViewInit, OnDestroy {
         this.map.removeLayer(this.destinationMarker);
         if (this.polyline) {
           this.map.removeLayer(this.polyline);
+        }
+        if (this.routeTooltip) {
+          this.map.removeLayer(this.routeTooltip);
         }
 
         // Réinitialiser stats

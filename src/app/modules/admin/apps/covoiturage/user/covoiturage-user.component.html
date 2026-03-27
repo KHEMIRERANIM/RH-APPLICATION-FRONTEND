@@ -32,7 +32,7 @@
   </div>
 
   <!-- Section: Mes transports utilisés -->
-  <ng-container *ngIf="activeSection === 'utilises'">
+  <div [hidden]="activeSection !== 'utilises'" class="space-y-6">
     <!-- Tabs -->
     <div class="bg-white rounded-xl p-2 shadow-sm flex gap-2">
       <button
@@ -61,6 +61,7 @@
       </button>
     </div>
 
+    <div [hidden]="selectedTab !== 'covoiturage'" class="space-y-6">
     <!-- My Used Transports -->
     <div class="bg-white rounded-xl p-6 shadow-sm">
       <h3 class="text-lg font-semibold text-[#1A1A2E] mb-4">Mes réservations actives</h3>
@@ -307,13 +308,145 @@
               Envoyer
             </button>
           </div>
+      </div>
+    </div>
+    </div>
+    </div>
+
+    <!-- Section: Navette -->
+    <div *ngIf="selectedTab === 'navette'" class="space-y-6">
+      <!-- My Shuttle Reservations -->
+      <div class="space-y-4">
+        <h3 class="text-[#1A1A2E] font-semibold text-lg">Mes réservations de navettes</h3>
+        <div class="grid gap-4">
+          <div *ngFor="let reservation of myShuttleReservations" class="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-[#0F3460] rounded-lg flex items-center justify-center">
+                  <mat-icon class="icon-size-6 text-white text-center ml-2.5">directions_bus</mat-icon>
+                </div>
+                <div>
+                  <p class="text-[#1A1A2E] font-medium">{{ reservation.shuttleName }}</p>
+                  <div class="flex items-center gap-2 text-sm text-gray-600 mt-1">
+                    <mat-icon class="icon-size-4">location_on</mat-icon>
+                    <span>{{ reservation.route }}</span>
+                  </div>
+                  <div class="flex items-center gap-2 text-sm text-gray-600 mt-1">
+                    <mat-icon class="icon-size-4">schedule</mat-icon>
+                    <span>{{ reservation.departureTime }} - {{ reservation.arrivalTime }}</span>
+                    <span class="ml-2 px-2 py-0.5 bg-gray-100 rounded text-xs font-semibold">
+                      {{ reservation.busNumber }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-center gap-3">
+                <div class="flex gap-1">
+                  <span *ngFor="let day of reservation.days" class="px-2 py-1 bg-[#0F3460] text-white text-xs rounded font-medium">
+                    {{ day }}
+                  </span>
+                </div>
+                <button class="flex items-center gap-2 px-4 py-2 bg-[#E94560] text-white rounded-lg hover:bg-[#d13950] transition font-medium">
+                  <mat-icon class="icon-size-4">delete_outline</mat-icon>
+                  Annuler
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search Section - For Shuttle -->
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+        <h3 class="text-[#1A1A2E] mb-4 font-semibold text-lg">Filtrer les navettes</h3>
+        <div class="grid md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="block text-sm text-gray-600 mb-2 font-medium">Point de départ</label>
+            <select class="w-full px-4 h-11 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0F3460] focus:border-transparent outline-none bg-gray-50">
+              <option>Tous les points de départ</option>
+              <option>Gare Centrale</option>
+              <option>Métro Ligne 1</option>
+              <option>Tunis Centre</option>
+              <option>Aéroport</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm text-gray-600 mb-2 font-medium">Destination</label>
+            <select class="w-full px-4 h-11 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0F3460] focus:border-transparent outline-none bg-gray-50">
+              <option>Toutes les destinations</option>
+              <option>Siège Social</option>
+              <option>Zone Industrielle</option>
+              <option>Berges du Lac</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mb-5">
+          <label class="block text-sm text-gray-600 mb-2 font-medium">Heure souhaitée</label>
+          <input
+            type="time"
+            class="w-full px-4 h-11 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0F3460] focus:border-transparent outline-none bg-gray-50"
+          />
+        </div>
+
+        <button class="w-full bg-[#0F3460] text-white py-3 rounded-xl hover:bg-[#0a2340] transition font-semibold shadow-sm">
+          Rechercher des navettes
+        </button>
+      </div>
+
+      <!-- Available Shuttles -->
+      <div class="space-y-4">
+        <h3 class="text-[#1A1A2E] font-semibold text-lg">Navettes d'entreprise disponibles</h3>
+        <div class="grid md:grid-cols-2 gap-6">
+          <div *ngFor="let shuttle of availableShuttles" class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200 hover:border-[#0F3460] hover:shadow-md transition group">
+            <div class="relative h-48">
+              <img
+                [src]="shuttle.image"
+                [alt]="shuttle.name"
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div class="absolute top-3 left-3 bg-[#0F3460] text-white px-3 py-1 rounded-full text-sm font-semibold shadow-md">
+                {{ shuttle.busNumber }}
+              </div>
+              <div class="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-bold shadow-md">
+                <span class="text-[#1D9E75]">{{ shuttle.available }}</span>
+                <span class="text-gray-600">/{{ shuttle.capacity }} places</span>
+              </div>
+            </div>
+            <div class="p-5">
+              <h4 class="text-[#1A1A2E] mb-3 font-semibold text-lg">{{ shuttle.name }}</h4>
+              <div class="space-y-3 mb-5">
+                <div class="flex items-start gap-2 text-sm">
+                  <mat-icon class="icon-size-4 text-gray-400 mt-0.5 flex-shrink-0">location_on</mat-icon>
+                  <div>
+                    <p class="text-gray-900 font-medium">{{ shuttle.route }}</p>
+                    <p class="text-gray-500 text-xs mt-1 leading-relaxed">
+                      {{ shuttle.stops.join(' • ') }}
+                    </p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2 text-sm text-gray-600">
+                  <mat-icon class="icon-size-4 text-gray-400">schedule</mat-icon>
+                  <span class="font-medium">{{ shuttle.schedule }}</span>
+                </div>
+                <div class="flex items-center gap-4 text-xs text-gray-500 mt-2 bg-gray-50 p-2 rounded border border-gray-100">
+                  <span class="font-medium">Premier Départ: {{ shuttle.firstDeparture }}</span>
+                  <span class="font-medium">Dernier Retour: {{ shuttle.lastDeparture }}</span>
+                </div>
+              </div>
+              <button class="w-full bg-[#1D9E75] text-white py-2.5 rounded-lg hover:bg-[#168567] transition font-semibold shadow-sm">
+                Réserver cette navette
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  </ng-container>
+
+  </div>
 
   <!-- Section: Mes transports proposés -->
-  <ng-container *ngIf="activeSection === 'proposes'">
+  <div [hidden]="activeSection !== 'proposes'" class="space-y-6">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <!-- Left - Propose New Transport -->
       <div class="bg-white rounded-xl p-6 shadow-sm">
@@ -495,7 +628,7 @@
         </div>
       </div>
     </div>
-  </ng-container>
+  </div>
 
   <!-- Gift Modal -->
   <div *ngIf="showGiftModal" class="fixed inset-0 bg-[#0F3460]/30 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
