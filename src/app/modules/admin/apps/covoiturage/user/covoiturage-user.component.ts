@@ -1,6 +1,7 @@
-import { Component, AfterViewInit, OnDestroy, ElementRef, Renderer2, ViewChild, ChangeDetectorRef, NgZone, ApplicationRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, ElementRef, Renderer2, ViewChild, ChangeDetectorRef, NgZone, ApplicationRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { CovoiturageService, Vehicule, Trajet } from '../covoiturage.service';
 
 // Leaflet loaded via CDN
 declare var L: any;
@@ -10,7 +11,7 @@ declare var L: any;
   standalone: false,
   templateUrl: './covoiturage-user.component.html',
 })
-export class CovoiturageUserComponent implements AfterViewInit, OnDestroy {
+export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // Données
   carpoolOptions = [
@@ -190,9 +191,148 @@ export class CovoiturageUserComponent implements AfterViewInit, OnDestroy {
   private polyline: any;
   private routeTooltip: any;
 
+  // Gestion Backend
+  trajetForm: FormGroup;
+  vehicules: Vehicule[] = [];
+  employeId: string = '';
+  backendTrajets: Trajet[] = []; // Liste des trajets retournée par le backend
+
+  // Vehicle Modal State
+  showVehicleModal: boolean = false;
+
   @ViewChild('mapElement', { static: false }) mapDiv!: ElementRef;
 
-  constructor(private renderer: Renderer2, private cdr: ChangeDetectorRef, private ngZone: NgZone, private appRef: ApplicationRef) {}
+  constructor(
+    private renderer: Renderer2, 
+    private cdr: ChangeDetectorRef, 
+    private ngZone: NgZone, 
+    private appRef: ApplicationRef,
+    private fb: FormBuilder,
+    private covoiturageService: CovoiturageService
+  ) {
+    this.trajetForm = this.fb.group({
+      vehiculeId: ['', Validators.required],
+      categorie: ['COVOITURAGE', Validators.required],
+      adresseDepart: ['', Validators.required],
+      adresseArrivee: ['', Validators.required],
+      heureDepart: ['', Validators.required],
+      placesDisponibles: ['', Validators.required],
+    });
+  }
+
+  ngOnInit() {
+    const localUserStr = localStorage.getItem('currentUser');
+    if (localUserStr) {
+       try {
+           const localUser = JSON.parse(localUserStr);
+           this.employeId = localUser.id;
+           this.loadVehicules();
+           this.loadTrajets();
+       } catch (e) {
+           console.error("Erreur parsing currentUser", e);
+       }
+    }
+  }
+
+  loadVehicules() {
+    if (!this.employeId) return;
+    this.covoiturageService.getVehiculesByEmployeId(this.employeId).subscribe({
+       next: (res) => this.vehicules = res,
+       error: (err) => console.error("Erreur chargement véhicules", err)
+    });
+  }
+
+  loadTrajets() {
+    if (!this.employeId) return;
+    this.covoiturageService.getTrajetsProposesByEmploye(this.employeId).subscribe({
+       next: (res) => {
+         this.backendTrajets = res;
+         this.cdr.detectChanges();
+       },
+       error: (err) => console.error("Erreur chargement trajets", err)
+    });
+  }
+
+  getVehicleName(vehiculeId?: string): string {
+    if (!vehiculeId) return 'Véhicule inconnu';
+    const v = this.vehicules.find(veh => veh.id === vehiculeId);
+    return v ? `${v.marque} ${v.modele}` : 'Véhicule inconnu';
+  }
+
+  publierTrajet() {
+    if (this.trajetForm.invalid || !this.employeId || this.selectedDays.length === 0) {
+        this.trajetForm.markAllAsTouched();
+        return;
+    }
+
+    const formValues = this.trajetForm.value;
+    const jours = this.selectedDays.join(', ');
+    
+    const newTrajet: Trajet = {
+        employeId: this.employeId,
+        vehiculeId: formValues.vehiculeId,
+        categorie: formValues.categorie,
+        adresseDepart: formValues.adresseDepart,
+        adresseArrivee: formValues.adresseArrivee,
+        heureDepart: formValues.heureDepart + ':00', // Ajout secondes pour LocalDateTime au format ISO/LocalTime
+        joursDisponibles: jours,
+        placesDisponibles: formValues.placesDisponibles,
+        placesRestantes: formValues.placesDisponibles,
+        statut: 'ACTIF'
+    };
+    
+    this.covoiturageService.creerTrajet(newTrajet).subscribe({
+        next: () => {
+          this.loadTrajets();
+          this.trajetForm.reset({ categorie: 'COVOITURAGE', vehiculeId: '' });
+          this.selectedDays = ["Lun", "Mar", "Mer", "Jeu", "Ven"]; // Reset days
+          this.cdr.detectChanges();
+        },
+        error: (err) => console.error("Erreur publication trajet", err)
+    });
+  }
+
+  // --- Modal Vehicle Methods ---
+
+  openVehicleModal() {
+    this.showVehicleModal = true;
+  }
+
+  closeVehicleModal() {
+    this.showVehicleModal = false;
+  }
+
+  onAddVehicle(vehicle: Vehicule) {
+    if (!this.employeId) return;
+    vehicle.employeId = this.employeId;
+    this.covoiturageService.creerVehicule(vehicle).subscribe({
+      next: () => {
+        this.loadVehicules();
+      },
+      error: (err) => console.error("Erreur création véhicule", err)
+    });
+  }
+
+  onUpdateVehicle(event: {id: string, vehicle: Partial<Vehicule>}) {
+    if (!this.employeId) return;
+    event.vehicle.employeId = this.employeId;
+    this.covoiturageService.updateVehicule(event.id, event.vehicle).subscribe({
+      next: () => {
+        this.loadVehicules();
+      },
+      error: (err) => console.error("Erreur mise à jour véhicule", err)
+    });
+  }
+
+  onDeleteVehicle(id: string) {
+    if (!confirm("Êtes-vous sûr de vouloir supprimer ce véhicule ?")) return;
+    this.covoiturageService.deleteVehicule(id).subscribe({
+      next: () => {
+        this.loadVehicules();
+      },
+      error: (err) => console.error("Erreur suppression véhicule", err)
+    });
+  }
 
   ngAfterViewInit() {
     if (this.activeSection === 'utilises') {

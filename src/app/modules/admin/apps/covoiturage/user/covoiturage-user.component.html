@@ -449,19 +449,57 @@
   <div [hidden]="activeSection !== 'proposes'" class="space-y-6">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <!-- Left - Propose New Transport -->
-      <div class="bg-white rounded-xl p-6 shadow-sm">
+      <form [formGroup]="trajetForm" (ngSubmit)="publierTrajet()" class="bg-white rounded-xl p-6 shadow-sm">
         <h3 class="text-lg font-semibold text-[#1A1A2E] mb-4">Proposer un nouveau trajet</h3>
         
         <div class="space-y-5">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1.5">
-              Type de véhicule
-            </label>
-            <select class="w-full h-11 px-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#1D9E75] bg-gray-50">
-              <option>Voiture personnelle</option>
-              <option>Moto</option>
-              <option>Vélo</option>
-            </select>
+          <div class="grid grid-cols-2 gap-4">
+             <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">
+                  Type de trajet
+                </label>
+                <select formControlName="categorie" class="w-full h-11 px-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#1D9E75] bg-gray-50">
+                  <option value="COVOITURAGE">Covoiturage</option>
+                  <option value="NAVETTE">Navette</option>
+                  <option value="INTER_SITES">Inter-sites</option>
+                  <option value="ADAPTE">Transport Adapté</option>
+                </select>
+             </div>
+             <div>
+                <label class="block text-base font-medium text-[#1A1A2E] mb-3">
+                  Sélectionner un véhicule
+                </label>
+                <div class="space-y-3">
+                  <!-- Vehicle Cards -->
+                  <div *ngFor="let v of vehicules" 
+                       (click)="trajetForm.get('vehiculeId')?.setValue(v.id)"
+                       [class.border-[#1D9E75]]="trajetForm.get('vehiculeId')?.value === v.id"
+                       [class.bg-green-50]="trajetForm.get('vehiculeId')?.value === v.id"
+                       [class.border-gray-200]="trajetForm.get('vehiculeId')?.value !== v.id"
+                       class="border rounded-xl p-4 cursor-pointer hover:border-[#1D9E75] transition-all flex items-center gap-4 bg-white shadow-sm">
+                    <div class="text-[#1D9E75]">
+                      <mat-icon svgIcon="feather:truck" class="icon-size-6"></mat-icon>
+                    </div>
+                    <div class="flex-1">
+                      <div class="flex items-center gap-2 mb-0.5">
+                        <p class="font-semibold text-[#0F3460] text-[15px]">{{v.marque}} {{v.modele}}</p>
+                        <span *ngIf="v.isDefault" class="bg-[#F5A623] text-white rounded w-[22px] h-[22px] flex items-center justify-center">
+                          <mat-icon svgIcon="feather:star" class="icon-size-3.5 fill-current text-white"></mat-icon>
+                        </span>
+                      </div>
+                      <p class="text-sm text-gray-500 font-medium">
+                        {{v.immatriculation}} &bull; {{v.nbPlaces}} places &bull; <span class="capitalize">{{v.typeCarburant.toLowerCase()}}</span>
+                      </p>
+                    </div>
+                  </div>
+
+                  <!-- "Ajouter un véhicule" button -->
+                  <button type="button" (click)="openVehicleModal()" class="w-full h-12 border-2 border-dashed border-gray-300 rounded-xl text-[#1D9E75] font-semibold flex items-center justify-center gap-2 hover:bg-gray-50 hover:border-[#1D9E75] hover:text-[#178f66] transition-colors">
+                    <mat-icon svgIcon="feather:truck" class="icon-size-5"></mat-icon>
+                    Ajouter un véhicule
+                  </button>
+                </div>
+             </div>
           </div>
 
           <!-- Route Points -->
@@ -476,6 +514,7 @@
                 </label>
                 <input
                   type="text"
+                  formControlName="adresseDepart"
                   placeholder="Adresse de départ"
                   class="w-full h-11 px-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#1D9E75] bg-gray-50"
                 />
@@ -492,6 +531,7 @@
                 </label>
                 <input
                   type="text"
+                  formControlName="adresseArrivee"
                   placeholder="Adresse d'arrivée"
                   class="w-full h-11 px-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#1D9E75] bg-gray-50"
                 />
@@ -506,6 +546,7 @@
               </label>
               <input
                 type="time"
+                formControlName="heureDepart"
                 class="w-full h-11 px-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#1D9E75] bg-gray-50"
               />
             </div>
@@ -515,6 +556,7 @@
               </label>
               <input
                 type="number"
+                formControlName="placesDisponibles"
                 placeholder="Ex: 3"
                 class="w-full h-11 px-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#1D9E75] bg-gray-50"
               />
@@ -537,73 +579,64 @@
             </div>
           </div>
 
-          <button class="w-full h-11 bg-[#0F3460] text-white rounded-xl font-medium hover:bg-[#0a2442] transition-colors shadow-md mt-2">
+          <button type="submit" [disabled]="trajetForm.invalid" class="w-full h-11 bg-[#0F3460] text-white rounded-xl font-medium hover:bg-[#0a2442] disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-md mt-2">
             Publier mon trajet
           </button>
         </div>
-      </div>
+      </form>
 
       <!-- Right - My Active Proposals -->
       <div class="space-y-4">
-        <div class="bg-white rounded-xl p-6 shadow-sm">
-          <h3 class="text-lg font-semibold text-[#1A1A2E] mb-4">Mes trajets actifs</h3>
+        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+          <h3 class="text-xl font-semibold text-[#0F3460] mb-5">Mes trajets actifs</h3>
           
           <div class="space-y-4">
             <div
-              *ngFor="let transport of myProposedTransports"
-              class="p-5 rounded-xl border-2 border-[#0F3460]/20 bg-[#0F3460]/[0.02]"
+              *ngFor="let transport of backendTrajets"
+              class="border border-gray-200 rounded-lg p-5 shadow-sm bg-white"
             >
-              <div class="flex items-center justify-between mb-4">
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-full bg-[#0F3460] flex items-center justify-center text-white font-semibold shadow-sm">
-                    Moi
-                  </div>
-                  <div>
-                    <p class="font-semibold text-[#1A1A2E] leading-tight">Mon trajet principal</p>
-                    <p class="text-sm font-medium text-gray-500 mt-0.5">{{ transport.time }}</p>
-                  </div>
+              <div class="flex justify-between items-start mb-3">
+                <div class="flex items-center gap-2 text-gray-700">
+                  <mat-icon svgIcon="feather:truck" class="text-[#1D9E75] icon-size-5"></mat-icon>
+                  <span class="font-medium text-[15px] text-gray-600">{{ getVehicleName(transport.vehiculeId) }}</span>
                 </div>
-                <div class="text-right">
-                  <p class="text-xs font-medium text-gray-500 mb-0.5">Réservations</p>
-                  <p class="text-xl font-bold text-[#1D9E75]">
-                    {{ transport.bookedSeats }}<span class="text-sm text-gray-400 font-medium">/{{ transport.seats }}</span>
-                  </p>
+                <!-- Assuming you have a deleteTrajet method, I bind it here -->
+                <button class="px-4 py-1.5 bg-[#E94560] text-white text-sm font-semibold rounded-lg hover:bg-red-600 transition-colors shadow-sm">
+                  Supprimer
+                </button>
+              </div>
+              
+              <div class="space-y-2.5 mb-4">
+                <div class="flex items-center gap-2 text-[#0F3460]">
+                  <mat-icon svgIcon="feather:map-pin" class="icon-size-4 opacity-70"></mat-icon>
+                  <span class="text-[15px] font-medium">{{ transport.adresseDepart }} &rarr; {{ transport.adresseArrivee }}</span>
+                </div>
+                <div class="flex items-center gap-4 text-gray-600 text-sm">
+                  <div class="flex items-center gap-1.5">
+                    <mat-icon svgIcon="feather:clock" class="icon-size-4 opacity-70"></mat-icon>
+                    <span class="font-medium">{{ transport.heureDepart }}</span>
+                  </div>
+                  <div class="flex items-center gap-1.5">
+                    <mat-icon svgIcon="feather:users" class="icon-size-4 opacity-70"></mat-icon>
+                    <span class="font-medium">{{ transport.placesDisponibles }} places</span>
+                  </div>
                 </div>
               </div>
 
-              <div class="flex items-center gap-2 text-sm text-gray-700 mb-4 bg-white p-2 rounded-lg border border-gray-100 shadow-sm">
-                <mat-icon class="icon-size-4 text-gray-400" svgIcon="feather:map-pin"></mat-icon>
-                <span class="font-medium whitespace-nowrap overflow-hidden text-ellipsis">{{ transport.departure }} → {{ transport.arrival }}</span>
-              </div>
-
-              <div class="flex flex-wrap gap-1.5 mb-4">
-                <span
-                  *ngFor="let day of transport.daysActive"
-                  class="px-2.5 py-1 text-xs font-bold bg-[#0F3460]/10 text-[#0F3460] rounded-md"
-                >
-                  {{ day }}
+              <div class="flex flex-wrap gap-2 mb-4">
+                <!-- Fallback to split if string is comma-separated, otherwise just display -->
+                <span *ngFor="let day of (transport.joursDisponibles || '').split(',')" class="px-2.5 py-1 bg-[#1D9E75]/10 text-[#1D9E75] text-xs font-semibold rounded">
+                  {{ day | slice:0:3 | titlecase }}
                 </span>
               </div>
 
-              <!-- Passengers -->
-              <div *ngIf="transport.passengers.length > 0" class="border-t border-gray-200 pt-4 mt-2">
-                <p class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">Passagers confirmés</p>
-                <div class="space-y-2.5">
-                  <div *ngFor="let passenger of transport.passengers" class="flex items-center gap-3 bg-white p-2 rounded-lg shadow-sm border border-gray-100">
-                    <img
-                      [src]="passenger.avatar"
-                      [alt]="passenger.name"
-                      class="w-8 h-8 rounded-full object-cover shadow-sm"
-                    />
-                    <span class="text-sm font-semibold text-gray-700">{{ passenger.name }}</span>
-                    <button class="ml-auto text-xs text-[#E94560] hover:underline font-medium">Retirer</button>
-                  </div>
+              <div class="border-t border-gray-100 pt-4 mt-2">
+                <p class="text-sm text-[#0F3460] font-semibold mb-3">Réservations (2)</p>
+                <div class="flex -space-x-2">
+                  <img src="https://i.pravatar.cc/150?img=11" alt="Passager" class="w-8 h-8 rounded-full border-2 border-white object-cover shadow-sm" />
+                  <img src="https://i.pravatar.cc/150?img=5" alt="Passager" class="w-8 h-8 rounded-full border-2 border-white object-cover shadow-sm" />
                 </div>
               </div>
-
-              <button class="w-full mt-4 h-10 border-2 border-[#E94560] text-[#E94560] rounded-lg text-sm font-bold hover:bg-[#E94560] hover:text-white transition-colors shadow-sm">
-                Supprimer le trajet
-              </button>
             </div>
           </div>
         </div>
@@ -686,4 +719,13 @@
       </button>
     </div>
   </div>
+
+  <app-vehicle-modal
+    [isOpen]="showVehicleModal"
+    [vehicles]="vehicules"
+    (closeModal)="closeVehicleModal()"
+    (addVehicle)="onAddVehicle($event)"
+    (updateVehicle)="onUpdateVehicle($event)"
+    (deleteVehicle)="onDeleteVehicle($event)"
+  ></app-vehicle-modal>
 </div>
