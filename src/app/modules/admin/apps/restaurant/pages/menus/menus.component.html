@@ -1,0 +1,79 @@
+﻿<div class="mb-8">
+  <h2 class="text-2xl text-gray-900 mb-6">Menus</h2>
+
+  <div class="flex flex-col sm:flex-row gap-4 mb-6">
+    <input
+      type="text"
+      placeholder="Rechercher un plat..."
+      [(ngModel)]="searchTerm"
+      class="w-full pl-4 pr-4 py-2 border border-gray-200 rounded-lg"
+    />
+    <div class="flex gap-2">
+      <button
+        *ngFor="let filter of filters"
+        (click)="toggleFilter(filter)"
+        [ngClass]="{
+          'bg-blue-600 text-white border-blue-600': selectedFilters.includes(filter),
+          'bg-white text-gray-600 border-gray-200': !selectedFilters.includes(filter)
+        }"
+        class="px-4 py-2 rounded-lg border transition-colors"
+      >
+        {{ filter }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="space-y-4">
+  <div *ngFor="let menu of filteredMenus()" class="bg-white rounded-lg border border-gray-200">
+    <button
+      (click)="toggleMenu(menu.id)"
+      class="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50"
+    >
+      <div>
+        <h3 class="text-lg text-gray-900">{{ menu.titre }}</h3>
+        <p class="text-sm text-gray-500">{{ menu.date }}</p>
+      </div>
+      <span
+        class="px-3 py-1 rounded-full text-sm"
+        [ngClass]="{
+          'bg-green-100 text-green-700': menu.statut === 'published',
+          'bg-gray-100 text-gray-600': menu.statut !== 'published'
+        }"
+      >
+        {{ menu.statut }}
+      </span>
+    </button>
+
+    <div *ngIf="expandedMenu === menu.id" class="px-6 pb-6 pt-2">
+      <div *ngIf="menu.plats.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div *ngFor="let plat of filterPlats(menu.plats)" class="border border-gray-200 rounded-lg overflow-hidden">
+          <img [src]="plat.image" [alt]="plat.nom" class="w-full h-40 object-cover" />
+          <div class="p-4">
+            <h4 class="text-base text-gray-900 mb-2">{{ plat.nom }}</h4>
+            <div class="flex flex-wrap gap-2 mb-3">
+              <span *ngFor="let tag of plat.tags" class="px-2 py-1 rounded text-xs"
+                [ngClass]="{
+                  'bg-orange-100 text-orange-700': tag === 'gluten-free',
+                  'bg-green-100 text-green-700': tag === 'vegetarian',
+                  'bg-blue-100 text-blue-700': tag === 'diabetic'
+                }"
+              >
+                {{ tag }}
+              </span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-lg text-gray-900">{{ plat.prix | currency:'USD':'symbol' }}</span>
+              <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                Commander
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p *ngIf="menu.plats.length === 0" class="text-gray-500 text-center py-4">
+        Aucun plat disponible
+      </p>
+    </div>
+  </div>
+</div>
