@@ -589,7 +589,8 @@ deleteEmployee(user: any): void {
             legend     : { show: false },
             plotOptions: { bar: { columnWidth: '50%' } },
             series     : this.data.githubIssues.series,
-            states     : { hover: { filter: { type: 'darken', value: 0.75 } } },
+// Nouveau code sans la propriété 'value'
+            states: { hover: { filter: { type: 'darken' } } },
             stroke     : { width: [3, 0] },
             tooltip    : { followCursor: true, theme: 'dark' },
             xaxis      : {
@@ -619,7 +620,8 @@ deleteEmployee(user: any): void {
                 }
             },
             series     : this.data.taskDistribution.series,
-            states     : { hover: { filter: { type: 'darken', value: 0.75 } } },
+           // Nouveau code sans la propriété 'value'
+            states: { hover: { filter: { type: 'darken' } } }  ,
             stroke     : { width: 2 },
             theme      : { monochrome: { enabled: true, color: '#93C5FD', shadeIntensity: 0.75, shadeTo: 'dark' } },
             tooltip    : { followCursor: true, theme: 'dark' },

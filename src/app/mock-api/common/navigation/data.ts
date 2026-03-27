@@ -27,14 +27,14 @@ export const defaultNavigation: FuseNavigationItem[] = [
         children: [
             {
                 id   : 'apps.academy',
-                title: 'Formation',
+                title: 'Congés',
                 type : 'basic',
                 icon : 'heroicons_outline:academic-cap',
                 link : '/apps/academy'
             },
             {
                 id   : 'apps.calendar',
-                title: 'Congés',
+                title: 'Formation',
                 type : 'basic',
                 icon : 'heroicons_outline:calendar',
                 link : '/apps/calendar'
