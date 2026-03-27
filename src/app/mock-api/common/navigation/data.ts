@@ -86,7 +86,8 @@ export const defaultNavigation: FuseNavigationItem[] = [
                 title: 'Covoiturage',
                 type : 'basic',
                 icon : 'heroicons_outline:truck',
-                link : '/apps/covoiturage'
+                link : '/apps/covoiturage'  // ← Change en /covoiturage/user
+
             },
             {
                 id   : 'apps.carriere',

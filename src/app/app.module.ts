@@ -9,6 +9,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MaterialModule } from './material.module';
 
 
+
 import { TextFieldModule } from '@angular/cdk/text-field';  // ← AJOUTER
 
 // Material Modules
@@ -48,6 +49,7 @@ const routerConfig: ExtraOptions = {
 @NgModule({
     declarations: [AppComponent],
     imports: [
+        
         BrowserModule,
         BrowserAnimationsModule,
         HttpClientModule,
@@ -71,6 +73,7 @@ const routerConfig: ExtraOptions = {
         MaterialModule,
         MatDatepickerModule,
         MatNativeDateModule,
+        
         
         
         ToastrModule.forRoot({

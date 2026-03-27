@@ -12,7 +12,6 @@ export const appRoutes: Route[] = [
 {path: 'admin/team',loadChildren: () => import('./modules/admin/dashboards/project/team-admin/team-admin.module').then(m => m.TeamAdminModule)},
     // Redirect empty path to sign-in (unauthenticated) or dashboard (authenticated via NoAuthGuard)
     {path: '', pathMatch : 'full', redirectTo: 'sign-in'},
-
     // Redirect signed in user to the '/dashboards/project'
     //
     // After the user signs in, the sign in page will redirect the user to the 'signed-in-redirect'
@@ -94,7 +93,7 @@ export const appRoutes: Route[] = [
                 {path: 'partnerships', loadChildren: () => import('app/modules/admin/apps/hr-apps/hr-apps.module').then(m => m.HrAppsModule)},
                 {path: 'rse', loadChildren: () => import('app/modules/admin/apps/hr-apps/hr-apps.module').then(m => m.HrAppsModule)},
                 {path: 'restaurant', loadChildren: () => import('app/modules/admin/apps/hr-apps/hr-apps.module').then(m => m.HrAppsModule)},
-                {path: 'covoiturage', loadChildren: () => import('app/modules/admin/apps/hr-apps/hr-apps.module').then(m => m.HrAppsModule)},
+                {path: 'covoiturage', loadChildren: () => import('app/modules/admin/apps/covoiturage/covoiturage.module').then(m => m.CovoiturageModule)},
                 {path: 'carriere', loadChildren: () => import('app/modules/admin/apps/hr-apps/hr-apps.module').then(m => m.HrAppsModule)},
                 {path: 'file-manager', loadChildren: () => import('app/modules/admin/apps/file-manager/file-manager.module').then(m => m.FileManagerModule)},
                 {path: 'help-center', loadChildren: () => import('app/modules/admin/apps/help-center/help-center.module').then(m => m.HelpCenterModule)},
