@@ -87,11 +87,11 @@
             </div>
             <div class="flex items-center gap-3 text-sm text-gray-600">
               <span class="flex items-center gap-1">
-                <mat-icon class="icon-size-4">location_on</mat-icon>
+                <mat-icon class="icon-size-4" svgIcon="feather:map-pin"></mat-icon>
                 {{ transport.departure }} → {{ transport.arrival }}
               </span>
               <span class="flex items-center gap-1">
-                <mat-icon class="icon-size-4">schedule</mat-icon>
+                <mat-icon class="icon-size-4" svgIcon="feather:clock"></mat-icon>
                 {{ transport.time }}
               </span>
             </div>
@@ -228,7 +228,7 @@
               (click)="showChat = !showChat"
               class="p-2 hover:bg-gray-100 rounded-lg transition-colors"
             >
-              <mat-icon class="icon-size-5 text-[#1D9E75]">chat</mat-icon>
+              <mat-icon class="icon-size-5 text-[#1D9E75]" svgIcon="feather:message-circle"></mat-icon>
             </button>
           </div>
           
@@ -248,21 +248,21 @@
                     {{ option.name }}
                   </p>
                   <div *ngIf="option.reliable" class="flex items-center gap-1 bg-[#1D9E75]/10 px-2 py-0.5 rounded-full">
-                    <mat-icon class="icon-size-3 text-[#1D9E75]">check_circle</mat-icon>
+                    <mat-icon class="icon-size-3 text-[#1D9E75]" svgIcon="feather:check-circle"></mat-icon>
                     <span class="text-xs text-[#1D9E75] font-medium">Fiable</span>
                   </div>
                 </div>
                 <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-600">
                   <span class="flex items-center gap-1">
-                    <mat-icon class="icon-size-3">location_on</mat-icon>
+                    <mat-icon class="icon-size-3" svgIcon="feather:map-pin"></mat-icon>
                     {{ option.departure }} → {{ option.arrival }}
                   </span>
                   <span class="flex items-center gap-1">
-                    <mat-icon class="icon-size-3">schedule</mat-icon>
+                    <mat-icon class="icon-size-3" svgIcon="feather:clock"></mat-icon>
                     {{ option.time }}
                   </span>
                   <span class="flex items-center gap-1 text-[#0F3460] font-medium">
-                    <mat-icon class="icon-size-3">group</mat-icon>
+                    <mat-icon class="icon-size-3" svgIcon="feather:users"></mat-icon>
                     {{ option.seats }} places
                   </span>
                 </div>
@@ -323,16 +323,16 @@
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-4">
                 <div class="w-12 h-12 bg-[#0F3460] rounded-lg flex items-center justify-center">
-                  <mat-icon class="icon-size-6 text-white text-center ml-2.5">directions_bus</mat-icon>
+                  <mat-icon class="icon-size-6 text-white text-center ml-2.5" svgIcon="feather:truck"></mat-icon>
                 </div>
                 <div>
                   <p class="text-[#1A1A2E] font-medium">{{ reservation.shuttleName }}</p>
                   <div class="flex items-center gap-2 text-sm text-gray-600 mt-1">
-                    <mat-icon class="icon-size-4">location_on</mat-icon>
+                    <mat-icon class="icon-size-4" svgIcon="feather:map-pin"></mat-icon>
                     <span>{{ reservation.route }}</span>
                   </div>
                   <div class="flex items-center gap-2 text-sm text-gray-600 mt-1">
-                    <mat-icon class="icon-size-4">schedule</mat-icon>
+                    <mat-icon class="icon-size-4" svgIcon="feather:clock"></mat-icon>
                     <span>{{ reservation.departureTime }} - {{ reservation.arrivalTime }}</span>
                     <span class="ml-2 px-2 py-0.5 bg-gray-100 rounded text-xs font-semibold">
                       {{ reservation.busNumber }}
@@ -347,7 +347,7 @@
                   </span>
                 </div>
                 <button class="flex items-center gap-2 px-4 py-2 bg-[#E94560] text-white rounded-lg hover:bg-[#d13950] transition font-medium">
-                  <mat-icon class="icon-size-4">delete_outline</mat-icon>
+                  <mat-icon class="icon-size-4" svgIcon="feather:trash-2"></mat-icon>
                   Annuler
                 </button>
               </div>
@@ -417,7 +417,7 @@
               <h4 class="text-[#1A1A2E] mb-3 font-semibold text-lg">{{ shuttle.name }}</h4>
               <div class="space-y-3 mb-5">
                 <div class="flex items-start gap-2 text-sm">
-                  <mat-icon class="icon-size-4 text-gray-400 mt-0.5 flex-shrink-0">location_on</mat-icon>
+                  <mat-icon class="icon-size-4 text-gray-400 mt-0.5 flex-shrink-0" svgIcon="feather:map-pin"></mat-icon>
                   <div>
                     <p class="text-gray-900 font-medium">{{ shuttle.route }}</p>
                     <p class="text-gray-500 text-xs mt-1 leading-relaxed">
@@ -426,7 +426,7 @@
                   </div>
                 </div>
                 <div class="flex items-center gap-2 text-sm text-gray-600">
-                  <mat-icon class="icon-size-4 text-gray-400">schedule</mat-icon>
+                  <mat-icon class="icon-size-4 text-gray-400" svgIcon="feather:clock"></mat-icon>
                   <span class="font-medium">{{ shuttle.schedule }}</span>
                 </div>
                 <div class="flex items-center gap-4 text-xs text-gray-500 mt-2 bg-gray-50 p-2 rounded border border-gray-100">
@@ -572,7 +572,7 @@
               </div>
 
               <div class="flex items-center gap-2 text-sm text-gray-700 mb-4 bg-white p-2 rounded-lg border border-gray-100 shadow-sm">
-                <mat-icon class="icon-size-4 text-gray-400">location_on</mat-icon>
+                <mat-icon class="icon-size-4 text-gray-400" svgIcon="feather:map-pin"></mat-icon>
                 <span class="font-medium whitespace-nowrap overflow-hidden text-ellipsis">{{ transport.departure }} → {{ transport.arrival }}</span>
               </div>
 
@@ -612,7 +612,7 @@
         <div class="bg-gradient-to-br from-[#1D9E75] to-[#168567] rounded-xl p-6 text-white shadow-md relative overflow-hidden">
           <div class="absolute -right-6 -top-6 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
           <div class="flex items-center gap-2 mb-6">
-            <mat-icon class="icon-size-6">trending_up</mat-icon>
+            <mat-icon class="icon-size-6" svgIcon="feather:trending-up"></mat-icon>
             <h4 class="font-semibold text-lg">Votre impact environnemental</h4>
           </div>
           <div class="grid grid-cols-2 gap-4">
