@@ -27,13 +27,24 @@
           <div *ngFor="let reservation of mesReservations" class="flex items-center gap-4 p-4 rounded-lg border border-gray-200 bg-gray-50">
             <div class="w-12 h-12 rounded-full bg-[#1D9E75] flex items-center justify-center text-white font-bold">C</div>
             <div class="flex-1">
-              <div class="flex items-center gap-2 mb-1">
-                <p class="font-semibold text-[#1A1A2E]">Trajet du {{ reservation.dateReservation | date:'dd/MM/yyyy' }}</p>
-                <span class="text-xs px-2 py-0.5 rounded-full font-medium shadow-sm" [ngClass]="reservation.statut === 'CONFIRMEE' ? 'bg-[#1D9E75] text-white' : (reservation.statut === 'EN_ATTENTE' ? 'bg-yellow-500 text-white' : 'bg-red-500 text-white')">{{ reservation.statut === 'CONFIRMEE' ? 'Confirmée' : (reservation.statut === 'EN_ATTENTE' ? 'En attente' : 'Annulée') }}</span>
-              </div>
-              <div class="flex items-center gap-3 text-sm text-gray-600">
-                <span class="flex items-center gap-1"><mat-icon class="icon-size-4" svgIcon="feather:map-pin"></mat-icon>Trajet #{{ reservation.trajetId | slice:0:8 }}</span>
-              </div>
+              <ng-container *ngIf="getTrajetInfo(reservation.trajetId) as trajetInfo; else fallbackInfo">
+                <div class="flex items-center gap-2 mb-1">
+                  <p class="font-semibold text-[#1A1A2E]">Trajet avec {{ getEmployeeName(trajetInfo.employeId) }}</p>
+                  <span class="text-xs px-2 py-0.5 rounded-full font-medium shadow-sm" [ngClass]="reservation.statut === 'CONFIRME' ? 'bg-[#1D9E75] text-white' : (reservation.statut === 'EN_ATTENTE' ? 'bg-yellow-500 text-white' : 'bg-red-500 text-white')">{{ reservation.statut === 'CONFIRME' ? 'Confirmée' : (reservation.statut === 'EN_ATTENTE' ? 'En attente' : 'Annulée') }}</span>
+                </div>
+                <div class="flex items-center gap-3 text-sm text-gray-600">
+                  <span class="flex items-center gap-1"><mat-icon class="icon-size-4" svgIcon="feather:map-pin"></mat-icon>{{ trajetInfo.adresseDepart }} → {{ trajetInfo.adresseArrivee }}</span>
+                </div>
+              </ng-container>
+              <ng-template #fallbackInfo>
+                <div class="flex items-center gap-2 mb-1">
+                  <p class="font-semibold text-[#1A1A2E]">Trajet du {{ reservation.dateReservation | date:'dd/MM/yyyy' }}</p>
+                  <span class="text-xs px-2 py-0.5 rounded-full font-medium shadow-sm" [ngClass]="reservation.statut === 'CONFIRME' ? 'bg-[#1D9E75] text-white' : (reservation.statut === 'EN_ATTENTE' ? 'bg-yellow-500 text-white' : 'bg-red-500 text-white')">{{ reservation.statut === 'CONFIRME' ? 'Confirmée' : (reservation.statut === 'EN_ATTENTE' ? 'En attente' : 'Annulée') }}</span>
+                </div>
+                <div class="flex items-center gap-3 text-sm text-gray-600">
+                  <span class="flex items-center gap-1"><mat-icon class="icon-size-4" svgIcon="feather:map-pin"></mat-icon>Détails en cours de chargement...</span>
+                </div>
+              </ng-template>
               <div class="flex items-center gap-2 mt-2 text-xs text-[#1D9E75]">
                 <mat-icon class="icon-size-3" svgIcon="feather:leaf"></mat-icon>
                 <span>+{{ reservation.pointsEco }} points éco</span>
@@ -94,6 +105,10 @@
                   <button *ngFor="let day of days" (click)="toggleDay(day)" [class]="'flex-1 min-w-[3rem] h-10 rounded-lg font-medium transition-all ' + (selectedDays.includes(day) ? 'bg-[#1D9E75] text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200')">{{ day }}</button>
                 </div>
               </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Heure de départ souhaitée (optionnel)</label>
+                <input type="time" [(ngModel)]="searchTime" class="w-full h-10 px-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#1D9E75] bg-white" />
+              </div>
               <div class="bg-[#1D9E75]/10 rounded-lg p-4 border-l-4 border-[#1D9E75]">
                 <div class="grid grid-cols-3 gap-4">
                   <div><p class="text-xs text-gray-600 mb-1">Distance (est.)</p><p class="text-lg font-bold text-[#1A1A2E]">{{ routeDistance }}</p></div>
@@ -147,11 +162,11 @@
               <button (click)="showChat = !showChat" class="p-2 hover:bg-gray-100 rounded-lg transition-colors"><mat-icon class="icon-size-5 text-[#1D9E75]" svgIcon="feather:message-circle"></mat-icon></button>
             </div>
             <div class="space-y-3 max-h-96 overflow-y-auto pr-2">
-              <div *ngFor="let trajet of allTrajets" class="flex items-center gap-3 p-4 rounded-xl border border-gray-200 hover:border-[#1D9E75] hover:shadow-md transition-all cursor-default bg-white">
-                <div class="w-12 h-12 rounded-full bg-[#0F3460] flex items-center justify-center text-white font-bold">{{ (trajet.employeId?.substring(0,2) || 'C') | uppercase }}</div>
+              <div *ngFor="let trajet of displayedTrajets" class="flex items-center gap-3 p-4 rounded-xl border border-gray-200 hover:border-[#1D9E75] hover:shadow-md transition-all cursor-default bg-white">
+                <div class="w-12 h-12 rounded-full bg-[#0F3460] flex items-center justify-center text-white font-bold">{{ (getEmployeeName(trajet.employeId).substring(0,1)) | uppercase }}</div>
                 <div class="flex-1">
                   <div class="flex items-center gap-2 mb-1">
-                    <p class="font-semibold text-[#1A1A2E] text-sm">Conducteur {{ trajet.employeId?.substring(0,6) }}</p>
+                    <p class="font-semibold text-[#1A1A2E] text-sm">{{ getEmployeeName(trajet.employeId) }}</p>
                     <div *ngIf="trajet.placesRestantes > 0" class="flex items-center gap-1 bg-[#1D9E75]/10 px-2 py-0.5 rounded-full"><mat-icon class="icon-size-3 text-[#1D9E75]" svgIcon="feather:check-circle"></mat-icon><span class="text-xs text-[#1D9E75] font-medium">Disponible</span></div>
                   </div>
                   <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-600">
@@ -165,7 +180,7 @@
                 </div>
                 <button (click)="reserverTrajet(trajet.id!)" [disabled]="estDejaReserve(trajet.id!) || trajet.placesRestantes === 0" class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-sm" [ngClass]="estDejaReserve(trajet.id!) ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-[#1D9E75] text-white hover:bg-[#168567]'">{{ estDejaReserve(trajet.id!) ? 'Réservé' : 'Réserver' }}</button>
               </div>
-              <div *ngIf="allTrajets.length === 0" class="text-center py-8 text-gray-500">Aucun covoiturage disponible pour le moment.</div>
+              <div *ngIf="displayedTrajets.length === 0" class="text-center py-8 text-gray-500">Aucun covoiturage disponible pour le moment.</div>
             </div>
           </div>
 
@@ -242,12 +257,50 @@
             <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Heure de départ</label><input type="time" formControlName="heureDepart" class="w-full h-11 px-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#1D9E75] bg-gray-50" /></div>
             <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Places disponibles</label><input type="number" formControlName="placesDisponibles" placeholder="Ex: 3" class="w-full h-11 px-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#1D9E75] bg-gray-50" /></div>
           </div>
-          <div><label class="block text-sm font-medium text-gray-700 mb-2">Jours de la semaine</label><div class="flex flex-wrap gap-2"><button *ngFor="let day of days" (click)="toggleDay(day)" [class]="'flex-1 min-w-[3rem] h-10 rounded-lg font-medium transition-all ' + (selectedDays.includes(day) ? 'bg-[#1D9E75] text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200')">{{ day }}</button></div></div>
-          <button type="submit" [disabled]="trajetForm.invalid" class="w-full h-11 bg-[#0F3460] text-white rounded-xl font-medium hover:bg-[#0a2442] disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-md mt-2">Publier mon trajet</button>
+          <div><label class="block text-sm font-medium text-gray-700 mb-2">Jours de la semaine</label><div class="flex flex-wrap gap-2"><button type="button" *ngFor="let day of days" (click)="toggleDay(day)" [class]="'flex-1 min-w-[3rem] h-10 rounded-lg font-medium transition-all ' + (selectedDays.includes(day) ? 'bg-[#1D9E75] text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200')">{{ day }}</button></div></div>
+          <button type="submit" class="w-full h-11 bg-[#0F3460] text-white rounded-xl font-medium hover:bg-[#0a2442] disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-md mt-2">Publier mon trajet</button>
         </div>
       </form>
 
-      <div class="space-y-4">
+      <div class="space-y-4" [ngClass]="isPubMapExpanded ? 'col-span-1 lg:col-span-2' : ''">
+        <!-- Carte pour saisir le trajet -->
+        <div [class]="'bg-white rounded-xl shadow-sm border border-gray-200 relative overflow-hidden transition-all duration-300 ' + (isPubMapExpanded ? 'h-[75vh]' : 'h-[380px]')">
+           <div class="absolute top-16 left-4 z-[400] bg-white/90 backdrop-blur text-[#1A1A2E] text-xs font-semibold px-3 py-1.5 rounded-lg shadow-sm">
+             📍 Cliquez pour définir Départ puis Arrivée
+           </div>
+           
+           <!-- Barre de recherche -->
+           <div class="absolute top-4 left-4 right-4 z-[400] flex gap-2">
+             <div class="flex-1 relative">
+               <div class="flex gap-2">
+                 <div class="flex-1 relative">
+                   <mat-icon class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 icon-size-4" svgIcon="feather:search"></mat-icon>
+                   <input type="text" [(ngModel)]="pubSearchQuery" (input)="onPubSearchInput()" (keyup.enter)="searchPubLocation()" placeholder="Rechercher un lieu (ville, rue)..." class="w-full h-11 pl-9 pr-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#1D9E75] text-sm bg-white shadow-md" />
+                 </div>
+                 <button (click)="searchPubLocation()" class="px-5 h-11 bg-[#1D9E75] text-white rounded-lg hover:bg-[#168567] transition-colors shadow-md font-medium text-sm whitespace-nowrap">Chercher</button>
+               </div>
+               <div *ngIf="pubSearchSuggestions.length > 0" class="absolute top-12 left-0 right-0 bg-white rounded-lg shadow-xl border border-gray-200 mt-1 max-h-64 overflow-y-auto z-[500]">
+                 <div *ngFor="let suggestion of pubSearchSuggestions" (click)="selectPubSuggestion(suggestion)" class="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0">
+                   <p class="font-medium text-gray-800 text-sm">{{ suggestion.display_name.split(',')[0] }}</p>
+                   <p class="text-xs text-gray-500">{{ suggestion.display_name.split(',').slice(1, 4).join(', ') }}</p>
+                 </div>
+               </div>
+             </div>
+           </div>
+           
+           <!-- Boutons flottants droite -->
+           <div class="absolute top-16 right-4 z-[400] flex flex-col gap-2">
+             <button type="button" (click)="centerOnPublishMapLocation()" class="w-10 h-10 bg-white rounded-lg shadow-md border border-gray-200 hover:bg-gray-50 flex items-center justify-center" title="Ma position">
+               <mat-icon class="text-[#1D9E75] icon-size-5" svgIcon="feather:map-pin"></mat-icon>
+             </button>
+             <button type="button" (click)="togglePubMapSize()" class="w-10 h-10 bg-white rounded-lg shadow-md border border-gray-200 hover:bg-gray-50 flex items-center justify-center">
+               <mat-icon class="text-gray-600 icon-size-5" [svgIcon]="isPubMapExpanded ? 'feather:minimize-2' : 'feather:maximize-2'"></mat-icon>
+             </button>
+           </div>
+           
+           <div #publishMapElement class="w-full h-full z-10"></div>
+        </div>
+
         <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
           <h3 class="text-xl font-semibold text-[#0F3460] mb-5">Mes trajets actifs</h3>
           <div class="space-y-4">
@@ -261,7 +314,20 @@
                 <div class="flex items-center gap-4 text-gray-600 text-sm"><div class="flex items-center gap-1.5"><mat-icon svgIcon="feather:clock" class="icon-size-4 opacity-70"></mat-icon><span class="font-medium">{{ transport.heureDepart | slice:0:5 }}</span></div><div class="flex items-center gap-1.5"><mat-icon svgIcon="feather:users" class="icon-size-4 opacity-70"></mat-icon><span class="font-medium">{{ transport.placesRestantes }}/{{ transport.placesDisponibles }} places</span></div></div>
               </div>
               <div class="flex flex-wrap gap-2 mb-4"><span *ngFor="let day of (transport.joursDisponibles || '').split(',')" class="px-2.5 py-1 bg-[#1D9E75]/10 text-[#1D9E75] text-xs font-semibold rounded">{{ day | slice:0:3 | titlecase }}</span></div>
-              <div class="border-t border-gray-100 pt-4 mt-2"><p class="text-sm text-[#0F3460] font-semibold mb-3">Réservations ({{ transport.placesDisponibles - transport.placesRestantes }})</p><div class="flex -space-x-2"><img src="https://i.pravatar.cc/150?img=11" alt="Passager" class="w-8 h-8 rounded-full border-2 border-white object-cover shadow-sm" /><img src="https://i.pravatar.cc/150?img=5" alt="Passager" class="w-8 h-8 rounded-full border-2 border-white object-cover shadow-sm" /></div></div>
+              <div class="border-t border-gray-100 pt-4 mt-2">
+                <p class="text-sm text-[#0F3460] font-semibold mb-3">Réservations ({{ transport.reservations?.length || 0 }})</p>
+                <div class="space-y-2">
+                  <div *ngFor="let res of transport.reservations" class="flex justify-between items-center bg-gray-50 p-2 rounded-lg border border-gray-200">
+                    <div class="flex items-center gap-2">
+                      <div class="w-8 h-8 rounded-full bg-[#1D9E75] flex items-center justify-center text-white text-xs font-bold">{{ (getEmployeeName(res.employeId).substring(0,1)) | uppercase }}</div>
+                      <div>
+                        <p class="text-xs font-semibold text-[#1A1A2E]">{{ getEmployeeName(res.employeId) }}</p>
+                        <span class="text-[10px] px-1.5 py-0.5 rounded-full font-medium" [ngClass]="res.statut === 'CONFIRME' ? 'bg-[#1D9E75] text-white' : (res.statut === 'EN_ATTENTE' ? 'bg-yellow-500 text-white' : 'bg-red-500 text-white')">{{ res.statut === 'CONFIRME' ? 'Confirmée' : (res.statut === 'EN_ATTENTE' ? 'En attente' : 'Annulée') }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
             <div *ngIf="backendTrajets.length === 0" class="text-center py-8 text-gray-500">Vous n'avez proposé aucun trajet.</div>
           </div>

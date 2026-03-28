@@ -2,6 +2,7 @@ import { Component, OnInit, AfterViewInit, OnDestroy, ElementRef, Renderer2, Vie
 import { CommonModule } from '@angular/common';
 import { FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CovoiturageService, Vehicule, Trajet, ReservationResponse, ReservationRequest } from '../covoiturage.service';
+import { UserService, Employee } from '../../../../../services/user.service';
 
 // Leaflet loaded via CDN
 declare var L: any;
@@ -191,16 +192,34 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
 
   // Recherche
   searchQuery: string = '';
+  searchTime: string = '';
   searchSuggestions: any[] = [];
-  searchMarker: any;
+
   private searchTimeout: any;
 
+  pubSearchQuery: string = '';
+  pubSearchSuggestions: any[] = [];
+  private pubSearchTimeout: any;
+
+  @ViewChild('mapElement') mapDiv!: ElementRef;
+  @ViewChild('publishMapElement') publishMapDiv!: ElementRef;
+
   private map: any;
+  private publishMap: any;
+
   private departureMarker: any;
   private destinationMarker: any;
+  private pubDepMarker: any;
+  private pubDestMarker: any;
+
   private currentLocationMarker: any;
+  private pubCurrentLocationMarker: any;
+
+  private searchMarker: any;
   private polyline: any;
   private routeTooltip: any;
+
+  public isPubMapExpanded: boolean = false;
 
   // Gestion Backend
   trajetForm: FormGroup;
@@ -211,19 +230,22 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
   // Vehicle Modal State
   showVehicleModal: boolean = false;
   allTrajets: Trajet[] = [];
+  displayedTrajets: Trajet[] = [];
   mesReservations: ReservationResponse[] = [];
   totalPointsEco: number = 0;
   reservationEnCours: boolean = false;
 
-  @ViewChild('mapElement', { static: false }) mapDiv!: ElementRef;
+  // Cache employés
+  employesMap: Map<string, string> = new Map();
 
   constructor(
-    private renderer: Renderer2, 
-    private cdr: ChangeDetectorRef, 
-    private ngZone: NgZone, 
+    private renderer: Renderer2,
+    private cdr: ChangeDetectorRef,
+    private ngZone: NgZone,
     private appRef: ApplicationRef,
     private fb: FormBuilder,
-    private covoiturageService: CovoiturageService
+    private covoiturageService: CovoiturageService,
+    private userService: UserService
   ) {
     this.trajetForm = this.fb.group({
       vehiculeId: ['', Validators.required],
@@ -238,36 +260,71 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
   ngOnInit() {
     const localUserStr = localStorage.getItem('currentUser');
     if (localUserStr) {
-       try {
-           const localUser = JSON.parse(localUserStr);
-           this.employeId = localUser.id;
-           this.loadVehicules();
-           this.loadTrajets();
-           this.loadAllTrajets();
-           this.loadMesReservations();
-           this.loadTotalPoints();
-       } catch (e) {
-           console.error("Erreur parsing currentUser", e);
-       }
+      try {
+        const localUser = JSON.parse(localUserStr);
+        this.employeId = localUser.id;
+        this.loadEmployees();
+        this.loadVehicules();
+        this.loadTrajets();
+        this.loadAllTrajets();
+        this.loadMesReservations();
+        this.loadTotalPoints();
+      } catch (e) {
+        console.error("Erreur parsing currentUser", e);
+      }
     }
   }
+loadEmployees(): void {
+  this.userService.getAllEmployees().subscribe({
+    next: (users) => {
+      users.forEach((user: any) => {
+        this.employesMap.set(
+          String(user.id),
+          `${user.prenom || ''} ${user.nom || ''}`.trim()
+        );
+      });
+      this.cdr.detectChanges();
+    },
+    error: (err) => console.error("Erreur", err)
+  });
+}
+  getEmployeeName(id: string): string {
+    return this.employesMap.get(String(id)) || `Employé Inconnu`;
+  }
+
+  getTrajetInfo(trajetId: string | undefined): Trajet | undefined {
+    if (!trajetId) return undefined;
+    return this.allTrajets.find(t => t.id === trajetId);
+  }
+
+
 
   loadVehicules() {
     if (!this.employeId) return;
     this.covoiturageService.getVehiculesByEmployeId(this.employeId).subscribe({
-       next: (res) => this.vehicules = res,
-       error: (err) => console.error("Erreur chargement véhicules", err)
+      next: (res) => this.vehicules = res,
+      error: (err) => console.error("Erreur chargement véhicules", err)
     });
   }
 
   loadTrajets() {
     if (!this.employeId) return;
     this.covoiturageService.getTrajetsByEmployeId(this.employeId).subscribe({
-       next: (res) => {
-         this.backendTrajets = res;
-         this.cdr.detectChanges();
-       },
-       error: (err) => console.error("Erreur chargement trajets", err)
+      next: (res) => {
+        this.backendTrajets = res;
+        this.backendTrajets.forEach(trajet => {
+          if (trajet.id) {
+            this.covoiturageService.getReservationsByTrajet(trajet.id).subscribe({
+              next: (reserves) => {
+                trajet.reservations = reserves.filter(r => r.statut !== 'ANNULE');
+                this.cdr.detectChanges();
+              }
+            });
+          }
+        });
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error("Erreur chargement trajets", err)
     });
   }
 
@@ -279,34 +336,51 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
 
   publierTrajet() {
     if (this.trajetForm.invalid || !this.employeId || this.selectedDays.length === 0) {
-        this.trajetForm.markAllAsTouched();
-        return;
+      this.trajetForm.markAllAsTouched();
+      let errorMsg = "Veuillez corriger le formulaire : ";
+      if (!this.trajetForm.get('vehiculeId')?.value) errorMsg += "\n- Véhicule manquant";
+      if (this.selectedDays.length === 0) errorMsg += "\n- Jours manquants";
+      if (this.trajetForm.get('adresseDepart')?.invalid) errorMsg += "\n- Adresse de départ manquante";
+      if (this.trajetForm.get('adresseArrivee')?.invalid) errorMsg += "\n- Adresse d'arrivée manquante";
+      if (this.trajetForm.get('heureDepart')?.invalid) errorMsg += "\n- Heure de départ manquante";
+      if (this.trajetForm.get('placesDisponibles')?.invalid) errorMsg += "\n- Places manquantes";
+      alert(errorMsg);
+      return;
     }
 
     const formValues = this.trajetForm.value;
     const jours = this.selectedDays.join(', ');
-    
+
     const newTrajet: Trajet = {
-        employeId: this.employeId,
-        vehiculeId: formValues.vehiculeId,
-        categorie: formValues.categorie,
-        adresseDepart: formValues.adresseDepart,
-        adresseArrivee: formValues.adresseArrivee,
-        heureDepart: formValues.heureDepart + ':00',
-        joursDisponibles: jours,
-        placesDisponibles: formValues.placesDisponibles,
-        placesRestantes: formValues.placesDisponibles,
-        statut: 'ACTIF'
+      employeId: this.employeId,
+      vehiculeId: formValues.vehiculeId,
+      categorie: formValues.categorie,
+      adresseDepart: formValues.adresseDepart,
+      adresseArrivee: formValues.adresseArrivee,
+      heureDepart: formValues.heureDepart + ':00',
+      joursDisponibles: jours,
+      placesDisponibles: formValues.placesDisponibles,
+      placesRestantes: formValues.placesDisponibles,
+      statut: 'ACTIF'
     };
-    
+
     this.covoiturageService.creerTrajet(newTrajet).subscribe({
-        next: () => {
-          this.loadTrajets();
-          this.trajetForm.reset({ categorie: 'COVOITURAGE', vehiculeId: '' });
-          this.selectedDays = ["Lun", "Mar", "Mer", "Jeu", "Ven"];
-          this.cdr.detectChanges();
-        },
-        error: (err) => console.error("Erreur publication trajet", err)
+      next: () => {
+        this.loadTrajets();
+        this.trajetForm.reset({ categorie: 'COVOITURAGE', vehiculeId: '' });
+        this.selectedDays = ["Lun", "Mar", "Mer", "Jeu", "Ven"];
+
+        // Reset map markers
+        if (this.publishMap) {
+          if (this.pubDepMarker) this.publishMap.removeLayer(this.pubDepMarker);
+          if (this.pubDestMarker) this.publishMap.removeLayer(this.pubDestMarker);
+          this.pubDepMarker = null;
+          this.pubDestMarker = null;
+        }
+
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error("Erreur publication trajet", err)
     });
   }
 
@@ -319,14 +393,17 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
   }
 
   loadAllTrajets(): void {
-    this.covoiturageService.getAllTrajets().subscribe({
-      next: (res) => {
-        this.allTrajets = res.filter(t => t.statut === 'ACTIF');
-        this.cdr.detectChanges();
-      },
-      error: (err) => console.error('Erreur chargement tous les trajets', err)
-    });
-  }
+  this.covoiturageService.getAllTrajets().subscribe({
+    next: (res) => {
+      this.allTrajets = res.filter(t => t.statut === 'ACTIF');
+      this.displayedTrajets = [...this.allTrajets];
+      console.log('TRAJET employeId:', this.allTrajets[0]?.employeId);
+      console.log('MAP complète:', JSON.stringify([...this.employesMap]));
+      this.cdr.detectChanges();
+    },
+    error: (err) => console.error('Erreur chargement tous les trajets', err)
+  });
+}
 
   loadMesReservations(): void {
     if (!this.employeId) return;
@@ -369,9 +446,8 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
   }
 
   estDejaReserve(trajetId: string): boolean {
-    return this.mesReservations.some(r => r.trajetId === trajetId && r.statut !== 'ANNULEE');
+    return this.mesReservations.some(r => r.trajetId === trajetId && r.statut !== 'ANNULE');
   }
-
   deleteTrajet(id?: string): void {
     if (!id) return;
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce trajet ?')) return;
@@ -459,13 +535,13 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     const lat = parseFloat(lieu.lat);
     const lng = parseFloat(lieu.lon);
     const nomLieu = lieu.display_name.split(',')[0];
-    
+
     this.map.setView([lat, lng], 15);
-    
+
     if (this.searchMarker) {
       this.map.removeLayer(this.searchMarker);
     }
-    
+
     const searchIcon = L.divIcon({
       className: 'search-marker',
       html: `
@@ -479,7 +555,7 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
       iconSize: [40, 50],
       iconAnchor: [20, 40]
     });
-    
+
     this.searchMarker = L.marker([lat, lng], { icon: searchIcon }).addTo(this.map);
     this.searchSuggestions = [];
     this.searchQuery = nomLieu;
@@ -490,14 +566,14 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
       alert('Géolocalisation non supportée');
       return;
     }
-    
+
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
-        
+
         this.map.setView([lat, lng], 15);
-        
+
         const pulseIcon = L.divIcon({
           className: 'pulse-marker',
           html: `
@@ -509,16 +585,16 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
           iconSize: [20, 20],
           iconAnchor: [10, 10]
         });
-        
+
         if (this.currentLocationMarker) {
           this.map.removeLayer(this.currentLocationMarker);
         }
-        
+
         this.currentLocationMarker = L.marker([lat, lng], { icon: pulseIcon })
           .addTo(this.map)
           .bindPopup('<b>📍 Vous êtes ici</b>')
           .openPopup();
-          
+
         setTimeout(() => {
           if (this.currentLocationMarker) {
             this.map.removeLayer(this.currentLocationMarker);
@@ -528,7 +604,7 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
       },
       (error) => {
         let message = 'Erreur de géolocalisation';
-        switch(error.code) {
+        switch (error.code) {
           case error.PERMISSION_DENIED: message = 'Permission refusée'; break;
           case error.POSITION_UNAVAILABLE: message = 'Position non disponible'; break;
           case error.TIMEOUT: message = 'Délai dépassé'; break;
@@ -538,32 +614,158 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     );
   }
 
+  // ------ PUBLISH MAP SEARCH & EXPAND LOGIC ------
+  togglePubMapSize() {
+    this.isPubMapExpanded = !this.isPubMapExpanded;
+    setTimeout(() => {
+      if (this.publishMap) {
+        this.publishMap.invalidateSize();
+      }
+    }, 400);
+  }
+
+  onPubSearchInput() {
+    if (this.pubSearchTimeout) clearTimeout(this.pubSearchTimeout);
+    if (this.pubSearchQuery.length < 3) {
+      this.pubSearchSuggestions = [];
+      return;
+    }
+    this.pubSearchTimeout = setTimeout(() => {
+      this.getPubSuggestions();
+    }, 500);
+  }
+
+  async getPubSuggestions() {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(this.pubSearchQuery)}&limit=5&addressdetails=1&countrycodes=tn&accept-language=fr`
+      );
+      this.pubSearchSuggestions = await response.json();
+    } catch (error) {
+      console.error('Erreur suggestions:', error);
+      this.pubSearchSuggestions = [];
+    }
+  }
+
+  async searchPubLocation() {
+    if (!this.pubSearchQuery.trim()) return;
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(this.pubSearchQuery)}&limit=1&addressdetails=1&countrycodes=tn&accept-language=fr`
+      );
+      const data = await response.json();
+      if (data && data.length > 0) {
+        this.selectPubSuggestion(data[0]);
+      } else {
+        alert('Aucun lieu trouvé pour "' + this.pubSearchQuery + '"');
+      }
+    } catch (error) {
+      console.error('Erreur recherche:', error);
+      alert('Erreur lors de la recherche');
+    }
+  }
+
+  selectPubSuggestion(lieu: any) {
+    const lat = parseFloat(lieu.lat);
+    const lng = parseFloat(lieu.lon);
+    const nomLieu = lieu.display_name.split(',')[0];
+
+    this.publishMap.setView([lat, lng], 15);
+
+    // Instead of using a dedicated search marker, we directly trigger the map click logic
+    // to place the Dep/Dest markers exactly as if the user clicked on the map.
+    this.publishMap.fire('click', { latlng: L.latLng(lat, lng) });
+
+    this.pubSearchSuggestions = [];
+    this.pubSearchQuery = nomLieu;
+  }
+  // ------------------------------------------------
+
+  centerOnPublishMapLocation() {
+    if (!navigator.geolocation) {
+      alert('Géolocalisation non supportée');
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+
+        this.publishMap.setView([lat, lng], 15);
+
+        const pulseIcon = L.divIcon({
+          className: 'pulse-marker',
+          html: `
+            <div class="relative">
+              <div class="absolute w-8 h-8 bg-[#1D9E75] rounded-full opacity-75 animate-ping"></div>
+              <div style="background-color: #1D9E75; width: 16px; height: 16px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 0 2px rgba(29,158,117,0.3);"></div>
+            </div>
+          `,
+          iconSize: [20, 20],
+          iconAnchor: [10, 10]
+        });
+
+        if (this.pubCurrentLocationMarker) {
+          this.publishMap.removeLayer(this.pubCurrentLocationMarker);
+        }
+
+        this.pubCurrentLocationMarker = L.marker([lat, lng], { icon: pulseIcon })
+          .addTo(this.publishMap)
+          .bindPopup('<b>📍 Vous êtes ici</b>')
+          .openPopup();
+
+        setTimeout(() => {
+          if (this.pubCurrentLocationMarker) {
+            this.publishMap.removeLayer(this.pubCurrentLocationMarker);
+            this.pubCurrentLocationMarker = null;
+          }
+        }, 5000);
+      },
+      (error) => {
+        alert('Erreur de géolocalisation');
+      }
+    );
+  }
+
   rechercherCovoitureurs() {
     const depart = this.inputMode === 'map' ? this.departureLocation : this.manualDeparture;
     const arrivee = this.inputMode === 'map' ? this.destinationLocation : this.manualDestination;
-    
+
     if (!depart || !arrivee) {
-      alert('Veuillez renseigner le départ et la destination');
+      alert('Veuillez renseigner le départ et la destination pour rechercher.');
       return;
     }
-    
+
     const trajetsFiltres = this.allTrajets.filter(trajet => {
       const joursTrajet = trajet.joursDisponibles.split(',');
-      const joursMatch = this.selectedDays.some(j => joursTrajet.includes(j));
-      const departMatch = trajet.adresseDepart.toLowerCase().includes(depart.toLowerCase()) || 
-                          depart.toLowerCase().includes(trajet.adresseDepart.toLowerCase());
-      const arriveeMatch = trajet.adresseArrivee.toLowerCase().includes(arrivee.toLowerCase()) || 
-                           arrivee.toLowerCase().includes(trajet.adresseArrivee.toLowerCase());
-      return joursMatch && (departMatch || arriveeMatch);
+      const joursMatch = this.selectedDays.some(j => aIncludeB(joursTrajet, j));
+      const departMatch = trajet.adresseDepart.toLowerCase().includes(depart.toLowerCase()) ||
+        depart.toLowerCase().includes(trajet.adresseDepart.toLowerCase());
+      const arriveeMatch = trajet.adresseArrivee.toLowerCase().includes(arrivee.toLowerCase()) ||
+        arrivee.toLowerCase().includes(trajet.adresseArrivee.toLowerCase());
+
+      let timeMatch = true;
+      if (this.searchTime) {
+        timeMatch = trajet.heureDepart.startsWith(this.searchTime);
+      }
+
+      return joursMatch && (departMatch || arriveeMatch) && timeMatch;
     });
-    
+
+    // Helper function for array inclusion using trim
+    function aIncludeB(arr: string[], val: string) {
+      return arr.some(a => a.trim().toLowerCase() === val.trim().toLowerCase());
+    }
+
     if (trajetsFiltres.length === 0) {
       alert('Aucun covoiturage trouvé pour ces critères.');
+      this.displayedTrajets = [];
     } else {
       alert(`${trajetsFiltres.length} covoiturage(s) trouvé(s) !`);
-      this.allTrajets = trajetsFiltres;
-      this.cdr.detectChanges();
+      this.displayedTrajets = trajetsFiltres;
     }
+    this.cdr.detectChanges();
   }
 
   ngAfterViewInit() {
@@ -576,11 +778,22 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     if (this.map) {
       this.map.remove();
     }
+    if (this.publishMap) {
+      this.publishMap.remove();
+    }
   }
 
   switchSection(section: 'utilises' | 'proposes') {
     this.activeSection = section;
-    if (section === 'utilises') {
+    if (section === 'proposes') {
+      setTimeout(() => {
+        if (this.publishMap) {
+          this.publishMap.invalidateSize();
+        } else {
+          if (typeof L !== 'undefined') this.initPublishMap();
+        }
+      }, 300);
+    } else if (section === 'utilises') {
       setTimeout(() => {
         if (!this.map && typeof L !== 'undefined') {
           this.initMap();
@@ -629,6 +842,7 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
   private initLeaflet() {
     if (typeof L !== 'undefined') {
       this.initMap();
+      this.initPublishMap();
       return;
     }
 
@@ -641,6 +855,7 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
     script.onload = () => {
       this.initMap();
+      this.initPublishMap();
     };
     this.renderer.appendChild(document.body, script);
   }
@@ -686,21 +901,21 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
         if (!this.departureMarker) {
           this.departureLocation = "Recherche de l'adresse...";
           this.cdr.detectChanges();
-          
+
           const customIcon = L.divIcon({
             className: 'custom-icon',
             html: `<div style="background-color: #1D9E75; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.4);"></div>`,
             iconSize: [20, 20],
             iconAnchor: [10, 10]
           });
-          this.departureMarker = L.marker([lat, lng], {icon: customIcon}).addTo(this.map).bindPopup("Départ").openPopup();
-          
+          this.departureMarker = L.marker([lat, lng], { icon: customIcon }).addTo(this.map).bindPopup("Départ").openPopup();
+
           this.getAddressFromCoords(lat, lng).then(addr => {
             this.ngZone.run(() => {
               this.departureLocation = addr;
             });
           });
-          
+
         } else if (!this.destinationMarker) {
           this.destinationLocation = "Recherche de l'adresse...";
           this.cdr.detectChanges();
@@ -711,16 +926,16 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
             iconSize: [20, 20],
             iconAnchor: [10, 10]
           });
-          this.destinationMarker = L.marker([lat, lng], {icon: customIcon}).addTo(this.map).bindPopup("Arrivée").openPopup();
-          
+          this.destinationMarker = L.marker([lat, lng], { icon: customIcon }).addTo(this.map).bindPopup("Arrivée").openPopup();
+
           const startLat = this.departureMarker.getLatLng().lat;
           const startLng = this.departureMarker.getLatLng().lng;
-          
+
           const distanceMts = this.departureMarker.getLatLng().distanceTo(this.destinationMarker.getLatLng());
           const distanceKm = distanceMts / 1000;
-          const durationMn = Math.round((distanceKm / 40) * 60); 
-          const co2Saved = distanceKm * 0.12; 
-          
+          const durationMn = Math.round((distanceKm / 40) * 60);
+          const co2Saved = distanceKm * 0.12;
+
           this.ngZone.run(() => {
             this.routeDistance = distanceKm.toFixed(1) + ' km';
             this.routeDuration = durationMn.toString() + ' min';
@@ -736,14 +951,14 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
               if (data.routes && data.routes.length > 0) {
                 const route = data.routes[0];
                 const coords = route.geometry.coordinates.map((c: any) => [c[1], c[0]]);
-                
+
                 this.ngZone.run(() => {
                   this.polyline = L.polyline(coords, {
                     color: '#3B82F6',
                     weight: 5,
                     opacity: 0.9
                   }).addTo(this.map);
-                  
+
                   this.map.fitBounds(this.polyline.getBounds(), { padding: [50, 50] });
 
                   const realDistanceKm = route.distance / 1000;
@@ -759,7 +974,7 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
                     <span style="font-weight:900; font-size:14px; color:#1A1A2E;">${realDurationMn} min</span><br>
                     <span style="font-size:12px; color:#6b7280; font-weight:600;">${realDistanceKm.toFixed(1)} km</span>
                   </div>`;
-                  
+
                   this.routeTooltip = L.tooltip({ permanent: true, direction: 'center', className: 'bg-white rounded-xl shadow-lg border-0' })
                     .setLatLng(midPoint)
                     .setContent(tooltipHtml)
@@ -792,7 +1007,7 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
           this.routeDistance = '-';
           this.routeDuration = '-';
           this.routeCo2 = '-';
-          
+
           this.departureLocation = "Recherche de l'adresse...";
           this.destinationLocation = '';
           this.cdr.detectChanges();
@@ -803,7 +1018,7 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
             iconSize: [20, 20],
             iconAnchor: [10, 10]
           });
-          this.departureMarker = L.marker([lat, lng], {icon: customIcon}).addTo(this.map).bindPopup("Départ").openPopup();
+          this.departureMarker = L.marker([lat, lng], { icon: customIcon }).addTo(this.map).bindPopup("Départ").openPopup();
           this.destinationMarker = null;
           this.polyline = null;
 
@@ -819,5 +1034,93 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     setTimeout(() => {
       this.map.invalidateSize();
     }, 400);
+  }
+
+  private initPublishMap() {
+    if (!this.publishMapDiv) return;
+    if (this.publishMap) {
+      setTimeout(() => this.publishMap.invalidateSize(), 500);
+      return;
+    }
+
+    this.publishMap = L.map(this.publishMapDiv.nativeElement).setView([36.8065, 10.1815], 12);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(this.publishMap);
+
+    this.publishMap.on('click', (e: any) => {
+      this.ngZone.run(() => {
+        const lat = e.latlng.lat;
+        const lng = e.latlng.lng;
+
+        if (!this.pubDepMarker) {
+          this.trajetForm.get('adresseDepart')?.setValue("Recherche...");
+
+          const customIcon = L.divIcon({
+            className: 'custom-icon',
+            html: `<div style="background-color: #1D9E75; width: 16px; height: 16px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.4);"></div>`,
+            iconSize: [20, 20],
+            iconAnchor: [10, 10]
+          });
+          this.pubDepMarker = L.marker([lat, lng], { icon: customIcon }).addTo(this.publishMap).bindPopup("Départ").openPopup();
+
+          this.getAddressFromCoords(lat, lng).then(addr => {
+            this.ngZone.run(() => {
+              this.trajetForm.get('adresseDepart')?.setValue(addr);
+              this.cdr.detectChanges();
+            });
+          });
+
+        } else if (!this.pubDestMarker) {
+          this.trajetForm.get('adresseArrivee')?.setValue("Recherche...");
+
+          const customIcon = L.divIcon({
+            className: 'custom-icon',
+            html: `<div style="background-color: #E94560; width: 16px; height: 16px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.4);"></div>`,
+            iconSize: [20, 20],
+            iconAnchor: [10, 10]
+          });
+          this.pubDestMarker = L.marker([lat, lng], { icon: customIcon }).addTo(this.publishMap).bindPopup("Arrivée").openPopup();
+
+          this.getAddressFromCoords(lat, lng).then(addr => {
+            this.ngZone.run(() => {
+              this.trajetForm.get('adresseArrivee')?.setValue(addr);
+              this.cdr.detectChanges();
+            });
+          });
+
+          // Fit Bounds
+          const group = new L.featureGroup([this.pubDepMarker, this.pubDestMarker]);
+          this.publishMap.fitBounds(group.getBounds(), { padding: [50, 50] });
+
+        } else {
+          // Reset
+          this.publishMap.removeLayer(this.pubDepMarker);
+          this.publishMap.removeLayer(this.pubDestMarker);
+
+          this.trajetForm.get('adresseDepart')?.setValue("Recherche...");
+          this.trajetForm.get('adresseArrivee')?.setValue('');
+          this.cdr.detectChanges();
+
+          const customIcon = L.divIcon({
+            className: 'custom-icon',
+            html: `<div style="background-color: #1D9E75; width: 16px; height: 16px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.4);"></div>`,
+            iconSize: [20, 20],
+            iconAnchor: [10, 10]
+          });
+          this.pubDepMarker = L.marker([lat, lng], { icon: customIcon }).addTo(this.publishMap).bindPopup("Départ").openPopup();
+          this.pubDestMarker = null;
+
+          this.getAddressFromCoords(lat, lng).then(addr => {
+            this.ngZone.run(() => {
+              this.trajetForm.get('adresseDepart')?.setValue(addr);
+              this.cdr.detectChanges();
+            });
+          });
+        }
+      });
+    });
   }
 }

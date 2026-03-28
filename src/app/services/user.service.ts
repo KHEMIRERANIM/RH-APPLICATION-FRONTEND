@@ -63,57 +63,57 @@ export interface CreateEmployeeRequest {
 })
 export class UserService {
     private apiUrl = 'http://localhost:8081/api';
-    
-    constructor(private http: HttpClient) {}
-    
+
+    constructor(private http: HttpClient) { }
+
     // ========== AUTHENTIFICATION ==========
-    
+
     login(credentials: { email: string; password: string }): Observable<any> {
         return this.http.post(`${this.apiUrl}/auth/login`, credentials);
     }
-    
+
     // ========== EMPLOYEES ==========
-    
-    getAllEmployees(): Observable<Employee[]> {
-        return this.http.get<Employee[]>(`${this.apiUrl}/employees`);
-    }
-    
+
+   getAllEmployees(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/users`);
+}
+
     getEmployeeById(id: string): Observable<Employee> {
         return this.http.get<Employee>(`${this.apiUrl}/employees/${id}`);
     }
-    
+
     createEmployee(employee: CreateEmployeeRequest): Observable<Employee> {
         return this.http.post<Employee>(`${this.apiUrl}/employees`, employee);
     }
-    
+
     updateEmployee(id: string, employee: Partial<CreateEmployeeRequest>): Observable<Employee> {
         return this.http.put<Employee>(`${this.apiUrl}/employees/${id}`, employee);
     }
-    
+
     deleteEmployee(id: string): Observable<void> {
         return this.http.delete<void>(`${this.apiUrl}/employees/${id}`);
     }
-    
+
     // ========== DEPARTMENTS ==========
-    
+
     getAllDepartments(): Observable<Department[]> {
         return this.http.get<Department[]>(`${this.apiUrl}/departments`);
     }
-    
+
     // ========== JOB TITLES ==========
-    
+
     getAllJobTitles(): Observable<JobTitle[]> {
         return this.http.get<JobTitle[]>(`${this.apiUrl}/job-titles`);
     }
-    
+
     // ========== MANAGERS ==========
-    
+
     getAllManagers(): Observable<Employee[]> {
         return this.http.get<Employee[]>(`${this.apiUrl}/employees/managers`);
     }
-    
+
     // ========== UPLOAD ==========
-    
+
     uploadPhoto(file: File): Observable<{ url: string }> {
         const formData = new FormData();
         formData.append('file', file);

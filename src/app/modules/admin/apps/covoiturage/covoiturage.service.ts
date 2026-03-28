@@ -16,7 +16,7 @@ export interface Vehicule {
 
 export interface Trajet {
 
-  
+
   id?: string;
   employeId?: string;
   vehiculeId?: string;
@@ -29,19 +29,20 @@ export interface Trajet {
   placesRestantes: number;
   statut: 'ACTIF' | 'COMPLET' | 'ANNULE';
   dateCreation?: string;
+  reservations?: ReservationResponse[];
 }
 
 export interface ReservationRequest {
   trajetId: string;
   employeId: string;
-  statut: 'EN_ATTENTE' | 'CONFIRMEE' | 'ANNULEE';
+  statut: 'EN_ATTENTE' | 'CONFIRME' | 'ANNULE';
 }
 
 export interface ReservationResponse {
   id: string;
   trajetId: string;
   employeId: string;
-  statut: 'EN_ATTENTE' | 'CONFIRMEE' | 'ANNULEE';
+  statut: 'EN_ATTENTE' | 'CONFIRME' | 'ANNULE';
   dateReservation: string;
   co2AvecCovoit?: number;
   co2EconomiseKg?: number;
@@ -55,10 +56,10 @@ export interface ReservationResponse {
 export class CovoiturageService {
   private apiUrl = 'http://localhost:8081/api'; // Same base URL used in UserService
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   // --- VEHICULES ---
-  
+
   getVehiculesByEmployeId(employeId: string): Observable<Vehicule[]> {
     return this.http.get<Vehicule[]>(`${this.apiUrl}/vehicules`).pipe(
       map(vehicules => vehicules.filter(v => v.employeId === employeId))
@@ -95,22 +96,31 @@ export class CovoiturageService {
 
   private reservationsUrl = 'http://localhost:8081/api/reservations';
 
-getReservationsByEmploye(employeId: string): Observable<ReservationResponse[]> {
-  return this.http.get<ReservationResponse[]>(`${this.reservationsUrl}/employe/${employeId}`);
-}
+  getReservationsByEmploye(employeId: string): Observable<ReservationResponse[]> {
+    return this.http.get<ReservationResponse[]>(`${this.reservationsUrl}/employe/${employeId}`);
+  }
 
-getTotalPointsEco(employeId: string): Observable<number> {
-  return this.http.get<number>(`${this.reservationsUrl}/employe/${employeId}/points`);
-}
+  getTotalPointsEco(employeId: string): Observable<number> {
+    return this.http.get<number>(`${this.reservationsUrl}/employe/${employeId}/points`);
+  }
 
-creerReservation(request: ReservationRequest): Observable<ReservationResponse> {
-  return this.http.post<ReservationResponse>(this.reservationsUrl, request);
-}
+  creerReservation(request: ReservationRequest): Observable<ReservationResponse> {
+    return this.http.post<ReservationResponse>(this.reservationsUrl, request);
+  }
 
-annulerReservation(id: string): Observable<void> {
-  return this.http.delete<void>(`${this.reservationsUrl}/${id}`);
-}
-getAllTrajets(): Observable<Trajet[]> {
-  return this.http.get<Trajet[]>(`${this.apiUrl}/trajets`);
-}
+  annulerReservation(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.reservationsUrl}/${id}`);
+  }
+
+  getReservationsByTrajet(trajetId: string): Observable<ReservationResponse[]> {
+    return this.http.get<ReservationResponse[]>(`${this.reservationsUrl}/trajet/${trajetId}`);
+  }
+
+  updateReservationStatus(id: string, request: Partial<ReservationRequest>): Observable<ReservationResponse> {
+    return this.http.put<ReservationResponse>(`${this.reservationsUrl}/${id}`, request);
+  }
+
+  getAllTrajets(): Observable<Trajet[]> {
+    return this.http.get<Trajet[]>(`${this.apiUrl}/trajets`);
+  }
 }
