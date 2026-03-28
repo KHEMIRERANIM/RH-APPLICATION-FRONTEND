@@ -1,294 +1,254 @@
 ﻿<div class="p-6">
 
-  <!-- Header -->
   <div class="flex items-center justify-between mb-6">
-    <h2 class="text-2xl font-bold text-gray-900">🍽️ Menus</h2>
-    <button (click)="showCreateForm = !showCreateForm"
-      class="px-5 py-2 bg-blue-700 text-white rounded-xl hover:bg-blue-800 transition-all font-semibold shadow-md">
+    <div>
+      <h2 class="text-2xl font-bold text-gray-900">
+        {{ roleService.isAdmin() ? 'Gestion des Menus' : 'Menus du Restaurant' }}
+      </h2>
+    </div>
+    <button *ngIf="roleService.isAdmin()" (click)="showCreateForm = !showCreateForm"
+      style="background:#1d4ed8;color:white;padding:8px 20px;border-radius:12px;font-weight:600;border:none;cursor:pointer;">
       + Nouveau Menu
     </button>
   </div>
 
-  <!-- Messages -->
-  <div *ngIf="successMsg" class="mb-4 p-3 bg-green-100 text-green-700 rounded-xl flex justify-between items-center">
-    <span>✅ {{ successMsg }}</span>
-    <button (click)="successMsg=''" class="font-bold text-green-900">✕</button>
+  <div *ngIf="successMsg" style="margin-bottom:16px;padding:12px;background:#dcfce7;color:#15803d;border-radius:12px;">
+    {{ successMsg }}
   </div>
-  <div *ngIf="errorMsg" class="mb-4 p-3 bg-red-100 text-red-700 rounded-xl flex justify-between items-center">
-    <span>❌ {{ errorMsg }}</span>
-    <button (click)="errorMsg=''" class="font-bold text-red-900">✕</button>
+  <div *ngIf="errorMsg" style="margin-bottom:16px;padding:12px;background:#fee2e2;color:#dc2626;border-radius:12px;">
+    {{ errorMsg }}
   </div>
 
-  <!-- Formulaire créer menu -->
-  <div *ngIf="showCreateForm" class="mb-6 p-5 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl shadow-sm">
-    <h3 class="text-lg font-bold mb-4 text-blue-800">Créer un nouveau menu</h3>
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+  <div *ngIf="showCreateForm && roleService.isAdmin()"
+    style="margin-bottom:24px;padding:20px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:16px;">
+    <h3 style="font-size:16px;font-weight:700;color:#1e40af;margin-bottom:16px;">Creer un nouveau menu</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
       <input type="text" placeholder="Titre du menu *" [(ngModel)]="newMenu.titre"
-        class="px-4 py-2 border border-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        style="padding:8px 16px;border:1px solid #bfdbfe;border-radius:12px;outline:none;" />
       <input type="date" [(ngModel)]="newMenu.date"
-        class="px-4 py-2 border border-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        style="padding:8px 16px;border:1px solid #bfdbfe;border-radius:12px;outline:none;" />
       <select [(ngModel)]="newMenu.statut"
-        class="px-4 py-2 border border-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
-        <option value="publie">Publié</option>
+        style="padding:8px 16px;border:1px solid #bfdbfe;border-radius:12px;outline:none;">
+        <option value="publie">Publie</option>
         <option value="brouillon">Brouillon</option>
       </select>
     </div>
-    <div class="flex gap-3 mt-4">
+    <div style="display:flex;gap:12px;margin-top:16px;">
       <button (click)="createMenu()"
-        class="px-5 py-2 bg-blue-700 text-white rounded-xl hover:bg-blue-800 font-semibold shadow-sm">
-        ✓ Créer
+        style="padding:8px 20px;background:#1d4ed8;color:white;border-radius:12px;font-weight:600;border:none;cursor:pointer;">
+        Creer
       </button>
       <button (click)="showCreateForm = false"
-        class="px-5 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50">
+        style="padding:8px 20px;background:#f3f4f6;color:#4b5563;border-radius:12px;border:none;cursor:pointer;">
         Annuler
       </button>
     </div>
   </div>
 
-  <!-- Recherche globale et filtres -->
-  <div class="bg-white border border-gray-200 rounded-2xl p-4 mb-6 shadow-sm">
-    <p class="text-sm font-semibold text-gray-500 mb-3">🔍 Recherche sur tous les menus</p>
-    <div class="flex flex-col sm:flex-row gap-3">
-      <div class="flex gap-2 flex-1">
-        <input type="text" placeholder="Rechercher un plat dans tous les menus..."
-          [(ngModel)]="searchTerm"
-          class="flex-1 px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        <button (click)="searchTerm = ''; selectedFilters = []"
-          *ngIf="isSearchActive()"
-          class="px-4 py-2 bg-gray-100 text-gray-500 rounded-xl hover:bg-gray-200 text-sm">
-          ✕ Reset
-        </button>
-      </div>
-      <div class="flex gap-2 flex-wrap">
-        <button *ngFor="let filter of filters" (click)="toggleFilter(filter)"
-          [ngClass]="{
-            'bg-blue-700 text-white border-blue-700 shadow-md': selectedFilters.includes(filter),
-            'bg-white text-slate-600 border-slate-200 hover:border-blue-400 hover:text-blue-600': !selectedFilters.includes(filter)
-          }"
-          class="px-4 py-2 rounded-xl border-2 transition-all text-sm font-semibold">
-          {{ filter }}
-        </button>
-      </div>
+  <div style="background:white;border:1px solid #e5e7eb;border-radius:16px;padding:16px;margin-bottom:24px;">
+    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+      <input type="text" placeholder="Rechercher un plat..." [(ngModel)]="searchTerm"
+        style="flex:1;min-width:200px;padding:8px 16px;border:1px solid #e5e7eb;border-radius:12px;outline:none;" />
+      <button *ngFor="let filter of filters" (click)="toggleFilter(filter)"
+        [style.background]="selectedFilters.includes(filter) ? '#1d4ed8' : '#f9fafb'"
+        [style.color]="selectedFilters.includes(filter) ? 'white' : '#4b5563'"
+        style="padding:8px 16px;border-radius:12px;border:1px solid #e5e7eb;font-weight:600;cursor:pointer;">
+        {{ filter }}
+      </button>
+      <button *ngIf="isSearchActive()" (click)="searchTerm = ''; selectedFilters = []"
+        style="padding:8px 16px;background:#f3f4f6;color:#6b7280;border-radius:12px;border:none;cursor:pointer;">
+        Reset
+      </button>
     </div>
-    <p *ngIf="isSearchActive()" class="text-xs text-blue-600 mt-2">
-      {{ getFilteredMenusWithResults().length }} menu(s) contenant des résultats
-    </p>
   </div>
 
-  <!-- Loading -->
-  <div *ngIf="loading" class="text-center py-12">
-    <div class="inline-block w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-    <p class="mt-3 text-gray-500">Chargement des menus...</p>
+  <div *ngIf="loading" style="text-align:center;padding:48px;">
+    <div style="display:inline-block;width:40px;height:40px;border:4px solid #2563eb;border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite;"></div>
+    <p style="margin-top:12px;color:#6b7280;">Chargement...</p>
   </div>
 
-  <!-- Liste des menus -->
-  <div class="space-y-4">
-    <div *ngFor="let menu of getFilteredMenusWithResults()"
-      class="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+  <div *ngIf="!loading">
+    <div *ngFor="let menu of getFilteredMenus()"
+      style="background:white;border-radius:16px;border:1px solid #e5e7eb;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
 
-      <!-- Header menu -->
-      <div class="px-6 py-4 flex items-center justify-between">
-        <button (click)="toggleMenu(menu.id!)" class="flex-1 text-left">
-          <h3 class="text-lg font-bold text-gray-900">{{ menu.titre }}</h3>
-          <p class="text-sm text-gray-400">📅 {{ menu.date }}</p>
+      <div style="padding:16px 24px;display:flex;align-items:center;justify-content:space-between;">
+        <button (click)="toggleMenu(menu.id!)" style="flex:1;text-align:left;background:none;border:none;cursor:pointer;">
+          <h3 style="font-size:18px;font-weight:700;color:#111827;margin:0;">{{ menu.titre }}</h3>
+          <p style="font-size:14px;color:#9ca3af;margin:4px 0 0;">{{ menu.date }} - {{ menu.plats?.length || 0 }} plat(s)</p>
         </button>
-        <div class="flex items-center gap-2 flex-wrap justify-end">
-          <span class="px-3 py-1 rounded-full text-xs font-bold"
-            [ngClass]="{
-              'bg-emerald-100 text-emerald-700': menu.statut === 'publie',
-              'bg-yellow-100 text-yellow-700': menu.statut === 'brouillon'
-            }">
-            {{ menu.statut === 'publie' ? '✓ Publié' : '⏳ Brouillon' }}
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span style="padding:4px 12px;border-radius:999px;font-size:12px;font-weight:700;"
+            [style.background]="menu.statut === 'publie' ? '#dcfce7' : '#fef9c3'"
+            [style.color]="menu.statut === 'publie' ? '#15803d' : '#a16207'">
+            {{ menu.statut === 'publie' ? 'Publie' : 'Brouillon' }}
           </span>
-          <button (click)="openAddPlat(menu.id!)"
-            class="px-3 py-1.5 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 shadow-sm transition-all">
-            + Plat
-          </button>
-          <button (click)="openEditMenu(menu)"
-            class="px-3 py-1.5 bg-sky-500 text-white rounded-xl text-xs font-bold hover:bg-sky-600 shadow-sm transition-all">
-            ✏️ Modifier
-          </button>
-          <button (click)="deleteMenu(menu.id!)"
-            class="px-3 py-1.5 bg-slate-500 text-white rounded-xl text-xs font-bold hover:bg-slate-600 shadow-sm transition-all">
-            🗑️ Supprimer
-          </button>
+          <ng-container *ngIf="roleService.isAdmin()">
+            <button (click)="openAddPlat(menu.id!)"
+              style="padding:6px 12px;background:#2563eb;color:white;border-radius:10px;font-size:12px;font-weight:700;border:none;cursor:pointer;">
+              + Plat
+            </button>
+            <button (click)="openEditMenu(menu)"
+              style="padding:6px 14px;background:#0ea5e9;color:white;border-radius:10px;font-size:12px;font-weight:700;border:none;cursor:pointer;">
+              Modifier
+            </button>
+            <button (click)="deleteMenu(menu.id!)"
+              style="padding:6px 14px;background:#6366f1;color:white;border-radius:10px;font-size:12px;font-weight:700;border:none;cursor:pointer;">
+              Supprimer
+            </button>
+          </ng-container>
           <button (click)="toggleMenu(menu.id!)"
-            class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 transition-all">
-            {{ expandedMenu === menu.id ? '▲' : '▼' }}
+            style="width:32px;height:32px;border-radius:50%;background:#f3f4f6;border:none;cursor:pointer;font-size:12px;">
+            {{ expandedMenu === menu.id ? 'v' : '>' }}
           </button>
         </div>
       </div>
 
-      <!-- Résumé plats -->
-      <div class="px-6 pb-2" *ngIf="expandedMenu !== menu.id">
-        <p class="text-xs text-gray-400">
-          {{ menu.plats?.length || 0 }} plat(s)
-          <span *ngIf="isSearchActive() && menu.plats?.length > 0" class="text-blue-600 font-semibold">
-            — {{ menu.plats.length }} correspondance(s) trouvée(s)
-          </span>
-        </p>
-      </div>
-
-      <!-- Plats du menu -->
-      <div *ngIf="expandedMenu === menu.id" class="px-6 pb-6 pt-2">
+      <div *ngIf="expandedMenu === menu.id" style="padding:0 24px 24px;">
         <div *ngIf="menu.plats && menu.plats.length > 0"
-          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div *ngFor="let plat of menu.plats"
-            class="border border-gray-100 rounded-2xl overflow-hidden hover:shadow-lg transition-all bg-white">
-            <div class="relative">
-              <img [src]="plat.image || getImageForPlat(plat.nom)"
-                [alt]="plat.nom"
-                class="w-full h-44 object-cover"
+          style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;">
+          <div *ngFor="let plat of filterPlats(menu.plats)"
+            style="border:1px solid #f3f4f6;border-radius:16px;overflow:hidden;background:white;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+            <div style="position:relative;">
+              <img [src]="plat.image || getImageForPlat(plat.nom)" [alt]="plat.nom"
+                style="width:100%;height:176px;object-fit:cover;"
                 onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'" />
-              <span class="absolute top-2 right-2 text-xs px-2 py-1 rounded-full font-bold"
-                [ngClass]="plat.disponible ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'">
-                {{ plat.disponible ? '✓ Dispo' : '✗ Indispo' }}
+              <span style="position:absolute;top:8px;right:8px;font-size:11px;padding:4px 8px;border-radius:999px;font-weight:700;"
+                [style.background]="plat.disponible ? '#22c55e' : '#ef4444'"
+                style="color:white;">
+                {{ plat.disponible ? 'Dispo' : 'Indispo' }}
               </span>
             </div>
-            <div class="p-4">
-              <h4 class="text-base font-bold text-gray-900 mb-1">{{ plat.nom }}</h4>
-              <p class="text-sm text-gray-400 mb-2">{{ plat.description }}</p>
-              <div class="flex flex-wrap gap-1 mb-3">
+            <div style="padding:16px;">
+              <h4 style="font-size:15px;font-weight:700;color:#111827;margin:0 0 4px;">{{ plat.nom }}</h4>
+              <p style="font-size:13px;color:#9ca3af;margin:0 0 8px;">{{ plat.description }}</p>
+              <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px;">
                 <span *ngFor="let tag of plat.tags"
-                  class="px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                  style="padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;">
                   {{ tag }}
                 </span>
               </div>
-              <div class="flex items-center justify-between mb-3">
-                <span class="text-xl font-extrabold text-blue-700">{{ plat.prix }} TND</span>
-                <span class="text-xs text-gray-400">Qté: {{ plat.quantite }}</span>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+                <span style="font-size:20px;font-weight:800;color:#1d4ed8;">{{ plat.prix }} TND</span>
+                <span style="font-size:12px;color:#9ca3af;">Qte: {{ plat.quantite }}</span>
               </div>
-              <div class="flex gap-2">
+              <div *ngIf="roleService.isAdmin()" style="display:flex;gap:8px;">
                 <button (click)="openEditPlat(menu.id!, plat)"
-                  class="flex-1 px-3 py-2 bg-sky-500 text-white rounded-xl text-xs font-bold hover:bg-sky-600 transition-all shadow-sm">
-                  ✏️ Modifier
+                  style="flex:1;padding:8px;background:#0ea5e9;color:white;border-radius:10px;font-size:12px;font-weight:700;border:none;cursor:pointer;">
+                  Modifier
                 </button>
                 <button (click)="deletePlat(menu.id!, plat.platId!)"
-                  class="flex-1 px-3 py-2 bg-slate-500 text-white rounded-xl text-xs font-bold hover:bg-slate-600 transition-all shadow-sm">
-                  🗑️ Supprimer
+                  style="flex:1;padding:8px;background:#6366f1;color:white;border-radius:10px;font-size:12px;font-weight:700;border:none;cursor:pointer;">
+                  Supprimer
                 </button>
               </div>
             </div>
           </div>
         </div>
         <p *ngIf="!menu.plats || menu.plats.length === 0"
-          class="text-gray-400 text-center py-8 italic text-sm">
-          Aucun plat — cliquez sur "+ Plat" pour en ajouter.
+          style="text-align:center;padding:32px;color:#9ca3af;font-style:italic;">
+          {{ roleService.isAdmin() ? 'Aucun plat - cliquez sur + Plat pour en ajouter.' : 'Aucun plat dans ce menu.' }}
         </p>
       </div>
     </div>
 
-    <!-- Aucun résultat -->
-    <div *ngIf="isSearchActive() && getFilteredMenusWithResults().length === 0"
-      class="text-center py-12 bg-white rounded-2xl border border-gray-200">
-      <p class="text-4xl mb-3">🔍</p>
-      <p class="text-gray-500 font-medium">Aucun plat trouvé pour cette recherche.</p>
-      <button (click)="searchTerm = ''; selectedFilters = []"
-        class="mt-3 px-4 py-2 bg-blue-600 text-white rounded-xl text-sm hover:bg-blue-700">
-        Réinitialiser la recherche
-      </button>
+    <div *ngIf="getFilteredMenus().length === 0"
+      style="text-align:center;padding:48px;background:white;border-radius:16px;border:1px solid #e5e7eb;">
+      <p style="color:#9ca3af;">Aucun menu trouve.</p>
     </div>
   </div>
 
-  <!-- Modal Ajouter Plat -->
-  <div *ngIf="showAddPlatForm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md">
-      <h3 class="text-lg font-bold mb-1 text-blue-700">➕ Ajouter un plat</h3>
-      <p class="text-xs text-gray-400 mb-4">L'image sera générée automatiquement depuis le nom du plat.</p>
-      <div class="space-y-3">
+  <div *ngIf="showAddPlatForm && roleService.isAdmin()"
+    style="position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px;">
+    <div style="background:white;border-radius:16px;padding:24px;width:100%;max-width:480px;box-shadow:0 25px 50px rgba(0,0,0,0.25);">
+      <h3 style="font-size:16px;font-weight:700;color:#1d4ed8;margin-bottom:16px;">Ajouter un plat</h3>
+      <div style="display:flex;flex-direction:column;gap:12px;">
         <input type="text" placeholder="Nom du plat *" [(ngModel)]="newPlat.nom"
-          class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          style="padding:8px 16px;border:1px solid #e5e7eb;border-radius:12px;outline:none;" />
         <input type="text" placeholder="Description" [(ngModel)]="newPlat.description"
-          class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        <div class="grid grid-cols-2 gap-3">
+          style="padding:8px 16px;border:1px solid #e5e7eb;border-radius:12px;outline:none;" />
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
           <input type="number" placeholder="Prix (TND)" [(ngModel)]="newPlat.prix"
-            class="px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          <input type="number" placeholder="Quantité" [(ngModel)]="newPlat.quantite"
-            class="px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            style="padding:8px 16px;border:1px solid #e5e7eb;border-radius:12px;outline:none;" />
+          <input type="number" placeholder="Quantite" [(ngModel)]="newPlat.quantite"
+            style="padding:8px 16px;border:1px solid #e5e7eb;border-radius:12px;outline:none;" />
         </div>
-        <input type="text" placeholder="Tags séparés par virgule (ex: diabetique, sans_gluten)" [(ngModel)]="newPlatTags"
-          class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        <label class="flex items-center gap-2 cursor-pointer">
-          <input type="checkbox" [(ngModel)]="newPlat.disponible" class="w-4 h-4 accent-blue-600" />
-          <span class="text-sm text-gray-600">Disponible</span>
+        <input type="text" placeholder="Tags (ex: diabetique, sans_gluten)" [(ngModel)]="newPlatTags"
+          style="padding:8px 16px;border:1px solid #e5e7eb;border-radius:12px;outline:none;" />
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+          <input type="checkbox" [(ngModel)]="newPlat.disponible" style="width:16px;height:16px;" />
+          <span style="font-size:14px;color:#4b5563;">Disponible</span>
         </label>
-        <!-- Aperçu image -->
-        <div *ngIf="newPlat.nom" class="rounded-xl overflow-hidden h-32 bg-gray-100">
-          <img [src]="getImageForPlat(newPlat.nom)" alt="aperçu"
-            class="w-full h-full object-cover"
-            onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'" />
-        </div>
       </div>
-      <div class="flex gap-3 mt-5">
+      <div style="display:flex;gap:12px;margin-top:20px;">
         <button (click)="addPlat()"
-          class="flex-1 px-4 py-2 bg-blue-700 text-white rounded-xl hover:bg-blue-800 font-bold shadow-sm">
-          ✓ Ajouter
+          style="flex:1;padding:10px;background:#1d4ed8;color:white;border-radius:12px;font-weight:700;border:none;cursor:pointer;">
+          Ajouter
         </button>
         <button (click)="showAddPlatForm = false"
-          class="flex-1 px-4 py-2 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200">
+          style="flex:1;padding:10px;background:#f3f4f6;color:#4b5563;border-radius:12px;border:none;cursor:pointer;">
           Annuler
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Modal Modifier Menu -->
-  <div *ngIf="showEditMenuForm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md">
-      <h3 class="text-lg font-bold mb-4 text-sky-600">✏️ Modifier le menu</h3>
-      <div class="space-y-3">
+  <div *ngIf="showEditMenuForm && roleService.isAdmin()"
+    style="position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px;">
+    <div style="background:white;border-radius:16px;padding:24px;width:100%;max-width:480px;box-shadow:0 25px 50px rgba(0,0,0,0.25);">
+      <h3 style="font-size:16px;font-weight:700;color:#0ea5e9;margin-bottom:16px;">Modifier le menu</h3>
+      <div style="display:flex;flex-direction:column;gap:12px;">
         <input type="text" placeholder="Titre" [(ngModel)]="editMenu.titre"
-          class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-400" />
+          style="padding:8px 16px;border:1px solid #e5e7eb;border-radius:12px;outline:none;" />
         <input type="date" [(ngModel)]="editMenu.date"
-          class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-400" />
+          style="padding:8px 16px;border:1px solid #e5e7eb;border-radius:12px;outline:none;" />
         <select [(ngModel)]="editMenu.statut"
-          class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-400">
-          <option value="publie">Publié</option>
+          style="padding:8px 16px;border:1px solid #e5e7eb;border-radius:12px;outline:none;">
+          <option value="publie">Publie</option>
           <option value="brouillon">Brouillon</option>
         </select>
       </div>
-      <div class="flex gap-3 mt-5">
+      <div style="display:flex;gap:12px;margin-top:20px;">
         <button (click)="saveEditMenu()"
-          class="flex-1 px-4 py-2 bg-sky-500 text-white rounded-xl hover:bg-sky-600 font-bold shadow-sm">
-          ✓ Sauvegarder
+          style="flex:1;padding:10px;background:#0ea5e9;color:white;border-radius:12px;font-weight:700;border:none;cursor:pointer;">
+          Appliquer les modifications
         </button>
         <button (click)="showEditMenuForm = false"
-          class="flex-1 px-4 py-2 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200">
+          style="flex:1;padding:10px;background:#f3f4f6;color:#4b5563;border-radius:12px;border:none;cursor:pointer;">
           Annuler
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Modal Modifier Plat -->
-  <div *ngIf="showEditPlatForm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md">
-      <h3 class="text-lg font-bold mb-4 text-sky-600">✏️ Modifier le plat</h3>
-      <div class="space-y-3">
+  <div *ngIf="showEditPlatForm && roleService.isAdmin()"
+    style="position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px;">
+    <div style="background:white;border-radius:16px;padding:24px;width:100%;max-width:480px;box-shadow:0 25px 50px rgba(0,0,0,0.25);">
+      <h3 style="font-size:16px;font-weight:700;color:#0ea5e9;margin-bottom:16px;">Modifier le plat</h3>
+      <div style="display:flex;flex-direction:column;gap:12px;">
         <input type="text" placeholder="Nom" [(ngModel)]="editPlat.nom"
-          class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-400" />
+          style="padding:8px 16px;border:1px solid #e5e7eb;border-radius:12px;outline:none;" />
         <input type="text" placeholder="Description" [(ngModel)]="editPlat.description"
-          class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-400" />
-        <div class="grid grid-cols-2 gap-3">
+          style="padding:8px 16px;border:1px solid #e5e7eb;border-radius:12px;outline:none;" />
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
           <input type="number" placeholder="Prix (TND)" [(ngModel)]="editPlat.prix"
-            class="px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-400" />
-          <input type="number" placeholder="Quantité" [(ngModel)]="editPlat.quantite"
-            class="px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-400" />
+            style="padding:8px 16px;border:1px solid #e5e7eb;border-radius:12px;outline:none;" />
+          <input type="number" placeholder="Quantite" [(ngModel)]="editPlat.quantite"
+            style="padding:8px 16px;border:1px solid #e5e7eb;border-radius:12px;outline:none;" />
         </div>
-        <input type="text" placeholder="Tags séparés par virgule" [(ngModel)]="editPlatTags"
-          class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-400" />
-        <label class="flex items-center gap-2 cursor-pointer">
-          <input type="checkbox" [(ngModel)]="editPlat.disponible" class="w-4 h-4 accent-sky-500" />
-          <span class="text-sm text-gray-600">Disponible</span>
+        <input type="text" placeholder="Tags separes par virgule" [(ngModel)]="editPlatTags"
+          style="padding:8px 16px;border:1px solid #e5e7eb;border-radius:12px;outline:none;" />
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+          <input type="checkbox" [(ngModel)]="editPlat.disponible" style="width:16px;height:16px;" />
+          <span style="font-size:14px;color:#4b5563;">Disponible</span>
         </label>
       </div>
-      <div class="flex gap-3 mt-5">
+      <div style="display:flex;gap:12px;margin-top:20px;">
         <button (click)="saveEditPlat()"
-          class="flex-1 px-4 py-2 bg-sky-500 text-white rounded-xl hover:bg-sky-600 font-bold shadow-sm">
-          ✓ Sauvegarder
+          style="flex:1;padding:10px;background:#0ea5e9;color:white;border-radius:12px;font-weight:700;border:none;cursor:pointer;">
+          Appliquer les modifications
         </button>
         <button (click)="showEditPlatForm = false"
-          class="flex-1 px-4 py-2 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200">
+          style="flex:1;padding:10px;background:#f3f4f6;color:#4b5563;border-radius:12px;border:none;cursor:pointer;">
           Annuler
         </button>
       </div>

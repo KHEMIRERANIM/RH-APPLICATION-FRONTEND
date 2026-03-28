@@ -1,1 +1,91 @@
-<p>plats works!</p>
+﻿<div class="p-6">
+
+  <div class="flex items-center justify-between mb-6">
+    <h2 class="text-2xl font-bold text-gray-900">Catalogue des Plats</h2>
+    <span class="px-4 py-2 bg-blue-50 text-blue-700 rounded-xl text-sm font-bold border border-blue-200">
+      {{ allPlats.length }} plats au total
+    </span>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-3 gap-4 mb-6">
+    <div class="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm text-center">
+      <p class="text-3xl font-extrabold text-blue-700">{{ allPlats.length }}</p>
+      <p class="text-xs text-gray-400 mt-1">Total plats</p>
+    </div>
+    <div class="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm text-center">
+      <p class="text-3xl font-extrabold text-green-600">{{ getTotalDispos() }}</p>
+      <p class="text-xs text-gray-400 mt-1">Disponibles</p>
+    </div>
+    <div class="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm text-center">
+      <p class="text-3xl font-extrabold text-purple-600">{{ getPrixMoyen() | number:'1.2-2' }} TND</p>
+      <p class="text-xs text-gray-400 mt-1">Prix moyen</p>
+    </div>
+  </div>
+
+  <!-- Filtres -->
+  <div class="bg-white border border-gray-200 rounded-2xl p-4 mb-6 shadow-sm flex flex-wrap gap-3 items-center">
+    <input type="text" placeholder="Rechercher un plat..." [(ngModel)]="searchTerm" (ngModelChange)="applyFilters()"
+      class="flex-1 min-w-48 px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
+
+    <select [(ngModel)]="filterDispo" (ngModelChange)="applyFilters()"
+      class="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+      <option value="tous">Tous</option>
+      <option value="dispo">Disponibles</option>
+      <option value="indispo">Indisponibles</option>
+    </select>
+
+    <select [(ngModel)]="filterTag" (ngModelChange)="applyFilters()"
+      class="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+      <option value="">Tous les tags</option>
+      <option *ngFor="let tag of allTags" [value]="tag">{{ tag }}</option>
+    </select>
+
+    <button (click)="searchTerm=''; filterDispo='tous'; filterTag=''; applyFilters()"
+      class="px-4 py-2 bg-gray-100 text-gray-500 rounded-xl text-sm hover:bg-gray-200">
+      Reset
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center py-12">
+    <div class="inline-block w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+    <p class="mt-3 text-gray-500">Chargement...</p>
+  </div>
+
+  <!-- Grille plats -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" *ngIf="!loading">
+    <div *ngFor="let plat of filtered"
+      class="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-all overflow-hidden">
+      <div class="relative">
+        <img [src]="plat.image || getImageForPlat(plat.nom)" [alt]="plat.nom"
+          class="w-full h-40 object-cover"
+          onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'" />
+        <span class="absolute top-2 right-2 text-xs px-2 py-1 rounded-full font-bold"
+          [ngClass]="plat.disponible ? 'bg-green-500 text-white' : 'bg-red-500 text-white'">
+          {{ plat.disponible ? 'Dispo' : 'Indispo' }}
+        </span>
+      </div>
+      <div class="p-4">
+        <h4 class="font-bold text-gray-900 mb-1">{{ plat.nom }}</h4>
+        <p class="text-xs text-gray-400 mb-1">{{ plat.description }}</p>
+        <p class="text-xs text-blue-500 mb-2 font-medium">Menu: {{ plat.menuTitre }}</p>
+        <div class="flex flex-wrap gap-1 mb-3">
+          <span *ngFor="let tag of plat.tags"
+            class="px-2 py-0.5 rounded-full text-xs bg-blue-50 text-blue-700 border border-blue-100">
+            {{ tag }}
+          </span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-lg font-extrabold text-blue-700">{{ plat.prix }} TND</span>
+          <span class="text-xs text-gray-400">Qte: {{ plat.quantite }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="filtered.length === 0"
+      class="col-span-4 text-center py-16 bg-white rounded-2xl border border-gray-200">
+      <p class="text-gray-400 font-medium">Aucun plat trouve.</p>
+    </div>
+  </div>
+</div>

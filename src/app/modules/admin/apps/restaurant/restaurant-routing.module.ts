@@ -1,5 +1,6 @@
-import { NgModule } from '@angular/core';
+﻿import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { RoleGuard } from 'app/core/auth/guards/role.guard';
 import { RestaurantComponent } from './restaurant/restaurant.component';
 import { MenusComponent } from './pages/menus/menus.component';
 import { PlatsComponent } from './pages/plats/plats.component';
@@ -13,9 +14,9 @@ const routes: Routes = [
     children: [
       { path: 'menus', component: MenusComponent },
       { path: 'plats', component: PlatsComponent },
-      { path: 'commandes', component: CommandesComponent },
+      { path: 'commandes', component: CommandesComponent, canActivate: [RoleGuard], data: { roles: ['ADMIN', 'EMPLOYE'] } },
       { path: 'avis', component: AvisComponent },
-      { path: '', redirectTo: 'menus', pathMatch: 'full' } // page par défaut
+      { path: '', redirectTo: 'menus', pathMatch: 'full' } // page par dÃ©faut
     ]
   }
 ];
@@ -25,3 +26,6 @@ const routes: Routes = [
   exports: [RouterModule]
 })
 export class RestaurantRoutingModule {}
+
+
+

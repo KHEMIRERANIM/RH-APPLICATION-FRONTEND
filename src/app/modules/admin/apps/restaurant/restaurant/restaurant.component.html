@@ -1,3 +1,28 @@
-<div class="restaurant-container">
-  <router-outlet></router-outlet>
+﻿<div class="flex flex-col w-full min-h-screen bg-gray-50">
+
+  <!-- Navbar interne restaurant -->
+  <div class="bg-white border-b border-gray-200 shadow-sm px-6 py-3 flex gap-2 flex-wrap">
+    <a routerLink="menus" routerLinkActive="bg-blue-700 text-white"
+      class="px-4 py-2 rounded-xl text-sm font-semibold transition-all border border-gray-200 text-gray-600 hover:border-blue-400">
+      🍽️ Menus
+    </a>
+    <a routerLink="plats" routerLinkActive="bg-blue-700 text-white"
+      class="px-4 py-2 rounded-xl text-sm font-semibold transition-all border border-gray-200 text-gray-600 hover:border-blue-400">
+      🥘 Plats
+    </a>
+    <a *ngIf="!roleService.isCandidat()" routerLink="commandes" routerLinkActive="bg-blue-700 text-white"
+  class="px-4 py-2 rounded-xl text-sm font-semibold transition-all border border-gray-200 text-gray-600 hover:border-blue-400">
+  📋 Mes Commandes
+</a>
+    <a routerLink="avis" routerLinkActive="bg-blue-700 text-white"
+      class="px-4 py-2 rounded-xl text-sm font-semibold transition-all border border-gray-200 text-gray-600 hover:border-blue-400">
+      ⭐ Avis
+    </a>
+  </div>
+
+  <!-- Contenu de la page -->
+  <div class="flex-1">
+    <router-outlet></router-outlet>
+  </div>
+
 </div>
