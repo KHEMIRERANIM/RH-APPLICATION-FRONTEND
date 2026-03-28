@@ -70,16 +70,18 @@
 
         <!-- Formulaire quantité / Réservation -->
         <form [formGroup]="form" class="reservation-form">
-            
+
             <!-- CAS STANDARD -->
             <div class="quantity-selector" *ngIf="!isHotel">
                 <label class="quantity-label">Nombre de personnes</label>
                 <div class="quantity-controls">
-                    <button mat-icon-button type="button" class="qty-btn" (click)="decrementer()" [disabled]="form.get('nbPersonnes')?.value <= 1">
+                    <button mat-icon-button type="button" class="qty-btn" (click)="decrementer()"
+                        [disabled]="form.get('nbPersonnes')?.value <= 1">
                         <mat-icon svgIcon="heroicons_solid:minus"></mat-icon>
                     </button>
                     <span class="qty-value">{{ form.get('nbPersonnes')?.value }}</span>
-                    <button mat-icon-button type="button" class="qty-btn" (click)="incrementer()" [disabled]="form.get('nbPersonnes')?.value >= offre.nbPlacesDispo">
+                    <button mat-icon-button type="button" class="qty-btn" (click)="incrementer()"
+                        [disabled]="form.get('nbPersonnes')?.value >= offre.nbPlacesDispo">
                         <mat-icon svgIcon="heroicons_solid:plus"></mat-icon>
                     </button>
                 </div>
@@ -87,11 +89,12 @@
 
             <!-- CAS HÔTEL -->
             <div class="hotel-reservation-block" *ngIf="isHotel">
-                
+
                 <div class="date-selector" style="margin-bottom: 8px;">
                     <mat-form-field appearance="outline" style="width: 100%;">
                         <mat-label>Dates du séjour</mat-label>
-                        <mat-date-range-input [rangePicker]="picker" [min]="offre.dateDebut" [max]="offre.dateFin" separator=" ➝ ">
+                        <mat-date-range-input [rangePicker]="picker" [min]="offre.dateDebut" [max]="offre.dateFin"
+                            separator=" ➝ ">
                             <input matStartDate formControlName="checkIn" placeholder="Arrivée">
                             <input matEndDate formControlName="checkOut" placeholder="Départ">
                         </mat-date-range-input>
@@ -104,24 +107,29 @@
                     <div class="quantity-selector" style="flex: 1;">
                         <label class="quantity-label">Adultes</label>
                         <div class="quantity-controls">
-                            <button mat-icon-button type="button" class="qty-btn" (click)="decrementerType('nbAdultes')" [disabled]="form.get('nbAdultes')?.value <= 1">
+                            <button mat-icon-button type="button" class="qty-btn" (click)="decrementerType('nbAdultes')"
+                                [disabled]="form.get('nbAdultes')?.value <= 1">
                                 <mat-icon svgIcon="heroicons_solid:minus"></mat-icon>
                             </button>
                             <span class="qty-value">{{ form.get('nbAdultes')?.value }}</span>
-                            <button mat-icon-button type="button" class="qty-btn" (click)="incrementerType('nbAdultes')" [disabled]="(form.get('nbAdultes')?.value + form.get('nbEnfants')?.value) >= offre.nbPlacesDispo">
+                            <button mat-icon-button type="button" class="qty-btn" (click)="incrementerType('nbAdultes')"
+                                [disabled]="(form.get('nbAdultes')?.value + form.get('nbEnfants')?.value) >= offre.nbPlacesDispo">
                                 <mat-icon svgIcon="heroicons_solid:plus"></mat-icon>
                             </button>
                         </div>
                     </div>
-                    
+
                     <div class="quantity-selector" style="flex: 1;">
-                        <label class="quantity-label">Enfants ( &lt; {{ offre.detailsHotel?.ageLimiteEnfant }}ans)</label>
+                        <label class="quantity-label">Enfants ( &lt; {{ offre.detailsHotel?.ageLimiteEnfant
+                            }}ans)</label>
                         <div class="quantity-controls">
-                            <button mat-icon-button type="button" class="qty-btn" (click)="decrementerType('nbEnfants')" [disabled]="form.get('nbEnfants')?.value <= 0">
+                            <button mat-icon-button type="button" class="qty-btn" (click)="decrementerType('nbEnfants')"
+                                [disabled]="form.get('nbEnfants')?.value <= 0">
                                 <mat-icon svgIcon="heroicons_solid:minus"></mat-icon>
                             </button>
                             <span class="qty-value">{{ form.get('nbEnfants')?.value }}</span>
-                            <button mat-icon-button type="button" class="qty-btn" (click)="incrementerType('nbEnfants')" [disabled]="(form.get('nbAdultes')?.value + form.get('nbEnfants')?.value) >= offre.nbPlacesDispo">
+                            <button mat-icon-button type="button" class="qty-btn" (click)="incrementerType('nbEnfants')"
+                                [disabled]="(form.get('nbAdultes')?.value + form.get('nbEnfants')?.value) >= offre.nbPlacesDispo">
                                 <mat-icon svgIcon="heroicons_solid:plus"></mat-icon>
                             </button>
                         </div>
@@ -131,10 +139,13 @@
                 <!-- Formules -->
                 <div class="formules-selector" *ngIf="offre.detailsHotel?.formulesDisponibles?.length > 0">
                     <label class="quantity-label">Formule de restauration</label>
-                    <mat-radio-group formControlName="formule" class="formules-radio-group" style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
-                        <mat-radio-button *ngFor="let f of offre.detailsHotel?.formulesDisponibles" [value]="f" color="primary">
-                            {{ f === 'PD' ? '☕ Petit Déjeuner' : (f === 'DP' ? '🍽️ Demi Pension' : '🍴 Pension Complète') }}
-                            <span *ngIf="offre.detailsHotel!.surprixFormules[f] > 0" style="color: #64748b; font-size: 0.85em; margin-left: 4px;">
+                    <mat-radio-group formControlName="formule" class="formules-radio-group"
+                        style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
+                        <mat-radio-button *ngFor="let f of offre.detailsHotel?.formulesDisponibles" [value]="f"
+                            color="primary">
+                            {{ f === 'PD' ? 'Petit Déjeuner' : (f === 'DP' ? 'Demi Pension' : 'Pension Complète') }}
+                            <span *ngIf="offre.detailsHotel!.surprixFormules[f] > 0"
+                                style="color: #64748b; font-size: 0.85em; margin-left: 4px;">
                                 (+{{ offre.detailsHotel!.surprixFormules[f] }} DT/pers/nuit)
                             </span>
                         </mat-radio-button>
@@ -149,12 +160,15 @@
                     <span>{{ form.get('nbPersonnes')?.value }} × {{ offre.prixConvention | number:'1.0-2' }} DT</span>
                     <span class="total-value">{{ prixTotal | number:'1.0-2' }} DT</span>
                 </div>
-                
-                <div class="total-row" *ngIf="isHotel" style="display: flex; justify-content: space-between; align-items: center;">
-                    <div style="font-size: 0.85em; color: #475569; display: flex; flex-direction: column; align-items: flex-start;">
-                         <span>{{ form.get('nbAdultes')?.value }} Adulte(s), {{ form.get('nbEnfants')?.value }} Enfant(s)</span>
-                         <span *ngIf="nuitsH > 0">Séjour de {{ nuitsH }} Nuit(s)</span>
-                         <span *ngIf="nuitsH <= 0" style="color: #ef4444;">Sélectionnez des dates</span>
+
+                <div class="total-row" *ngIf="isHotel"
+                    style="display: flex; justify-content: space-between; align-items: center;">
+                    <div
+                        style="font-size: 0.85em; color: #475569; display: flex; flex-direction: column; align-items: flex-start;">
+                        <span>{{ form.get('nbAdultes')?.value }} Adulte(s), {{ form.get('nbEnfants')?.value }}
+                            Enfant(s)</span>
+                        <span *ngIf="nuitsH > 0">Séjour de {{ nuitsH }} Nuit(s)</span>
+                        <span *ngIf="nuitsH <= 0" style="color: #ef4444;">Sélectionnez des dates</span>
                     </div>
                     <span class="total-value">{{ prixTotal | number:'1.0-2' }} DT</span>
                 </div>
@@ -166,16 +180,8 @@
     <!-- ═══ ACTIONS ════════════════════════════════════════════ -->
     <mat-dialog-actions class="dialog-actions">
         <button mat-button class="btn-cancel" (click)="fermer()">Annuler</button>
-        <button
-            mat-flat-button
-            class="btn-confirm"
-            (click)="confirmer()"
-            [disabled]="form.invalid || isLoading">
-            <mat-progress-spinner
-                *ngIf="isLoading"
-                mode="indeterminate"
-                diameter="20"
-                class="spinner-white">
+        <button mat-flat-button class="btn-confirm" (click)="confirmer()" [disabled]="form.invalid || isLoading">
+            <mat-progress-spinner *ngIf="isLoading" mode="indeterminate" diameter="20" class="spinner-white">
             </mat-progress-spinner>
             <mat-icon svgIcon="heroicons_outline:check-circle" *ngIf="!isLoading"></mat-icon>
             {{ isLoading ? 'Réservation...' : 'Confirmer (' + (prixTotal | number:'1.0-2') + ' DT)' }}

@@ -69,10 +69,7 @@
     ═══════════════════════════════════════════════════════════ -->
     <div class="filters-bar">
         <div class="filters-container">
-            <button
-                *ngFor="let f of filters"
-                class="filter-chip"
-                [class.active]="activeFilter === f.key"
+            <button *ngFor="let f of filters" class="filter-chip" [class.active]="activeFilter === f.key"
                 (click)="setFilter(f.key)">
                 <mat-icon [svgIcon]="f.icon"></mat-icon>
                 {{ f.label }}
@@ -108,18 +105,12 @@
     ═══════════════════════════════════════════════════════════ -->
     <div class="offres-grid" *ngIf="!isLoading && filteredOffres.length > 0">
 
-        <div
-            class="offre-card"
-            *ngFor="let offre of filteredOffres; let i = index"
+        <div class="offre-card" *ngFor="let offre of filteredOffres; let i = index"
             [style.animation-delay]="i * 80 + 'ms'">
 
             <!-- Image / Bannière de la carte -->
             <div class="card-banner" [style.background]="getCardGradient(offre.categorie)">
-                <img
-                    *ngIf="offre.imageUrl"
-                    [src]="offre.imageUrl"
-                    [alt]="offre.titre"
-                    class="card-img"
+                <img *ngIf="offre.imageUrl" [src]="offre.imageUrl" [alt]="offre.titre" class="card-img"
                     (error)="offre.imageUrl = null">
 
                 <!-- Overlay icône si pas d'image -->
@@ -167,15 +158,24 @@
                 </div>
 
                 <!-- Info spécifique Hôtel -->
-                <div class="hotel-details-mini" *ngIf="offre.categorie === 'HOTEL' && offre.detailsHotel" style="font-size: 0.8rem; background: #f8fafc; padding: 10px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #e2e8f0;">
+                <div class="hotel-details-mini" *ngIf="offre.categorie === 'HOTEL' && offre.detailsHotel"
+                    style="font-size: 0.8rem; background: #f8fafc; padding: 10px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #e2e8f0;">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                        <span><strong style="color: #4f46e5;">Adulte:</strong> {{ offre.detailsHotel.prixAdulte | number:'1.0-2' }} DT/nuit</span>
-                        <span><strong style="color: #4f46e5;">Enfant:</strong> {{ offre.detailsHotel.prixEnfant | number:'1.0-2' }} DT/nuit</span>
+                        <span><strong style="color: #4f46e5;">Adulte:</strong> {{ offre.detailsHotel.prixAdulte |
+                            number:'1.0-2' }} DT/nuit</span>
+                        <span><strong style="color: #4f46e5;">Enfant:</strong> {{ offre.detailsHotel.prixEnfant |
+                            number:'1.0-2' }} DT/nuit</span>
                     </div>
                     <div style="display: flex; gap: 8px; color: #64748b;">
-                        <span *ngIf="offre.detailsHotel.formulesDisponibles?.includes('PD')" style="background: white; padding: 2px 6px; border-radius: 4px; border: 1px solid #e2e8f0;">☕ PD</span>
-                        <span *ngIf="offre.detailsHotel.formulesDisponibles?.includes('DP')" style="background: white; padding: 2px 6px; border-radius: 4px; border: 1px solid #e2e8f0;">🍽️ DP</span>
-                        <span *ngIf="offre.detailsHotel.formulesDisponibles?.includes('PC')" style="background: white; padding: 2px 6px; border-radius: 4px; border: 1px solid #e2e8f0;">🍴 PC</span>
+                        <span *ngIf="offre.detailsHotel.formulesDisponibles?.includes('PD')"
+                            style="background: white; padding: 2px 6px; border-radius: 4px; border: 1px solid #e2e8f0;">
+                            PD</span>
+                        <span *ngIf="offre.detailsHotel.formulesDisponibles?.includes('DP')"
+                            style="background: white; padding: 2px 6px; border-radius: 4px; border: 1px solid #e2e8f0;">
+                            DP</span>
+                        <span *ngIf="offre.detailsHotel.formulesDisponibles?.includes('PC')"
+                            style="background: white; padding: 2px 6px; border-radius: 4px; border: 1px solid #e2e8f0;">
+                            PC</span>
                     </div>
                 </div>
 
@@ -186,9 +186,7 @@
                         <mat-icon svgIcon="heroicons_mini:users"></mat-icon>
                         <span>{{ offre.nbPlacesDispo }} place(s) restante(s) sur {{ offre.nbPlacesTotal }}</span>
                     </div>
-                    <mat-progress-bar
-                        [mode]="'determinate'"
-                        [value]="getPlacesPercent(offre)"
+                    <mat-progress-bar [mode]="'determinate'" [value]="getPlacesPercent(offre)"
                         [color]="getPlacesColor(offre)">
                     </mat-progress-bar>
                 </div>
@@ -200,17 +198,16 @@
                         <span class="prix-convention">{{ offre.prixConvention | number:'1.0-2' }} DT</span>
                         <span class="prix-label">/ personne</span>
                     </div>
-                    <div class="prix-block" *ngIf="offre.categorie === 'HOTEL' && offre.detailsHotel" style="flex-direction: column; align-items: flex-start;">
+                    <div class="prix-block" *ngIf="offre.categorie === 'HOTEL' && offre.detailsHotel"
+                        style="flex-direction: column; align-items: flex-start;">
                         <span style="font-size: 0.75rem; color: #64748b;">À partir de</span>
                         <div>
-                            <span class="prix-convention" style="font-size: 1.25rem;">{{ offre.detailsHotel.prixEnfant | number:'1.0-2' }} DT</span>
+                            <span class="prix-convention" style="font-size: 1.25rem;">{{ offre.detailsHotel.prixEnfant |
+                                number:'1.0-2' }} DT</span>
                             <span class="prix-label">/ nuit / enfant</span>
                         </div>
                     </div>
-                    <button
-                        mat-flat-button
-                        class="btn-reserver"
-                        [disabled]="offre.nbPlacesDispo === 0"
+                    <button mat-flat-button class="btn-reserver" [disabled]="offre.nbPlacesDispo === 0"
                         (click)="ouvrirReservation(offre)">
                         <mat-icon svgIcon="heroicons_outline:bookmark" *ngIf="offre.nbPlacesDispo > 0"></mat-icon>
                         <mat-icon svgIcon="heroicons_outline:x-circle" *ngIf="offre.nbPlacesDispo === 0"></mat-icon>
