@@ -1,0 +1,93 @@
+<div class="form-page">
+
+    <!-- ─── HEADER ─────────────────────────────────────── -->
+    <div class="page-header">
+        <button mat-icon-button class="back-btn" (click)="annuler()">
+            <mat-icon svgIcon="heroicons_outline:arrow-left"></mat-icon>
+        </button>
+        <div class="header-info">
+            <h1 class="page-title">{{ isEdit ? 'Modifier le Partenaire' : 'Nouveau Partenaire' }}</h1>
+            <p class="page-subtitle">{{ isEdit ? 'Mise à jour des informations du partenaire existant' : 'Remplissez les détails pour ajouter un nouveau partenaire à la mutuelle' }}</p>
+        </div>
+    </div>
+
+    <!-- ─── LOADER ─────────────────────────────────────── -->
+    <div class="loader-container" *ngIf="isLoading">
+        <mat-progress-spinner mode="indeterminate" diameter="48" color="primary"></mat-progress-spinner>
+    </div>
+
+    <!-- ─── FORMULAIRE ─────────────────────────────────── -->
+    <div class="form-container" *ngIf="!isLoading">
+        <form [formGroup]="form" class="admin-form" (ngSubmit)="sauvegarder()">
+
+            <!-- Section Avatar/Logo -->
+            <div class="form-section avatar-section">
+                <div class="avatar-circle">
+                    {{ getInitiale() }}
+                </div>
+                <div class="avatar-info">
+                    <h3>Identité visuelle</h3>
+                    <p>Le logo ou l'initiale représente ce partenaire dans le catalogue</p>
+                </div>
+            </div>
+
+            <!-- Grille des champs -->
+            <div class="fields-grid">
+                <!-- Nom -->
+                <mat-form-field appearance="outline" class="col-span-2">
+                    <mat-label>Nom du partenaire</mat-label>
+                    <mat-icon matPrefix svgIcon="heroicons_outline:office-building"></mat-icon>
+                    <input matInput formControlName="nom" placeholder="Ex: Tunisair, Hôtel El Mouradi...">
+                    <mat-error *ngIf="f['nom'].hasError('required')">Le nom est requis</mat-error>
+                    <mat-error *ngIf="f['nom'].hasError('minlength')">Le nom doit faire au moins 2 caractères</mat-error>
+                </mat-form-field>
+
+                <!-- Type -->
+                <mat-form-field appearance="outline" class="col-span-1">
+                    <mat-label>Type/Catégorie</mat-label>
+                    <mat-icon matPrefix svgIcon="heroicons_outline:tag"></mat-icon>
+                    <mat-select formControlName="type">
+                        <mat-option *ngFor="let cat of categories" [value]="cat">{{ cat }}</mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="f['type'].hasError('required')">La catégorie est requise</mat-error>
+                </mat-form-field>
+
+                <!-- Date convention -->
+                <mat-form-field appearance="outline" class="col-span-1">
+                    <mat-label>Date de signature convention</mat-label>
+                    <input matInput [matDatepicker]="picker" formControlName="dateConvention">
+                    <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                    <mat-datepicker #picker></mat-datepicker>
+                    <mat-error *ngIf="f['dateConvention'].hasError('required')">La date est requise</mat-error>
+                </mat-form-field>
+
+                <!-- Email -->
+                <mat-form-field appearance="outline" class="col-span-2">
+                    <mat-label>Email de contact (Optionnel)</mat-label>
+                    <mat-icon matPrefix svgIcon="heroicons_outline:mail"></mat-icon>
+                    <input matInput formControlName="emailContact" placeholder="contact@partenaire.com">
+                    <mat-error *ngIf="f['emailContact'].hasError('email')">Format email invalide</mat-error>
+                </mat-form-field>
+
+                <!-- Actif -->
+                <div class="form-toggle row-span-col-2">
+                    <mat-slide-toggle formControlName="actif" color="primary">
+                        <span class="toggle-label">Partenaire Actif</span>
+                    </mat-slide-toggle>
+                    <p class="toggle-hint">Si désactivé, les offres de ce partenaire ne seront plus visibles dans le catalogue employés</p>
+                </div>
+            </div>
+
+            <!-- Actions du formulaire -->
+            <div class="form-actions">
+                <button mat-button type="button" class="btn-secondary" (click)="annuler()" [disabled]="isSaving">
+                    Annuler
+                </button>
+                <button mat-flat-button color="primary" class="btn-primary" type="submit" [disabled]="form.invalid || isSaving">
+                    <mat-progress-spinner *ngIf="isSaving" mode="indeterminate" diameter="20" class="spinner-white"></mat-progress-spinner>
+                    <span *ngIf="!isSaving">{{ isEdit ? 'Mettre à jour' : 'Créer le partenaire' }}</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,173 @@
+$primary    : #6366f1;
+$text-main  : #0f172a;
+$text-muted : #64748b;
+$border     : #e2e8f0;
+
+:host { display: block; }
+
+.form-page {
+    min-height: 100vh;
+    background: #f8fafc;
+    padding   : 2rem;
+    .dark & { background: #0f172a; }
+}
+
+.page-header {
+    display      : flex;
+    align-items  : flex-start;
+    gap          : 1.5rem;
+    margin-bottom: 2.5rem;
+}
+
+.back-btn {
+    background   : white !important;
+    border-radius: 12px !important;
+    box-shadow   : 0 1px 3px rgba(0,0,0,0.1);
+    &:hover { background: #f1f5f9 !important; transform: translateX(-2px); }
+    .dark & { background: #1e293b !important; color: white !important; }
+}
+
+.page-title {
+    font-size  : 1.6rem;
+    font-weight: 800;
+    margin     : 0;
+    color      : $text-main;
+    .dark & { color: white; }
+}
+
+.page-subtitle {
+    font-size : 0.9rem;
+    color     : $text-muted;
+    margin-top: 0.25rem;
+}
+
+.form-container {
+    max-width    : 800px;
+    background   : white;
+    border-radius: 16px;
+    box-shadow   : 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.05);
+    border       : 1px solid $border;
+    overflow     : hidden;
+    margin       : 0 auto;
+
+    .dark & { background: #1e293b; border-color: #334155; }
+}
+
+// ── BANNIÈRE IMAGE ───────────────────────────────────────
+.image-upload-section {
+    width   : 100%;
+    padding : 0;
+    position: relative;
+    background: #f1f5f9;
+    .dark & { background: #0f172a; }
+}
+
+.image-preview-container {
+    width           : 100%;
+    height          : 240px;
+    position        : relative;
+    overflow        : hidden;
+    display         : flex;
+    align-items     : center;
+    justify-content : center;
+    cursor          : pointer;
+    background      : linear-gradient(135deg, rgba(99,102,241,0.05), rgba(139,92,246,0.1));
+    border-bottom   : 1px solid $border;
+    transition      : all 0.3s ease;
+
+    .dark & { border-color: #334155; }
+
+    &:hover:not(.has-image) { background: rgba(99,102,241,0.1); }
+
+    .preview-img { width: 100%; height: 100%; object-fit: cover; }
+
+    .preview-overlay {
+        position  : absolute;
+        inset     : 0;
+        background: rgba(0,0,0,0.4);
+        display   : flex;
+        align-items: center;
+        justify-content: center;
+        opacity   : 0;
+        transition: opacity 0.2s;
+    }
+
+    &:hover .preview-overlay { opacity: 1; }
+
+    .placeholder-content {
+        display       : flex;
+        flex-direction: column;
+        align-items   : center;
+        text-align    : center;
+
+        .upload-icon {
+            font-size: 48px; width: 48px; height: 48px;
+            color: rgba(99,102,241,0.5);
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-text { font-weight: 600; color: $text-main; .dark & { color: white; } }
+        .upload-hint { font-size: 0.8rem; color: $text-muted; margin-top: 0.25rem; }
+    }
+}
+
+// ── CHAMPS ───────────────────────────────────────────────
+.fields-wrapper { padding: 2rem; }
+
+.section-title {
+    font-size     : 0.75rem;
+    font-weight   : 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color         : $primary;
+    margin-bottom : 1.25rem;
+}
+
+.section-divider {
+    height    : 1px;
+    background: $border;
+    margin    : 2rem 0;
+    .dark & { background: #334155; }
+}
+
+.fields-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap    : 1.25rem;
+
+    &.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+    .col-span-2 { grid-column: span 2; }
+    .col-span-1 { grid-column: span 1; }
+
+    @media (max-width: 600px) {
+        grid-template-columns: 1fr;
+        &.cols-3 { grid-template-columns: 1fr; }
+        .col-span-2 { grid-column: span 1; }
+    }
+}
+
+mat-form-field { width: 100%; }
+
+// ── ACTIONS ──────────────────────────────────────────────
+.form-actions {
+    display        : flex;
+    justify-content: flex-end;
+    gap            : 1rem;
+    padding        : 1.5rem 2rem;
+    background     : #f8fafc;
+    border-top     : 1px solid $border;
+
+    .dark & { background: #0f172a; border-color: #334155; }
+
+    .btn-secondary { color: $text-muted; &:hover { background: #e2e8f0; } }
+    .btn-primary {
+        border-radius: 10px;
+        padding      : 0 1.5rem;
+        font-weight  : 600;
+        height       : 44px;
+        display      : flex;
+        align-items  : center;
+        gap          : 0.5rem;
+    }
+}

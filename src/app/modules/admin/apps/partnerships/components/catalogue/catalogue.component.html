@@ -1,0 +1,224 @@
+<div class="partnerships-page">
+
+    <!-- ═══════════════════════════════════════════════════════
+         HERO HEADER
+    ═══════════════════════════════════════════════════════════ -->
+    <div class="hero-header">
+        <div class="hero-bg-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+        </div>
+        <div class="hero-content">
+            <div class="hero-left">
+                <div class="hero-badge">
+                    <mat-icon svgIcon="heroicons_solid:sparkles"></mat-icon>
+                    <span>Avantages Exclusifs</span>
+                </div>
+                <h1 class="hero-title">Mutuelle &amp; Avantages Sociaux</h1>
+                <p class="hero-subtitle">
+                    Profitez d'offres exclusives négociées par votre entreprise auprès de partenaires sélectionnés.
+                </p>
+            </div>
+            <div class="hero-actions">
+                <button mat-flat-button class="btn-mes-reservations" (click)="allerMesReservations()">
+                    <mat-icon svgIcon="heroicons_outline:bookmark"></mat-icon>
+                    Mes Réservations
+                </button>
+                <button *ngIf="isAdmin" mat-flat-button class="btn-admin" (click)="allerAdmin()">
+                    <mat-icon svgIcon="heroicons_outline:cog"></mat-icon>
+                    Administration
+                </button>
+            </div>
+        </div>
+
+        <!-- KPI Cards (Admin seulement) -->
+        <div class="kpi-row" *ngIf="isAdmin">
+            <div class="kpi-card">
+                <div class="kpi-icon kpi-violet">
+                    <mat-icon svgIcon="heroicons_outline:tag"></mat-icon>
+                </div>
+                <div class="kpi-info">
+                    <span class="kpi-value">{{ kpis.totalOffres }}</span>
+                    <span class="kpi-label">Offres actives</span>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon kpi-blue">
+                    <mat-icon svgIcon="heroicons_outline:office-building"></mat-icon>
+                </div>
+                <div class="kpi-info">
+                    <span class="kpi-value">{{ kpis.totalPartenaires }}</span>
+                    <span class="kpi-label">Partenaires</span>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon kpi-green">
+                    <mat-icon svgIcon="heroicons_outline:users"></mat-icon>
+                </div>
+                <div class="kpi-info">
+                    <span class="kpi-value">{{ kpis.placesTotal }}</span>
+                    <span class="kpi-label">Places disponibles</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         FILTRES PAR CATÉGORIE
+    ═══════════════════════════════════════════════════════════ -->
+    <div class="filters-bar">
+        <div class="filters-container">
+            <button
+                *ngFor="let f of filters"
+                class="filter-chip"
+                [class.active]="activeFilter === f.key"
+                (click)="setFilter(f.key)">
+                <mat-icon [svgIcon]="f.icon"></mat-icon>
+                {{ f.label }}
+                <span class="filter-count" *ngIf="f.key === 'TOUS'">{{ offres.length }}</span>
+                <span class="filter-count" *ngIf="f.key !== 'TOUS'">
+                    {{ getCountByFilter(f.key) }}
+                </span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         LOADER
+    ═══════════════════════════════════════════════════════════ -->
+    <div class="loader-container" *ngIf="isLoading">
+        <mat-progress-spinner mode="indeterminate" diameter="56" color="primary"></mat-progress-spinner>
+        <p>Chargement des offres...</p>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         ÉTAT VIDE
+    ═══════════════════════════════════════════════════════════ -->
+    <div class="empty-state" *ngIf="!isLoading && filteredOffres.length === 0">
+        <div class="empty-icon">
+            <mat-icon svgIcon="heroicons_outline:emoji-sad"></mat-icon>
+        </div>
+        <h3>Aucune offre disponible</h3>
+        <p>Il n'y a pas d'offres dans cette catégorie pour le moment.</p>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         GRILLE DES OFFRES
+    ═══════════════════════════════════════════════════════════ -->
+    <div class="offres-grid" *ngIf="!isLoading && filteredOffres.length > 0">
+
+        <div
+            class="offre-card"
+            *ngFor="let offre of filteredOffres; let i = index"
+            [style.animation-delay]="i * 80 + 'ms'">
+
+            <!-- Image / Bannière de la carte -->
+            <div class="card-banner" [style.background]="getCardGradient(offre.categorie)">
+                <img
+                    *ngIf="offre.imageUrl"
+                    [src]="offre.imageUrl"
+                    [alt]="offre.titre"
+                    class="card-img"
+                    (error)="offre.imageUrl = null">
+
+                <!-- Overlay icône si pas d'image -->
+                <div class="banner-icon-overlay" *ngIf="!offre.imageUrl">
+                    <mat-icon [svgIcon]="getCategorieIcon(offre.categorie)" class="banner-icon"></mat-icon>
+                </div>
+
+                <!-- Badge catégorie -->
+                <span class="cat-badge" [ngClass]="getCategorieBadgeClass(offre.categorie)">
+                    {{ offre.categorie }}
+                </span>
+
+                <!-- Badge économie -->
+                <span class="eco-badge" *ngIf="getEconomie(offre) > 0">
+                    -{{ getEconomie(offre) | number:'1.0-0' }} DT
+                </span>
+            </div>
+
+            <!-- Corps de la carte -->
+            <div class="card-body">
+                <div class="card-header-row">
+                    <h3 class="card-title">{{ offre.titre }}</h3>
+                    <span class="partenaire-tag" *ngIf="offre.nomPartenaire">
+                        <mat-icon svgIcon="heroicons_mini:building-office-2"></mat-icon>
+                        {{ offre.nomPartenaire }}
+                    </span>
+                </div>
+
+                <p class="card-desc" *ngIf="offre.description">{{ offre.description }}</p>
+
+                <!-- Localisation & Dates -->
+                <div class="card-meta">
+                    <div class="meta-item" *ngIf="offre.localisation">
+                        <mat-icon svgIcon="heroicons_mini:map-pin"></mat-icon>
+                        <span>{{ offre.localisation }}</span>
+                    </div>
+                    <div class="meta-item" *ngIf="offre.dateDebut">
+                        <mat-icon svgIcon="heroicons_mini:calendar"></mat-icon>
+                        <span>{{ offre.dateDebut | date:'dd MMM' }} → {{ offre.dateFin | date:'dd MMM yyyy' }}</span>
+                    </div>
+                    <div class="meta-item" *ngIf="offre.categorie === 'HOTEL' && offre.detailsHotel">
+                        <mat-icon svgIcon="heroicons_mini:moon"></mat-icon>
+                        <span>{{ offre.detailsHotel.nombreNuits }} nuit(s)</span>
+                    </div>
+                </div>
+
+                <!-- Info spécifique Hôtel -->
+                <div class="hotel-details-mini" *ngIf="offre.categorie === 'HOTEL' && offre.detailsHotel" style="font-size: 0.8rem; background: #f8fafc; padding: 10px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #e2e8f0;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span><strong style="color: #4f46e5;">Adulte:</strong> {{ offre.detailsHotel.prixAdulte | number:'1.0-2' }} DT/nuit</span>
+                        <span><strong style="color: #4f46e5;">Enfant:</strong> {{ offre.detailsHotel.prixEnfant | number:'1.0-2' }} DT/nuit</span>
+                    </div>
+                    <div style="display: flex; gap: 8px; color: #64748b;">
+                        <span *ngIf="offre.detailsHotel.formulesDisponibles?.includes('PD')" style="background: white; padding: 2px 6px; border-radius: 4px; border: 1px solid #e2e8f0;">☕ PD</span>
+                        <span *ngIf="offre.detailsHotel.formulesDisponibles?.includes('DP')" style="background: white; padding: 2px 6px; border-radius: 4px; border: 1px solid #e2e8f0;">🍽️ DP</span>
+                        <span *ngIf="offre.detailsHotel.formulesDisponibles?.includes('PC')" style="background: white; padding: 2px 6px; border-radius: 4px; border: 1px solid #e2e8f0;">🍴 PC</span>
+                    </div>
+                </div>
+
+
+                <!-- Barre places disponibles -->
+                <div class="places-bar-container">
+                    <div class="places-label">
+                        <mat-icon svgIcon="heroicons_mini:users"></mat-icon>
+                        <span>{{ offre.nbPlacesDispo }} place(s) restante(s) sur {{ offre.nbPlacesTotal }}</span>
+                    </div>
+                    <mat-progress-bar
+                        [mode]="'determinate'"
+                        [value]="getPlacesPercent(offre)"
+                        [color]="getPlacesColor(offre)">
+                    </mat-progress-bar>
+                </div>
+
+                <!-- Prix & Action -->
+                <div class="card-footer">
+                    <div class="prix-block" *ngIf="offre.categorie !== 'HOTEL'">
+                        <span class="prix-barre">{{ offre.prixReel | number:'1.0-2' }} DT</span>
+                        <span class="prix-convention">{{ offre.prixConvention | number:'1.0-2' }} DT</span>
+                        <span class="prix-label">/ personne</span>
+                    </div>
+                    <div class="prix-block" *ngIf="offre.categorie === 'HOTEL' && offre.detailsHotel" style="flex-direction: column; align-items: flex-start;">
+                        <span style="font-size: 0.75rem; color: #64748b;">À partir de</span>
+                        <div>
+                            <span class="prix-convention" style="font-size: 1.25rem;">{{ offre.detailsHotel.prixEnfant | number:'1.0-2' }} DT</span>
+                            <span class="prix-label">/ nuit / enfant</span>
+                        </div>
+                    </div>
+                    <button
+                        mat-flat-button
+                        class="btn-reserver"
+                        [disabled]="offre.nbPlacesDispo === 0"
+                        (click)="ouvrirReservation(offre)">
+                        <mat-icon svgIcon="heroicons_outline:bookmark" *ngIf="offre.nbPlacesDispo > 0"></mat-icon>
+                        <mat-icon svgIcon="heroicons_outline:x-circle" *ngIf="offre.nbPlacesDispo === 0"></mat-icon>
+                        {{ offre.nbPlacesDispo > 0 ? 'Réserver' : 'Complet' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

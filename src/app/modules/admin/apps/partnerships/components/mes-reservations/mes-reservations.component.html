@@ -1,0 +1,183 @@
+<div class="reservations-page">
+
+    <!-- ═══════════════════════════════════════════════════════
+         HERO HEADER
+    ═══════════════════════════════════════════════════════════ -->
+    <div class="hero-header">
+        <div class="hero-bg-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+        </div>
+        <div class="hero-content">
+            <div class="hero-left">
+                <div class="hero-badge">
+                    <mat-icon svgIcon="heroicons_solid:bookmark"></mat-icon>
+                    <span>Mon Historique</span>
+                </div>
+                <h1 class="hero-title">Mes Réservations</h1>
+                <p class="hero-subtitle">
+                    Consultez et gérez vos réservations d'avantages sociaux
+                </p>
+            </div>
+            <div class="hero-actions">
+                <button mat-flat-button class="btn-catalogue" (click)="retourCatalogue()">
+                    <mat-icon svgIcon="heroicons_outline:arrow-left"></mat-icon>
+                    Retour aux offres
+                </button>
+                <button *ngIf="nbAnnulees > 0" mat-flat-button class="btn-vider" (click)="viderHistorique()"
+                    [disabled]="isClearingHistory">
+                    <mat-icon svgIcon="heroicons_outline:trash" *ngIf="!isClearingHistory"></mat-icon>
+                    <mat-progress-spinner *ngIf="isClearingHistory" mode="indeterminate" diameter="16"
+                        class="mr-2"></mat-progress-spinner>
+                    <span *ngIf="isClearingHistory">&nbsp; Nettoyage...</span>
+                    <span *ngIf="!isClearingHistory">Vider les annulées</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── STATS KPI CARDS ──────────────────────────────────── -->
+    <div class="stats-row" *ngIf="!isLoading && reservations.length > 0">
+        <div class="kpi-card">
+            <div class="kpi-icon kpi-green">
+                <mat-icon svgIcon="heroicons_solid:check-circle"></mat-icon>
+            </div>
+            <div class="kpi-info">
+                <span class="kpi-value">{{ nbConfirmees }}</span>
+                <span class="kpi-label">Confirmée(s)</span>
+            </div>
+        </div>
+
+        <div class="kpi-card" *ngIf="nbAnnulees > 0">
+            <div class="kpi-icon kpi-red">
+                <mat-icon svgIcon="heroicons_solid:x-circle"></mat-icon>
+            </div>
+            <div class="kpi-info">
+                <span class="kpi-value">{{ nbAnnulees }}</span>
+                <span class="kpi-label">Annulée(s)</span>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon kpi-violet">
+                <mat-icon svgIcon="heroicons_solid:currency-dollar"></mat-icon>
+            </div>
+            <div class="kpi-info">
+                <span class="kpi-value">{{ montantTotal | number:'1.0-2' }} DT</span>
+                <span class="kpi-label">Total engagé</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── LOADER ──────────────────────────────────────────── -->
+    <div class="loader-container" *ngIf="isLoading">
+        <mat-progress-spinner mode="indeterminate" diameter="48" color="primary"></mat-progress-spinner>
+    </div>
+
+    <!-- ─── ÉTAT VIDE ────────────────────────────────────────── -->
+    <div class="empty-state" *ngIf="!isLoading && reservations.length === 0">
+        <div class="empty-icon">
+            <mat-icon svgIcon="heroicons_outline:bookmark"></mat-icon>
+        </div>
+        <h3>Aucune réservation</h3>
+        <p>Vous n'avez pas encore effectué de réservation.</p>
+        <button mat-flat-button class="btn-primary-action" (click)="retourCatalogue()">
+            <mat-icon svgIcon="heroicons_outline:collection"></mat-icon>
+            Découvrir les offres
+        </button>
+    </div>
+
+    <!-- ─── LISTE DES RÉSERVATIONS ───────────────────────────── -->
+    <div class="reservations-list" *ngIf="!isLoading && reservations.length > 0">
+
+        <div class="reservation-card"
+            *ngFor="let r of reservations; let i = index"
+            [style.animation-delay]="i * 80 + 'ms'"
+            [class.confirmed]="r.statut === 'CONFIRMEE'"
+            [class.cancelled]="r.statut === 'ANNULEE'">
+
+            <!-- ── Panneau accent gauche coloré ─── -->
+            <div class="card-accent">
+                <div class="accent-icon">
+                    <mat-icon [svgIcon]="r.statut === 'CONFIRMEE'
+                        ? 'heroicons_solid:check-circle'
+                        : 'heroicons_solid:x-circle'">
+                    </mat-icon>
+                </div>
+                <span class="accent-num">#{{ i + 1 }}</span>
+            </div>
+
+            <!-- ── Corps de la carte ──────────────── -->
+            <div class="card-body">
+
+                <!-- Ligne 1 : Titre offre + badge statut -->
+                <div class="card-header-row">
+                    <div class="offer-name">
+                        <mat-icon svgIcon="heroicons_mini:tag" class="offer-icon"></mat-icon>
+                        <span>{{ r.titreOffre || ('Offre #' + r.idOffre?.slice(-6)) }}</span>
+                    </div>
+                    <span class="status-badge"
+                        [class.badge-confirmee]="r.statut === 'CONFIRMEE'"
+                        [class.badge-annulee]="r.statut === 'ANNULEE'">
+                        {{ r.statut === 'CONFIRMEE' ? '✓ CONFIRMÉE' : '✕ ANNULÉE' }}
+                    </span>
+                </div>
+
+                <!-- Ligne 2 : Chips méta -->
+                <div class="card-meta">
+                    <span class="meta-chip" *ngIf="!r.nbAdultes && r.nbEnfants === undefined">
+                        <mat-icon svgIcon="heroicons_mini:users"></mat-icon>
+                        <strong>{{ r.nbPersonnes }}</strong>&nbsp;personne{{ r.nbPersonnes > 1 ? 's' : '' }}
+                    </span>
+                    <span class="meta-chip" *ngIf="r.nbAdultes !== undefined || r.nbEnfants !== undefined">
+                        <mat-icon svgIcon="heroicons_mini:users"></mat-icon>
+                        <strong>{{ r.nbAdultes || 0 }}</strong> Adulte(s), <strong>{{ r.nbEnfants || 0 }}</strong> Enfant(s)
+                    </span>
+                    <span class="meta-chip" *ngIf="r.formule">
+                        <mat-icon svgIcon="heroicons_mini:cake"></mat-icon>
+                        {{ r.formule === 'PD' ? 'Petit Dėj.' : (r.formule === 'DP' ? 'Demi Pension' : 'Pension Complète') }}
+                    </span>
+                    <span class="meta-chip" *ngIf="!r.nbAdultes && r.nbEnfants === undefined">
+                        <mat-icon svgIcon="heroicons_mini:currency-dollar"></mat-icon>
+                        {{ r.prixUnitaire | number:'1.0-2' }} DT / pers.
+                    </span>
+                    <span class="meta-chip" *ngIf="r.dateReservation">
+                        <mat-icon svgIcon="heroicons_mini:calendar"></mat-icon>
+                        {{ r.dateReservation | date:'dd/MM/yyyy à HH:mm' }}
+                    </span>
+                </div>
+
+                <!-- Ligne 3 : Séparateur + total + actions -->
+                <div class="card-footer-row">
+                    <div class="total-block">
+                        <span class="total-label">Total réservation</span>
+                        <span class="total-amount">{{ r.prixTotal | number:'1.0-2' }} DT</span>
+                    </div>
+
+                    <div class="card-actions">
+                        <span class="cancel-note" *ngIf="r.statut === 'ANNULEE' && r.dateAnnulation">
+                            <mat-icon svgIcon="heroicons_mini:information-circle"></mat-icon>
+                            Annulée le {{ r.dateAnnulation | date:'dd/MM/yyyy' }}
+                        </span>
+
+                        <button *ngIf="r.statut === 'CONFIRMEE'"
+                            mat-stroked-button class="btn-annuler"
+                            (click)="annuler(r)"
+                            [disabled]="isAnnulating[r.id!]">
+                            <mat-progress-spinner *ngIf="isAnnulating[r.id!]"
+                                mode="indeterminate" diameter="14">
+                            </mat-progress-spinner>
+                            <mat-icon *ngIf="!isAnnulating[r.id!]"
+                                svgIcon="heroicons_outline:x-circle">
+                            </mat-icon>
+                            {{ isAnnulating[r.id!] ? 'Annulation...' : 'Annuler' }}
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>

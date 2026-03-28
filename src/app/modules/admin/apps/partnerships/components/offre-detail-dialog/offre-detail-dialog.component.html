@@ -1,0 +1,184 @@
+<div class="reservation-dialog">
+
+    <!-- ═══ BANNIÈRE ════════════════════════════════════════ -->
+    <div class="dialog-banner" [style.background]="getCardGradient()">
+        <img *ngIf="offre.imageUrl" [src]="offre.imageUrl" [alt]="offre.titre" class="banner-img">
+        <div class="banner-overlay">
+            <div class="banner-icon-wrapper" *ngIf="!offre.imageUrl">
+                <mat-icon [svgIcon]="getCategorieIcon()" class="banner-icon"></mat-icon>
+            </div>
+        </div>
+        <div class="banner-badges">
+            <span class="cat-badge">{{ offre.categorie }}</span>
+            <span class="eco-badge" *ngIf="getEconomie() > 0">
+                Économisez {{ getEconomie() | number:'1.0-0' }} DT
+            </span>
+        </div>
+        <button mat-icon-button class="close-btn" (click)="fermer()">
+            <mat-icon svgIcon="heroicons_outline:x"></mat-icon>
+        </button>
+    </div>
+
+    <!-- ═══ CONTENU ═══════════════════════════════════════════ -->
+    <mat-dialog-content class="dialog-content">
+
+        <!-- Titre & Partenaire -->
+        <div class="offer-header">
+            <h2 class="offer-title">{{ offre.titre }}</h2>
+            <p class="offer-desc" *ngIf="offre.description">{{ offre.description }}</p>
+        </div>
+
+        <!-- Infos rapides -->
+        <div class="info-chips">
+            <span class="info-chip" *ngIf="offre.localisation">
+                <mat-icon svgIcon="heroicons_mini:map-pin"></mat-icon>
+                {{ offre.localisation }}
+            </span>
+            <span class="info-chip" *ngIf="offre.dateDebut">
+                <mat-icon svgIcon="heroicons_mini:calendar"></mat-icon>
+                {{ offre.dateDebut | date:'dd MMM' }} → {{ offre.dateFin | date:'dd MMM yyyy' }}
+            </span>
+            <span class="info-chip places" [class.low]="offre.nbPlacesDispo <= 3">
+                <mat-icon svgIcon="heroicons_mini:users"></mat-icon>
+                {{ offre.nbPlacesDispo }} place(s) disponible(s)
+            </span>
+        </div>
+
+        <!-- Bloc prix -->
+        <div class="price-block">
+            <div class="price-normal">
+                <span class="price-label">Prix normal</span>
+                <span class="price-value struck">{{ offre.prixReel | number:'1.0-2' }} DT</span>
+            </div>
+            <div class="price-divider">
+                <mat-icon svgIcon="heroicons_outline:arrow-right" class="arrow-icon"></mat-icon>
+            </div>
+            <div class="price-convention" *ngIf="!isHotel">
+                <span class="price-label">Votre prix</span>
+                <span class="price-value highlight">{{ offre.prixConvention | number:'1.0-2' }} DT</span>
+            </div>
+            <div class="price-convention" *ngIf="isHotel">
+                <span class="price-label">Dès / pers.</span>
+                <span class="price-value highlight">{{ offre.detailsHotel?.prixEnfant | number:'1.0-2' }} DT</span>
+            </div>
+        </div>
+
+        <!-- Séparateur -->
+        <div class="section-divider">
+            <span>Votre réservation</span>
+        </div>
+
+        <!-- Formulaire quantité / Réservation -->
+        <form [formGroup]="form" class="reservation-form">
+            
+            <!-- CAS STANDARD -->
+            <div class="quantity-selector" *ngIf="!isHotel">
+                <label class="quantity-label">Nombre de personnes</label>
+                <div class="quantity-controls">
+                    <button mat-icon-button type="button" class="qty-btn" (click)="decrementer()" [disabled]="form.get('nbPersonnes')?.value <= 1">
+                        <mat-icon svgIcon="heroicons_solid:minus"></mat-icon>
+                    </button>
+                    <span class="qty-value">{{ form.get('nbPersonnes')?.value }}</span>
+                    <button mat-icon-button type="button" class="qty-btn" (click)="incrementer()" [disabled]="form.get('nbPersonnes')?.value >= offre.nbPlacesDispo">
+                        <mat-icon svgIcon="heroicons_solid:plus"></mat-icon>
+                    </button>
+                </div>
+            </div>
+
+            <!-- CAS HÔTEL -->
+            <div class="hotel-reservation-block" *ngIf="isHotel">
+                
+                <div class="date-selector" style="margin-bottom: 8px;">
+                    <mat-form-field appearance="outline" style="width: 100%;">
+                        <mat-label>Dates du séjour</mat-label>
+                        <mat-date-range-input [rangePicker]="picker" [min]="offre.dateDebut" [max]="offre.dateFin" separator=" ➝ ">
+                            <input matStartDate formControlName="checkIn" placeholder="Arrivée">
+                            <input matEndDate formControlName="checkOut" placeholder="Départ">
+                        </mat-date-range-input>
+                        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                        <mat-date-range-picker #picker></mat-date-range-picker>
+                    </mat-form-field>
+                </div>
+
+                <div style="display: flex; gap: 24px; margin-bottom: 16px;">
+                    <div class="quantity-selector" style="flex: 1;">
+                        <label class="quantity-label">Adultes</label>
+                        <div class="quantity-controls">
+                            <button mat-icon-button type="button" class="qty-btn" (click)="decrementerType('nbAdultes')" [disabled]="form.get('nbAdultes')?.value <= 1">
+                                <mat-icon svgIcon="heroicons_solid:minus"></mat-icon>
+                            </button>
+                            <span class="qty-value">{{ form.get('nbAdultes')?.value }}</span>
+                            <button mat-icon-button type="button" class="qty-btn" (click)="incrementerType('nbAdultes')" [disabled]="(form.get('nbAdultes')?.value + form.get('nbEnfants')?.value) >= offre.nbPlacesDispo">
+                                <mat-icon svgIcon="heroicons_solid:plus"></mat-icon>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="quantity-selector" style="flex: 1;">
+                        <label class="quantity-label">Enfants ( &lt; {{ offre.detailsHotel?.ageLimiteEnfant }}ans)</label>
+                        <div class="quantity-controls">
+                            <button mat-icon-button type="button" class="qty-btn" (click)="decrementerType('nbEnfants')" [disabled]="form.get('nbEnfants')?.value <= 0">
+                                <mat-icon svgIcon="heroicons_solid:minus"></mat-icon>
+                            </button>
+                            <span class="qty-value">{{ form.get('nbEnfants')?.value }}</span>
+                            <button mat-icon-button type="button" class="qty-btn" (click)="incrementerType('nbEnfants')" [disabled]="(form.get('nbAdultes')?.value + form.get('nbEnfants')?.value) >= offre.nbPlacesDispo">
+                                <mat-icon svgIcon="heroicons_solid:plus"></mat-icon>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Formules -->
+                <div class="formules-selector" *ngIf="offre.detailsHotel?.formulesDisponibles?.length > 0">
+                    <label class="quantity-label">Formule de restauration</label>
+                    <mat-radio-group formControlName="formule" class="formules-radio-group" style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
+                        <mat-radio-button *ngFor="let f of offre.detailsHotel?.formulesDisponibles" [value]="f" color="primary">
+                            {{ f === 'PD' ? '☕ Petit Déjeuner' : (f === 'DP' ? '🍽️ Demi Pension' : '🍴 Pension Complète') }}
+                            <span *ngIf="offre.detailsHotel!.surprixFormules[f] > 0" style="color: #64748b; font-size: 0.85em; margin-left: 4px;">
+                                (+{{ offre.detailsHotel!.surprixFormules[f] }} DT/pers/nuit)
+                            </span>
+                        </mat-radio-button>
+                    </mat-radio-group>
+                </div>
+
+            </div>
+
+            <!-- Récapitulatif prix total -->
+            <div class="total-recap" [style.marginTop.px]="isHotel ? 20 : 0">
+                <div class="total-row" *ngIf="!isHotel">
+                    <span>{{ form.get('nbPersonnes')?.value }} × {{ offre.prixConvention | number:'1.0-2' }} DT</span>
+                    <span class="total-value">{{ prixTotal | number:'1.0-2' }} DT</span>
+                </div>
+                
+                <div class="total-row" *ngIf="isHotel" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="font-size: 0.85em; color: #475569; display: flex; flex-direction: column; align-items: flex-start;">
+                         <span>{{ form.get('nbAdultes')?.value }} Adulte(s), {{ form.get('nbEnfants')?.value }} Enfant(s)</span>
+                         <span *ngIf="nuitsH > 0">Séjour de {{ nuitsH }} Nuit(s)</span>
+                         <span *ngIf="nuitsH <= 0" style="color: #ef4444;">Sélectionnez des dates</span>
+                    </div>
+                    <span class="total-value">{{ prixTotal | number:'1.0-2' }} DT</span>
+                </div>
+            </div>
+        </form>
+
+    </mat-dialog-content>
+
+    <!-- ═══ ACTIONS ════════════════════════════════════════════ -->
+    <mat-dialog-actions class="dialog-actions">
+        <button mat-button class="btn-cancel" (click)="fermer()">Annuler</button>
+        <button
+            mat-flat-button
+            class="btn-confirm"
+            (click)="confirmer()"
+            [disabled]="form.invalid || isLoading">
+            <mat-progress-spinner
+                *ngIf="isLoading"
+                mode="indeterminate"
+                diameter="20"
+                class="spinner-white">
+            </mat-progress-spinner>
+            <mat-icon svgIcon="heroicons_outline:check-circle" *ngIf="!isLoading"></mat-icon>
+            {{ isLoading ? 'Réservation...' : 'Confirmer (' + (prixTotal | number:'1.0-2') + ' DT)' }}
+        </button>
+    </mat-dialog-actions>
+</div>

@@ -36,8 +36,18 @@ export class NavigationMockApi
                     } catch (e) {}
                 }
 
-                // Filtrer : cacher section admin si pas admin
-                const filteredDefault = cloneDeep(this._defaultNavigation).filter(item => {
+                // Filtrer : cacher section admin si pas admin, et section partnerships si candidat
+                const filteredDefault = cloneDeep(this._defaultNavigation).map(item => {
+                    if (item.id === 'apps' && item.children) {
+                        item.children = item.children.filter(child => {
+                            if (child.id === 'apps.partnerships' && userRole.toUpperCase() === 'CANDIDAT') {
+                                return false;
+                            }
+                            return true;
+                        });
+                    }
+                    return item;
+                }).filter(item => {
                     if (item.id === 'admin') {
                         return userRole === 'admin';
                     }

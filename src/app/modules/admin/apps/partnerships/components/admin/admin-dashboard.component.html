@@ -1,0 +1,337 @@
+<div class="admin-page">
+
+    <!-- ═══ HEADER ADMIN ═══════════════════════════════════ -->
+    <div class="admin-header">
+        <div class="header-left">
+            <button mat-icon-button class="back-btn" (click)="retourCatalogue()">
+                <mat-icon svgIcon="heroicons_outline:arrow-left"></mat-icon>
+            </button>
+            <div>
+                <div class="admin-badge">
+                    <mat-icon svgIcon="heroicons_solid:shield-check"></mat-icon>
+                    <span>Administration</span>
+                </div>
+                <h1 class="admin-title">Gestion Mutuelle &amp; Avantages</h1>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ TABS ═══════════════════════════════════════════ -->
+    <mat-tab-group class="admin-tabs" animationDuration="300ms">
+
+        <!-- ──────────────────────────────────────────────
+             ONGLET 1 : PARTENAIRES
+        ─────────────────────────────────────────────────── -->
+        <mat-tab>
+            <ng-template mat-tab-label>
+                <mat-icon svgIcon="heroicons_outline:office-building" class="tab-icon"></mat-icon>
+                Partenaires
+            </ng-template>
+
+            <div class="tab-content">
+                <!-- Toolbar -->
+                <div class="table-toolbar">
+                    <div class="search-box">
+                        <mat-icon svgIcon="heroicons_outline:search" class="search-icon"></mat-icon>
+                        <input placeholder="Rechercher un partenaire..." (input)="filtrerPartenaires($event)">
+                    </div>
+                    <button mat-flat-button class="btn-add" (click)="nouveauPartenaire()">
+                        <mat-icon svgIcon="heroicons_outline:plus"></mat-icon>
+                        Nouveau partenaire
+                    </button>
+                </div>
+
+                <!-- Loader -->
+                <div class="loader-row" *ngIf="loadingP">
+                    <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
+                </div>
+
+                <!-- Table -->
+                <div class="table-container" *ngIf="!loadingP" [@fadeIn]>
+                    <table mat-table [dataSource]="partenairesDS" matSort #sortP="matSort" class="admin-table">
+
+                        <ng-container matColumnDef="nom">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header>Partenaire</th>
+                            <td mat-cell *matCellDef="let p">
+                                <div class="partner-name-cell">
+                                    <div class="partner-avatar" [style.background]="'linear-gradient(135deg, #6366f1, #8b5cf6)'">
+                                        {{ p.nom?.charAt(0) | uppercase }}
+                                    </div>
+                                    <span>{{ p.nom }}</span>
+                                </div>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="type">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header>Catégorie</th>
+                            <td mat-cell *matCellDef="let p">
+                                <span class="cat-chip cat-{{ p.type | lowercase }}">{{ p.type }}</span>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="emailContact">
+                            <th mat-header-cell *matHeaderCellDef>Email</th>
+                            <td mat-cell *matCellDef="let p">
+                                <span class="text-muted">{{ p.emailContact || '—' }}</span>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="dateConvention">
+                            <th mat-header-cell *matHeaderCellDef>Convention</th>
+                            <td mat-cell *matCellDef="let p">
+                                <span class="text-muted">{{ p.dateConvention | date:'dd/MM/yyyy' }}</span>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="actif">
+                            <th mat-header-cell *matHeaderCellDef>Statut</th>
+                            <td mat-cell *matCellDef="let p">
+                                <mat-slide-toggle
+                                    [checked]="p.actif"
+                                    color="primary"
+                                    (change)="togglePartenaire(p)"
+                                    [matTooltip]="p.actif ? 'Désactiver' : 'Activer'">
+                                </mat-slide-toggle>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="actions">
+                            <th mat-header-cell *matHeaderCellDef>Actions</th>
+                            <td mat-cell *matCellDef="let p">
+                                <div class="action-btns">
+                                    <button mat-icon-button class="btn-edit" (click)="modifierPartenaire(p.id)" matTooltip="Modifier">
+                                        <mat-icon svgIcon="heroicons_outline:pencil"></mat-icon>
+                                    </button>
+                                    <button mat-icon-button class="btn-delete" (click)="supprimerPartenaire(p.id)"
+                                        [disabled]="deletingP[p.id]" matTooltip="Supprimer">
+                                        <mat-progress-spinner *ngIf="deletingP[p.id]" mode="indeterminate" diameter="20"></mat-progress-spinner>
+                                        <mat-icon *ngIf="!deletingP[p.id]" svgIcon="heroicons_outline:trash"></mat-icon>
+                                    </button>
+                                </div>
+                            </td>
+                        </ng-container>
+
+                        <tr mat-header-row *matHeaderRowDef="partenairesCols"></tr>
+                        <tr mat-row *matRowDef="let row; columns: partenairesCols;" class="table-row"></tr>
+
+                        <tr class="mat-row" *matNoDataRow>
+                            <td class="mat-cell no-data" [attr.colspan]="partenairesCols.length">
+                                Aucun partenaire trouvé
+                            </td>
+                        </tr>
+                    </table>
+                    <mat-paginator #paginatorP [pageSizeOptions]="[5, 10, 25]" showFirstLastButtons></mat-paginator>
+                </div>
+            </div>
+        </mat-tab>
+
+        <!-- ──────────────────────────────────────────────
+             ONGLET 2 : OFFRES
+        ─────────────────────────────────────────────────── -->
+        <mat-tab>
+            <ng-template mat-tab-label>
+                <mat-icon svgIcon="heroicons_outline:tag" class="tab-icon"></mat-icon>
+                Offres
+            </ng-template>
+
+            <div class="tab-content">
+                <!-- Toolbar -->
+                <div class="table-toolbar">
+                    <div class="search-box">
+                        <mat-icon svgIcon="heroicons_outline:search" class="search-icon"></mat-icon>
+                        <input placeholder="Rechercher une offre..." (input)="filtrerOffres($event)">
+                    </div>
+                    <button mat-flat-button class="btn-add" (click)="nouvelleOffre()">
+                        <mat-icon svgIcon="heroicons_outline:plus"></mat-icon>
+                        Nouvelle offre
+                    </button>
+                </div>
+
+                <!-- Loader -->
+                <div class="loader-row" *ngIf="loadingO">
+                    <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
+                </div>
+
+                <!-- Table -->
+                <div class="table-container" *ngIf="!loadingO">
+                    <table mat-table [dataSource]="offresDS" matSort #sortO="matSort" class="admin-table">
+
+                        <ng-container matColumnDef="titre">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header>Offre</th>
+                            <td mat-cell *matCellDef="let o">
+                                <div class="offer-cell">
+                                    <div class="offer-thumb" [style.background]="o.categorie === 'VOYAGE' ? 'linear-gradient(135deg,#667eea,#764ba2)' : o.categorie === 'HOTEL' ? 'linear-gradient(135deg,#0ea5e9,#2563eb)' : 'linear-gradient(135deg,#f59e0b,#ef4444)'">
+                                        <img *ngIf="o.imageUrl" [src]="o.imageUrl" [alt]="o.titre">
+                                    </div>
+                                    <span>{{ o.titre }}</span>
+                                </div>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="categorie">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header>Catégorie</th>
+                            <td mat-cell *matCellDef="let o">
+                                <span class="cat-chip cat-{{ o.categorie | lowercase }}">{{ o.categorie }}</span>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="partenaire">
+                            <th mat-header-cell *matHeaderCellDef>Partenaire</th>
+                            <td mat-cell *matCellDef="let o">
+                                <span class="text-muted">{{ getNomPartenaire(o.idPartenaire) }}</span>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="prixConvention">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header>Prix Convention</th>
+                            <td mat-cell *matCellDef="let o">
+                                <span class="price-cell">{{ o.prixConvention | number:'1.0-2' }} DT</span>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="nbPlacesDispo">
+                            <th mat-header-cell *matHeaderCellDef>Places dispo</th>
+                            <td mat-cell *matCellDef="let o">
+                                <span [class.low-stock]="o.nbPlacesDispo <= 3" [class.out-stock]="o.nbPlacesDispo === 0">
+                                    {{ o.nbPlacesDispo }} / {{ o.nbPlacesTotal }}
+                                </span>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="statut">
+                            <th mat-header-cell *matHeaderCellDef>Statut</th>
+                            <td mat-cell *matCellDef="let o">
+                                <mat-slide-toggle
+                                    [checked]="o.statut === 'ACTIVE'"
+                                    color="primary"
+                                    (change)="toggleOffre(o)"
+                                    [matTooltip]="o.statut === 'ACTIVE' ? 'Désactiver' : 'Activer'">
+                                </mat-slide-toggle>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="actions">
+                            <th mat-header-cell *matHeaderCellDef>Actions</th>
+                            <td mat-cell *matCellDef="let o">
+                                <div class="action-btns">
+                                    <button mat-icon-button class="btn-edit" (click)="modifierOffre(o.id)" matTooltip="Modifier">
+                                        <mat-icon svgIcon="heroicons_outline:pencil"></mat-icon>
+                                    </button>
+                                    <button mat-icon-button class="btn-delete" (click)="supprimerOffre(o.id)"
+                                        [disabled]="deletingO[o.id]" matTooltip="Supprimer">
+                                        <mat-progress-spinner *ngIf="deletingO[o.id]" mode="indeterminate" diameter="20"></mat-progress-spinner>
+                                        <mat-icon *ngIf="!deletingO[o.id]" svgIcon="heroicons_outline:trash"></mat-icon>
+                                    </button>
+                                </div>
+                            </td>
+                        </ng-container>
+
+                        <tr mat-header-row *matHeaderRowDef="offresCols"></tr>
+                        <tr mat-row *matRowDef="let row; columns: offresCols;" class="table-row"></tr>
+
+                        <tr class="mat-row" *matNoDataRow>
+                            <td class="mat-cell no-data" [attr.colspan]="offresCols.length">
+                                Aucune offre trouvée
+                            </td>
+                        </tr>
+                    </table>
+                    <mat-paginator #paginatorO [pageSizeOptions]="[5, 10, 25]" showFirstLastButtons></mat-paginator>
+                </div>
+            </div>
+        </mat-tab>
+
+        <!-- ──────────────────────────────────────────────
+             ONGLET 3 : TOUTES LES RÉSERVATIONS
+        ─────────────────────────────────────────────────── -->
+        <mat-tab>
+            <ng-template mat-tab-label>
+                <mat-icon svgIcon="heroicons_outline:clipboard-list" class="tab-icon"></mat-icon>
+                Réservations
+            </ng-template>
+
+            <div class="tab-content">
+                <!-- Toolbar -->
+                <div class="table-toolbar">
+                    <div class="search-box">
+                        <mat-icon svgIcon="heroicons_outline:search" class="search-icon"></mat-icon>
+                        <input placeholder="Rechercher..." (input)="filtrerReservations($event)">
+                    </div>
+                </div>
+
+                <!-- Loader -->
+                <div class="loader-row" *ngIf="loadingR">
+                    <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
+                </div>
+
+                <!-- Table -->
+                <div class="table-container" *ngIf="!loadingR">
+                    <table mat-table [dataSource]="reservationsDS" class="admin-table">
+
+                        <ng-container matColumnDef="reference">
+                            <th mat-header-cell *matHeaderCellDef>Réf.</th>
+                            <td mat-cell *matCellDef="let r">
+                                <span class="badge-ref" *ngIf="r.id">#{{ r.id.slice(-8) | uppercase }}</span>
+                                <span class="badge-ref" *ngIf="!r.id">#N/A</span>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="user">
+                            <th mat-header-cell *matHeaderCellDef>Utilisateur</th>
+                            <td mat-cell *matCellDef="let r">
+                                <span class="user-id" [title]="r.idUser">{{ r.nomUser || (r.idUser?.slice(-8)) }}</span>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="offre">
+                            <th mat-header-cell *matHeaderCellDef>Offre</th>
+                            <td mat-cell *matCellDef="let r">
+                                <span class="text-muted" [title]="r.idOffre">{{ r.titreOffre || (r.idOffre?.slice(-8)) }}</span>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="nbPersonnes">
+                            <th mat-header-cell *matHeaderCellDef>Personnes</th>
+                            <td mat-cell *matCellDef="let r">{{ r.nbPersonnes }}</td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="prixTotal">
+                            <th mat-header-cell *matHeaderCellDef>Total</th>
+                            <td mat-cell *matCellDef="let r">
+                                <span class="price-cell">{{ r.prixTotal | number:'1.0-2' }} DT</span>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="statut">
+                            <th mat-header-cell *matHeaderCellDef>Statut</th>
+                            <td mat-cell *matCellDef="let r">
+                                <span class="status-badge"
+                                    [class.badge-confirmee]="r.statut === 'CONFIRMEE'"
+                                    [class.badge-annulee]="r.statut === 'ANNULEE'">
+                                    {{ r.statut }}
+                                </span>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="dateReservation">
+                            <th mat-header-cell *matHeaderCellDef>Date</th>
+                            <td mat-cell *matCellDef="let r">
+                                <span class="text-muted">{{ r.dateReservation | date:'dd/MM/yyyy HH:mm' }}</span>
+                            </td>
+                        </ng-container>
+
+                        <tr mat-header-row *matHeaderRowDef="reservationsCols"></tr>
+                        <tr mat-row *matRowDef="let row; columns: reservationsCols;" class="table-row"></tr>
+
+                        <tr class="mat-row" *matNoDataRow>
+                            <td class="mat-cell no-data" [attr.colspan]="reservationsCols.length">
+                                Aucune réservation trouvée
+                            </td>
+                        </tr>
+                    </table>
+                    <mat-paginator #paginatorR [pageSizeOptions]="[10, 25, 50]" showFirstLastButtons></mat-paginator>
+                </div>
+            </div>
+        </mat-tab>
+
+    </mat-tab-group>
+</div>
