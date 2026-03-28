@@ -36,6 +36,8 @@ export interface ReservationRequest {
   trajetId: string;
   employeId: string;
   statut: 'EN_ATTENTE' | 'CONFIRME' | 'ANNULE';
+    distanceKm?: number;
+
 }
 
 export interface ReservationResponse {
@@ -95,14 +97,16 @@ export class CovoiturageService {
   }
 
   private reservationsUrl = 'http://localhost:8081/api/reservations';
+  private empreintesUrl = 'http://localhost:8081/api/empreintes'; // ← ajouter
+
 
   getReservationsByEmploye(employeId: string): Observable<ReservationResponse[]> {
     return this.http.get<ReservationResponse[]>(`${this.reservationsUrl}/employe/${employeId}`);
   }
-
-  getTotalPointsEco(employeId: string): Observable<number> {
-    return this.http.get<number>(`${this.reservationsUrl}/employe/${employeId}/points`);
-  }
+  
+getTotalPointsEco(employeId: string): Observable<number> {
+  return this.http.get<number>(`${this.empreintesUrl}/employe/${employeId}/points`); // ← modifier
+}
 
   creerReservation(request: ReservationRequest): Observable<ReservationResponse> {
     return this.http.post<ReservationResponse>(this.reservationsUrl, request);

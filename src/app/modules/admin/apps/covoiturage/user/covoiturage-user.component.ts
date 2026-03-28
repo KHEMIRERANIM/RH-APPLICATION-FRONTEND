@@ -174,8 +174,9 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
   selectedTab: string = 'covoiturage';
   selectedDays: string[] = ["Lun", "Mar", "Mer", "Jeu", "Ven"];
   showChat = false;
-  activeSection: 'utilises' | 'proposes' = 'utilises';
+  activeSection: 'utilises' | 'proposes' | 'recompenses' = 'utilises';
   showGiftModal = false;
+
 
   // Map États et Statistiques
   departureLocation: string = '';
@@ -237,6 +238,34 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
 
   // Cache employés
   employesMap: Map<string, string> = new Map();
+
+  // ----- NOUVELLE PAGE RÉCOMPENSES (REWARDS) -----
+  userPointsReward: number = 370;
+  userLevelReward: string = 'Or';
+  nextLevelReward: string = 'Platine';
+  pointsForNextLevelReward: number = 500;
+
+  get rewardProgressPercentage(): number {
+    return (this.userPointsReward / this.pointsForNextLevelReward) * 100;
+  }
+
+  rewardsGifts = [
+    { id: 1, title: 'Café gratuit', description: 'Un café premium au choix', points: 50, icon: '☕', available: true, image: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400' },
+    { id: 2, title: 'Repas gratuit', description: 'Un repas au restaurant d\'entreprise', points: 150, icon: '🍽️', available: true, image: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400' },
+    { id: 3, title: 'Bon 20 DT', description: 'Bon d\'achat valable en magasin', points: 300, icon: '🎁', available: true, image: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=400' },
+    { id: 4, title: 'Jour de congé', description: 'Un jour de congé supplémentaire', points: 500, icon: '🌴', available: false, image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400' },
+    { id: 5, title: 'Parking 1 mois', description: 'Place de parking réservée pendant 1 mois', points: 800, icon: '🅿️', available: false, image: 'https://images.unsplash.com/photo-1590674899484-d5640e854abe?w=400' },
+    { id: 6, title: 'Bon 50 DT', description: 'Bon d\'achat premium', points: 1000, icon: '🎉', available: false, image: 'https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?w=400' }
+  ];
+
+  rewardsHistory = [
+    { id: 1, type: 'earn', title: 'Covoiturage Tunis-Ariana', points: 52, date: '24 Mars 2026', icon: '🚗' },
+    { id: 2, type: 'redeem', title: 'Repas gratuit', points: -150, date: '20 Mars 2026', status: 'Livré', icon: '🎁', image: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=100' },
+    { id: 3, type: 'earn', title: 'Covoiturage La Marsa-Lac', points: 45, date: '18 Mars 2026', icon: '🚗' },
+    { id: 4, type: 'redeem', title: 'Bon 20 DT', points: -300, date: '15 Mars 2026', status: 'En attente', icon: '🎁', image: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=100' },
+    { id: 5, type: 'earn', title: 'Covoiturage Menzah-Centre', points: 38, date: '12 Mars 2026', icon: '🚗' }
+  ];
+  // ---------------------------------------------
 
   constructor(
     private renderer: Renderer2,
@@ -405,14 +434,17 @@ loadEmployees(): void {
   });
 }
 
-  loadMesReservations(): void {
+ loadMesReservations(): void {
     if (!this.employeId) return;
     this.covoiturageService.getReservationsByEmploye(this.employeId).subscribe({
-      next: (res) => { this.mesReservations = res; this.cdr.detectChanges(); },
+      next: (res) => {
+        this.mesReservations = res;
+        this.loadTotalPoints(); // ← ajouter
+        this.cdr.detectChanges();
+      },
       error: (err) => console.error('Erreur chargement réservations', err)
     });
   }
-
   loadTotalPoints(): void {
     if (!this.employeId) return;
     this.covoiturageService.getTotalPointsEco(this.employeId).subscribe({
@@ -421,21 +453,53 @@ loadEmployees(): void {
     });
   }
 
-  reserverTrajet(trajetId: string): void {
-    if (!this.employeId || this.reservationEnCours) return;
-    if (this.estDejaReserve(trajetId)) return;
-    this.reservationEnCours = true;
-    const request: ReservationRequest = { trajetId, employeId: this.employeId, statut: 'EN_ATTENTE' };
-    this.covoiturageService.creerReservation(request).subscribe({
-      next: () => {
-        this.reservationEnCours = false;
-        this.loadMesReservations();
-        this.loadTotalPoints();
-        this.loadAllTrajets();
-      },
-      error: (err) => { this.reservationEnCours = false; console.error('Erreur réservation', err); }
-    });
+ async reserverTrajet(trajetId: string): Promise<void> {
+  if (!this.employeId || this.reservationEnCours) return;
+  if (this.estDejaReserve(trajetId)) return;
+  this.reservationEnCours = true;
+
+  const trajet = this.allTrajets.find(t => t.id === trajetId);
+  let distanceKm = 25.0;
+
+  if (trajet) {
+    try {
+      const depRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(trajet.adresseDepart)}&limit=1&countrycodes=tn`);
+      const depData = await depRes.json();
+      const arrRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(trajet.adresseArrivee)}&limit=1&countrycodes=tn`);
+      const arrData = await arrRes.json();
+
+      if (depData[0] && arrData[0]) {
+        const osrmRes = await fetch(`https://router.project-osrm.org/route/v1/driving/${depData[0].lon},${depData[0].lat};${arrData[0].lon},${arrData[0].lat}?overview=false`);
+        const osrmData = await osrmRes.json();
+        if (osrmData.routes && osrmData.routes[0]) {
+          distanceKm = osrmData.routes[0].distance / 1000;
+        }
+      }
+    } catch (e) {
+      console.warn('Erreur calcul distance', e);
+    }
   }
+
+  const request: ReservationRequest = {
+    trajetId,
+    employeId: this.employeId,
+    statut: 'EN_ATTENTE',
+    distanceKm: Math.round(distanceKm * 10) / 10
+  };
+
+  this.covoiturageService.creerReservation(request).subscribe({
+    next: () => {
+      this.reservationEnCours = false;
+      this.loadMesReservations();
+      this.loadTotalPoints();
+      this.loadAllTrajets();
+    },
+    error: (err) => {
+      this.reservationEnCours = false;
+      console.error('Erreur réservation', err);
+    }
+  });
+}
 
   annulerReservation(reservationId: string): void {
     if (!confirm('Annuler cette réservation ?')) return;
@@ -783,7 +847,7 @@ loadEmployees(): void {
     }
   }
 
-  switchSection(section: 'utilises' | 'proposes') {
+  switchSection(section: 'utilises' | 'proposes' | 'recompenses') {
     this.activeSection = section;
     if (section === 'proposes') {
       setTimeout(() => {
