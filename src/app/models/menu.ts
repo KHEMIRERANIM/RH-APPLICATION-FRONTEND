@@ -1,12 +1,16 @@
 ﻿export interface Plat {
+  platId?: string;
   nom: string;
+  description: string;
   prix: number;
   tags: string[];
-  image: string;
+  image?: string;
+  quantite: number;
+  disponible: boolean;
 }
 
 export interface Menu {
-  id: string;
+  id?: string;
   titre: string;
   date: string;
   statut: string;
