@@ -7,6 +7,8 @@ import { ToastrService } from 'ngx-toastr';
 import { PartnershipsService } from '../../../services/partnerships.service';
 import { Offre, Partenaire } from '../../../models/partnerships.models';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 
 @Component({
     selector   : 'offre-form',
@@ -36,7 +38,8 @@ export class OffreFormComponent implements OnInit, OnDestroy {
         private _router  : Router,
         private _svc     : PartnershipsService,
         private _toastr  : ToastrService,
-        private _sanitizer: DomSanitizer
+        private _sanitizer: DomSanitizer,
+        private _dialog  : MatDialog
     ) {}
 
     ngOnInit(): void {
@@ -198,6 +201,26 @@ export class OffreFormComponent implements OnInit, OnDestroy {
             return;
         }
 
+        const action = this.isEdit ? 'modifier cette offre' : 'créer cette offre';
+        const ref = this._dialog.open(ConfirmDialogComponent, {
+            panelClass: 'partnerships-confirm-dialog',
+            data: {
+                title: this.isEdit ? "Modifier l'Offre" : 'Nouvelle Offre',
+                message: `Êtes-vous sûr de vouloir ${action} ?`,
+                confirmLabel: this.isEdit ? 'Oui, enregistrer' : 'Oui, créer',
+                cancelLabel: 'Non, annuler',
+                icon: this.isEdit ? 'heroicons_outline:pencil' : 'heroicons_outline:tag',
+                color: this.isEdit ? 'primary' : 'success'
+            }
+        });
+
+        ref.afterClosed().subscribe(confirmed => {
+            if (!confirmed) { return; }
+            this._execSauvegarder();
+        });
+    }
+
+    private _execSauvegarder(): void {
         this.isSaving = true;
         const payload = { ...this.form.value };
 

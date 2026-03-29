@@ -39,6 +39,7 @@ import { MesReservationsComponent } from './components/mes-reservations/mes-rese
 import { AdminDashboardComponent } from './components/admin/admin-dashboard.component';
 import { PartenaireFormComponent } from './components/admin/partenaire-form/partenaire-form.component';
 import { OffreFormComponent } from './components/admin/offre-form/offre-form.component';
+import { ConfirmDialogComponent } from './components/admin/confirm-dialog/confirm-dialog.component';
 
 // Service
 import { PartnershipsService } from './services/partnerships.service';
@@ -53,7 +54,8 @@ import { partnershipsRoutes } from './partnerships-routing';
         MesReservationsComponent,
         AdminDashboardComponent,
         PartenaireFormComponent,
-        OffreFormComponent
+        OffreFormComponent,
+        ConfirmDialogComponent
     ],
     imports: [
         RouterModule.forChild(partnershipsRoutes),

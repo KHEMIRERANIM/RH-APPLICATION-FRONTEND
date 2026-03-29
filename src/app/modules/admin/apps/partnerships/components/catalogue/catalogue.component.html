@@ -200,11 +200,11 @@
                     </div>
                     <div class="prix-block" *ngIf="offre.categorie === 'HOTEL' && offre.detailsHotel"
                         style="flex-direction: column; align-items: flex-start;">
-                        <span style="font-size: 0.75rem; color: #64748b;">À partir de</span>
+                        <span class="prix-barre">{{ offre.prixReel | number:'1.0-2' }} DT</span>
                         <div>
-                            <span class="prix-convention" style="font-size: 1.25rem;">{{ offre.detailsHotel.prixEnfant |
+                            <span class="prix-convention" style="font-size: 1.25rem;">{{ offre.detailsHotel.prixAdulte |
                                 number:'1.0-2' }} DT</span>
-                            <span class="prix-label">/ nuit / enfant</span>
+                            <span class="prix-label">/ nuit / adulte</span>
                         </div>
                     </div>
                     <button mat-flat-button class="btn-reserver" [disabled]="offre.nbPlacesDispo === 0"

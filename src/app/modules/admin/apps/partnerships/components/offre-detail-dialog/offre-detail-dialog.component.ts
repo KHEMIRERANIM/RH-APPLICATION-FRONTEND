@@ -21,6 +21,7 @@ export class OffreDetailDialogComponent implements OnInit {
     isLoading = false;
     prixTotal  = 0;
     nuitsH = 0;
+    confirmationStep = false;
 
     constructor(
         private _fb      : FormBuilder,
@@ -45,10 +46,11 @@ export class OffreDetailDialogComponent implements OnInit {
                 checkIn: [null, Validators.required], // Force la sélection manuelle
                 checkOut: [null, Validators.required] // Force la sélection manuelle
             });
-            // Sélection par défaut de la 1ère formule
+            // Sélection par défaut : PD (Petit Déjeuner) en priorité, sinon la 1ère formule disponible
             const formules = this.offre.detailsHotel!.formulesDisponibles;
             if (formules && formules.length > 0) {
-                this.form.get('formule')?.setValue(formules[0]);
+                const defaultFormule = formules.includes('PD' as any) ? 'PD' : formules[0];
+                this.form.get('formule')?.setValue(defaultFormule);
             }
         } else {
             this.form = this._fb.group({
@@ -187,6 +189,52 @@ export class OffreDetailDialogComponent implements OnInit {
 
     fermer(): void {
         this._dialogRef.close(null);
+    }
+
+    // ── Étape de confirmation ───────────────────────────────────────
+    demanderConfirmation(): void {
+        if (this.form.invalid) {
+            this.form.markAllAsTouched();
+            return;
+        }
+        if (this.isHotel) {
+            const nbA = this.form.get('nbAdultes')?.value || 0;
+            const nbE = this.form.get('nbEnfants')?.value || 0;
+            if (nbA + nbE > this.offre.nbPlacesDispo) {
+                this._toastr.warning('Capacité dépassée.');
+                return;
+            }
+            if (this.nuitsH <= 0) {
+                this._toastr.warning('Veuillez sélectionner des dates valides.');
+                return;
+            }
+        }
+        this.confirmationStep = true;
+    }
+
+    retourFormulaire(): void {
+        this.confirmationStep = false;
+    }
+
+    // ── Helpers affichage récapitulatif ──────────────────────────────
+    getFormuleLabel(): string {
+        const f = this.form.get('formule')?.value;
+        if (f === 'PD') { return 'Petit Déjeuner (PD)'; }
+        if (f === 'DP') { return 'Demi-Pension (DP)'; }
+        if (f === 'PC') { return 'Pension Complète (PC)'; }
+        return f || '-';
+    }
+
+    getCheckInLabel(): string {
+        const v = this.form.get('checkIn')?.value;
+        if (!v) { return '-'; }
+        return new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(v));
+    }
+
+    getCheckOutLabel(): string {
+        const v = this.form.get('checkOut')?.value;
+        if (!v) { return '-'; }
+        return new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(v));
     }
 
     getCategorieIcon(): string {

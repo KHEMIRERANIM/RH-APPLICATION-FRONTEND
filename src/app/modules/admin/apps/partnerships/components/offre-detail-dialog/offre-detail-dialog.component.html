@@ -58,8 +58,8 @@
                 <span class="price-value highlight">{{ offre.prixConvention | number:'1.0-2' }} DT</span>
             </div>
             <div class="price-convention" *ngIf="isHotel">
-                <span class="price-label">Dès / pers.</span>
-                <span class="price-value highlight">{{ offre.detailsHotel?.prixEnfant | number:'1.0-2' }} DT</span>
+                <span class="price-label">Dès / adulte / nuit</span>
+                <span class="price-value highlight">{{ offre.detailsHotel?.prixAdulte | number:'1.0-2' }} DT</span>
             </div>
         </div>
 
@@ -177,16 +177,88 @@
             </div>
         </form>
 
+        <!-- ═══ ÉCRAN DE CONFIRMATION ════════════════════════════════════════ -->
+        <div class="confirmation-panel" *ngIf="confirmationStep">
+
+            <div class="recap-header">
+                <mat-icon svgIcon="heroicons_outline:clipboard-check" class="recap-icon"></mat-icon>
+                <span>Récapitulatif de votre réservation</span>
+            </div>
+
+            <div class="recap-list">
+                <div class="recap-row">
+                    <span class="recap-key">Offre</span>
+                    <span class="recap-val">{{ offre.titre }}</span>
+                </div>
+                <div class="recap-row" *ngIf="!isHotel">
+                    <span class="recap-key">Catégorie</span>
+                    <span class="recap-val">{{ offre.categorie }}</span>
+                </div>
+                <div class="recap-row" *ngIf="!isHotel && offre.localisation">
+                    <span class="recap-key">Lieu</span>
+                    <span class="recap-val">{{ offre.localisation }}</span>
+                </div>
+                <div class="recap-row" *ngIf="!isHotel && offre.dateDebut">
+                    <span class="recap-key">Dates</span>
+                    <span class="recap-val">{{ offre.dateDebut | date:'dd MMM' }} → {{ offre.dateFin | date:'dd MMM yyyy' }}</span>
+                </div>
+                <div class="recap-row" *ngIf="!isHotel">
+                    <span class="recap-key">Nombre de personnes</span>
+                    <span class="recap-val">{{ form.get('nbPersonnes')?.value }} pers. × {{ offre.prixConvention | number:'1.0-2' }} DT</span>
+                </div>
+                <ng-container *ngIf="isHotel">
+                    <div class="recap-row">
+                        <span class="recap-key">Adultes / Enfants</span>
+                        <span class="recap-val">{{ form.get('nbAdultes')?.value }} × Adulte — {{ form.get('nbEnfants')?.value }} × Enfant</span>
+                    </div>
+                    <div class="recap-row">
+                        <span class="recap-key">Séjour</span>
+                        <span class="recap-val">{{ getCheckInLabel() }} → {{ getCheckOutLabel() }} ({{ nuitsH }} nuit(s))</span>
+                    </div>
+                    <div class="recap-row">
+                        <span class="recap-key">Formule</span>
+                        <span class="recap-val">{{ getFormuleLabel() }}</span>
+                    </div>
+                </ng-container>
+                <div class="recap-row total">
+                    <span class="recap-key">Total à régler</span>
+                    <span class="recap-val">{{ prixTotal | number:'1.0-2' }} DT</span>
+                </div>
+            </div>
+
+            <p class="recap-warning">
+                <mat-icon svgIcon="heroicons_mini:information-circle"></mat-icon>
+                En confirmant, vous bénéficiez du tarif de convention. Un email de confirmation vous sera envoyé.
+            </p>
+        </div>
+
     </mat-dialog-content>
 
     <!-- ═══ ACTIONS ════════════════════════════════════════════ -->
     <mat-dialog-actions class="dialog-actions">
-        <button mat-button class="btn-cancel" (click)="fermer()">Annuler</button>
-        <button mat-flat-button class="btn-confirm" (click)="confirmer()" [disabled]="form.invalid || isLoading">
-            <mat-progress-spinner *ngIf="isLoading" mode="indeterminate" diameter="20" class="spinner-white">
-            </mat-progress-spinner>
-            <mat-icon svgIcon="heroicons_outline:check-circle" *ngIf="!isLoading"></mat-icon>
-            {{ isLoading ? 'Réservation...' : 'Confirmer (' + (prixTotal | number:'1.0-2') + ' DT)' }}
-        </button>
+
+        <!-- Étape 1 : Formulaire -->
+        <ng-container *ngIf="!confirmationStep">
+            <button mat-button class="btn-cancel" (click)="fermer()">Annuler</button>
+            <button mat-flat-button class="btn-confirm" (click)="demanderConfirmation()" [disabled]="form.invalid || isLoading">
+                <mat-icon svgIcon="heroicons_outline:arrow-right"></mat-icon>
+                Continuer ({{ prixTotal | number:'1.0-2' }} DT)
+            </button>
+        </ng-container>
+
+        <!-- Étape 2 : Confirmation -->
+        <ng-container *ngIf="confirmationStep">
+            <button mat-stroked-button class="btn-cancel" (click)="retourFormulaire()">
+                <mat-icon svgIcon="heroicons_outline:arrow-left"></mat-icon>
+                Modifier
+            </button>
+            <button mat-flat-button class="btn-confirm btn-confirm-final" (click)="confirmer()" [disabled]="isLoading">
+                <mat-progress-spinner *ngIf="isLoading" mode="indeterminate" diameter="20" class="spinner-white">
+                </mat-progress-spinner>
+                <mat-icon svgIcon="heroicons_outline:check-circle" *ngIf="!isLoading"></mat-icon>
+                {{ isLoading ? 'Réservation en cours...' : 'Oui, confirmer ma réservation' }}
+            </button>
+        </ng-container>
+
     </mat-dialog-actions>
 </div>
