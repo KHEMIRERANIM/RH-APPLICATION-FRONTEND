@@ -51,7 +51,8 @@
                     <div class="relative flex items-center">
                         <mat-icon svgIcon="heroicons_outline:tag" class="absolute left-3 text-slate-400 w-5 h-5 pointer-events-none z-10"></mat-icon>
                         <select formControlName="type"
-                                class="w-full pl-10 pr-8 py-[0.625rem] border border-slate-200 rounded-lg text-[0.875rem] text-slate-800 bg-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all box-border appearance-none cursor-pointer">
+                                style="-webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: none;"
+                                class="w-full pl-10 pr-8 py-[0.625rem] border border-slate-200 rounded-lg text-[0.875rem] text-slate-800 bg-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all box-border cursor-pointer">
                             <option value="null" disabled selected>Sélectionnez une catégorie...</option>
                             <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
                         </select>

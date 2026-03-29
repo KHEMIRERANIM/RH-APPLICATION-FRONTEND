@@ -86,7 +86,7 @@ export interface CreateOffreRequest {
 // ─────────────────────────────────────────
 // Réservation
 // ─────────────────────────────────────────
-export interface Reservation {
+export interface AvantageReservation {
     id?: string;
     idUser: string;
     idOffre: string;

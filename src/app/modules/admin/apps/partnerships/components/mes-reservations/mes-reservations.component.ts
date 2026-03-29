@@ -4,7 +4,7 @@ import { Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
 import { ToastrService } from 'ngx-toastr';
 import { PartnershipsService } from '../../services/partnerships.service';
-import { Reservation } from '../../models/partnerships.models';
+import { AvantageReservation } from '../../models/partnerships.models';
 
 @Component({
     selector   : 'mes-reservations',
@@ -13,7 +13,7 @@ import { Reservation } from '../../models/partnerships.models';
 })
 export class MesReservationsComponent implements OnInit, OnDestroy {
 
-    reservations: Reservation[] = [];
+    reservations: AvantageReservation[] = [];
     isLoading    = true;
     isAnnulating : Record<string, boolean> = {};
     isClearingHistory = false;
@@ -64,7 +64,7 @@ export class MesReservationsComponent implements OnInit, OnDestroy {
         });
     }
 
-    annuler(reservation: Reservation): void {
+    annuler(reservation: AvantageReservation): void {
         if (!reservation.id) { return; }
         this.isAnnulating[reservation.id] = true;
 

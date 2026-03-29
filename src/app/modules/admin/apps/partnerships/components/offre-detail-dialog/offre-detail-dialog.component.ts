@@ -42,8 +42,8 @@ export class OffreDetailDialogComponent implements OnInit {
                 nbAdultes: [1, [Validators.required, Validators.min(1)]],
                 nbEnfants: [0, [Validators.required, Validators.min(0)]],
                 formule: [null, Validators.required],
-                checkIn: [this.offre.dateDebut ? new Date(this.offre.dateDebut) : null, Validators.required],
-                checkOut: [this.offre.dateFin ? new Date(this.offre.dateFin) : null, Validators.required]
+                checkIn: [null, Validators.required], // Force la sélection manuelle
+                checkOut: [null, Validators.required] // Force la sélection manuelle
             });
             // Sélection par défaut de la 1ère formule
             const formules = this.offre.detailsHotel!.formulesDisponibles;
@@ -52,7 +52,7 @@ export class OffreDetailDialogComponent implements OnInit {
             }
         } else {
             this.form = this._fb.group({
-                nbPersonnes: [1, [
+                nbPersonnes: [0, [ // Initialise à 0 pour avoir 0 DT par défaut au démarrage
                     Validators.required,
                     Validators.min(1),
                     Validators.max(this.offre.nbPlacesDispo)
@@ -203,6 +203,9 @@ export class OffreDetailDialogComponent implements OnInit {
     }
 
     getEconomie(): number {
+        if (this.offre.categorie === 'HOTEL' && this.offre.detailsHotel) {
+            return (this.offre.prixReel || 0) - (this.offre.detailsHotel.prixAdulte || 0);
+        }
         return (this.offre.prixReel || 0) - (this.offre.prixConvention || 0);
     }
 }

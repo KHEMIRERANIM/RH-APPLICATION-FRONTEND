@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import {
     Partenaire,
     Offre,
-    Reservation,
+    AvantageReservation,
     CategorieOffre,
     CreatePartenaireRequest,
     CreateOffreRequest
@@ -104,18 +104,18 @@ export class PartnershipsService {
      * POST /api/reservations?idOffre=...&nbPersonnes=...
      * Crée ou modifie une réservation existante — ADMIN + EMPLOYÉ
      */
-    reserverOuModifier(idOffre: string, nbPersonnes: number): Observable<Reservation> {
+    reserverOuModifier(idOffre: string, nbPersonnes: number): Observable<AvantageReservation> {
         const params = new HttpParams()
             .set('idOffre', idOffre)
             .set('nbPersonnes', nbPersonnes.toString());
-        return this._http.post<Reservation>(`${this.BASE_URL}/reservations`, null, { params });
+        return this._http.post<AvantageReservation>(`${this.BASE_URL}/avantages/reservations`, null, { params });
     }
 
     /**
      * POST /api/reservations/hotel?idOffre=...&nbAdultes=...
      * Crée ou modifie une réservation hôtelière — ADMIN + EMPLOYÉ
      */
-    reserverHotel(idOffre: string, nbAdultes: number, nbEnfants: number, formule: string, checkIn: string, checkOut: string): Observable<Reservation> {
+    reserverHotel(idOffre: string, nbAdultes: number, nbEnfants: number, formule: string, checkIn: string, checkOut: string): Observable<AvantageReservation> {
         let params = new HttpParams()
             .set('idOffre', idOffre)
             .set('nbAdultes', nbAdultes.toString())
@@ -123,32 +123,32 @@ export class PartnershipsService {
             .set('formule', formule)
             .set('checkIn', checkIn)
             .set('checkOut', checkOut);
-        return this._http.post<Reservation>(`${this.BASE_URL}/reservations/hotel`, null, { params });
+        return this._http.post<AvantageReservation>(`${this.BASE_URL}/avantages/reservations/hotel`, null, { params });
     }
 
     /** GET /api/reservations/mes-reservations — ADMIN + EMPLOYÉ */
-    getMesReservations(): Observable<Reservation[]> {
-        return this._http.get<Reservation[]>(`${this.BASE_URL}/reservations/mes-reservations`);
+    getMesReservations(): Observable<AvantageReservation[]> {
+        return this._http.get<AvantageReservation[]>(`${this.BASE_URL}/avantages/reservations/mes-reservations`);
     }
 
     /** DELETE /api/reservations/mes-reservations/annulees — ADMIN + EMPLOYÉ */
     viderReservationsAnnulees(): Observable<void> {
-        return this._http.delete<void>(`${this.BASE_URL}/reservations/mes-reservations/annulees`);
+        return this._http.delete<void>(`${this.BASE_URL}/avantages/reservations/mes-reservations/annulees`);
     }
 
     /** PATCH /api/reservations/{id}/annuler — ADMIN + EMPLOYÉ */
-    annulerReservation(id: string): Observable<Reservation> {
-        return this._http.patch<Reservation>(`${this.BASE_URL}/reservations/${id}/annuler`, {});
+    annulerReservation(id: string): Observable<AvantageReservation> {
+        return this._http.patch<AvantageReservation>(`${this.BASE_URL}/avantages/reservations/${id}/annuler`, {});
     }
 
     /** GET /api/reservations — ADMIN seulement */
-    getAllReservations(): Observable<Reservation[]> {
-        return this._http.get<Reservation[]>(`${this.BASE_URL}/reservations`);
+    getAllReservations(): Observable<AvantageReservation[]> {
+        return this._http.get<AvantageReservation[]>(`${this.BASE_URL}/avantages/reservations`);
     }
 
     /** GET /api/reservations/offre/{idOffre} — ADMIN seulement */
-    getReservationsByOffre(idOffre: string): Observable<Reservation[]> {
-        return this._http.get<Reservation[]>(`${this.BASE_URL}/reservations/offre/${idOffre}`);
+    getReservationsByOffre(idOffre: string): Observable<AvantageReservation[]> {
+        return this._http.get<AvantageReservation[]>(`${this.BASE_URL}/avantages/reservations/offre/${idOffre}`);
     }
 
     /** GET /api/users — ADMIN seulement */

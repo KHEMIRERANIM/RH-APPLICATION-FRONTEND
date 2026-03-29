@@ -90,17 +90,19 @@
             <!-- CAS HÔTEL -->
             <div class="hotel-reservation-block" *ngIf="isHotel">
 
-                <div class="date-selector" style="margin-bottom: 8px;">
-                    <mat-form-field appearance="outline" style="width: 100%;">
-                        <mat-label>Dates du séjour</mat-label>
-                        <mat-date-range-input [rangePicker]="picker" [min]="offre.dateDebut" [max]="offre.dateFin"
-                            separator=" ➝ ">
-                            <input matStartDate formControlName="checkIn" placeholder="Arrivée">
-                            <input matEndDate formControlName="checkOut" placeholder="Départ">
+                <div class="date-selector flex flex-col gap-1.5 focus-within:text-primary transition-colors" style="margin-bottom: 12px; text-align: left;">
+                    <label class="text-[0.85rem] font-semibold text-slate-700 mb-0.5">Dates du séjour</label>
+                    <div class="relative flex items-center border border-slate-200 rounded-lg bg-white focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 transition-all px-2 box-border">
+                        <mat-date-range-input [rangePicker]="picker" [min]="offre.dateDebut" [max]="offre.dateFin" class="w-full ml-2 text-sm text-slate-800 py-[0.625rem] cursor-pointer" (click)="picker.open()">
+                            <input matStartDate formControlName="checkIn" placeholder="Arrivée" class="focus:outline-none cursor-pointer bg-transparent">
+                            <span class="mx-2 text-slate-400">➝</span>
+                            <input matEndDate formControlName="checkOut" placeholder="Départ" class="focus:outline-none cursor-pointer bg-transparent">
                         </mat-date-range-input>
-                        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                        <div class="text-slate-500 mr-1 flex items-center">
+                            <mat-datepicker-toggle [for]="picker"></mat-datepicker-toggle>
+                        </div>
                         <mat-date-range-picker #picker></mat-date-range-picker>
-                    </mat-form-field>
+                    </div>
                 </div>
 
                 <div style="display: flex; gap: 24px; margin-bottom: 16px;">

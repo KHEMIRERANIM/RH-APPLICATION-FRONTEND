@@ -168,7 +168,10 @@ export class CatalogueComponent implements OnInit, OnDestroy {
     }
 
     getEconomie(offre: Offre): number {
-        return offre.prixReel - offre.prixConvention;
+        if (offre.categorie === 'HOTEL' && offre.detailsHotel) {
+            return (offre.prixReel || 0) - (offre.detailsHotel.prixAdulte || 0);
+        }
+        return (offre.prixReel || 0) - (offre.prixConvention || 0);
     }
 
     getDefaultImage(cat: CategorieOffre): string {

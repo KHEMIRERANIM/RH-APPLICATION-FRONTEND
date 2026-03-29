@@ -7,7 +7,7 @@ import { Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
 import { ToastrService } from 'ngx-toastr';
 import { PartnershipsService } from '../../services/partnerships.service';
-import { Partenaire, Offre, Reservation } from '../../models/partnerships.models';
+import { Partenaire, Offre, AvantageReservation } from '../../models/partnerships.models';
 
 @Component({
     selector: 'admin-dashboard',
@@ -29,7 +29,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     loadingO = true;
 
     // ── Réservations ─────────────────────────────────────
-    reservationsDS = new MatTableDataSource<Reservation>();
+    reservationsDS = new MatTableDataSource<AvantageReservation>();
     reservationsCols = ['reference', 'user', 'offre', 'nbPersonnes', 'prixTotal', 'statut', 'dateReservation'];
     loadingR = true;
     users: any[] = [];
