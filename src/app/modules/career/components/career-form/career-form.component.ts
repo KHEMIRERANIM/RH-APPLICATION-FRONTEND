@@ -43,21 +43,18 @@ export class CareerFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.isEdit = !!this.data;
-
-    // ✅ Forcer la largeur du dialog depuis le composant
-    this.dialogRef.updateSize('620px');
-
+    this.dialogRef.updateSize('700px');
     this.form = this.fb.group({
-      title:                [this.data?.title || '',        [Validators.required, Validators.minLength(3)]],
-      description:          [this.data?.description || ''],
-      level:                [this.data?.level || '',         Validators.required],
-      domain:               [this.data?.domain || '',        Validators.required],
-      requiredSkills:       [this.data?.requiredSkills || []],
-      departement:          [this.data?.departement || ''],
-      poste:                [this.data?.poste || ''],
-      salaryMin:            [this.data?.salaryMin || null],
-      salaryMax:            [this.data?.salaryMax || null],
-      isRemoteFriendly:     [this.data?.isRemoteFriendly || false],
+      title:                   [this.data?.title || '',    [Validators.required, Validators.minLength(3)]],
+      description:             [this.data?.description || ''],
+      level:                   [this.data?.level || '',    Validators.required],
+      domain:                  [this.data?.domain || '',   Validators.required],
+      requiredSkills:          [this.data?.requiredSkills || []],
+      departement:             [this.data?.departement || ''],
+      poste:                   [this.data?.poste || ''],
+      salaryMin:               [this.data?.salaryMin || null],
+      salaryMax:               [this.data?.salaryMax || null],
+      isRemoteFriendly:        [this.data?.isRemoteFriendly || false],
       isAccessibleForDisabled: [this.data?.isAccessibleForDisabled || false]
     });
   }
@@ -69,44 +66,30 @@ export class CareerFormComponent implements OnInit {
   addSkill(): void {
     const skill = this.skillInput.trim();
     if (!skill) return;
-    const current = this.skills;
-    if (!current.includes(skill)) {
-      this.form.patchValue({ requiredSkills: [...current, skill] });
-    }
+    if (!this.skills.includes(skill))
+      this.form.patchValue({ requiredSkills: [...this.skills, skill] });
     this.skillInput = '';
   }
 
   removeSkill(skill: string): void {
-    this.form.patchValue({
-      requiredSkills: this.skills.filter(s => s !== skill)
-    });
+    this.form.patchValue({ requiredSkills: this.skills.filter(s => s !== skill) });
   }
 
   onSkillKeydown(event: KeyboardEvent): void {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      this.addSkill();
-    }
+    if (event.key === 'Enter') { event.preventDefault(); this.addSkill(); }
   }
 
   save(): void {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
+    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.isSaving = true;
-    const payload: Career = this.form.value;
-
     const request$ = this.isEdit
-      ? this.careerService.update(this.data!.id!, payload)
-      : this.careerService.create(payload);
-
+      ? this.careerService.update(this.data!.id!, this.form.value)
+      : this.careerService.create(this.form.value);
     request$.subscribe({
       next: () => {
         this.snackBar.open(
           this.isEdit ? 'Position updated!' : 'Position created!',
-          'OK',
-          { duration: 3000 }
+          'OK', { duration: 3000 }
         );
         this.dialogRef.close(true);
       },
@@ -117,7 +100,5 @@ export class CareerFormComponent implements OnInit {
     });
   }
 
-  cancel(): void {
-    this.dialogRef.close(false);
-  }
+  cancel(): void { this.dialogRef.close(false); }
 }

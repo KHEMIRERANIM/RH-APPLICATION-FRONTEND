@@ -1,64 +1,62 @@
 ::ng-deep {
 
-  // ✅ Fix colonnes : override Fuse theme
   .mat-mdc-header-cell {
     font-size: 11px !important;
     font-weight: 600 !important;
     text-transform: uppercase !important;
-    color: var(--fuse-text-secondary, #6b7280) !important;
+    color: #6b7280 !important;
     letter-spacing: 0.05em !important;
+    padding: 0 16px !important;
   }
 
-  .mat-mdc-cell,
-  .mat-mdc-header-cell {
+  .mat-mdc-cell {
+    padding: 8px 16px !important;
     overflow: visible !important;
-    white-space: nowrap !important;
-    padding: 0 12px !important;
   }
 
-  // Largeurs par colonne
   .mat-column-title {
-    min-width: 200px !important;
-    flex: 1 1 200px !important;
-    white-space: normal !important; // titre peut wrapper
+    min-width: 220px !important;
+    flex: 1 1 220px !important;
+    white-space: normal !important;
   }
-
   .mat-column-domain {
-    min-width: 150px !important;
-    flex: 0 0 150px !important;
+    min-width: 160px !important;
+    flex: 0 0 160px !important;
+    white-space: normal !important;
   }
-
   .mat-column-level {
-    min-width: 120px !important;
-    flex: 0 0 120px !important;
+    min-width: 130px !important;
+    flex: 0 0 130px !important;
   }
-
   .mat-column-salary {
-    min-width: 170px !important;
-    flex: 0 0 170px !important;
+    min-width: 190px !important;
+    flex: 0 0 190px !important;
+    white-space: nowrap !important;
   }
-
   .mat-column-options {
-    min-width: 120px !important;
-    flex: 0 0 120px !important;
+    min-width: 130px !important;
+    flex: 0 0 130px !important;
   }
-
-  // ✅ Actions : largeur fixe garantie, jamais tronquée
   .mat-column-actions {
-    min-width: 100px !important;
-    flex: 0 0 100px !important;
-    display: flex !important;
-    align-items: center !important;
+    min-width: 140px !important;
+    flex: 0 0 140px !important;
   }
 
-  // Hover row
   .career-row:hover {
     background-color: #eff6ff !important;
     transition: background-color 150ms ease !important;
   }
 
-  // Fix paginator texte
   .mat-mdc-paginator-range-label {
     font-size: 13px !important;
+  }
+
+  .new-position-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    height: 40px !important;
+    padding: 0 20px !important;
+    border-radius: 8px !important;
   }
 }

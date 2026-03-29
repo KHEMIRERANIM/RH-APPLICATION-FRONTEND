@@ -65,14 +65,14 @@ export class CareerListComponent implements OnInit, AfterViewInit {
   };
 
   levelIcons: Record<CareerLevel, string> = {
-    [CareerLevel.INTERN]: 'school',
-    [CareerLevel.JUNIOR]: 'signal_cellular_1_bar',
-    [CareerLevel.MID]: 'signal_cellular_2_bar',
-    [CareerLevel.SENIOR]: 'signal_cellular_3_bar',
-    [CareerLevel.LEAD]: 'star',
-    [CareerLevel.MANAGER]: 'manage_accounts',
-    [CareerLevel.DIRECTOR]: 'workspace_premium',
-    [CareerLevel.EXECUTIVE]: 'military_tech'
+    [CareerLevel.INTERN]: '○',
+    [CareerLevel.JUNIOR]: '◔',
+    [CareerLevel.MID]: '◑',
+    [CareerLevel.SENIOR]: '◕',
+    [CareerLevel.LEAD]: '★',
+    [CareerLevel.MANAGER]: '▲',
+    [CareerLevel.DIRECTOR]: '◆',
+    [CareerLevel.EXECUTIVE]: '♛'
   };
 
   constructor(
@@ -80,7 +80,7 @@ export class CareerListComponent implements OnInit, AfterViewInit {
     private dialog: MatDialog,
     private snackBar: MatSnackBar,
     private cdr: ChangeDetectorRef,
-    private ngZone: NgZone   // ✅ ajout NgZone
+    private ngZone: NgZone
   ) {}
 
   ngOnInit(): void {
@@ -88,25 +88,19 @@ export class CareerListComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    // Lier immédiatement — la table est toujours dans le DOM
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
   }
 
   loadCareers(): void {
     this.isLoading = true;
-
     this.careerService.getAll().subscribe({
       next: (data) => {
-        // ✅ ngZone.run() force Angular à traiter la mise à jour
-        // dans la zone correcte même avec Fuse lazy routing
         this.ngZone.run(() => {
           this.dataSource.data = data;
           this.computeStats(data);
           this.isLoading = false;
           this.cdr.detectChanges();
-
-          // ✅ Réassigner dans la zone après detectChanges
           Promise.resolve().then(() => {
             this.dataSource.paginator = this.paginator;
             this.dataSource.sort = this.sort;
@@ -118,7 +112,7 @@ export class CareerListComponent implements OnInit, AfterViewInit {
         this.ngZone.run(() => {
           this.isLoading = false;
           this.cdr.detectChanges();
-          this.snackBar.open('Erreur lors du chargement', 'Fermer', { duration: 3000 });
+          this.snackBar.open('Loading error', 'Close', { duration: 3000 });
         });
       }
     });
@@ -138,20 +132,20 @@ export class CareerListComponent implements OnInit, AfterViewInit {
   }
 
   applyFilter(event: Event): void {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource.filter = filterValue.trim().toLowerCase();
+    this.dataSource.filter = (event.target as HTMLInputElement).value.trim().toLowerCase();
   }
 
   openForm(career?: Career): void {
-    const dialogRef = this.dialog.open(CareerFormComponent, {
-      width: '680px',
-      data: career ? { ...career } : null,
-      panelClass: 'career-dialog'
-    });
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) this.loadCareers();
-    });
-  }
+  const dialogRef = this.dialog.open(CareerFormComponent, {
+    width: '700px',
+    maxWidth: '95vw',
+    data: career ? { ...career } : null,
+    panelClass: 'career-dialog'
+  });
+  dialogRef.afterClosed().subscribe(result => {
+    if (result) this.loadCareers();
+  });
+}
 
   deleteCareer(career: Career): void {
     if (!confirm(`Delete position "${career.title}"?`)) return;
