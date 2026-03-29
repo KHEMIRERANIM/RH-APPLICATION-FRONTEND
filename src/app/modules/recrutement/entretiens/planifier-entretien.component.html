@@ -1,0 +1,105 @@
+<div class="flex flex-col flex-auto min-w-0 p-6 sm:p-10">
+
+  <!-- Confirmation -->
+  <div *ngIf="submitted" class="flex flex-col items-center justify-center gap-6 py-16">
+    <div class="flex items-center justify-center w-20 h-20 rounded-full bg-green-100">
+      <mat-icon class="icon-size-12 text-green-600" [svgIcon]="'heroicons_outline:calendar-days'"></mat-icon>
+    </div>
+    <div class="text-center">
+      <h2 class="text-2xl font-bold mb-2">Entretien planifié !</h2>
+      <p class="text-secondary mb-6">L'entretien a été créé avec succès. Le candidat sera notifié.</p>
+      <div class="flex gap-3 justify-center">
+        <button mat-flat-button [color]="'primary'" (click)="retour()">
+          Retour au pipeline
+        </button>
+        <button mat-stroked-button routerLink="/recrutement/admin/entretiens">
+          Voir tous les entretiens
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <ng-container *ngIf="!submitted">
+
+    <div class="flex items-center gap-2 text-sm text-secondary mb-6 cursor-pointer" (click)="retour()">
+      <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:arrow-left'"></mat-icon>
+      Retour au pipeline
+    </div>
+
+    <div class="max-w-2xl mx-auto w-full">
+      <div class="bg-card rounded-2xl shadow p-8">
+        <h2 class="text-2xl font-bold mb-2">Planifier un entretien</h2>
+        <p class="text-secondary mb-8">Candidature : {{ candidature?.candidatId || 'Chargement...' }}</p>
+
+        <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-6">
+
+          <!-- Type d'entretien -->
+          <div>
+            <label class="block text-sm font-medium mb-2">Type d'entretien</label>
+            <div class="grid grid-cols-3 gap-3">
+              <button *ngFor="let t of typesEntretien" type="button"
+                class="flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all cursor-pointer"
+                [ngClass]="form.get('type')?.value === t ?
+                  'border-primary bg-primary-50 text-primary' :
+                  'border-gray-200 hover:border-gray-300'"
+                (click)="form.get('type')?.setValue(t)">
+                <mat-icon class="icon-size-6"
+                  [svgIcon]="t === 'TELEPHONIQUE' ? 'heroicons_outline:phone' :
+                             t === 'VISIO' ? 'heroicons_outline:video-camera' :
+                             'heroicons_outline:building-office-2'">
+                </mat-icon>
+                <span class="text-xs font-medium">{{ t }}</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Date et heure -->
+          <mat-form-field class="w-full">
+            <mat-label>Date et heure</mat-label>
+            <input matInput type="datetime-local" formControlName="dateHeure">
+            <mat-icon matSuffix [svgIcon]="'heroicons_outline:calendar'"></mat-icon>
+          </mat-form-field>
+
+          <!-- Durée -->
+          <mat-form-field class="w-full">
+            <mat-label>Durée (minutes)</mat-label>
+            <input matInput type="number" formControlName="dureeMinutes" min="15" step="15">
+            <mat-icon matSuffix [svgIcon]="'heroicons_outline:clock'"></mat-icon>
+          </mat-form-field>
+
+          <!-- Lien visio (si VISIO) -->
+          <mat-form-field *ngIf="showLienVisio" class="w-full">
+            <mat-label>Lien de visioconférence</mat-label>
+            <input matInput formControlName="lienVisio" placeholder="https://meet.google.com/...">
+            <mat-icon matSuffix [svgIcon]="'heroicons_outline:link'"></mat-icon>
+          </mat-form-field>
+
+          <!-- Lieu (si PRESENTIEL) -->
+          <mat-form-field *ngIf="showLieu" class="w-full">
+            <mat-label>Adresse / Salle</mat-label>
+            <input matInput formControlName="lieu" placeholder="Salle de réunion B, 2ème étage">
+            <mat-icon matSuffix [svgIcon]="'heroicons_outline:map-pin'"></mat-icon>
+          </mat-form-field>
+
+          <!-- Erreur -->
+          <fuse-alert *ngIf="errorMsg" type="error" [appearance]="'outline'">
+            {{ errorMsg }}
+          </fuse-alert>
+
+          <!-- Boutons -->
+          <div class="flex gap-3">
+            <button mat-stroked-button type="button" class="flex-1" (click)="retour()">Annuler</button>
+            <button mat-flat-button [color]="'primary'" type="submit" class="flex-1" [disabled]="loading || form.invalid">
+              <mat-progress-spinner *ngIf="loading" [diameter]="18" [mode]="'indeterminate'" class="mr-2">
+              </mat-progress-spinner>
+              {{ loading ? 'Planification...' : 'Planifier l\'entretien' }}
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+  </ng-container>
+
+</div>

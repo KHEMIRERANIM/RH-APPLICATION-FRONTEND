@@ -1,0 +1,135 @@
+<div class="flex flex-col flex-auto min-w-0 p-6 sm:p-10">
+
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h2 class="text-3xl font-extrabold tracking-tight">Dashboard Recrutement</h2>
+      <p class="text-secondary mt-1">Vue d'ensemble de votre activité de recrutement</p>
+    </div>
+    <button mat-flat-button [color]="'primary'" (click)="creerOffre()">
+      <mat-icon [svgIcon]="'heroicons_outline:plus'" class="mr-2"></mat-icon>
+      Nouvelle offre
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="flex items-center justify-center h-64">
+    <mat-progress-spinner [diameter]="48" [mode]="'indeterminate'"></mat-progress-spinner>
+  </div>
+
+  <ng-container *ngIf="!loading">
+
+    <!-- KPI Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+
+      <div class="bg-card rounded-2xl shadow p-6">
+        <div class="flex items-center justify-between mb-4">
+          <p class="text-sm font-medium text-secondary">Offres publiées</p>
+          <div class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100">
+            <mat-icon class="icon-size-5 text-blue-600" [svgIcon]="'heroicons_outline:briefcase'"></mat-icon>
+          </div>
+        </div>
+        <p class="text-4xl font-extrabold">{{ totalOffresPubliees }}</p>
+        <p class="text-sm text-secondary mt-1">{{ offres.length }} offre(s) au total</p>
+      </div>
+
+      <div class="bg-card rounded-2xl shadow p-6">
+        <div class="flex items-center justify-between mb-4">
+          <p class="text-sm font-medium text-secondary">Candidatures reçues</p>
+          <div class="flex items-center justify-center w-10 h-10 rounded-full bg-green-100">
+            <mat-icon class="icon-size-5 text-green-600" [svgIcon]="'heroicons_outline:users'"></mat-icon>
+          </div>
+        </div>
+        <p class="text-4xl font-extrabold">{{ totalCandidatures }}</p>
+        <p class="text-sm text-secondary mt-1">Toutes offres confondues</p>
+      </div>
+
+      <div class="bg-card rounded-2xl shadow p-6">
+        <div class="flex items-center justify-between mb-4">
+          <p class="text-sm font-medium text-secondary">Entretiens à venir</p>
+          <div class="flex items-center justify-center w-10 h-10 rounded-full bg-purple-100">
+            <mat-icon class="icon-size-5 text-purple-600" [svgIcon]="'heroicons_outline:calendar-days'"></mat-icon>
+          </div>
+        </div>
+        <p class="text-4xl font-extrabold">{{ entretiensCount }}</p>
+        <p class="text-sm text-secondary mt-1">Planifiés</p>
+      </div>
+
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+      <!-- Mes offres -->
+      <div class="bg-card rounded-2xl shadow overflow-hidden">
+        <div class="flex items-center justify-between p-6 border-b">
+          <h3 class="font-bold text-lg">Mes offres</h3>
+          <button mat-stroked-button routerLink="/recrutement/offres">Voir tout</button>
+        </div>
+        <div class="divide-y">
+          <div *ngIf="offres.length === 0" class="p-6 text-center text-secondary">
+            Aucune offre créée
+          </div>
+          <div *ngFor="let offre of offres | slice:0:5"
+            class="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
+            <div class="flex-auto min-w-0 mr-4">
+              <p class="font-medium truncate">{{ offre.titre }}</p>
+              <p class="text-sm text-secondary">{{ offre.nombreCandidatures }} candidature(s) · {{ offre.localisation }}</p>
+            </div>
+            <div class="flex items-center gap-2 flex-shrink-0">
+              <span class="px-2 py-0.5 rounded-full text-xs font-medium"
+                [ngClass]="offre.statut === 'PUBLIEE' ? 'bg-green-100 text-green-800' :
+                           offre.statut === 'BROUILLON' ? 'bg-yellow-100 text-yellow-800' :
+                           'bg-gray-100 text-gray-600'">
+                {{ offre.statut }}
+              </span>
+              <button mat-icon-button (click)="voirPipeline(offre)" matTooltip="Voir le pipeline">
+                <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:view-columns'"></mat-icon>
+              </button>
+              <button *ngIf="offre.statut === 'BROUILLON'" mat-icon-button [color]="'primary'"
+                (click)="publierOffre(offre)" matTooltip="Publier">
+                <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:paper-airplane'"></mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Entretiens à venir -->
+      <div class="bg-card rounded-2xl shadow overflow-hidden">
+        <div class="flex items-center justify-between p-6 border-b">
+          <h3 class="font-bold text-lg">Entretiens à venir</h3>
+          <button mat-stroked-button routerLink="/recrutement/admin/entretiens">Voir tout</button>
+        </div>
+        <div class="divide-y">
+          <div *ngIf="entretiensAVenir.length === 0" class="p-6 text-center text-secondary">
+            Aucun entretien planifié
+          </div>
+          <div *ngFor="let e of entretiensAVenir | slice:0:5"
+            class="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
+            <div class="flex items-center gap-3">
+              <div class="flex items-center justify-center w-10 h-10 rounded-full"
+                [ngClass]="e.type === 'VISIO' ? 'bg-blue-100' :
+                           e.type === 'PRESENTIEL' ? 'bg-green-100' : 'bg-yellow-100'">
+                <mat-icon class="icon-size-5"
+                  [ngClass]="e.type === 'VISIO' ? 'text-blue-600' :
+                             e.type === 'PRESENTIEL' ? 'text-green-600' : 'text-yellow-600'"
+                  [svgIcon]="e.type === 'VISIO' ? 'heroicons_outline:video-camera' :
+                             e.type === 'PRESENTIEL' ? 'heroicons_outline:building-office-2' :
+                             'heroicons_outline:phone'">
+                </mat-icon>
+              </div>
+              <div>
+                <p class="font-medium text-sm">{{ e.type }}</p>
+                <p class="text-xs text-secondary">{{ e.dateHeure | date:'dd/MM/yyyy à HH:mm' }} · {{ e.dureeMinutes }} min</p>
+              </div>
+            </div>
+            <a [routerLink]="['/recrutement/admin/entretiens', e.id, 'feedback']"
+              class="text-sm text-primary hover:underline">
+              Feedback
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </ng-container>
+</div>

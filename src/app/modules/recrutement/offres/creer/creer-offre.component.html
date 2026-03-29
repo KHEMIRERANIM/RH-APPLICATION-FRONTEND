@@ -1,0 +1,149 @@
+<div class="flex flex-col flex-auto min-w-0 p-6 sm:p-10">
+
+  <div class="flex items-center gap-2 text-sm text-secondary mb-6 cursor-pointer" (click)="retour()">
+    <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:arrow-left'"></mat-icon>
+    Retour
+  </div>
+
+  <div class="max-w-3xl mx-auto w-full">
+    <h2 class="text-2xl font-bold mb-8">Créer une offre d'emploi</h2>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-6">
+
+      <!-- Section 1 -->
+      <div class="bg-card rounded-2xl shadow p-6">
+        <h3 class="font-semibold text-lg mb-5 flex items-center gap-2">
+          <span class="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-white text-xs font-bold">1</span>
+          Informations générales
+        </h3>
+        <div class="flex flex-col gap-4">
+          <mat-form-field class="w-full">
+            <mat-label>Titre du poste</mat-label>
+            <input matInput formControlName="titre" placeholder="Ex: Développeur Full Stack">
+            <mat-error>Le titre est requis</mat-error>
+          </mat-form-field>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <mat-form-field>
+              <mat-label>Département</mat-label>
+              <mat-select formControlName="departement">
+                <mat-option *ngFor="let d of departements" [value]="d">{{ d }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>Localisation</mat-label>
+              <input matInput formControlName="localisation" placeholder="Tunis, Sfax...">
+            </mat-form-field>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <mat-form-field>
+              <mat-label>Type de contrat</mat-label>
+              <mat-select formControlName="typeContrat">
+                <mat-option *ngFor="let t of typesContrat" [value]="t">{{ t }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>Niveau d'expérience</mat-label>
+              <mat-select formControlName="niveauExperience">
+                <mat-option *ngFor="let n of niveauxExp" [value]="n">{{ n }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>Niveau d'études</mat-label>
+              <mat-select formControlName="niveauEtudes">
+                <mat-option *ngFor="let n of niveauxEtudes" [value]="n">{{ n }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2 -->
+      <div class="bg-card rounded-2xl shadow p-6">
+        <h3 class="font-semibold text-lg mb-5 flex items-center gap-2">
+          <span class="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-white text-xs font-bold">2</span>
+          Description
+        </h3>
+        <mat-form-field class="w-full">
+          <mat-label>Description détaillée</mat-label>
+          <textarea matInput formControlName="description" rows="6"
+            placeholder="Décrivez les missions, le contexte..."></textarea>
+          <mat-hint>Minimum 50 caractères</mat-hint>
+          <mat-error>La description doit faire au moins 50 caractères</mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Section 3 -->
+      <div class="bg-card rounded-2xl shadow p-6">
+        <h3 class="font-semibold text-lg mb-5 flex items-center gap-2">
+          <span class="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-white text-xs font-bold">3</span>
+          Compétences & avantages
+        </h3>
+        <div class="mb-5">
+          <label class="block text-sm font-medium mb-2">Compétences requises</label>
+          <mat-form-field class="w-full">
+            <mat-chip-grid #chipComp>
+              <mat-chip-row *ngFor="let c of competences" (removed)="removeCompetence(c)">
+                {{ c }}<button matChipRemove><mat-icon>cancel</mat-icon></button>
+              </mat-chip-row>
+            </mat-chip-grid>
+            <input placeholder="Appuyez sur Entrée..."
+              [matChipInputFor]="chipComp"
+              [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+              (matChipInputTokenEnd)="addCompetence($event)">
+          </mat-form-field>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2">Avantages</label>
+          <mat-form-field class="w-full">
+            <mat-chip-grid #chipAv>
+              <mat-chip-row *ngFor="let a of avantages" (removed)="removeAvantage(a)">
+                {{ a }}<button matChipRemove><mat-icon>cancel</mat-icon></button>
+              </mat-chip-row>
+            </mat-chip-grid>
+            <input placeholder="Ex: Télétravail, Tickets repas..."
+              [matChipInputFor]="chipAv"
+              [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+              (matChipInputTokenEnd)="addAvantage($event)">
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Section 4 -->
+      <div class="bg-card rounded-2xl shadow p-6">
+        <h3 class="font-semibold text-lg mb-5 flex items-center gap-2">
+          <span class="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-white text-xs font-bold">4</span>
+          Conditions & publication
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <mat-form-field>
+            <mat-label>Salaire minimum (TND)</mat-label>
+            <input matInput type="number" formControlName="salaireMin" min="0">
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>Salaire maximum (TND)</mat-label>
+            <input matInput type="number" formControlName="salaireMax" min="0">
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>Nombre de postes</mat-label>
+            <input matInput type="number" formControlName="nombrePostes" min="1">
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>Date d'expiration</mat-label>
+            <input matInput type="datetime-local" formControlName="dateExpiration">
+          </mat-form-field>
+        </div>
+      </div>
+
+      <fuse-alert *ngIf="errorMsg" type="error" [appearance]="'outline'">{{ errorMsg }}</fuse-alert>
+
+      <div class="flex gap-4">
+        <button mat-stroked-button type="button" class="flex-1" (click)="retour()">Annuler</button>
+        <button mat-flat-button [color]="'primary'" type="submit" class="flex-1"
+          [disabled]="loading || form.invalid">
+          {{ loading ? 'Création...' : "Créer l'offre" }}
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>

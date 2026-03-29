@@ -1,0 +1,48 @@
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import {
+  Entretien,
+  CreateEntretienRequest,
+  FeedbackEntretienRequest,
+} from '../models/recrutement.models';
+
+@Injectable({ providedIn: 'root' })
+export class EntretienService {
+
+  private api = 'http://localhost:8081/api/recrutement/entretiens';
+
+  constructor(private http: HttpClient) {}
+
+  planifierEntretien(request: CreateEntretienRequest): Observable<Entretien> {
+    return this.http.post<Entretien>(this.api, request);
+  }
+
+  getEntretienById(id: string): Observable<Entretien> {
+    return this.http.get<Entretien>(`${this.api}/${id}`);
+  }
+
+  getEntretiensParCandidature(candidatureId: string): Observable<Entretien[]> {
+    return this.http.get<Entretien[]>(`${this.api}/candidature/${candidatureId}`);
+  }
+
+  getEntretiensParRecruteur(recruteurId: string): Observable<Entretien[]> {
+    return this.http.get<Entretien[]>(`${this.api}/recruteur/${recruteurId}`);
+  }
+
+  modifierEntretien(id: string, request: CreateEntretienRequest): Observable<Entretien> {
+    return this.http.put<Entretien>(`${this.api}/${id}`, request);
+  }
+
+  ajouterFeedback(id: string, request: FeedbackEntretienRequest): Observable<Entretien> {
+    return this.http.post<Entretien>(`${this.api}/${id}/feedback`, request);
+  }
+
+  annulerEntretien(id: string): Observable<void> {
+    return this.http.patch<void>(`${this.api}/${id}/annuler`, {});
+  }
+
+  marquerRealise(id: string): Observable<void> {
+    return this.http.patch<void>(`${this.api}/${id}/realise`, {});
+  }
+}

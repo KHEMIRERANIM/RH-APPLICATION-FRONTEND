@@ -102,6 +102,8 @@ export const appRoutes: Route[] = [
                 {path: 'notes', loadChildren: () => import('app/modules/admin/apps/notes/notes.module').then(m => m.NotesModule)},
                 {path: 'scrumboard', loadChildren: () => import('app/modules/admin/apps/scrumboard/scrumboard.module').then(m => m.ScrumboardModule)},
                 {path: 'tasks', loadChildren: () => import('app/modules/admin/apps/tasks/tasks.module').then(m => m.TasksModule)},
+                // MODULE RECRUTEMENT
+
             ]},
 
             // Pages
@@ -207,6 +209,11 @@ export const appRoutes: Route[] = [
                 // Guides
                 {path: 'guides', loadChildren: () => import('app/modules/admin/docs/guides/guides.module').then(m => m.GuidesModule)}
             ]},
+            {
+                path: 'recrutement',
+                loadChildren: () => import('app/modules/recrutement/recrutement.module')
+                    .then(m => m.RecrutementModule)
+            },
 
             // 404 & Catch all
             {path: '404-not-found', pathMatch: 'full', loadChildren: () => import('app/modules/admin/pages/error/error-404/error-404.module').then(m => m.Error404Module)},

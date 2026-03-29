@@ -1,0 +1,118 @@
+<div class="flex flex-col flex-auto min-w-0">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row items-start sm:items-center p-6 sm:p-10 pb-4 gap-4">
+    <div class="flex-auto">
+      <h2 class="text-3xl font-extrabold tracking-tight leading-none">Offres d'emploi</h2>
+      <p class="text-secondary mt-1">{{ offres.length }} offre(s) disponible(s)</p>
+    </div>
+    <button *ngIf="isAdmin" mat-flat-button [color]="'primary'" (click)="creerOffre()">
+      <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+      <span class="ml-2">Créer une offre</span>
+    </button>
+  </div>
+
+  <!-- Filtres -->
+  <div class="flex flex-wrap gap-3 px-6 sm:px-10 pb-4">
+    <mat-form-field class="fuse-mat-dense flex-1 min-w-48" [subscriptSizing]="'dynamic'">
+      <mat-icon matPrefix [svgIcon]="'heroicons_solid:magnifying-glass'" class="icon-size-4"></mat-icon>
+      <input matInput [formControl]="searchCtrl" placeholder="Rechercher un poste...">
+    </mat-form-field>
+    <mat-form-field class="fuse-mat-dense w-40" [subscriptSizing]="'dynamic'">
+      <mat-select [formControl]="departementCtrl" placeholder="Département" (selectionChange)="applyFilters()">
+        <mat-option value="">Tous</mat-option>
+        <mat-option *ngFor="let d of departements" [value]="d">{{ d }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field class="fuse-mat-dense w-40" [subscriptSizing]="'dynamic'">
+      <mat-select [formControl]="typeContratCtrl" placeholder="Contrat" (selectionChange)="applyFilters()">
+        <mat-option value="">Tous</mat-option>
+        <mat-option *ngFor="let t of typesContrat" [value]="t">{{ t }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <button mat-stroked-button (click)="resetFilters()" class="h-10">
+      <mat-icon [svgIcon]="'heroicons_outline:x-mark'" class="icon-size-4 mr-1"></mat-icon>
+      Réinitialiser
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="flex items-center justify-center h-64">
+    <mat-progress-spinner [diameter]="40" [mode]="'indeterminate'"></mat-progress-spinner>
+  </div>
+
+  <!-- Empty -->
+  <div *ngIf="!loading && offres.length === 0"
+    class="flex flex-col items-center justify-center h-64 gap-4">
+    <mat-icon class="icon-size-24 text-hint" [svgIcon]="'heroicons_outline:briefcase'"></mat-icon>
+    <p class="text-xl font-medium text-secondary">Aucune offre disponible</p>
+  </div>
+
+  <!-- Grille -->
+  <div *ngIf="!loading && offres.length > 0"
+    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6 sm:p-10 pt-4">
+    <div *ngFor="let offre of offres"
+      class="flex flex-col bg-card rounded-2xl shadow overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+      (click)="voirDetail(offre)">
+      <div class="h-2 bg-primary"></div>
+      <div class="flex flex-col flex-auto p-6 gap-3">
+        <div class="flex items-center gap-2">
+          <span class="px-2.5 py-0.5 rounded-full text-xs font-medium"
+            [ngClass]="badgeContrat(offre.typeContrat)">
+            {{ offre.typeContrat }}
+          </span>
+          <span class="text-xs text-secondary font-medium">{{ offre.departement }}</span>
+        </div>
+        <h3 class="text-lg font-semibold leading-tight line-clamp-2">{{ offre.titre }}</h3>
+        <div class="flex flex-col gap-1.5 text-sm text-secondary">
+          <div class="flex items-center gap-1.5">
+            <mat-icon class="icon-size-4 text-hint" [svgIcon]="'heroicons_outline:map-pin'"></mat-icon>
+            {{ offre.localisation }}
+          </div>
+          <div class="flex items-center gap-1.5">
+            <mat-icon class="icon-size-4 text-hint" [svgIcon]="'heroicons_outline:banknotes'"></mat-icon>
+            {{ offre.salaireMin | number }} – {{ offre.salaireMax | number }} TND
+          </div>
+          <div class="flex items-center gap-1.5">
+            <mat-icon class="icon-size-4 text-hint" [svgIcon]="'heroicons_outline:user-group'"></mat-icon>
+            {{ offre.nombreCandidatures }} candidature(s)
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-1.5 mt-1">
+          <span *ngFor="let comp of offre.competencesRequises | slice:0:3"
+            class="px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-700">
+            {{ comp }}
+          </span>
+          <span *ngIf="offre.competencesRequises?.length > 3"
+            class="px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-500">
+            +{{ offre.competencesRequises.length - 3 }}
+          </span>
+        </div>
+        <div class="flex items-center gap-2 mt-auto pt-4 border-t">
+          <ng-container *ngIf="!isAdmin">
+            <button mat-flat-button [color]="'primary'" class="flex-1"
+              (click)="postuler(offre); $event.stopPropagation()">
+              Postuler
+            </button>
+            <button mat-stroked-button
+              (click)="voirDetail(offre); $event.stopPropagation()">
+              Détails
+            </button>
+          </ng-container>
+          <ng-container *ngIf="isAdmin">
+            <button mat-stroked-button class="flex-1"
+              (click)="voirPipeline(offre); $event.stopPropagation()">
+              <mat-icon [svgIcon]="'heroicons_outline:view-columns'" class="icon-size-4 mr-1"></mat-icon>
+              Pipeline
+            </button>
+            <button *ngIf="offre.statut === 'BROUILLON'" mat-flat-button [color]="'primary'"
+              (click)="publier(offre, $event)">
+              Publier
+            </button>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

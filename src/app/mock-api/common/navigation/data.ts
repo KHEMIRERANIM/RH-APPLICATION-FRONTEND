@@ -51,7 +51,7 @@ export const defaultNavigation: FuseNavigationItem[] = [
                 title: 'Recrutement',
                 type : 'basic',
                 icon : 'heroicons_outline:user-group',
-                link : '/apps/contacts'
+                link : '/recrutement/offres'
             },
             {
                 id   : 'apps.ecommerce',

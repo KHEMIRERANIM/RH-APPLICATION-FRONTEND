@@ -1,0 +1,117 @@
+<div class="flex flex-col flex-auto min-w-0 p-6 sm:p-10">
+
+  <div *ngIf="submitted" class="flex flex-col items-center justify-center gap-6 py-16">
+    <div class="flex items-center justify-center w-20 h-20 rounded-full bg-green-100">
+      <mat-icon class="icon-size-12 text-green-600" [svgIcon]="'heroicons_outline:clipboard-document-check'"></mat-icon>
+    </div>
+    <div class="text-center">
+      <h2 class="text-2xl font-bold mb-2">Feedback soumis !</h2>
+      <p class="text-secondary mb-6">L'évaluation a été enregistrée avec succès.</p>
+      <button mat-flat-button [color]="'primary'" (click)="retour()">Retour aux entretiens</button>
+    </div>
+  </div>
+
+  <ng-container *ngIf="!submitted">
+    <div class="flex items-center gap-2 text-sm text-secondary mb-6 cursor-pointer" (click)="retour()">
+      <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:arrow-left'"></mat-icon>
+      Retour
+    </div>
+
+    <div class="max-w-2xl mx-auto w-full">
+      <div class="bg-card rounded-2xl shadow p-8">
+        <h2 class="text-2xl font-bold mb-8">Feedback d'entretien</h2>
+
+        <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-6">
+
+          <!-- Note globale -->
+          <div>
+            <label class="block text-sm font-medium mb-3">
+              Note globale : <span class="text-primary font-bold">{{ form.get('noteGlobale')?.value }}/10</span>
+              — {{ noteLabels[form.get('noteGlobale')?.value] }}
+            </label>
+            <div class="flex gap-2">
+              <button *ngFor="let n of [1,2,3,4,5,6,7,8,9,10]" type="button"
+                class="flex items-center justify-center w-10 h-10 rounded-xl border-2 font-bold text-sm transition-all"
+                [ngClass]="form.get('noteGlobale')?.value === n ?
+                  'border-primary bg-primary text-white' :
+                  'border-gray-200 hover:border-primary hover:text-primary'"
+                (click)="form.get('noteGlobale')?.setValue(n)">
+                {{ n }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Feedback global -->
+          <mat-form-field class="w-full">
+            <mat-label>Feedback global</mat-label>
+            <textarea matInput formControlName="feedbackGlobal" rows="4"
+              placeholder="Décrivez l'impression générale, le déroulement de l'entretien...">
+            </textarea>
+          </mat-form-field>
+
+          <!-- Points forts -->
+          <div>
+            <label class="block text-sm font-medium mb-2">Points forts</label>
+            <div class="flex gap-2 mb-2">
+              <input class="flex-auto border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                placeholder="Ajouter un point fort..." [(ngModel)]="newPointFort" [ngModelOptions]="{standalone:true}"
+                (keyup.enter)="addPointFort()">
+              <button type="button" mat-icon-button [color]="'primary'" (click)="addPointFort()">
+                <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+              </button>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <span *ngFor="let p of pointsFortsList; let i = index"
+                class="flex items-center gap-1.5 px-3 py-1 rounded-full text-sm bg-green-100 text-green-800">
+                {{ p }}
+                <button type="button" class="text-green-600 hover:text-green-900" (click)="removePointFort(i)">×</button>
+              </span>
+            </div>
+          </div>
+
+          <!-- Points faibles -->
+          <div>
+            <label class="block text-sm font-medium mb-2">Points à améliorer</label>
+            <div class="flex gap-2 mb-2">
+              <input class="flex-auto border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                placeholder="Ajouter un point à améliorer..." [(ngModel)]="newPointFaible" [ngModelOptions]="{standalone:true}"
+                (keyup.enter)="addPointFaible()">
+              <button type="button" mat-icon-button [color]="'warn'" (click)="addPointFaible()">
+                <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+              </button>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <span *ngFor="let p of pointsFaiblesList; let i = index"
+                class="flex items-center gap-1.5 px-3 py-1 rounded-full text-sm bg-red-100 text-red-800">
+                {{ p }}
+                <button type="button" class="text-red-600 hover:text-red-900" (click)="removePointFaible(i)">×</button>
+              </span>
+            </div>
+          </div>
+
+          <!-- Recommande embauche -->
+          <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+            <div>
+              <p class="font-medium">Recommander l'embauche</p>
+              <p class="text-sm text-secondary">Pensez-vous que ce candidat devrait être recruté ?</p>
+            </div>
+            <mat-slide-toggle formControlName="recommandeEmbauche" [color]="'primary'"></mat-slide-toggle>
+          </div>
+
+          <!-- Erreur -->
+          <fuse-alert *ngIf="errorMsg" type="error" [appearance]="'outline'">{{ errorMsg }}</fuse-alert>
+
+          <!-- Boutons -->
+          <div class="flex gap-3">
+            <button mat-stroked-button type="button" class="flex-1" (click)="retour()">Annuler</button>
+            <button mat-flat-button [color]="'primary'" type="submit" class="flex-1" [disabled]="loading || form.invalid">
+              {{ loading ? 'Envoi...' : 'Soumettre le feedback' }}
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </ng-container>
+
+</div>

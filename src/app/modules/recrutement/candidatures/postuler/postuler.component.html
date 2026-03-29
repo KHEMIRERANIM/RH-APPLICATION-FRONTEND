@@ -1,0 +1,138 @@
+<div class="flex flex-col flex-auto min-w-0 p-6 sm:p-10">
+
+  <!-- Confirmation -->
+  <div *ngIf="submitted" class="flex flex-col items-center justify-center gap-6 py-16">
+    <div class="flex items-center justify-center w-20 h-20 rounded-full bg-green-100">
+      <mat-icon class="icon-size-12 text-green-600" [svgIcon]="'heroicons_outline:check-circle'"></mat-icon>
+    </div>
+    <div class="text-center">
+      <h2 class="text-2xl font-bold mb-2">Candidature envoyée !</h2>
+      <p class="text-secondary mb-6">
+        Votre candidature pour le poste <strong>{{ offre?.titre }}</strong> a bien été transmise.
+        Vous pouvez suivre son avancement dans votre espace candidat.
+      </p>
+      <div class="flex gap-3 justify-center">
+        <button mat-flat-button [color]="'primary'" routerLink="/recrutement/mes-candidatures">
+          Mes candidatures
+        </button>
+        <button mat-stroked-button routerLink="/recrutement/offres">
+          Voir d'autres offres
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Formulaire -->
+  <ng-container *ngIf="!submitted">
+
+    <div class="flex items-center gap-2 text-sm text-secondary mb-6 cursor-pointer" (click)="retour()">
+      <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:arrow-left'"></mat-icon>
+      Retour à l'offre
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <!-- Formulaire principal -->
+      <div class="lg:col-span-2">
+        <div class="bg-card rounded-2xl shadow p-8">
+          <h2 class="text-2xl font-bold mb-6">Postuler à cette offre</h2>
+
+          <form [formGroup]="form" (ngSubmit)="submit()">
+
+            <!-- Upload CV -->
+            <div class="mb-6">
+              <label class="block text-sm font-medium mb-2">
+                CV (PDF) <span class="text-red-500">*</span>
+              </label>
+              <div class="flex items-center justify-center w-full">
+                <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  [ngClass]="cvFile ? 'border-green-400 bg-green-50 dark:bg-green-900/20' : 'border-gray-300'">
+                  <div class="flex flex-col items-center justify-center gap-2">
+                    <mat-icon [svgIcon]="cvFile ? 'heroicons_outline:document-check' : 'heroicons_outline:document-arrow-up'"
+                      class="icon-size-8" [ngClass]="cvFile ? 'text-green-600' : 'text-secondary'">
+                    </mat-icon>
+                    <p class="text-sm" [ngClass]="cvFile ? 'text-green-700 font-medium' : 'text-secondary'">
+                      {{ cvFile ? cvFile.name : 'Cliquez pour uploader votre CV (PDF)' }}
+                    </p>
+                  </div>
+                  <input type="file" accept=".pdf" class="hidden" (change)="onCvChange($event)">
+                </label>
+              </div>
+              <p *ngIf="form.get('cvFile')?.invalid && form.get('cvFile')?.touched"
+                class="text-red-500 text-xs mt-1">Le CV est obligatoire</p>
+            </div>
+
+            <!-- Upload Lettre -->
+            <div class="mb-8">
+              <label class="block text-sm font-medium mb-2">
+                Lettre de motivation (PDF) <span class="text-gray-400 text-xs">— optionnel</span>
+              </label>
+              <div class="flex items-center justify-center w-full">
+                <label class="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-xl cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  [ngClass]="lettreFile ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300'">
+                  <div class="flex flex-col items-center justify-center gap-1">
+                    <mat-icon [svgIcon]="lettreFile ? 'heroicons_outline:document-check' : 'heroicons_outline:document-plus'"
+                      class="icon-size-6" [ngClass]="lettreFile ? 'text-blue-600' : 'text-secondary'">
+                    </mat-icon>
+                    <p class="text-sm" [ngClass]="lettreFile ? 'text-blue-700 font-medium' : 'text-secondary'">
+                      {{ lettreFile ? lettreFile.name : 'Lettre de motivation (optionnel)' }}
+                    </p>
+                  </div>
+                  <input type="file" accept=".pdf" class="hidden" (change)="onLettreChange($event)">
+                </label>
+              </div>
+            </div>
+
+            <!-- Erreur -->
+            <fuse-alert *ngIf="errorMsg" type="error" class="mb-4" [appearance]="'outline'">
+              {{ errorMsg }}
+            </fuse-alert>
+
+            <!-- Submit -->
+            <button mat-flat-button [color]="'primary'" class="w-full py-3" type="submit"
+              [disabled]="loading || form.invalid">
+              <mat-progress-spinner *ngIf="loading" [diameter]="20" [mode]="'indeterminate'" class="mr-2">
+              </mat-progress-spinner>
+              <span>{{ loading ? 'Envoi en cours...' : 'Envoyer ma candidature' }}</span>
+            </button>
+
+          </form>
+        </div>
+      </div>
+
+      <!-- Récap offre -->
+      <div>
+        <div *ngIf="offre" class="bg-card rounded-2xl shadow p-6 sticky top-6">
+          <h3 class="font-semibold text-lg mb-4">{{ offre.titre }}</h3>
+          <div class="flex flex-col gap-3 text-sm text-secondary">
+            <div class="flex items-center gap-2">
+              <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:building-office-2'"></mat-icon>
+              {{ offre.departement }}
+            </div>
+            <div class="flex items-center gap-2">
+              <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:map-pin'"></mat-icon>
+              {{ offre.localisation }}
+            </div>
+            <div class="flex items-center gap-2">
+              <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:banknotes'"></mat-icon>
+              {{ offre.salaireMin | number }} – {{ offre.salaireMax | number }} TND
+            </div>
+            <div class="flex items-center gap-2">
+              <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:tag'"></mat-icon>
+              {{ offre.typeContrat }}
+            </div>
+          </div>
+          <mat-divider class="my-4"></mat-divider>
+          <div class="flex flex-wrap gap-1.5">
+            <span *ngFor="let comp of offre.competencesRequises"
+              class="px-2 py-0.5 rounded-full text-xs bg-primary-50 text-primary-700">
+              {{ comp }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </ng-container>
+
+</div>

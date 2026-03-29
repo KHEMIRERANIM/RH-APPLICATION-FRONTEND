@@ -1,0 +1,115 @@
+<div class="flex flex-col flex-auto min-w-0 p-6 sm:p-10">
+
+  <div *ngIf="loading" class="flex items-center justify-center h-64">
+    <mat-progress-spinner [diameter]="40" [mode]="'indeterminate'"></mat-progress-spinner>
+  </div>
+
+  <ng-container *ngIf="!loading && offre">
+    <div class="flex items-center gap-2 text-sm text-secondary mb-6 cursor-pointer" (click)="retour()">
+      <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:arrow-left'"></mat-icon>
+      Retour aux offres
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <!-- Colonne principale -->
+      <div class="lg:col-span-2 flex flex-col gap-6">
+        <div class="bg-card rounded-2xl shadow p-6">
+          <div class="flex flex-wrap gap-2 mb-3">
+            <span class="px-3 py-1 rounded-full text-sm font-medium bg-primary-100 text-primary-800">
+              {{ offre.typeContrat }}
+            </span>
+            <span class="px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700">
+              {{ offre.departement }}
+            </span>
+          </div>
+          <h1 class="text-3xl font-extrabold tracking-tight mb-4">{{ offre.titre }}</h1>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
+            <div class="flex items-center gap-2 text-secondary">
+              <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:map-pin'"></mat-icon>
+              {{ offre.localisation }}
+            </div>
+            <div class="flex items-center gap-2 text-secondary">
+              <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:academic-cap'"></mat-icon>
+              {{ offre.niveauEtudes }}
+            </div>
+            <div class="flex items-center gap-2 text-secondary">
+              <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:clock'"></mat-icon>
+              {{ offre.niveauExperience }}
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-card rounded-2xl shadow p-6">
+          <h2 class="text-lg font-semibold mb-4">Description du poste</h2>
+          <p class="text-secondary leading-relaxed whitespace-pre-line">{{ offre.description }}</p>
+        </div>
+
+        <div class="bg-card rounded-2xl shadow p-6">
+          <h2 class="text-lg font-semibold mb-4">Compétences requises</h2>
+          <div class="flex flex-wrap gap-2">
+            <span *ngFor="let comp of offre.competencesRequises"
+              class="px-3 py-1 rounded-full text-sm bg-primary-50 text-primary-700 border border-primary-200">
+              {{ comp }}
+            </span>
+          </div>
+        </div>
+
+        <div *ngIf="offre.avantages?.length" class="bg-card rounded-2xl shadow p-6">
+          <h2 class="text-lg font-semibold mb-4">Avantages</h2>
+          <div class="flex flex-wrap gap-2">
+            <span *ngFor="let av of offre.avantages"
+              class="flex items-center gap-1.5 px-3 py-1 rounded-full text-sm bg-green-50 text-green-700 border border-green-200">
+              <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:check-circle'"></mat-icon>
+              {{ av }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="flex flex-col gap-6">
+        <div class="bg-card rounded-2xl shadow p-6 sticky top-6">
+          <div class="text-center mb-4">
+            <p class="text-sm text-secondary mb-1">Rémunération</p>
+            <p class="text-2xl font-extrabold text-primary">
+              {{ offre.salaireMin | number }} – {{ offre.salaireMax | number }}
+            </p>
+            <p class="text-sm text-secondary">TND / mois</p>
+          </div>
+          <div class="flex flex-col gap-3 text-sm mb-4">
+            <div class="flex justify-between">
+              <span class="text-secondary">Postes disponibles</span>
+              <span class="font-medium">{{ offre.nombrePostes }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-secondary">Candidatures reçues</span>
+              <span class="font-medium">{{ offre.nombreCandidatures }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-secondary">Expire le</span>
+              <span class="font-medium">{{ offre.dateExpiration | date:'dd/MM/yyyy' }}</span>
+            </div>
+          </div>
+          <mat-divider class="my-4"></mat-divider>
+          <ng-container *ngIf="!isAdmin">
+            <button mat-flat-button [color]="'primary'" class="w-full" (click)="postuler()">
+              <mat-icon [svgIcon]="'heroicons_outline:paper-airplane'" class="mr-2"></mat-icon>
+              Postuler maintenant
+            </button>
+          </ng-container>
+          <ng-container *ngIf="isAdmin">
+            <button mat-flat-button [color]="'primary'" class="w-full mb-2" (click)="voirPipeline()">
+              <mat-icon [svgIcon]="'heroicons_outline:view-columns'" class="mr-2"></mat-icon>
+              Voir le pipeline
+            </button>
+            <button *ngIf="offre.statut === 'BROUILLON'" mat-stroked-button class="w-full" (click)="publier()">
+              Publier l'offre
+            </button>
+          </ng-container>
+        </div>
+      </div>
+
+    </div>
+  </ng-container>
+</div>
