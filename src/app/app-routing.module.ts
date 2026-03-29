@@ -12,6 +12,8 @@ export const appRoutes: Route[] = [
 {path: 'admin/team',loadChildren: () => import('./modules/admin/dashboards/project/team-admin/team-admin.module').then(m => m.TeamAdminModule)},
     // Redirect empty path to sign-in (unauthenticated) or dashboard (authenticated via NoAuthGuard)
     {path: '', pathMatch : 'full', redirectTo: 'sign-in'},
+    
+ 
     // Redirect signed in user to the '/dashboards/project'
     //
     // After the user signs in, the sign in page will redirect the user to the 'signed-in-redirect'

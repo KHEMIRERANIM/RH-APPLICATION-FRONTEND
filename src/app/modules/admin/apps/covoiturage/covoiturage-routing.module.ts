@@ -1,14 +1,14 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-
 import { CovoiturageUserComponent } from './user/covoiturage-user.component';
 import { CovoiturageAdminComponent } from './admin/covoiturage-admin.component';
+import { CovoiturageGuard } from 'app/core/auth/guards/covoiturage.guard';
 
 const routes: Routes = [
   {
     path: '',
-    redirectTo: 'user',
-    pathMatch: 'full'
+    canActivate: [CovoiturageGuard],
+    component: CovoiturageUserComponent  // jamais affiché, le guard redirige
   },
   {
     path: 'user',

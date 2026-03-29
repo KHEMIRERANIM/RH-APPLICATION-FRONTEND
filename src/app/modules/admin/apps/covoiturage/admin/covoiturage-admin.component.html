@@ -1,4 +1,373 @@
-<div class="flex flex-col flex-auto min-w-0 p-6">
-    <h2 class="text-2xl font-semibold">Administration Covoiturage</h2>
-    <p class="text-secondary mt-2">Gestion des trajets et utilisateurs</p>
+<div class="space-y-6 p-6 w-full">
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-semibold text-[#1A1A2E]">Administration Transport & Récompenses</h1>
+      <p class="text-gray-600 mt-1">Gestion complète du système de mobilité et gamification</p>
+    </div>
+    <button
+      (click)="openModal()"
+      class="flex items-center gap-2 px-6 py-3 bg-[#1D9E75] text-white rounded-lg hover:bg-[#178a66] transition shadow-sm"
+    >
+      <mat-icon class="icon-size-5" svgIcon="feather:plus"></mat-icon>
+      Nouveau
+    </button>
+  </div>
+
+  <!-- Navigation Tabs -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-1.5">
+    <div class="flex gap-1 overflow-x-auto">
+      <button
+        (click)="setActiveSection('statistiques')"
+        [class]="activeSection === 'statistiques' ? 'bg-[#0F3460] text-white' : 'text-[#1A1A2E] hover:bg-gray-100'"
+        class="flex items-center gap-2 px-4 py-2.5 rounded-lg whitespace-nowrap transition"
+      >
+        <mat-icon class="icon-size-4" svgIcon="feather:trending-up"></mat-icon>
+        Vue d'ensemble
+      </button>
+      <button
+        (click)="setActiveSection('navettes')"
+        [class]="activeSection === 'navettes' ? 'bg-[#0F3460] text-white' : 'text-[#1A1A2E] hover:bg-gray-100'"
+        class="flex items-center gap-2 px-4 py-2.5 rounded-lg whitespace-nowrap transition"
+      >
+        <mat-icon class="icon-size-4" svgIcon="feather:truck"></mat-icon>
+        Navettes
+      </button>
+      <button
+        (click)="setActiveSection('reservations')"
+        [class]="activeSection === 'reservations' ? 'bg-[#0F3460] text-white' : 'text-[#1A1A2E] hover:bg-gray-100'"
+        class="flex items-center gap-2 px-4 py-2.5 rounded-lg whitespace-nowrap transition"
+      >
+        <mat-icon class="icon-size-4" svgIcon="feather:calendar"></mat-icon>
+        Réservations
+      </button>
+      <button
+        (click)="setActiveSection('cadeaux')"
+        [class]="activeSection === 'cadeaux' ? 'bg-[#0F3460] text-white' : 'text-[#1A1A2E] hover:bg-gray-100'"
+        class="flex items-center gap-2 px-4 py-2.5 rounded-lg whitespace-nowrap transition"
+      >
+        <mat-icon class="icon-size-4" svgIcon="feather:gift"></mat-icon>
+        Cadeaux
+      </button>
+    </div>
+  </div>
+
+  <!-- STATISTIQUES SECTION -->
+  <div *ngIf="activeSection === 'statistiques'" class="space-y-6">
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-4 gap-4">
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
+            <mat-icon class="text-blue-600 icon-size-6" svgIcon="feather:truck"></mat-icon>
+          </div>
+          <span class="text-green-600 text-sm">+12%</span>
+        </div>
+        <p class="text-gray-600 text-sm mb-1">Navettes actives</p>
+        <p class="text-3xl font-semibold text-[#1A1A2E]">{{ stats.totalNavettes }}</p>
+      </div>
+
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center">
+            <mat-icon class="text-[#F5A623] icon-size-6" svgIcon="feather:calendar"></mat-icon>
+          </div>
+          <span class="text-green-600 text-sm">+15%</span>
+        </div>
+        <p class="text-gray-600 text-sm mb-1">Réservations total</p>
+        <p class="text-3xl font-semibold text-[#1A1A2E]">{{ stats.totalReservations }}</p>
+      </div>
+
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
+            <mat-icon class="text-[#1D9E75] icon-size-6" svgIcon="feather:car"></mat-icon>
+          </div>
+          <span class="text-green-600 text-sm">+18%</span>
+        </div>
+        <p class="text-gray-600 text-sm mb-1">Covoiturages</p>
+        <p class="text-3xl font-semibold text-[#1A1A2E]">{{ stats.reservationsCovoiturage }}</p>
+      </div>
+
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center">
+            <mat-icon class="text-purple-600 icon-size-6" svgIcon="feather:gift"></mat-icon>
+          </div>
+          <span class="text-green-600 text-sm">+22%</span>
+        </div>
+        <p class="text-gray-600 text-sm mb-1">Cadeaux échangés</p>
+        <p class="text-3xl font-semibold text-[#1A1A2E]">{{ stats.cadeauxEchanges }}</p>
+      </div>
+    </div>
+
+    <!-- Impact Cards -->
+    <div class="grid md:grid-cols-3 gap-6">
+      <div class="bg-gradient-to-br from-[#1D9E75] to-[#178a66] rounded-xl p-8 text-white shadow-lg">
+        <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center mb-4">
+          <mat-icon class="text-white icon-size-7" svgIcon="feather:trending-up"></mat-icon>
+        </div>
+        <p class="text-white/80 text-sm mb-1">CO2 Économisé (total)</p>
+        <p class="text-4xl font-bold mb-2">{{ stats.co2Economise }} kg</p>
+        <div class="flex items-center gap-2 text-sm text-white/70">
+          <div class="h-1.5 flex-1 bg-white/20 rounded-full overflow-hidden">
+            <div class="h-full bg-white/60 rounded-full" style="width: 75%"></div>
+          </div>
+          <span>+12%</span>
+        </div>
+      </div>
+
+      <div class="bg-gradient-to-br from-[#F5A623] to-[#e09615] rounded-xl p-8 text-white shadow-lg">
+        <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center mb-4">
+          <mat-icon class="text-white icon-size-7" svgIcon="feather:gift"></mat-icon>
+        </div>
+        <p class="text-white/80 text-sm mb-1">Points Distribués</p>
+        <p class="text-4xl font-bold mb-2">{{ stats.pointsDistribues }}</p>
+        <div class="flex items-center gap-2 text-sm text-white/70">
+          <div class="h-1.5 flex-1 bg-white/20 rounded-full overflow-hidden">
+            <div class="h-full bg-white/60 rounded-full" style="width: 60%"></div>
+          </div>
+          <span>+8%</span>
+        </div>
+      </div>
+
+      <div class="bg-gradient-to-br from-[#0F3460] to-[#0a2340] rounded-xl p-8 text-white shadow-lg">
+        <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center mb-4">
+          <mat-icon class="text-white icon-size-7" svgIcon="feather:truck"></mat-icon>
+        </div>
+        <p class="text-white/80 text-sm mb-1">Taux d'Utilisation</p>
+        <p class="text-4xl font-bold mb-2">{{ stats.tauxUtilisation }}%</p>
+        <div class="flex items-center gap-2 text-sm text-white/70">
+          <div class="h-1.5 flex-1 bg-white/20 rounded-full overflow-hidden">
+            <div class="h-full bg-white/60 rounded-full" style="width: 78%"></div>
+          </div>
+          <span>+5%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+        <h3 class="text-lg font-semibold text-[#1A1A2E] mb-4">Activité récente</h3>
+        <div class="space-y-4">
+          <div *ngFor="let res of reservations.slice(0,4)" class="flex items-center gap-4">
+            <img [src]="res.employePhoto" [alt]="res.employeNom" class="w-10 h-10 rounded-full">
+            <div class="flex-1">
+              <p class="text-[#1A1A2E] text-sm font-medium">{{ res.employeNom }}</p>
+              <p class="text-gray-500 text-xs">{{ res.trajet }} - {{ res.heure }}</p>
+            </div>
+            <span [class]="res.type === 'navette' ? 'bg-blue-50 text-blue-700' : 'bg-green-50 text-green-700'" class="px-2 py-1 rounded text-xs font-medium">
+              {{ res.type }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+        <h3 class="text-lg font-semibold text-[#1A1A2E] mb-4">Navettes performantes</h3>
+        <div class="space-y-3">
+          <div *ngFor="let navette of navettes" class="flex items-center justify-between">
+            <div class="flex-1">
+              <p class="text-[#1A1A2E] text-sm font-medium mb-1">{{ navette.nom }}</p>
+              <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+                <div class="h-full bg-[#1D9E75] rounded-full" [style.width.%]="(navette.reservations / navette.capacite) * 100"></div>
+              </div>
+            </div>
+            <span class="ml-4 text-sm text-gray-600">{{ navette.reservations }}/{{ navette.capacite }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NAVETTES SECTION -->
+  <div *ngIf="activeSection === 'navettes'" class="space-y-4">
+    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
+      <div class="relative">
+        <mat-icon class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 icon-size-5" svgIcon="feather:search"></mat-icon>
+        <input type="text" [(ngModel)]="searchTerm" placeholder="Rechercher une navette..." class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1D9E75] focus:border-transparent outline-none">
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div *ngFor="let navette of navettes" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition">
+        <div class="bg-gradient-to-r from-[#0F3460] to-[#1D9E75] p-4 text-white">
+          <div class="flex items-start justify-between mb-2">
+            <div>
+              <h4 class="text-lg font-semibold mb-1">{{ navette.nom }}</h4>
+              <p class="text-white/80 text-sm">{{ navette.ligne }}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 mt-3">
+            <span class="px-2 py-1 bg-white/20 rounded text-xs">{{ navette.busNumber }}</span>
+            <span [class]="navette.actif ? 'bg-green-400/20 text-green-100' : 'bg-gray-400/20 text-gray-100'" class="px-2 py-1 rounded text-xs">
+              {{ navette.actif ? 'Actif' : 'Inactif' }}
+            </span>
+          </div>
+        </div>
+        <div class="p-4 space-y-4">
+          <div class="flex items-center gap-3">
+            <img [src]="navette.chauffeurPhoto" [alt]="navette.chauffeurNom" class="w-10 h-10 rounded-full">
+            <div>
+              <p class="text-xs text-gray-500">Chauffeur</p>
+              <p class="text-sm font-medium text-[#1A1A2E]">{{ navette.chauffeurNom }}</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div class="bg-gray-50 rounded-lg p-3">
+              <p class="text-xs text-gray-500 mb-1">Horaires</p>
+              <p class="text-sm text-[#1A1A2E]">{{ navette.horaires }}</p>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-3">
+              <p class="text-xs text-gray-500 mb-1">Arrêts</p>
+              <p class="text-sm text-[#1A1A2E]">{{ navette.arrets.length }} points</p>
+            </div>
+          </div>
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <p class="text-xs text-gray-500">Occupation</p>
+              <p class="text-sm font-medium text-[#1A1A2E]">{{ navette.reservations }}/{{ navette.capacite }}</p>
+            </div>
+            <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+              <div class="h-full bg-[#1D9E75] rounded-full" [style.width.%]="(navette.reservations / navette.capacite) * 100"></div>
+            </div>
+          </div>
+          <div class="flex gap-2 pt-2 border-t border-gray-100">
+            <button class="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gray-50 text-[#1A1A2E] rounded-lg hover:bg-gray-100 transition">
+              <mat-icon class="icon-size-4" svgIcon="feather:edit-2"></mat-icon>
+              <span class="text-sm">Modifier</span>
+            </button>
+            <button class="px-3 py-2 bg-red-50 text-[#E94560] rounded-lg hover:bg-red-100 transition">
+              <mat-icon class="icon-size-4" svgIcon="feather:trash-2"></mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESERVATIONS SECTION -->
+  <div *ngIf="activeSection === 'reservations'" class="space-y-4">
+    <div class="bg-white rounded-xl p-2 shadow-sm border border-gray-200">
+      <div class="flex gap-2">
+        <button (click)="setReservationType('navette')" [class]="reservationType === 'navette' ? 'bg-[#0F3460] text-white' : 'text-[#1A1A2E] hover:bg-gray-100'" class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition">
+          <mat-icon class="icon-size-4" svgIcon="feather:truck"></mat-icon>
+          Navettes ({{ stats.reservationsNavette }})
+        </button>
+        <button (click)="setReservationType('covoiturage')" [class]="reservationType === 'covoiturage' ? 'bg-[#1D9E75] text-white' : 'text-[#1A1A2E] hover:bg-gray-100'" class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition">
+          <mat-icon class="icon-size-4" svgIcon="feather:car"></mat-icon>
+          Covoiturage ({{ stats.reservationsCovoiturage }})
+        </button>
+      </div>
+    </div>
+
+    <div class="space-y-3">
+      <div *ngFor="let reservation of filteredReservations" class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <img [src]="reservation.employePhoto" [alt]="reservation.employeNom" class="w-12 h-12 rounded-full">
+            <div>
+              <p class="font-semibold text-[#1A1A2E]">{{ reservation.employeNom }}</p>
+              <p class="text-sm text-gray-500">{{ reservation.trajet }}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-6">
+            <div class="text-right">
+              <p class="text-sm text-gray-500">Date & Heure</p>
+              <p class="font-medium text-[#1A1A2E]">{{ reservation.date }} à {{ reservation.heure }}</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span [class]="reservation.statut === 'Confirmée' ? 'bg-green-50 text-green-700' : (reservation.statut === 'En attente' ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700')" class="px-4 py-2 rounded-lg text-sm flex items-center gap-2">
+                <mat-icon class="icon-size-4" [svgIcon]="reservation.statut === 'Confirmée' ? 'feather:check-circle' : (reservation.statut === 'En attente' ? 'feather:clock' : 'feather:alert-circle')"></mat-icon>
+                {{ reservation.statut }}
+              </span>
+              <button *ngIf="reservation.statut === 'En attente'" class="px-4 py-2 bg-[#1D9E75] text-white rounded-lg hover:bg-[#178a66] transition text-sm">
+                Confirmer
+              </button>
+              <button class="px-4 py-2 bg-red-50 text-[#E94560] rounded-lg hover:bg-red-100 transition text-sm">
+                Annuler
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CADEAUX SECTION -->
+  <div *ngIf="activeSection === 'cadeaux'" class="space-y-4">
+    <div class="grid grid-cols-3 gap-4">
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+        <div class="flex items-center gap-3 mb-2">
+          <div class="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">
+            <mat-icon class="text-purple-600 icon-size-5" svgIcon="feather:gift"></mat-icon>
+          </div>
+          <p class="text-gray-600 text-sm">Total Cadeaux</p>
+        </div>
+        <p class="text-3xl font-bold text-[#1A1A2E]">{{ stats.totalCadeaux }}</p>
+      </div>
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+        <div class="flex items-center gap-3 mb-2">
+          <div class="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
+            <mat-icon class="text-green-600 icon-size-5" svgIcon="feather:trending-up"></mat-icon>
+          </div>
+          <p class="text-gray-600 text-sm">Échanges Total</p>
+        </div>
+        <p class="text-3xl font-bold text-[#1A1A2E]">{{ stats.cadeauxEchanges }}</p>
+      </div>
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+        <div class="flex items-center gap-3 mb-2">
+          <div class="w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center">
+            <mat-icon class="text-[#F5A623] icon-size-5" svgIcon="feather:users"></mat-icon>
+          </div>
+          <p class="text-gray-600 text-sm">Stock Disponible</p>
+        </div>
+<p class="text-3xl font-bold text-[#1A1A2E]">{{ totalStock }}</p>
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-4">
+      <div *ngFor="let cadeau of cadeaux" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition">
+        <div class="relative h-40">
+          <img [src]="cadeau.image" [alt]="cadeau.titre" class="w-full h-full object-cover">
+          <div class="absolute top-3 right-3 text-4xl bg-white/90 backdrop-blur-sm rounded-full w-16 h-16 flex items-center justify-center">
+            {{ cadeau.icon }}
+          </div>
+          <div [class]="cadeau.actif ? 'bg-green-500' : 'bg-gray-500'" class="absolute top-3 left-3 px-3 py-1.5 rounded-lg text-xs text-white">
+            {{ cadeau.actif ? 'Actif' : 'Inactif' }}
+          </div>
+        </div>
+        <div class="p-4 space-y-3">
+          <div>
+            <h4 class="font-semibold text-[#1A1A2E] mb-1">{{ cadeau.titre }}</h4>
+            <p class="text-sm text-gray-500">{{ cadeau.description }}</p>
+          </div>
+          <div class="grid grid-cols-3 gap-2">
+            <div class="bg-orange-50 rounded-lg p-2 text-center">
+              <p class="text-xs text-orange-600 mb-1">Points</p>
+              <p class="text-sm font-semibold text-[#1A1A2E]">{{ cadeau.points }}</p>
+            </div>
+            <div class="bg-blue-50 rounded-lg p-2 text-center">
+              <p class="text-xs text-blue-600 mb-1">Stock</p>
+              <p class="text-sm font-semibold text-[#1A1A2E]">{{ cadeau.stock }}</p>
+            </div>
+            <div class="bg-green-50 rounded-lg p-2 text-center">
+              <p class="text-xs text-green-600 mb-1">Échangés</p>
+              <p class="text-sm font-semibold text-[#1A1A2E]">{{ cadeau.echanges }}</p>
+            </div>
+          </div>
+          <div class="flex gap-2 pt-2 border-t border-gray-100">
+            <button class="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gray-50 text-[#1A1A2E] rounded-lg hover:bg-gray-100 transition">
+              <mat-icon class="icon-size-4" svgIcon="feather:edit-2"></mat-icon>
+              <span class="text-sm">Modifier</span>
+            </button>
+            <button class="px-3 py-2 bg-red-50 text-[#E94560] rounded-lg hover:bg-red-100 transition">
+              <mat-icon class="icon-size-4" svgIcon="feather:trash-2"></mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
