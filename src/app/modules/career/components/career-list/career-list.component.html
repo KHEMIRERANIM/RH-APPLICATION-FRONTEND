@@ -1,0 +1,174 @@
+<div class="flex flex-col flex-auto min-w-0 bg-gray-50">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between px-6 pt-8 pb-4 gap-4">
+    <div>
+      <h2 class="text-3xl font-extrabold tracking-tight text-gray-900">Career Management</h2>
+      <p class="text-secondary mt-1 text-sm">Manage positions, levels and career domains</p>
+    </div>
+    <!-- ✅ Fix bouton : texte d'abord, icône ensuite -->
+    <button mat-flat-button color="primary" (click)="openForm()">
+      <span>New Position</span>
+      <mat-icon class="icon-size-5 ml-2">add</mat-icon>
+    </button>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 px-6 mb-6">
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex flex-col gap-1">
+      <span class="text-xs font-semibold text-secondary uppercase tracking-wider">Total</span>
+      <span class="text-4xl font-bold text-primary">{{ total }}</span>
+      <span class="text-xs text-secondary">Positions</span>
+    </div>
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex flex-col gap-1">
+      <span class="text-xs font-semibold text-secondary uppercase tracking-wider">Remote</span>
+      <span class="text-4xl font-bold text-blue-500">{{ totalRemote }}</span>
+      <span class="text-xs text-secondary">Remote-friendly</span>
+    </div>
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex flex-col gap-1">
+      <span class="text-xs font-semibold text-secondary uppercase tracking-wider">Accessible</span>
+      <span class="text-4xl font-bold text-green-500">{{ totalDisabled }}</span>
+      <span class="text-xs text-secondary">Disability-friendly</span>
+    </div>
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex flex-col gap-1">
+      <span class="text-xs font-semibold text-secondary uppercase tracking-wider">Senior +</span>
+      <span class="text-4xl font-bold" style="color:#f97316">{{ totalSeniorPlus }}</span>
+      <span class="text-xs text-secondary">Experienced levels</span>
+    </div>
+  </div>
+
+  <!-- Table Card -->
+  <!-- ✅ Fix colonnes : overflow-x-auto pour scroll horizontal -->
+  <div class="flex flex-col mx-6 mb-8 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+
+    <!-- Search -->
+    <div class="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
+      <mat-icon class="text-gray-400 icon-size-5">search</mat-icon>
+      <input
+        class="flex-1 bg-transparent outline-none text-sm text-gray-700 placeholder-gray-400"
+        placeholder="Search by title, domain, position..."
+        (input)="applyFilter($event)" />
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="flex justify-center items-center py-16">
+      <mat-spinner diameter="36"></mat-spinner>
+    </div>
+
+    <!-- ✅ Fix colonnes tronquées : wrapper avec overflow-x-auto -->
+    <div class="overflow-x-auto">
+      <mat-table *ngIf="!isLoading" [dataSource]="dataSource" matSort
+                 class="w-full" style="min-width: 900px;">
+
+        <!-- Title -->
+        <ng-container matColumnDef="title">
+          <mat-header-cell *matHeaderCellDef mat-sort-header
+            class="text-xs font-semibold text-secondary uppercase"
+            style="min-width:200px">Title</mat-header-cell>
+          <mat-cell *matCellDef="let career" style="min-width:200px">
+            <div class="flex flex-col">
+              <span class="font-semibold text-gray-800">{{ career.title }}</span>
+              <span *ngIf="career.poste" class="text-xs text-secondary">{{ career.poste }}</span>
+            </div>
+          </mat-cell>
+        </ng-container>
+
+        <!-- Domain -->
+        <ng-container matColumnDef="domain">
+          <mat-header-cell *matHeaderCellDef mat-sort-header
+            class="text-xs font-semibold text-secondary uppercase"
+            style="min-width:150px">Domain</mat-header-cell>
+          <mat-cell *matCellDef="let career" style="min-width:150px">
+            <div class="flex flex-col gap-1">
+              <span class="px-3 py-1 rounded-full text-xs font-semibold w-fit"
+                    [ngClass]="domainColors[career.domain]">
+                {{ domainLabels[career.domain] }}
+              </span>
+              <span *ngIf="career.departement" class="text-xs text-secondary pl-1">{{ career.departement }}</span>
+            </div>
+          </mat-cell>
+        </ng-container>
+
+        <!-- Level -->
+        <ng-container matColumnDef="level">
+          <mat-header-cell *matHeaderCellDef mat-sort-header
+            class="text-xs font-semibold text-secondary uppercase"
+            style="min-width:120px">Level</mat-header-cell>
+          <mat-cell *matCellDef="let career" style="min-width:120px">
+            <div class="flex items-center gap-2" [ngClass]="levelColors[career.level]">
+              <mat-icon class="icon-size-4">{{ levelIcons[career.level] }}</mat-icon>
+              <span class="text-sm font-medium">{{ career.level }}</span>
+            </div>
+          </mat-cell>
+        </ng-container>
+
+        <!-- Salary -->
+        <ng-container matColumnDef="salary">
+          <mat-header-cell *matHeaderCellDef
+            class="text-xs font-semibold text-secondary uppercase"
+            style="min-width:160px">Salary</mat-header-cell>
+          <mat-cell *matCellDef="let career"
+            class="text-sm text-gray-600"
+            style="min-width:160px">{{ formatSalary(career) }}</mat-cell>
+        </ng-container>
+
+        <!-- Options -->
+        <ng-container matColumnDef="options">
+          <mat-header-cell *matHeaderCellDef
+            class="text-xs font-semibold text-secondary uppercase"
+            style="min-width:150px">Options</mat-header-cell>
+          <mat-cell *matCellDef="let career" style="min-width:150px">
+            <div class="flex gap-2 flex-wrap">
+              <span *ngIf="career.isRemoteFriendly"
+                class="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
+                <mat-icon class="icon-size-4">wifi</mat-icon> Remote
+              </span>
+              <span *ngIf="career.isAccessibleForDisabled"
+                class="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+                <mat-icon class="icon-size-4">accessible</mat-icon> Access
+              </span>
+            </div>
+          </mat-cell>
+        </ng-container>
+
+        <!-- Actions -->
+        <ng-container matColumnDef="actions">
+          <mat-header-cell *matHeaderCellDef
+            class="text-xs font-semibold text-secondary uppercase"
+            style="min-width:110px">Actions</mat-header-cell>
+          <mat-cell *matCellDef="let career" style="min-width:110px">
+            <button mat-icon-button color="primary" matTooltip="Edit" (click)="openForm(career)">
+              <mat-icon class="icon-size-5">edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" matTooltip="Delete" (click)="deleteCareer(career)">
+              <mat-icon class="icon-size-5">delete</mat-icon>
+            </button>
+          </mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="displayedColumns" class="bg-gray-50"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: displayedColumns;"
+                 class="hover:bg-blue-50 transition-colors duration-150"></mat-row>
+
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+            <div class="flex flex-col items-center py-16 gap-3">
+              <mat-icon style="font-size:48px;width:48px;height:48px;color:#d1d5db">work_off</mat-icon>
+              <span class="text-sm text-secondary">No positions found</span>
+            </div>
+          </td>
+        </tr>
+
+      </mat-table>
+    </div>
+
+    <!-- ✅ Paginator toujours visible -->
+    <mat-paginator
+      *ngIf="!isLoading"
+      [pageSizeOptions]="[10, 25, 50]"
+      showFirstLastButtons
+      class="border-t border-gray-100">
+    </mat-paginator>
+
+  </div>
+</div>

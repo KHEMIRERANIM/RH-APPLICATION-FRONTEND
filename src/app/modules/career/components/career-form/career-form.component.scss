@@ -1,0 +1,55 @@
+::ng-deep {
+
+  // ✅ Fix dialog container
+  .career-dialog .mat-mdc-dialog-container {
+    border-radius: 16px !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    width: 620px !important;
+    max-width: 95vw !important;
+  }
+
+  .career-dialog .mdc-dialog__surface {
+    border-radius: 16px !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    width: 620px !important;
+    max-width: 95vw !important;
+  }
+
+  // ✅ Fix dialog content scroll
+  .career-dialog mat-dialog-content,
+  .career-dialog .mat-mdc-dialog-content {
+    padding: 24px !important;
+    margin: 0 !important;
+    max-height: 60vh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  // ✅ Fix dialog actions
+  .career-dialog mat-dialog-actions,
+  .career-dialog .mat-mdc-dialog-actions {
+    padding: 16px 24px !important;
+    margin: 0 !important;
+    min-height: unset !important;
+    border-top: 1px solid #f3f4f6 !important;
+  }
+
+  // ✅ Form fields full width sans overflow
+  .career-dialog .mat-mdc-form-field {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  // ✅ Supprimer icônes suffix qui causent le débordement
+  .career-dialog .mat-mdc-form-field-icon-suffix {
+    display: none !important;
+  }
+
+  // ✅ Fix slide toggle couleur
+  .career-dialog .mdc-switch--unselected .mdc-switch__icon {
+    display: none !important;
+  }
+}

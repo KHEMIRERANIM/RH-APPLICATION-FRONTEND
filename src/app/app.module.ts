@@ -38,8 +38,7 @@ import { mockApiServices } from './mock-api';
 import { LayoutModule } from './layout/layout.module';
 import { AppComponent } from './app.component';
 import { appRoutes } from './app-routing.module';
-import { AuthInterceptor } from './core/interceptors/auth.interceptor';
-
+import { AuthInterceptor } from './core/auth/auth.interceptor';
 const routerConfig: ExtraOptions = {
     preloadingStrategy: PreloadAllModules,
     scrollPositionRestoration: 'enabled'

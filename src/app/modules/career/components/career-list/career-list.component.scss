@@ -1,0 +1,64 @@
+::ng-deep {
+
+  // ✅ Fix colonnes : override Fuse theme
+  .mat-mdc-header-cell {
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    color: var(--fuse-text-secondary, #6b7280) !important;
+    letter-spacing: 0.05em !important;
+  }
+
+  .mat-mdc-cell,
+  .mat-mdc-header-cell {
+    overflow: visible !important;
+    white-space: nowrap !important;
+    padding: 0 12px !important;
+  }
+
+  // Largeurs par colonne
+  .mat-column-title {
+    min-width: 200px !important;
+    flex: 1 1 200px !important;
+    white-space: normal !important; // titre peut wrapper
+  }
+
+  .mat-column-domain {
+    min-width: 150px !important;
+    flex: 0 0 150px !important;
+  }
+
+  .mat-column-level {
+    min-width: 120px !important;
+    flex: 0 0 120px !important;
+  }
+
+  .mat-column-salary {
+    min-width: 170px !important;
+    flex: 0 0 170px !important;
+  }
+
+  .mat-column-options {
+    min-width: 120px !important;
+    flex: 0 0 120px !important;
+  }
+
+  // ✅ Actions : largeur fixe garantie, jamais tronquée
+  .mat-column-actions {
+    min-width: 100px !important;
+    flex: 0 0 100px !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  // Hover row
+  .career-row:hover {
+    background-color: #eff6ff !important;
+    transition: background-color 150ms ease !important;
+  }
+
+  // Fix paginator texte
+  .mat-mdc-paginator-range-label {
+    font-size: 13px !important;
+  }
+}
