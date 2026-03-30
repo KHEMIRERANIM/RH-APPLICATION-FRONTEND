@@ -67,10 +67,27 @@ export class PostulerComponent implements OnInit {
     this.candidatureService.postuler(
       user.id, this.offre.id, this.cvFile, this.lettreFile || undefined
     ).subscribe({
-      next: () => { this.submitted = true; this.loading = false; },
+      next: () => {
+        this.submitted = true;
+        this.loading = false;
+      },
       error: (err) => {
         this.loading = false;
-        this.errorMsg = err?.error || 'Une erreur est survenue. Avez-vous déjà postulé à cette offre ?';
+        if (typeof err?.error === 'string') {
+          this.errorMsg = err.error;
+        } else if (err?.error?.message) {
+          this.errorMsg = err.error.message;
+        } else if (err?.status === 0) {
+          this.errorMsg = 'Backend non démarré. Lancez le serveur Spring Boot sur le port 8081.';
+        } else if (err?.status === 401) {
+          this.errorMsg = 'Session expirée. Veuillez vous reconnecter.';
+        } else if (err?.status === 409) {
+          this.errorMsg = 'Vous avez déjà postulé à cette offre.';
+        } else if (err?.status === 404) {
+          this.errorMsg = 'Offre introuvable.';
+        } else {
+          this.errorMsg = 'Une erreur est survenue. Veuillez réessayer.';
+        }
       },
     });
   }

@@ -10,6 +10,7 @@ import { Offre, Candidature, Entretien, STATUT_LABELS } from '../models/recrutem
 @Component({
   selector: 'app-recrutement-dashboard',
   templateUrl: './dashboard.component.html',
+  standalone: false,
 })
 export class DashboardComponent implements OnInit {
 
@@ -41,13 +42,12 @@ export class DashboardComponent implements OnInit {
       entretiens: this.entretienService.getEntretiensParRecruteur(user.id),
     }).subscribe({
       next: ({ offres, entretiens }) => {
-        this.offres = offres;
+        this.offres = offres; // Toutes les offres incluant BROUILLON
         this.entretiensAVenir = entretiens.filter(e => e.statut === 'PLANIFIE');
         this.loading = false;
       },
-      error: () => this.loading = false,
     });
-  }
+}
 
   voirPipeline(offre: Offre): void {
     this.router.navigate(['/recrutement/admin/pipeline', offre.id]);

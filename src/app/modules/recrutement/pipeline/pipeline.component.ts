@@ -19,6 +19,7 @@ import {
 @Component({
   selector: 'app-pipeline',
   templateUrl: './pipeline.component.html',
+  standalone: false,
 })
 export class PipelineComponent implements OnInit {
 

@@ -34,6 +34,9 @@ export class CreerOffreComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // Debug — vérifie le user connecté
+    console.log('USER CONNECTÉ:', this.authService.currentUser);
+
     this.form = this.fb.group({
       titre:            ['', Validators.required],
       description:      ['', [Validators.required, Validators.minLength(50)]],
@@ -71,16 +74,42 @@ export class CreerOffreComponent implements OnInit {
 
   submit(): void {
     if (this.form.invalid) return;
+
     this.loading = true;
     this.errorMsg = '';
+
+    // Récupère le user connecté
     const user = this.authService.currentUser;
+    console.log('SUBMIT - USER:', user);
+    console.log('SUBMIT - FORM:', this.form.value);
+
+    // Récupère l'ID du user (essaie plusieurs propriétés possibles)
+    const createurId = user?.id || user?.['_id'] || user?.['userId'] || 'admin';
+    console.log('CREATEUR ID:', createurId);
+
     this.offreService.createOffre({
       ...this.form.value,
       competencesRequises: this.competences,
       avantages: this.avantages,
-    }, user.id).subscribe({
-      next: () => { this.loading = false; this.router.navigate(['/recrutement/admin/offres']); },
-      error: (e) => { this.loading = false; this.errorMsg = e?.error || 'Erreur lors de la création'; },
+    }, createurId).subscribe({
+      next: (offre) => {
+        console.log('OFFRE CRÉÉE:', offre);
+        this.loading = false;
+        this.router.navigate(['/recrutement/admin/dashboard']);
+      },
+      error: (err) => {
+        this.loading = false;
+        console.error('ERREUR CRÉATION:', err);
+        if (err?.status === 0) {
+          this.errorMsg = 'Backend non démarré sur le port 8081.';
+        } else if (err?.status === 401) {
+          this.errorMsg = 'Non autorisé. Vérifiez votre connexion.';
+        } else if (typeof err?.error === 'string') {
+          this.errorMsg = err.error;
+        } else {
+          this.errorMsg = 'Erreur ' + (err?.status || '') + ' lors de la création.';
+        }
+      },
     });
   }
 

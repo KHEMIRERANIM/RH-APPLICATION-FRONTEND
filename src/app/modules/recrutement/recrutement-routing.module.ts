@@ -20,6 +20,7 @@ const routes: Routes = [
   { path: 'admin/offres/creer', component: CreerOffreComponent },
   { path: 'admin/offres', component: OffresListComponent },
   { path: 'admin/pipeline/:offreId', component: PipelineComponent },
+  { path: 'admin/entretiens', component: PlanifierEntretienComponent },
   { path: 'admin/entretiens/planifier', component: PlanifierEntretienComponent },
   { path: 'admin/entretiens/:id/feedback', component: FeedbackEntretienComponent },
 ];
