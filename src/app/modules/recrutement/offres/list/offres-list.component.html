@@ -12,11 +12,17 @@
     <span class="ml-2">Mes candidatures</span>
 </button>
 
-<!-- Bouton Créer offre pour admin -->
-<button *ngIf="isAdmin" mat-flat-button [color]="'primary'" (click)="creerOffre()">
+<!-- Boutons pour admin -->
+<div *ngIf="isAdmin" class="flex gap-2">
+  <button mat-stroked-button (click)="allerAuDashboard()">
+    <mat-icon [svgIcon]="'heroicons_outline:chart-bar'"></mat-icon>
+    <span class="ml-2">Dashboard</span>
+  </button>
+  <button mat-flat-button [color]="'primary'" (click)="creerOffre()">
     <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
     <span class="ml-2">Créer une offre</span>
-</button>
+  </button>
+</div>
   </div>
 
   <!-- Filtres -->

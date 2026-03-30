@@ -72,6 +72,11 @@ export class OffresListComponent implements OnInit {
   creerOffre(): void {
     this.router.navigate(['/recrutement/admin/offres/creer']);
   }
+
+  allerAuDashboard(): void {
+    this.router.navigate(['/recrutement/admin/dashboard']);
+  }
+
   voirMesCandidatures(): void {
     this.router.navigate(['/recrutement/mes-candidatures']);
   }
