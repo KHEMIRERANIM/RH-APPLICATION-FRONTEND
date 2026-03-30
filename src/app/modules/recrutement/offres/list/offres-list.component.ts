@@ -72,6 +72,9 @@ export class OffresListComponent implements OnInit {
   creerOffre(): void {
     this.router.navigate(['/recrutement/admin/offres/creer']);
   }
+  voirMesCandidatures(): void {
+    this.router.navigate(['/recrutement/mes-candidatures']);
+  }
 
   voirPipeline(offre: Offre): void {
     this.router.navigate(['/recrutement/admin/pipeline', offre.id]);

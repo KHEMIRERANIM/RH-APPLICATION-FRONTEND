@@ -6,10 +6,17 @@
       <h2 class="text-3xl font-extrabold tracking-tight leading-none">Offres d'emploi</h2>
       <p class="text-secondary mt-1">{{ offres.length }} offre(s) disponible(s)</p>
     </div>
-    <button *ngIf="isAdmin" mat-flat-button [color]="'primary'" (click)="creerOffre()">
-      <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
-      <span class="ml-2">Créer une offre</span>
-    </button>
+    <!-- Bouton Mes candidatures pour candidat -->
+<button *ngIf="!isAdmin" mat-stroked-button (click)="voirMesCandidatures()">
+    <mat-icon [svgIcon]="'heroicons_outline:collection'"></mat-icon>
+    <span class="ml-2">Mes candidatures</span>
+</button>
+
+<!-- Bouton Créer offre pour admin -->
+<button *ngIf="isAdmin" mat-flat-button [color]="'primary'" (click)="creerOffre()">
+    <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+    <span class="ml-2">Créer une offre</span>
+</button>
   </div>
 
   <!-- Filtres -->
