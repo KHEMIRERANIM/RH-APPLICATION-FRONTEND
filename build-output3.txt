@@ -1,0 +1,52 @@
+[33m❯[39m Building...
+
+STDERR:
+
+[1m[33m[1m[33mwarn[33m[22m[1m - As of Tailwind CSS v3.0, `blueGray` has been renamed to `slate`.[39m[22m
+[1m[33m[1m[33mwarn[33m[22m[1m - Update your configuration file to silence this warning.[39m[22m
+
+[1m[33m[1m[33mwarn[33m[22m[1m - The `purge`/`content` options have changed in Tailwind CSS v3.0.[39m[22m
+[1m[33m[1m[33mwarn[33m[22m[1m - Update your configuration file to eliminate this warning.[39m[22m
+[1m[33m[1m[33mwarn[33m[22m[1m - https://tailwindcss.com/docs/upgrade-guide#configure-content-sources[39m[22m
+
+[1m[33m[1m[33mwarn[33m[22m[1m - As of Tailwind CSS v3.3, the `@tailwindcss/line-clamp` plugin is now included by default.[39m[22m
+[1m[33m[1m[33mwarn[33m[22m[1m - Remove it from the `plugins` array in your configuration to eliminate this warning.[39m[22m
+ERROR Error [NullInjectorError]: R3InjectorError(t)[e -> InjectionToken  -> [object Object] -> t -> InjectionToken TRANSLOCO_TRANSPILER -> InjectionToken TRANSLOCO_TRANSPILER]: 
+  NullInjectorError: No provider for InjectionToken TRANSLOCO_TRANSPILER!
+    at as.get (file:///C:/Users/INFOKOM/Desktop/RH-APPLICATION/rh-project/project-angular18/.angular/prerender-root/c6feda91-d6f8-434a-be0b-27fa38c1f1f3/chunk-KWCFFWQ5.mjs:8:1132)
+    at io.get (file:///C:/Users/INFOKOM/Desktop/RH-APPLICATION/rh-project/project-angular18/.angular/prerender-root/c6feda91-d6f8-434a-be0b-27fa38c1f1f3/chunk-KWCFFWQ5.mjs:8:10717)
+    at io.get (file:///C:/Users/INFOKOM/Desktop/RH-APPLICATION/rh-project/project-angular18/.angular/prerender-root/c6feda91-d6f8-434a-be0b-27fa38c1f1f3/chunk-KWCFFWQ5.mjs:8:10717)
+    at uw (file:///C:/Users/INFOKOM/Desktop/RH-APPLICATION/rh-project/project-angular18/.angular/prerender-root/c6feda91-d6f8-434a-be0b-27fa38c1f1f3/chunk-KWCFFWQ5.mjs:5:2417)
+    at I (file:///C:/Users/INFOKOM/Desktop/RH-APPLICATION/rh-project/project-angular18/.angular/prerender-root/c6feda91-d6f8-434a-be0b-27fa38c1f1f3/chunk-KWCFFWQ5.mjs:5:2493)
+    at Object.ɵfac [as factory] (file:///C:/Users/INFOKOM/Desktop/RH-APPLICATION/rh-project/project-angular18/.angular/prerender-root/c6feda91-d6f8-434a-be0b-27fa38c1f1f3/chunk-4B6MSFXY.mjs:2:11480)
+    at io.hydrate (file:///C:/Users/INFOKOM/Desktop/RH-APPLICATION/rh-project/project-angular18/.angular/prerender-root/c6feda91-d6f8-434a-be0b-27fa38c1f1f3/chunk-KWCFFWQ5.mjs:8:11513)
+    at io.get (file:///C:/Users/INFOKOM/Desktop/RH-APPLICATION/rh-project/project-angular18/.angular/prerender-root/c6feda91-d6f8-434a-be0b-27fa38c1f1f3/chunk-KWCFFWQ5.mjs:8:10633)
+    at uw (file:///C:/Users/INFOKOM/Desktop/RH-APPLICATION/rh-project/project-angular18/.angular/prerender-root/c6feda91-d6f8-434a-be0b-27fa38c1f1f3/chunk-KWCFFWQ5.mjs:5:2417)
+    at I (file:///C:/Users/INFOKOM/Desktop/RH-APPLICATION/rh-project/project-angular18/.angular/prerender-root/c6feda91-d6f8-434a-be0b-27fa38c1f1f3/chunk-KWCFFWQ5.mjs:5:2493) {
+  ngTempTokenPath: null,
+  ngTokenPath: [
+    'e',
+    'InjectionToken ',
+    '[object Object]',
+    't',
+    'InjectionToken TRANSLOCO_TRANSPILER',
+    'InjectionToken TRANSLOCO_TRANSPILER'
+  ]
+}
+[31m✖[39m Building... [31m[FAILED: Cannot destructure property 'routes' of '(intermediate value)' as it is undefined.][39m
+[1m[31mAn unhandled exception occurred: Cannot destructure property 'routes' of '(intermediate value)' as it is undefined.
+See "C:\Users\INFOKOM\AppData\Local\Temp\ng-UnSGgt\angular-errors.log" for further details.[39m[22m
+C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\@angular-devkit\architect\node_modules\rxjs\dist\cjs\internal\util\reportUnhandledError.js:13
+            throw err;
+            ^
+
+TypeError: Cannot destructure property 'routes' of '(intermediate value)' as it is undefined.
+    at getAllRoutes (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\@angular\build\src\utils\server-rendering\prerender.js:185:21)
+    at async prerenderPages (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\@angular\build\src\utils\server-rendering\prerender.js:52:84)
+    at async executePostBundleSteps (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\@angular\build\src\builders\application\execute-post-bundle.js:62:83)
+    at async executeBuild (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\@angular\build\src\builders\application\execute-build.js:115:24)
+    at async watch (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\@angular\build\src\builders\application\index.js:70:24)
+    at async Task.task [as taskFn] (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\@angular\build\src\tools\esbuild\utils.js:126:26)
+    at async Task.run (C:\Users\INFOKOM\Desktop\RH-APPLICATION\rh-project\project-angular18\node_modules\listr2\dist\index.cjs:2143:11)
+
+Node.js v22.18.0

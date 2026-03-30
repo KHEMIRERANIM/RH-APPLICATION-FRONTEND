@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+    .bg-card { background-color: #ffffff; }
+    .bg-hover { background-color: #f3f4f6; }
+    .bg-primary { background-color: #3b82f6; }
+    .bg-primary-200 { background-color: #bfdbfe; }
+    .text-primary { color: #3b82f6; }
+    .text-secondary { color: #6b7280; }
+    .icon-size-4 { width: 16px; height: 16px; font-size: 16px; }
+    .icon-size-5 { width: 20px; height: 20px; font-size: 20px; }
+    .w-128 { width: 32rem; }
+}

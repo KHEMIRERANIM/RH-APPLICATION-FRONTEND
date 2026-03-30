@@ -1,0 +1,61 @@
+auth-sign-in {
+    display: block;
+    min-height: 100vh;
+}
+
+/* Page claire et lisible (indépendante du thème sombre de l’app) */
+.auth-sign-in-page {
+    min-height: 100vh;
+    background: linear-gradient(165deg, #f8fafc 0%, #eff6ff 40%, #e0f2fe 100%);
+}
+
+.auth-sign-in-page::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+        radial-gradient(ellipse 70% 60% at 0% 0%, rgba(56, 189, 248, 0.18), transparent 55%),
+        radial-gradient(ellipse 60% 50% at 100% 100%, rgba(99, 102, 241, 0.12), transparent 50%);
+    pointer-events: none;
+}
+
+.auth-glass-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    box-shadow:
+        0 20px 50px -12px rgba(15, 23, 42, 0.12),
+        0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+}
+
+.auth-role-btn {
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    border: 1px solid #e2e8f0 !important;
+    background: #f8fafc !important;
+}
+
+.auth-role-btn:hover:not(.auth-role-btn--active) {
+    transform: translateY(-2px);
+    border-color: #7dd3fc !important;
+    background: #f0f9ff !important;
+}
+
+.auth-role-btn--active {
+    border-color: #0ea5e9 !important;
+    background: #e0f2fe !important;
+    box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2), 0 8px 20px -6px rgba(14, 165, 233, 0.25);
+}
+
+.auth-gradient-title {
+    background: linear-gradient(90deg, #0f172a 0%, #0369a1 50%, #4f46e5 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Colonne droite : ton doux */
+.auth-hero-panel {
+    background: linear-gradient(145deg, #f1f5f9 0%, #e2e8f0 50%, #dbeafe 100%);
+    border-left: 1px solid rgba(148, 163, 184, 0.35);
+}
