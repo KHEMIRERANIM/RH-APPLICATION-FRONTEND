@@ -3,182 +3,235 @@
   <!-- Header -->
   <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between px-6 pt-8 pb-4 gap-4">
     <div>
-      <h2 class="text-3xl font-extrabold tracking-tight text-gray-900">Career Management</h2>
-      <p class="text-secondary mt-1 text-sm">Manage positions, levels and career domains</p>
+      <h2 class="text-3xl font-extrabold tracking-tight text-gray-900">
+        {{ authRole.isAdminOrRH() ? 'Career Management' : 'Espace Carrière' }}
+      </h2>
+      <p class="text-secondary mt-1 text-sm">
+        {{ authRole.isAdminOrRH() ? 'Manage positions, levels and career domains' : 'Consultez les postes et gérez votre évolution' }}
+      </p>
     </div>
-    <button mat-flat-button color="primary"
+    <!-- Bouton New Position : RH/Admin seulement -->
+    <button *ngIf="authRole.isAdminOrRH() && activeTab === 0"
+            mat-flat-button color="primary"
             class="new-position-btn"
             (click)="openForm()">
-      <span style="font-size:20px; line-height:1; margin-right:4px;">+</span>
+      <span style="font-size:20px;line-height:1;margin-right:4px;">+</span>
       <span>New Position</span>
     </button>
   </div>
 
-  <!-- KPI Cards -->
-  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 px-6 mb-6">
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex flex-col gap-1">
-      <span class="text-xs font-semibold text-secondary uppercase tracking-wider">Total</span>
-      <span class="text-4xl font-bold text-primary">{{ total }}</span>
-      <span class="text-xs text-secondary">Positions</span>
-    </div>
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex flex-col gap-1">
-      <span class="text-xs font-semibold text-secondary uppercase tracking-wider">Remote</span>
-      <span class="text-4xl font-bold text-blue-500">{{ totalRemote }}</span>
-      <span class="text-xs text-secondary">Remote-friendly</span>
-    </div>
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex flex-col gap-1">
-      <span class="text-xs font-semibold text-secondary uppercase tracking-wider">Accessible</span>
-      <span class="text-4xl font-bold text-green-500">{{ totalDisabled }}</span>
-      <span class="text-xs text-secondary">Disability-friendly</span>
-    </div>
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex flex-col gap-1">
-      <span class="text-xs font-semibold text-secondary uppercase tracking-wider">Senior +</span>
-      <span class="text-4xl font-bold" style="color:#f97316">{{ totalSeniorPlus }}</span>
-      <span class="text-xs text-secondary">Experienced levels</span>
-    </div>
+  <!-- Onglets -->
+  <div style="display:flex;gap:0;border-bottom:2px solid #e5e7eb;padding:0 24px;background:white;">
+    <button *ngFor="let tab of tabs; let i = index"
+            (click)="activeTab = i"
+            [style]="getTabStyle(i)">
+      {{ tab.icon }} {{ tab.label }}
+    </button>
   </div>
 
-  <!-- Table Card -->
-  <div class="flex flex-col mx-6 mb-8 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+  <!-- ===== ONGLET 0 : Positions ===== -->
+  <ng-container *ngIf="activeTab === 0">
 
-    <!-- Search -->
-    <div class="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
-      <span style="color:#9ca3af; font-size:18px;">🔍</span>
-      <input
-        class="flex-1 bg-transparent outline-none text-sm text-gray-700 placeholder-gray-400"
-        placeholder="Search by title, domain, position..."
-        (input)="applyFilter($event)" />
+    <!-- KPI Cards — RH/Admin seulement -->
+    <div *ngIf="authRole.isAdminOrRH()"
+         class="grid grid-cols-2 sm:grid-cols-4 gap-4 px-6 mt-6 mb-6">
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex flex-col gap-1">
+        <span class="text-xs font-semibold text-secondary uppercase tracking-wider">Total</span>
+        <span class="text-4xl font-bold text-primary">{{ total }}</span>
+        <span class="text-xs text-secondary">Positions</span>
+      </div>
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex flex-col gap-1">
+        <span class="text-xs font-semibold text-secondary uppercase tracking-wider">Remote</span>
+        <span class="text-4xl font-bold text-blue-500">{{ totalRemote }}</span>
+        <span class="text-xs text-secondary">Remote-friendly</span>
+      </div>
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex flex-col gap-1">
+        <span class="text-xs font-semibold text-secondary uppercase tracking-wider">Accessible</span>
+        <span class="text-4xl font-bold text-green-500">{{ totalDisabled }}</span>
+        <span class="text-xs text-secondary">Disability-friendly</span>
+      </div>
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex flex-col gap-1">
+        <span class="text-xs font-semibold text-secondary uppercase tracking-wider">Senior +</span>
+        <span class="text-4xl font-bold" style="color:#f97316">{{ totalSeniorPlus }}</span>
+        <span class="text-xs text-secondary">Experienced levels</span>
+      </div>
     </div>
 
-    <!-- Loading -->
-    <div *ngIf="isLoading" class="flex justify-center items-center py-16">
-      <mat-spinner diameter="36"></mat-spinner>
+    <!-- Bandeau employé -->
+    <div *ngIf="authRole.isEmployee()"
+         style="margin:24px 24px 16px;padding:16px 20px;background:#ede9fe;border-radius:12px;
+                display:flex;align-items:center;gap:12px;">
+      <span style="font-size:24px;">💼</span>
+      <div>
+        <p style="font-size:14px;font-weight:700;color:#5b21b6;margin:0;">
+          Postes disponibles dans l'entreprise
+        </p>
+        <p style="font-size:12px;color:#7c3aed;margin:0;">
+          Consultez les postes et soumettez une demande de mobilité
+        </p>
+      </div>
     </div>
 
-    <!-- Table -->
-    <div style="overflow-x:auto;" [style.display]="isLoading ? 'none' : 'block'">
-      <mat-table [dataSource]="dataSource" matSort
-                 style="min-width:1000px; background:transparent;">
+    <!-- Table Card -->
+    <div class="flex flex-col mx-6 mb-8 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
 
-        <!-- Title -->
-        <ng-container matColumnDef="title">
-          <mat-header-cell *matHeaderCellDef mat-sort-header>Title</mat-header-cell>
-          <mat-cell *matCellDef="let career">
-            <div class="flex flex-col py-2">
-              <span class="font-semibold text-gray-800 text-sm">{{ career.title }}</span>
-              <span *ngIf="career.poste" class="text-xs text-secondary">{{ career.poste }}</span>
-            </div>
-          </mat-cell>
-        </ng-container>
+      <!-- Search -->
+      <div class="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
+        <span style="color:#9ca3af;font-size:18px;">🔍</span>
+        <input class="flex-1 bg-transparent outline-none text-sm text-gray-700 placeholder-gray-400"
+               placeholder="Search by title, domain, position..."
+               (input)="applyFilter($event)" />
+      </div>
 
-        <!-- Domain -->
-        <ng-container matColumnDef="domain">
-          <mat-header-cell *matHeaderCellDef mat-sort-header>Domain</mat-header-cell>
-          <mat-cell *matCellDef="let career">
-            <div class="flex flex-col gap-1 py-2">
-              <span class="px-3 py-1 rounded-full text-xs font-semibold"
-                    style="display:inline-block; width:fit-content;"
-                    [ngClass]="domainColors[career.domain]">
-                {{ domainLabels[career.domain] }}
-              </span>
-              <span *ngIf="career.departement" class="text-xs text-secondary">
-                {{ career.departement }}
-              </span>
-            </div>
-          </mat-cell>
-        </ng-container>
+      <!-- Loading -->
+      <div *ngIf="isLoading" class="flex justify-center items-center py-16">
+        <mat-spinner diameter="36"></mat-spinner>
+      </div>
 
-        <!-- Level -->
-        <ng-container matColumnDef="level">
-          <mat-header-cell *matHeaderCellDef mat-sort-header>Level</mat-header-cell>
-          <mat-cell *matCellDef="let career">
-            <div style="display:flex; align-items:center; gap:6px;"
-                 [ngClass]="levelColors[career.level]">
-              <span style="font-size:14px; flex-shrink:0; line-height:1;">
-                {{ levelIcons[career.level] }}
-              </span>
-              <span class="text-sm font-medium">{{ career.level }}</span>
-            </div>
-          </mat-cell>
-        </ng-container>
+      <!-- Table -->
+      <div style="overflow-x:auto;" [style.display]="isLoading ? 'none' : 'block'">
+        <mat-table [dataSource]="dataSource" matSort style="min-width:900px;background:transparent;">
 
-        <!-- Salary -->
-        <ng-container matColumnDef="salary">
-          <mat-header-cell *matHeaderCellDef>Salary</mat-header-cell>
-          <mat-cell *matCellDef="let career">
-            <span class="text-sm text-gray-600">{{ formatSalary(career) }}</span>
-          </mat-cell>
-        </ng-container>
+          <!-- Title -->
+          <ng-container matColumnDef="title">
+            <mat-header-cell *matHeaderCellDef mat-sort-header>Title</mat-header-cell>
+            <mat-cell *matCellDef="let career">
+              <div class="flex flex-col py-2">
+                <span class="font-semibold text-gray-800 text-sm">{{ career.title }}</span>
+                <span *ngIf="career.poste" class="text-xs text-secondary">{{ career.poste }}</span>
+              </div>
+            </mat-cell>
+          </ng-container>
 
-        <!-- Options -->
-        <ng-container matColumnDef="options">
-          <mat-header-cell *matHeaderCellDef>Options</mat-header-cell>
-          <mat-cell *matCellDef="let career">
-            <div style="display:flex; flex-direction:column; gap:4px;">
-              <span *ngIf="career.isRemoteFriendly"
-                style="display:inline-flex; align-items:center; gap:4px;
-                       padding:2px 10px; border-radius:9999px;
-                       font-size:11px; font-weight:600;
-                       background:#dbeafe; color:#1d4ed8; width:fit-content;">
-                🌐 Remote
-              </span>
-              <span *ngIf="career.isAccessibleForDisabled"
-                style="display:inline-flex; align-items:center; gap:4px;
-                       padding:2px 10px; border-radius:9999px;
-                       font-size:11px; font-weight:600;
-                       background:#dcfce7; color:#15803d; width:fit-content;">
-                ♿ Access
-              </span>
-            </div>
-          </mat-cell>
-        </ng-container>
+          <!-- Domain -->
+          <ng-container matColumnDef="domain">
+            <mat-header-cell *matHeaderCellDef mat-sort-header>Domain</mat-header-cell>
+            <mat-cell *matCellDef="let career">
+              <div class="flex flex-col gap-1 py-2">
+                <span class="px-3 py-1 rounded-full text-xs font-semibold"
+                      style="display:inline-block;width:fit-content;"
+                      [ngClass]="domainColors[career.domain]">
+                  {{ domainLabels[career.domain] }}
+                </span>
+                <span *ngIf="career.departement" class="text-xs text-secondary">
+                  {{ career.departement }}
+                </span>
+              </div>
+            </mat-cell>
+          </ng-container>
 
-        <!-- Actions -->
-        <ng-container matColumnDef="actions">
-          <mat-header-cell *matHeaderCellDef>Actions</mat-header-cell>
-          <mat-cell *matCellDef="let career">
-            <div style="display:flex; align-items:center; gap:6px;">
-              <button mat-stroked-button color="primary"
-                      style="min-width:0; padding:0 12px; height:32px;
-                             font-size:12px; line-height:32px;"
-                      matTooltip="Edit"
-                      (click)="openForm(career)">
-                ✏️ Edit
+          <!-- Level -->
+          <ng-container matColumnDef="level">
+            <mat-header-cell *matHeaderCellDef mat-sort-header>Level</mat-header-cell>
+            <mat-cell *matCellDef="let career">
+              <div style="display:flex;align-items:center;gap:6px;" [ngClass]="levelColors[career.level]">
+                <span style="font-size:14px;flex-shrink:0;line-height:1;">{{ levelIcons[career.level] }}</span>
+                <span class="text-sm font-medium">{{ career.level }}</span>
+              </div>
+            </mat-cell>
+          </ng-container>
+
+          <!-- Salary -->
+          <ng-container matColumnDef="salary">
+            <mat-header-cell *matHeaderCellDef>Salary</mat-header-cell>
+            <mat-cell *matCellDef="let career">
+              <span class="text-sm text-gray-600">{{ formatSalary(career) }}</span>
+            </mat-cell>
+          </ng-container>
+
+          <!-- Options -->
+          <ng-container matColumnDef="options">
+            <mat-header-cell *matHeaderCellDef>Options</mat-header-cell>
+            <mat-cell *matCellDef="let career">
+              <div style="display:flex;flex-direction:column;gap:4px;">
+                <span *ngIf="career.isRemoteFriendly"
+                  style="display:inline-flex;align-items:center;gap:4px;padding:2px 10px;
+                         border-radius:9999px;font-size:11px;font-weight:600;
+                         background:#dbeafe;color:#1d4ed8;width:fit-content;">
+                  🌐 Remote
+                </span>
+                <span *ngIf="career.isAccessibleForDisabled"
+                  style="display:inline-flex;align-items:center;gap:4px;padding:2px 10px;
+                         border-radius:9999px;font-size:11px;font-weight:600;
+                         background:#dcfce7;color:#15803d;width:fit-content;">
+                  ♿ Access
+                </span>
+              </div>
+            </mat-cell>
+          </ng-container>
+
+          <!-- Actions Admin/RH -->
+          <ng-container matColumnDef="actions">
+            <mat-header-cell *matHeaderCellDef>Actions</mat-header-cell>
+            <mat-cell *matCellDef="let career">
+              <div style="display:flex;align-items:center;gap:6px;">
+                <button mat-stroked-button
+                        style="min-width:0;padding:0 10px;height:32px;font-size:12px;line-height:32px;"
+                        matTooltip="Voir les employés"
+                        (click)="viewEmployees(career)">👥</button>
+                <button mat-stroked-button color="primary"
+                        style="min-width:0;padding:0 12px;height:32px;font-size:12px;line-height:32px;"
+                        matTooltip="Edit"
+                        (click)="openForm(career)">✏️ Edit</button>
+                <button mat-stroked-button color="warn"
+                        style="min-width:0;padding:0 12px;height:32px;font-size:12px;line-height:32px;"
+                        matTooltip="Delete"
+                        (click)="deleteCareer(career)">🗑️ Del</button>
+              </div>
+            </mat-cell>
+          </ng-container>
+
+          <!-- ✅ Actions Employé — Postuler seulement -->
+          <ng-container matColumnDef="employee-actions">
+            <mat-header-cell *matHeaderCellDef>Action</mat-header-cell>
+            <mat-cell *matCellDef="let career">
+              <button (click)="openMobilityForm(career)"
+                      style="padding:0 16px;height:32px;border-radius:8px;border:none;
+                             background:#7c3aed;color:white;cursor:pointer;
+                             font-size:12px;font-weight:600;font-family:inherit;">
+                🔄 Postuler
               </button>
-              <button mat-stroked-button color="warn"
-                      style="min-width:0; padding:0 12px; height:32px;
-                             font-size:12px; line-height:32px;"
-                      matTooltip="Delete"
-                      (click)="deleteCareer(career)">
-                🗑️ Del
-              </button>
-            </div>
-          </mat-cell>
-        </ng-container>
+            </mat-cell>
+          </ng-container>
 
-        <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"
-                        class="bg-gray-50"></mat-header-row>
-        <mat-row *matRowDef="let row; columns: displayedColumns;"
-                 class="career-row"></mat-row>
+          <mat-header-row *matHeaderRowDef="displayedColumns; sticky: true" class="bg-gray-50"></mat-header-row>
+          <mat-row *matRowDef="let row; columns: displayedColumns;" class="career-row"></mat-row>
 
-        <tr class="mat-row" *matNoDataRow>
-          <td class="mat-cell" [attr.colspan]="displayedColumns.length">
-            <div class="flex flex-col items-center py-16 gap-3">
-              <span style="font-size:48px;">💼</span>
-              <span class="text-sm text-secondary">No positions found</span>
-            </div>
-          </td>
-        </tr>
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+              <div class="flex flex-col items-center py-16 gap-3">
+                <span style="font-size:48px;">💼</span>
+                <span class="text-sm text-secondary">No positions found</span>
+              </div>
+            </td>
+          </tr>
 
-      </mat-table>
+        </mat-table>
+      </div>
+
+      <mat-paginator [style.display]="isLoading ? 'none' : 'block'"
+                     [pageSizeOptions]="[10, 25, 50]"
+                     showFirstLastButtons
+                     class="border-t border-gray-100">
+      </mat-paginator>
+
     </div>
+  </ng-container>
 
-    <mat-paginator
-      [style.display]="isLoading ? 'none' : 'block'"
-      [pageSizeOptions]="[10, 25, 50]"
-      showFirstLastButtons
-      class="border-t border-gray-100">
-    </mat-paginator>
+  <!-- ===== ONGLET 1 ===== -->
+  <ng-container *ngIf="activeTab === 1">
+    <!-- RH : toutes les demandes -->
+    <app-mobility-dashboard *ngIf="authRole.isAdminOrRH()"></app-mobility-dashboard>
+    <!-- Employé : ses demandes uniquement -->
+    <app-employee-mobility *ngIf="authRole.isEmployee()"></app-employee-mobility>
+  </ng-container>
 
-  </div>
+  <!-- ===== ONGLET 2 ===== -->
+  <ng-container *ngIf="activeTab === 2">
+    <!-- RH : tous les plans -->
+    <app-career-plan-dashboard *ngIf="authRole.isAdminOrRH()"></app-career-plan-dashboard>
+    <!-- Employé : son plan uniquement -->
+    <app-employee-plan *ngIf="authRole.isEmployee()"></app-employee-plan>
+  </ng-container>
+
 </div>

@@ -1,0 +1,126 @@
+<div style="padding:24px;display:flex;flex-direction:column;gap:20px;">
+
+  <!-- Header -->
+  <div style="display:flex;justify-content:space-between;align-items:center;">
+    <div>
+      <h3 style="font-size:20px;font-weight:700;color:#111827;margin:0;">📈 Plans d'Évolution</h3>
+      <p style="font-size:13px;color:#6b7280;margin:4px 0 0;">Suivez la progression des employés vers leurs postes cibles</p>
+    </div>
+    <button (click)="openForm()"
+            style="padding:0 20px;height:40px;border-radius:8px;border:none;background:#7c3aed;color:white;cursor:pointer;font-size:14px;font-weight:600;font-family:inherit;display:flex;align-items:center;gap:6px;">
+      + Nouveau plan
+    </button>
+  </div>
+
+  <!-- KPI -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+    <div style="background:white;border-radius:16px;padding:20px;border:1px solid #f3f4f6;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+      <p style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;margin:0;">Plans actifs</p>
+      <p style="font-size:36px;font-weight:800;color:#7c3aed;margin:8px 0 0;">{{ totalActive }}</p>
+    </div>
+    <div style="background:white;border-radius:16px;padding:20px;border:1px solid #f3f4f6;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+      <p style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;margin:0;">Complétés</p>
+      <p style="font-size:36px;font-weight:800;color:#16a34a;margin:8px 0 0;">{{ totalCompleted }}</p>
+    </div>
+    <div style="background:white;border-radius:16px;padding:20px;border:1px solid #f3f4f6;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+      <p style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;margin:0;">Progression moy.</p>
+      <p style="font-size:36px;font-weight:800;color:#d97706;margin:8px 0 0;">{{ avgProgress }}%</p>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" style="display:flex;justify-content:center;padding:40px;">
+    <mat-spinner diameter="36"></mat-spinner>
+  </div>
+
+  <!-- Plans -->
+  <div *ngIf="!isLoading" style="display:flex;flex-direction:column;gap:16px;">
+
+    <div *ngIf="plans.length === 0"
+         style="text-align:center;padding:48px;color:#9ca3af;font-size:14px;">
+      Aucun plan d'évolution créé
+    </div>
+
+    <div *ngFor="let plan of plans"
+         style="background:white;border-radius:16px;padding:24px;border:1px solid #f3f4f6;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+
+      <!-- Top row -->
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+        <div style="display:flex;gap:14px;align-items:center;">
+          <div style="width:44px;height:44px;border-radius:12px;background:#ede9fe;display:flex;align-items:center;justify-content:center;font-size:18px;">👤</div>
+          <div>
+            <p style="font-size:15px;font-weight:700;color:#111827;margin:0;">{{ plan.employeeName }}</p>
+            <p style="font-size:12px;color:#6b7280;margin:4px 0 0;">
+              {{ plan.currentCareerTitle }} → <strong style="color:#7c3aed;">{{ plan.targetCareerTitle }}</strong>
+            </p>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span [style]="'padding:4px 12px;border-radius:9999px;font-size:12px;font-weight:700;' +
+                         (plan.status === PlanStatus.COMPLETED ? 'background:#dcfce7;color:#166534;' :
+                          plan.status === PlanStatus.CANCELLED ? 'background:#fee2e2;color:#991b1b;' :
+                          'background:#ede9fe;color:#7c3aed;')">
+            {{ plan.status === PlanStatus.COMPLETED ? '✅ Complété' :
+               plan.status === PlanStatus.CANCELLED ? '❌ Annulé' : '🎯 Actif' }}
+          </span>
+          <button (click)="delete(plan)"
+                  style="background:none;border:none;cursor:pointer;color:#dc2626;font-size:13px;">🗑️</button>
+        </div>
+      </div>
+
+      <!-- Progress bar -->
+      <div style="margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <span style="font-size:12px;font-weight:600;color:#374151;">Progression</span>
+          <span [style]="'font-size:14px;font-weight:800;color:' + getProgressColor(plan.progressPercent || 0)">
+            {{ plan.progressPercent }}%
+          </span>
+        </div>
+        <div style="background:#f3f4f6;border-radius:9999px;height:10px;overflow:hidden;">
+          <div [style]="'height:100%;border-radius:9999px;transition:width 0.5s ease;background:' +
+                        getProgressColor(plan.progressPercent || 0) +
+                        ';width:' + plan.progressPercent + '%'">
+          </div>
+        </div>
+      </div>
+
+      <!-- Skills -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+
+        <!-- Skills acquises -->
+        <div>
+          <p style="font-size:11px;font-weight:700;color:#16a34a;text-transform:uppercase;margin:0 0 8px;">
+            ✅ Compétences acquises ({{ plan.skillsAlreadyMet?.length || 0 }})
+          </p>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <span *ngFor="let s of plan.skillsAlreadyMet"
+                  style="padding:3px 10px;border-radius:9999px;font-size:11px;font-weight:600;background:#dcfce7;color:#166534;">
+              {{ s }}
+            </span>
+            <span *ngIf="!plan.skillsAlreadyMet?.length" style="font-size:12px;color:#9ca3af;font-style:italic;">Aucune</span>
+          </div>
+        </div>
+
+        <!-- Skills à acquérir -->
+        <div>
+          <p style="font-size:11px;font-weight:700;color:#dc2626;text-transform:uppercase;margin:0 0 8px;">
+            ❌ À acquérir ({{ plan.skillsToAcquire?.length || 0 }})
+          </p>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <span *ngFor="let s of plan.skillsToAcquire"
+                  style="padding:3px 10px;border-radius:9999px;font-size:11px;font-weight:600;background:#fee2e2;color:#991b1b;">
+              {{ s }}
+            </span>
+            <span *ngIf="!plan.skillsToAcquire?.length" style="font-size:12px;color:#9ca3af;font-style:italic;">Aucune 🎉</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <p *ngIf="plan.notes"
+         style="font-size:12px;color:#6b7280;margin:12px 0 0;padding-top:12px;border-top:1px solid #f3f4f6;font-style:italic;">
+        📝 {{ plan.notes }}
+      </p>
+    </div>
+  </div>
+</div>

@@ -17,11 +17,27 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { CareerRoutingModule } from './career-routing.module';
 import { CareerListComponent } from './components/career-list/career-list.component';
 import { CareerFormComponent } from './components/career-form/career-form.component';
+import { MobilityDashboardComponent } from './components/mobility-dashboard/mobility-dashboard.component';
+import { MobilityRequestFormComponent } from './components/mobility-request-form/mobility-request-form.component';
+import { CareerPlanDashboardComponent } from './components/career-plan-dashboard/career-plan-dashboard.component';
+import { CareerPlanFormComponent } from './components/career-plan-form/career-plan-form.component';
+import { CareerEmployeesDialogComponent } from './components/career-employees-dialog/career-employees-dialog.component';
+import { EmployeeMobilityComponent } from './components/employee-mobility/employee-mobility.component';
+import { EmployeePlanComponent } from './components/employee-plan/employee-plan.component';
+
 
 @NgModule({
   declarations: [
     CareerListComponent,
-    CareerFormComponent
+    CareerFormComponent,
+    MobilityDashboardComponent,
+    MobilityRequestFormComponent,
+    CareerPlanDashboardComponent,
+    CareerPlanFormComponent,
+    CareerEmployeesDialogComponent,
+    EmployeeMobilityComponent,
+    EmployeePlanComponent,
+    
   ],
   imports: [
     CommonModule,

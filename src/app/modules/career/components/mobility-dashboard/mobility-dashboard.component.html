@@ -1,0 +1,141 @@
+<div style="padding:24px; display:flex; flex-direction:column; gap:20px;">
+
+  <!-- Header -->
+  <div style="display:flex; justify-content:space-between; align-items:center;">
+    <div>
+      <h3 style="font-size:20px; font-weight:700; color:#111827; margin:0;">
+        🔄 Demandes de Mobilité Interne
+      </h3>
+      <p style="font-size:13px; color:#6b7280; margin:4px 0 0;">
+        Gérez les demandes de changement de poste
+      </p>
+    </div>
+
+    
+  </div>
+
+  <!-- KPI -->
+  <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px;">
+    <div style="background:white; border-radius:16px; padding:20px;
+                border:1px solid #f3f4f6; box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+      <p style="font-size:11px; font-weight:700; color:#6b7280; text-transform:uppercase; margin:0;">
+        En attente
+      </p>
+      <p style="font-size:36px; font-weight:800; color:#d97706; margin:8px 0 0;">
+        {{ totalPending }}
+      </p>
+    </div>
+
+    <div style="background:white; border-radius:16px; padding:20px;
+                border:1px solid #f3f4f6; box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+      <p style="font-size:11px; font-weight:700; color:#6b7280; text-transform:uppercase; margin:0;">
+        Approuvées
+      </p>
+      <p style="font-size:36px; font-weight:800; color:#16a34a; margin:8px 0 0;">
+        {{ totalApproved }}
+      </p>
+    </div>
+
+    <div style="background:white; border-radius:16px; padding:20px;
+                border:1px solid #f3f4f6; box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+      <p style="font-size:11px; font-weight:700; color:#6b7280; text-transform:uppercase; margin:0;">
+        Refusées
+      </p>
+      <p style="font-size:36px; font-weight:800; color:#dc2626; margin:8px 0 0;">
+        {{ totalRejected }}
+      </p>
+    </div>
+  </div>
+
+  <!-- Filtres statut (FIX TYPESCRIPT ICI) -->
+  <div style="display:flex; gap:8px; flex-wrap:wrap;">
+    <button *ngFor="let s of statuses"
+            (click)="selectedStatus = s"
+            [style]="selectedStatus === s
+              ? 'padding:6px 16px; border-radius:9999px; border:none; background:#7c3aed; color:white; cursor:pointer; font-size:13px; font-weight:600; font-family:inherit;'
+              : 'padding:6px 16px; border-radius:9999px; border:1px solid #e5e7eb; background:white; color:#374151; cursor:pointer; font-size:13px; font-weight:500; font-family:inherit;'">
+
+      {{ s === 'ALL'
+        ? '🔍 Tous'
+        : s === 'PENDING'
+          ? '⏳ En attente'
+          : s === 'APPROVED'
+            ? '✅ Approuvés'
+            : s === 'REJECTED'
+              ? '❌ Refusés'
+              : '⏸️ En suspens' }}
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" style="display:flex; justify-content:center; padding:40px;">
+    <mat-spinner diameter="36"></mat-spinner>
+  </div>
+
+  <!-- Liste -->
+  <div *ngIf="!isLoading" style="display:flex; flex-direction:column; gap:12px;">
+
+    <div *ngIf="filteredRequests.length === 0"
+         style="text-align:center; padding:48px; color:#9ca3af; font-size:14px;">
+      Aucune demande trouvée
+    </div>
+
+    <div *ngFor="let req of filteredRequests"
+         style="background:white; border-radius:16px; padding:20px;
+                border:1px solid #f3f4f6; box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
+
+        <!-- Info -->
+        <div style="display:flex; gap:14px; align-items:flex-start;">
+          <div style="width:44px; height:44px; border-radius:12px; background:#ede9fe;
+                      display:flex; align-items:center; justify-content:center;
+                      font-size:18px;">👤</div>
+
+          <div>
+            <p style="font-size:15px; font-weight:700; color:#111827; margin:0;">
+              {{ req.employeeName }}
+            </p>
+
+            <p style="font-size:12px; color:#6b7280; margin:4px 0 0;">
+              {{ req.currentCareerTitle || '—' }}
+              <span style="margin:0 6px;">→</span>
+              <strong style="color:#7c3aed;">{{ req.targetCareerTitle }}</strong>
+            </p>
+
+            <p *ngIf="req.motivationLetter"
+               style="font-size:12px; color:#9ca3af; margin:6px 0 0; font-style:italic;">
+              "{{ req.motivationLetter }}"
+            </p>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
+
+          <span [style]="'padding:4px 12px; border-radius:9999px; font-size:12px; font-weight:700;' + statusColors[req.status]">
+            {{ statusLabels[req.status] }}
+          </span>
+
+          <div *ngIf="req.status === MobilityStatus.PENDING"
+               style="display:flex; gap:6px;">
+            <button (click)="review(req, MobilityStatus.APPROVED)">✅</button>
+            <button (click)="review(req, MobilityStatus.ON_HOLD)">⏸️</button>
+            <button (click)="review(req, MobilityStatus.REJECTED)">❌</button>
+          </div>
+
+          <p *ngIf="req.reviewComment"
+             style="font-size:11px; color:#6b7280; margin:0; text-align:right;">
+            💬 {{ req.reviewComment }}
+          </p>
+
+          <button (click)="delete(req)"
+                  style="background:none; border:none; cursor:pointer; color:#dc2626;">
+            🗑️ Supprimer
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

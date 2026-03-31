@@ -1,0 +1,106 @@
+<div style="display:flex;flex-direction:column;width:100%;box-sizing:border-box;overflow:hidden;background:white;border-radius:16px;">
+
+  <!-- Header -->
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid #f3f4f6;">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="width:44px;height:44px;border-radius:12px;background:#ede9fe;display:flex;align-items:center;justify-content:center;font-size:22px;">🔄</div>
+      <div>
+        <h2 style="font-size:17px;font-weight:700;color:#111827;margin:0;">Demande de Mobilité</h2>
+        <p style="font-size:12px;color:#9ca3af;margin:0;">Soumettez votre demande de changement de poste</p>
+      </div>
+    </div>
+    <button (click)="cancel()"
+            style="background:#f9fafb;border:1px solid #e5e7eb;cursor:pointer;width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#6b7280;font-size:16px;">✕</button>
+  </div>
+
+  <!-- Body -->
+  <mat-dialog-content style="padding:24px !important;margin:0 !important;max-height:60vh;overflow-y:auto;box-sizing:border-box;">
+    <form [formGroup]="form" style="display:flex;flex-direction:column;gap:18px;">
+
+      <!-- Poste cible -->
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <label style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.06em;">
+          Poste cible <span style="color:#ef4444;">*</span>
+        </label>
+        <select formControlName="targetCareerId"
+                style="width:100%;padding:11px 14px;border-radius:8px;border:1.5px solid #e5e7eb;font-size:14px;outline:none;box-sizing:border-box;font-family:inherit;color:#111827;background:#fafafa;cursor:pointer;">
+          <option value="" disabled>Sélectionner un poste</option>
+          <option *ngFor="let c of careers" [value]="c.id">
+            {{ c.title }} — {{ c.departement || c.domain }}
+            {{ c.isAccessibleForDisabled ? '♿' : '' }}
+          </option>
+        </select>
+        <span *ngIf="form.get('targetCareerId')?.touched && form.get('targetCareerId')?.hasError('required')"
+              style="font-size:11px;color:#ef4444;">Champ requis</span>
+      </div>
+
+      <!-- Upload Lettre de motivation -->
+      <div style="display:flex;flex-direction:column;gap:8px;">
+  <label style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.06em;">
+    Lettre de motivation <span style="color:#ef4444;">*</span>
+  </label>
+
+        <!-- Zone de drop -->
+        <div (click)="fileInput.click()"
+       (dragover)="onDragOver($event)"
+       (dragleave)="onDragLeave($event)"
+       (drop)="onDrop($event)"
+       [style]="isDragging
+         ? 'border:2px dashed #7c3aed;background:#f5f3ff;border-radius:12px;padding:32px 20px;text-align:center;cursor:pointer;transition:all 0.2s;'
+         : 'border:2px dashed #d1d5db;background:#fafafa;border-radius:12px;padding:32px 20px;text-align:center;cursor:pointer;transition:all 0.2s;'">
+
+          <!-- Pas de fichier -->
+          <div *ngIf="!selectedFile" style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+      <span style="font-size:36px;"></span>
+      <p style="font-size:14px;font-weight:600;color:#374151;margin:0;">
+        Glissez votre fichier ici ou <span style="color:#7c3aed;">cliquez pour parcourir</span>
+      </p>
+      <p style="font-size:12px;color:#9ca3af;margin:0;">PDF, DOC, DOCX — max 5 MB</p>
+    </div>
+
+          <!-- Fichier sélectionné -->
+          <div *ngIf="selectedFile"
+         style="display:flex;align-items:center;justify-content:center;gap:12px;">
+      <span style="font-size:28px;">{{ getFileIcon() }}</span>
+      <div style="text-align:left;">
+        <p style="font-size:14px;font-weight:700;color:#111827;margin:0;">{{ selectedFile.name }}</p>
+        <p style="font-size:12px;color:#6b7280;margin:2px 0 0;">{{ getFileSize() }}</p>
+      </div>
+      <button type="button" (click)="removeFile($event)"
+              style="background:#fee2e2;border:none;cursor:pointer;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#dc2626;font-size:14px;margin-left:8px;">
+        ✕
+      </button>
+    </div>
+
+  </div>
+
+        <!-- Input caché -->
+        <input #fileInput type="file"
+         accept=".pdf,.doc,.docx"
+         style="display:none;"
+         (change)="onFileSelected($event)" />
+
+        <!-- Erreur fichier -->
+        <span *ngIf="fileError" style="font-size:11px;color:#ef4444;">{{ fileError }}</span>
+  <span *ngIf="!selectedFile && formSubmitted" style="font-size:11px;color:#ef4444;">
+    Veuillez joindre votre lettre de motivation
+  </span>
+</div>
+
+    </form>
+  </mat-dialog-content>
+
+  <!-- Footer -->
+  <div style="display:flex;justify-content:flex-end;gap:12px;padding:16px 24px;border-top:1px solid #f3f4f6;">
+    <button (click)="cancel()"
+            style="padding:0 20px;height:40px;border-radius:8px;border:1.5px solid #e5e7eb;background:white;cursor:pointer;font-size:14px;font-weight:500;color:#374151;font-family:inherit;">
+      Annuler
+    </button>
+    <button (click)="save()" [disabled]="isSaving"
+            style="padding:0 24px;height:40px;border-radius:8px;min-width:140px;border:none;background:#7c3aed;color:white;cursor:pointer;font-size:14px;font-weight:600;font-family:inherit;display:inline-flex;align-items:center;justify-content:center;gap:8px;">
+      <mat-spinner *ngIf="isSaving" diameter="16"></mat-spinner>
+      <span>Soumettre</span>
+    </button>
+  </div>
+
+</div>

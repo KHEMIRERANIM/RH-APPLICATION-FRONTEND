@@ -1,0 +1,86 @@
+<div style="padding:24px;display:flex;flex-direction:column;gap:20px;">
+
+  <div>
+    <h3 style="font-size:20px;font-weight:700;color:#111827;margin:0;">📈 Mon Plan d'Évolution</h3>
+    <p style="font-size:13px;color:#6b7280;margin:4px 0 0;">Votre roadmap vers votre poste cible</p>
+  </div>
+
+  <div *ngIf="isLoading" style="display:flex;justify-content:center;padding:40px;">
+    <mat-spinner diameter="36"></mat-spinner>
+  </div>
+
+  <div *ngIf="!isLoading && plans.length === 0"
+       style="text-align:center;padding:48px;color:#9ca3af;">
+    <p style="font-size:48px;margin:0;">🗺️</p>
+    <p style="font-size:14px;">Aucun plan d'évolution défini pour vous</p>
+    <p style="font-size:12px;color:#9ca3af;">Contactez votre RH pour créer votre plan</p>
+  </div>
+
+  <div *ngFor="let plan of plans"
+       style="background:white;border-radius:16px;padding:24px;border:1px solid #f3f4f6;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+      <div>
+        <p style="font-size:15px;font-weight:700;color:#111827;margin:0;">
+          {{ plan.currentCareerTitle }} → <span style="color:#7c3aed;">{{ plan.targetCareerTitle }}</span>
+        </p>
+        <p style="font-size:12px;color:#6b7280;margin:4px 0 0;">
+          {{ plan.status === PlanStatus.COMPLETED ? '🎉 Plan complété !' : '🎯 En cours' }}
+        </p>
+      </div>
+      <span [style]="'padding:4px 12px;border-radius:9999px;font-size:12px;font-weight:700;' +
+                     (plan.status === PlanStatus.COMPLETED ? 'background:#dcfce7;color:#166534;' : 'background:#ede9fe;color:#7c3aed;')">
+        {{ plan.status === PlanStatus.COMPLETED ? '✅ Complété' : '🎯 Actif' }}
+      </span>
+    </div>
+
+    <!-- Barre de progression -->
+    <div style="margin-bottom:20px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+        <span style="font-size:12px;font-weight:600;color:#374151;">Ma progression</span>
+        <span [style]="'font-size:14px;font-weight:800;color:' + getProgressColor(plan.progressPercent || 0)">
+          {{ plan.progressPercent }}%
+        </span>
+      </div>
+      <div style="background:#f3f4f6;border-radius:9999px;height:12px;overflow:hidden;">
+        <div [style]="'height:100%;border-radius:9999px;transition:width 0.5s;background:' +
+                      getProgressColor(plan.progressPercent || 0) + ';width:' + plan.progressPercent + '%'">
+        </div>
+      </div>
+    </div>
+
+    <!-- Skills -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div>
+        <p style="font-size:11px;font-weight:700;color:#16a34a;text-transform:uppercase;margin:0 0 8px;">
+          ✅ Je maîtrise ({{ plan.skillsAlreadyMet?.length || 0 }})
+        </p>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;">
+          <span *ngFor="let s of plan.skillsAlreadyMet"
+                style="padding:3px 10px;border-radius:9999px;font-size:11px;font-weight:600;background:#dcfce7;color:#166534;">
+            {{ s }}
+          </span>
+          <span *ngIf="!plan.skillsAlreadyMet?.length" style="font-size:12px;color:#9ca3af;font-style:italic;">Aucune</span>
+        </div>
+      </div>
+      <div>
+        <p style="font-size:11px;font-weight:700;color:#dc2626;text-transform:uppercase;margin:0 0 8px;">
+          📚 À acquérir ({{ plan.skillsToAcquire?.length || 0 }})
+        </p>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;">
+          <span *ngFor="let s of plan.skillsToAcquire"
+                style="padding:3px 10px;border-radius:9999px;font-size:11px;font-weight:600;background:#fee2e2;color:#991b1b;">
+            {{ s }}
+          </span>
+          <span *ngIf="!plan.skillsToAcquire?.length" style="font-size:12px;color:#9ca3af;font-style:italic;">Aucune 🎉</span>
+        </div>
+      </div>
+    </div>
+
+    <p *ngIf="plan.notes"
+       style="font-size:12px;color:#6b7280;margin:12px 0 0;padding-top:12px;border-top:1px solid #f3f4f6;font-style:italic;">
+      📝 Note RH : {{ plan.notes }}
+    </p>
+  </div>
+
+</div>

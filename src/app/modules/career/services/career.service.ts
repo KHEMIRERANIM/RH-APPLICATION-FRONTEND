@@ -33,4 +33,10 @@ export class CareerService {
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers: this.getHeaders() });
   }
+  getEmployeesByCareer(careerId: string): Observable<any[]> {
+  return this.http.get<any[]>(
+    `${this.apiUrl}/${careerId}/employees`,
+    { headers: this.getHeaders() }
+  );
+}
 }

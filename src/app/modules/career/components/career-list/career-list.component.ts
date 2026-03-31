@@ -7,6 +7,9 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { CareerService } from '../../services/career.service';
 import { Career, CareerDomain, CareerLevel } from '../../models/career.model';
 import { CareerFormComponent } from '../career-form/career-form.component';
+import { CareerEmployeesDialogComponent } from '../career-employees-dialog/career-employees-dialog.component';
+import { AuthRoleService } from '../../services/auth-role.service';
+import { MobilityRequestFormComponent } from '../mobility-request-form/mobility-request-form.component';
 
 @Component({
   selector: 'app-career-list',
@@ -18,6 +21,9 @@ export class CareerListComponent implements OnInit, AfterViewInit {
   displayedColumns: string[] = ['title', 'domain', 'level', 'salary', 'options', 'actions'];
   dataSource = new MatTableDataSource<Career>();
   isLoading = true;
+
+  activeTab = 0;
+  tabs: { icon: string; label: string }[] = [];
 
   total = 0;
   totalRemote = 0;
@@ -80,16 +86,47 @@ export class CareerListComponent implements OnInit, AfterViewInit {
     private dialog: MatDialog,
     private snackBar: MatSnackBar,
     private cdr: ChangeDetectorRef,
-    private ngZone: NgZone
+    private ngZone: NgZone,
+    public authRole: AuthRoleService  // ✅ public pour l'utiliser dans le HTML
   ) {}
 
   ngOnInit(): void {
+    this.buildTabs();
+    this.buildColumns();
     this.loadCareers();
   }
 
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
+  }
+
+  // ✅ Onglets selon le rôle
+  buildTabs(): void {
+    if (this.authRole.isAdminOrRH()) {
+      this.tabs = [
+        { icon: '💼', label: 'Positions' },
+        { icon: '🔄', label: 'Mobilité Interne' },
+        { icon: '📈', label: "Plans d'Évolution" }
+      ];
+    } else {
+      // Employé : seulement Postes + ses demandes + son plan
+      this.tabs = [
+        { icon: '💼', label: 'Postes Disponibles' },
+        { icon: '🔄', label: 'Mes Demandes' },
+        { icon: '📈', label: 'Mon Plan' }
+      ];
+    }
+  }
+
+  // ✅ Colonnes selon le rôle
+  buildColumns(): void {
+    if (this.authRole.isAdminOrRH()) {
+      this.displayedColumns = ['title', 'domain', 'level', 'salary', 'options', 'actions'];
+    } else {
+      // Employé : pas de colonne actions admin
+      this.displayedColumns = ['title', 'domain', 'level', 'salary', 'options', 'employee-actions'];
+    }
   }
 
   loadCareers(): void {
@@ -135,17 +172,35 @@ export class CareerListComponent implements OnInit, AfterViewInit {
     this.dataSource.filter = (event.target as HTMLInputElement).value.trim().toLowerCase();
   }
 
+  getTabStyle(index: number): string {
+    const base = 'padding:16px 24px;border:none;background:none;cursor:pointer;' +
+                 'font-size:14px;font-weight:600;font-family:inherit;' +
+                 'border-bottom:3px solid transparent;margin-bottom:-2px;transition:all 0.15s;';
+    return this.activeTab === index
+      ? base + 'color:#7c3aed;border-bottom-color:#7c3aed;'
+      : base + 'color:#6b7280;';
+  }
+
   openForm(career?: Career): void {
-  const dialogRef = this.dialog.open(CareerFormComponent, {
-    width: '700px',
-    maxWidth: '95vw',
-    data: career ? { ...career } : null,
-    panelClass: 'career-dialog'
-  });
-  dialogRef.afterClosed().subscribe(result => {
-    if (result) this.loadCareers();
-  });
-}
+    const dialogRef = this.dialog.open(CareerFormComponent, {
+      width: '700px',
+      maxWidth: '95vw',
+      data: career ? { ...career } : null,
+      panelClass: 'career-dialog'
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) this.loadCareers();
+    });
+  }
+
+  viewEmployees(career: Career): void {
+    this.dialog.open(CareerEmployeesDialogComponent, {
+      width: '560px',
+      maxWidth: '95vw',
+      data: career,
+      panelClass: 'career-dialog'
+    });
+  }
 
   deleteCareer(career: Career): void {
     if (!confirm(`Delete position "${career.title}"?`)) return;
@@ -167,4 +222,19 @@ export class CareerListComponent implements OnInit, AfterViewInit {
     if (career.salaryMin) return `From ${career.salaryMin.toLocaleString()} TND`;
     return `Up to ${career.salaryMax!.toLocaleString()} TND`;
   }
+  openMobilityForm(career: Career): void {
+  const ref = this.dialog.open(MobilityRequestFormComponent, {
+    width: '600px',
+    maxWidth: '95vw',
+    data: {
+      careers: [career],
+      preselectedCareerId: career.id,
+      employeeId: this.authRole.getCurrentUserId()
+    },
+    panelClass: 'career-dialog'
+  });
+  ref.afterClosed().subscribe(result => {
+    if (result) this.snackBar.open('Demande soumise !', 'OK', { duration: 3000 });
+  });
+}
 }

@@ -1,0 +1,109 @@
+<div style="display:flex;flex-direction:column;width:100%;box-sizing:border-box;overflow:hidden;background:white;border-radius:16px;">
+
+  <!-- Header -->
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid #f3f4f6;">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="width:44px;height:44px;border-radius:12px;background:#ede9fe;display:flex;align-items:center;justify-content:center;font-size:22px;">📈</div>
+      <div>
+        <h2 style="font-size:17px;font-weight:700;color:#111827;margin:0;">Nouveau Plan d'Évolution</h2>
+        <p style="font-size:12px;color:#9ca3af;margin:0;">Définissez le parcours de l'employé</p>
+      </div>
+    </div>
+    <button (click)="cancel()"
+            style="background:#f9fafb;border:1px solid #e5e7eb;cursor:pointer;width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#6b7280;font-size:16px;">✕</button>
+  </div>
+
+  <!-- Body -->
+  <mat-dialog-content style="padding:24px !important;margin:0 !important;max-height:60vh;overflow-y:auto;box-sizing:border-box;">
+    <form [formGroup]="form" style="display:flex;flex-direction:column;gap:16px;">
+
+      <!-- ✅ ID caché automatique -->
+      <input type="hidden" formControlName="employeeId" />
+      <input type="hidden" formControlName="createdBy" />
+
+      <!-- Poste actuel + Poste cible -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.06em;">
+            Poste actuel <span style="color:#ef4444;">*</span>
+          </label>
+          <select formControlName="currentCareerId"
+                  style="width:100%;padding:11px 14px;border-radius:8px;border:1.5px solid #e5e7eb;font-size:14px;outline:none;box-sizing:border-box;font-family:inherit;color:#111827;background:#fafafa;cursor:pointer;">
+            <option value="" disabled>Sélectionner</option>
+            <option *ngFor="let c of careers" [value]="c.id">{{ c.title }}</option>
+          </select>
+          <span *ngIf="form.get('currentCareerId')?.touched && form.get('currentCareerId')?.hasError('required')"
+                style="font-size:11px;color:#ef4444;">Requis</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.06em;">
+            Poste cible <span style="color:#ef4444;">*</span>
+          </label>
+          <select formControlName="targetCareerId"
+                  style="width:100%;padding:11px 14px;border-radius:8px;border:1.5px solid #e5e7eb;font-size:14px;outline:none;box-sizing:border-box;font-family:inherit;color:#111827;background:#fafafa;cursor:pointer;">
+            <option value="" disabled>Sélectionner</option>
+            <option *ngFor="let c of careers" [value]="c.id">
+              {{ c.title }} {{ c.isAccessibleForDisabled ? '♿' : '' }}
+            </option>
+          </select>
+          <span *ngIf="form.get('targetCareerId')?.touched && form.get('targetCareerId')?.hasError('required')"
+                style="font-size:11px;color:#ef4444;">Requis</span>
+        </div>
+      </div>
+
+      <!-- Skills actuelles -->
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <label style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.06em;">
+          Mes compétences actuelles
+        </label>
+        <div style="display:flex;gap:8px;">
+          <input [(ngModel)]="skillInput" [ngModelOptions]="{standalone:true}"
+                 (keydown)="onSkillKeydown($event)"
+                 placeholder="Ajouter une compétence..."
+                 style="flex:1;min-width:0;padding:11px 14px;border-radius:8px;border:1.5px solid #e5e7eb;font-size:14px;outline:none;box-sizing:border-box;font-family:inherit;color:#111827;background:#fafafa;" />
+          <button type="button" (click)="addSkill()"
+                  style="flex-shrink:0;padding:0 18px;height:44px;border-radius:8px;background:#7c3aed;color:white;border:none;cursor:pointer;font-size:14px;font-weight:600;font-family:inherit;">
+            + Add
+          </button>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;min-height:28px;">
+          <span *ngFor="let s of currentSkills"
+                style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:9999px;font-size:12px;font-weight:600;background:#ede9fe;color:#7c3aed;">
+            {{ s }}
+            <button type="button" (click)="removeSkill(s)"
+                    style="background:none;border:none;cursor:pointer;color:#7c3aed;font-size:14px;padding:0;">×</button>
+          </span>
+          <span *ngIf="!currentSkills.length"
+                style="font-size:12px;color:#9ca3af;font-style:italic;">
+            Aucune compétence ajoutée
+          </span>
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <label style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.06em;">
+          Notes
+        </label>
+        <textarea formControlName="notes" rows="3"
+                  placeholder="Remarques, objectifs..."
+                  style="width:100%;padding:11px 14px;border-radius:8px;border:1.5px solid #e5e7eb;font-size:14px;outline:none;box-sizing:border-box;font-family:inherit;color:#111827;background:#fafafa;resize:vertical;"></textarea>
+      </div>
+
+    </form>
+  </mat-dialog-content>
+
+  <!-- Footer -->
+  <div style="display:flex;justify-content:flex-end;gap:12px;padding:16px 24px;border-top:1px solid #f3f4f6;">
+    <button (click)="cancel()"
+            style="padding:0 20px;height:40px;border-radius:8px;border:1.5px solid #e5e7eb;background:white;cursor:pointer;font-size:14px;font-weight:500;color:#374151;font-family:inherit;">
+      Annuler
+    </button>
+    <button (click)="save()" [disabled]="isSaving"
+            style="padding:0 24px;height:40px;border-radius:8px;min-width:140px;border:none;background:#7c3aed;color:white;cursor:pointer;font-size:14px;font-weight:600;font-family:inherit;display:inline-flex;align-items:center;justify-content:center;gap:8px;">
+      <mat-spinner *ngIf="isSaving" diameter="16"></mat-spinner>
+      <span>Créer le plan</span>
+    </button>
+  </div>
+
+</div>

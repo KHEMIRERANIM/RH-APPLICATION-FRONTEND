@@ -44,6 +44,7 @@ export class CareerFormComponent implements OnInit {
   ngOnInit(): void {
     this.isEdit = !!this.data;
     this.dialogRef.updateSize('700px');
+
     this.form = this.fb.group({
       title:                   [this.data?.title || '',    [Validators.required, Validators.minLength(3)]],
       description:             [this.data?.description || ''],
@@ -85,6 +86,7 @@ export class CareerFormComponent implements OnInit {
     const request$ = this.isEdit
       ? this.careerService.update(this.data!.id!, this.form.value)
       : this.careerService.create(this.form.value);
+
     request$.subscribe({
       next: () => {
         this.snackBar.open(
