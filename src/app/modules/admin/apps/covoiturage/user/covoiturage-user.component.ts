@@ -75,26 +75,8 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     }
   ];
 
-  myShuttleReservations = [
-    {
-      id: 1,
-      shuttleName: 'Navette Ligne A',
-      route: 'Gare Centrale → Siège Social',
-      departureTime: '07:30',
-      arrivalTime: '08:00',
-      days: ['L', 'M', 'Me', 'J', 'V'],
-      busNumber: 'BUS-101'
-    },
-    {
-      id: 2,
-      shuttleName: 'Navette Zone Industrielle',
-      route: 'Métro Ligne 1 → Zone Industrielle',
-      departureTime: '08:15',
-      arrivalTime: '08:45',
-      days: ['L', 'M', 'Me', 'J', 'V'],
-      busNumber: 'BUS-205'
-    }
-  ];
+  myShuttleReservations: any[] = [];
+navetteTrackingId: string = ''; // ← AJOUTE ICI
 
   availableShuttles = [
     {
@@ -185,6 +167,23 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
   routeDuration: string = '-';
   routeCo2: string = '-';
   isMapExpanded: boolean = false;
+  // Ajoutez avec les autres variables (vers ligne 100 environ)
+shuttles: any[] = [];
+isLoadingShuttles = false;
+shuttleError = '';
+shuttleSearchTerm = '';
+shuttleFilterDepart: string = '';
+shuttleFilterArrivee: string = '';
+shuttleFilterHeure: string = '';
+selectedNavetteDays: { [shuttleId: string]: string[] } = {};
+
+get shuttleDeparts(): string[] {
+  return [...new Set(this.shuttles.map(s => s.adresseDepart).filter(Boolean))];
+}
+
+get shuttleArrivees(): string[] {
+  return [...new Set(this.shuttles.map(s => s.adresseArrivee).filter(Boolean))];
+}
 
   // Mode de saisie (Carte / Manuel)
   inputMode: 'map' | 'manual' = 'map';
@@ -298,6 +297,8 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
         this.loadAllTrajets();
         this.loadMesReservations();
         this.loadTotalPoints();
+          this.loadShuttles();           // <--- AJOUTE ICI
+      this.loadMyShuttleReservations(); // <--- AJOUTE ICI
       } catch (e) {
         console.error("Erreur parsing currentUser", e);
       }
@@ -520,6 +521,122 @@ loadEmployees(): void {
       error: (err) => console.error('Erreur suppression trajet', err)
     });
   }
+  loadMyShuttleReservations() {
+  if (!this.employeId) return;
+  this.covoiturageService.getReservationsNavetteByEmploye(this.employeId).subscribe({
+    next: (data) => {
+      this.myShuttleReservations = data;
+      this.cdr.detectChanges();
+    },
+    error: (err) => console.error('Erreur', err)
+  });
+}
+
+
+
+
+
+
+
+  loadShuttles() {
+  this.isLoadingShuttles = true;
+  this.covoiturageService.getShuttles().subscribe({
+    next: (data) => {
+      this.shuttles = data;
+      this.isLoadingShuttles = false;
+      this.cdr.detectChanges();
+    },
+    error: (err) => {
+      console.error('Erreur', err);
+      this.shuttleError = 'Erreur de chargement des navettes';
+      this.isLoadingShuttles = false;
+    }
+  });
+}
+
+get filteredShuttles() {
+  return this.shuttles.filter(s => {
+    const matchSearch = !this.shuttleSearchTerm ||
+      s.ligne?.toLowerCase().includes(this.shuttleSearchTerm.toLowerCase()) ||
+      s.marque?.toLowerCase().includes(this.shuttleSearchTerm.toLowerCase()) ||
+      s.immatriculation?.toLowerCase().includes(this.shuttleSearchTerm.toLowerCase());
+
+    const matchDepart = !this.shuttleFilterDepart ||
+      s.adresseDepart === this.shuttleFilterDepart;
+
+    const matchArrivee = !this.shuttleFilterArrivee ||
+      s.adresseArrivee === this.shuttleFilterArrivee;
+
+    const matchHeure = !this.shuttleFilterHeure ||
+      s.heureDepart?.startsWith(this.shuttleFilterHeure);
+
+    return matchSearch && matchDepart && matchArrivee && matchHeure;
+  });
+}
+
+rechercherNavettes() {
+  this.cdr.detectChanges();
+}
+
+estDejaReserveNavette(shuttleId: string): boolean {
+  return this.myShuttleReservations.some(r => r.shuttleId === shuttleId);
+}
+
+reserverNavette(shuttle: any) {
+ const jours = this.selectedNavetteDays[shuttle.id] || [];
+if (jours.length === 0) {
+  alert('Veuillez sélectionner au moins un jour pour cette navette.');
+  return;
+}
+const joursSelectionnes = jours.join(',');
+
+  const reservation = {
+    busId: shuttle.id,          // ← "busId" pas "shuttleId" (correspond au backend)
+    employeId: this.employeId,
+    joursSelectionnes: joursSelectionnes,
+    statut: 'EN_ATTENTE'
+  };
+
+  this.covoiturageService.reserverNavette(reservation).subscribe({
+    next: (res: any) => {
+      this.loadMyShuttleReservations();  // recharger depuis le backend
+      this.loadShuttles();               // mettre à jour les places restantes
+this.selectedNavetteDays[shuttle.id] = [];      alert('Réservation effectuée avec succès !');
+      this.cdr.detectChanges();
+    },
+    error: (err) => {
+      console.error('Erreur réservation', err);
+      alert('Erreur lors de la réservation : ' + (err.error?.message || err.message));
+    }
+  });
+}
+
+toggleNavetteDay(shuttleId: string, day: string) {
+  if (!this.selectedNavetteDays[shuttleId]) {
+    this.selectedNavetteDays[shuttleId] = [];
+  }
+  if (this.selectedNavetteDays[shuttleId].includes(day)) {
+    this.selectedNavetteDays[shuttleId] = this.selectedNavetteDays[shuttleId].filter(d => d !== day);
+  } else {
+    this.selectedNavetteDays[shuttleId] = [...this.selectedNavetteDays[shuttleId], day];
+  }
+}
+
+annulerReservationNavette(reservationId: string) {
+  if (!confirm('Annuler cette réservation ?')) return;
+  
+  this.covoiturageService.annulerReservationNavette(reservationId).subscribe({
+    next: () => {
+      this.myShuttleReservations = this.myShuttleReservations.filter(r => r.id !== reservationId);
+      alert('Réservation annulée');
+      this.cdr.detectChanges();
+    },
+    error: (err) => {
+      console.error('Erreur annulation', err);
+      alert('Erreur lors de l\'annulation');
+    }
+  });
+}
 
   // Méthodes pour la saisie manuelle
   setInputMode(mode: 'map' | 'manual') {
@@ -1187,4 +1304,7 @@ loadEmployees(): void {
       });
     });
   }
+
+  
+  
 }

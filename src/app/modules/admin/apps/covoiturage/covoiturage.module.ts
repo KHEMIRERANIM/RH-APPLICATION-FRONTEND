@@ -9,11 +9,13 @@ import { CovoiturageAdminComponent } from './admin/covoiturage-admin.component';
 import { VehicleModalComponent } from './components/vehicle-modal/vehicle-modal.component';
 
 import { CovoiturageRoutingModule } from './covoiturage-routing.module';
+import { NavetteTrackingComponent } from './user/navette-tracking/navette-tracking.component';
 
 @NgModule({
   declarations: [
     CovoiturageUserComponent,
     CovoiturageAdminComponent,
+    NavetteTrackingComponent,
     VehicleModalComponent
   ],
   imports: [
@@ -21,7 +23,7 @@ import { CovoiturageRoutingModule } from './covoiturage-routing.module';
     FormsModule,
     ReactiveFormsModule,
     MatIconModule,
-    CovoiturageRoutingModule
+    CovoiturageRoutingModule,
   ],
   exports: [
     CovoiturageUserComponent

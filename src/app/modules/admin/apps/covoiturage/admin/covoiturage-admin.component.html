@@ -1,51 +1,42 @@
 <div class="space-y-6 p-6 w-full">
+
   <!-- Header -->
   <div class="flex items-center justify-between">
     <div>
       <h1 class="text-2xl font-semibold text-[#1A1A2E]">Administration Transport & Récompenses</h1>
       <p class="text-gray-600 mt-1">Gestion complète du système de mobilité et gamification</p>
     </div>
-    <button
-      (click)="openModal()"
-      class="flex items-center gap-2 px-6 py-3 bg-[#1D9E75] text-white rounded-lg hover:bg-[#178a66] transition shadow-sm"
-    >
+    <button (click)="openModal()"
+      class="flex items-center gap-2 px-6 py-3 bg-[#1D9E75] text-white rounded-lg hover:bg-[#178a66] transition shadow-sm">
       <mat-icon class="icon-size-5" svgIcon="feather:plus"></mat-icon>
-      Nouveau
+      Nouveau bus
     </button>
   </div>
 
   <!-- Navigation Tabs -->
   <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-1.5">
     <div class="flex gap-1 overflow-x-auto">
-      <button
-        (click)="setActiveSection('statistiques')"
+      <button (click)="setActiveSection('statistiques')"
         [class]="activeSection === 'statistiques' ? 'bg-[#0F3460] text-white' : 'text-[#1A1A2E] hover:bg-gray-100'"
-        class="flex items-center gap-2 px-4 py-2.5 rounded-lg whitespace-nowrap transition"
-      >
+        class="flex items-center gap-2 px-4 py-2.5 rounded-lg whitespace-nowrap transition">
         <mat-icon class="icon-size-4" svgIcon="feather:trending-up"></mat-icon>
         Vue d'ensemble
       </button>
-      <button
-        (click)="setActiveSection('navettes')"
+      <button (click)="setActiveSection('navettes')"
         [class]="activeSection === 'navettes' ? 'bg-[#0F3460] text-white' : 'text-[#1A1A2E] hover:bg-gray-100'"
-        class="flex items-center gap-2 px-4 py-2.5 rounded-lg whitespace-nowrap transition"
-      >
+        class="flex items-center gap-2 px-4 py-2.5 rounded-lg whitespace-nowrap transition">
         <mat-icon class="icon-size-4" svgIcon="feather:truck"></mat-icon>
         Navettes
       </button>
-      <button
-        (click)="setActiveSection('reservations')"
+      <button (click)="setActiveSection('reservations')"
         [class]="activeSection === 'reservations' ? 'bg-[#0F3460] text-white' : 'text-[#1A1A2E] hover:bg-gray-100'"
-        class="flex items-center gap-2 px-4 py-2.5 rounded-lg whitespace-nowrap transition"
-      >
+        class="flex items-center gap-2 px-4 py-2.5 rounded-lg whitespace-nowrap transition">
         <mat-icon class="icon-size-4" svgIcon="feather:calendar"></mat-icon>
         Réservations
       </button>
-      <button
-        (click)="setActiveSection('cadeaux')"
+      <button (click)="setActiveSection('cadeaux')"
         [class]="activeSection === 'cadeaux' ? 'bg-[#0F3460] text-white' : 'text-[#1A1A2E] hover:bg-gray-100'"
-        class="flex items-center gap-2 px-4 py-2.5 rounded-lg whitespace-nowrap transition"
-      >
+        class="flex items-center gap-2 px-4 py-2.5 rounded-lg whitespace-nowrap transition">
         <mat-icon class="icon-size-4" svgIcon="feather:gift"></mat-icon>
         Cadeaux
       </button>
@@ -54,7 +45,6 @@
 
   <!-- STATISTIQUES SECTION -->
   <div *ngIf="activeSection === 'statistiques'" class="space-y-6">
-    <!-- Stats Cards -->
     <div class="grid grid-cols-4 gap-4">
       <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
         <div class="flex items-center justify-between mb-4">
@@ -66,7 +56,6 @@
         <p class="text-gray-600 text-sm mb-1">Navettes actives</p>
         <p class="text-3xl font-semibold text-[#1A1A2E]">{{ stats.totalNavettes }}</p>
       </div>
-
       <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
         <div class="flex items-center justify-between mb-4">
           <div class="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center">
@@ -77,7 +66,6 @@
         <p class="text-gray-600 text-sm mb-1">Réservations total</p>
         <p class="text-3xl font-semibold text-[#1A1A2E]">{{ stats.totalReservations }}</p>
       </div>
-
       <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
         <div class="flex items-center justify-between mb-4">
           <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
@@ -88,7 +76,6 @@
         <p class="text-gray-600 text-sm mb-1">Covoiturages</p>
         <p class="text-3xl font-semibold text-[#1A1A2E]">{{ stats.reservationsCovoiturage }}</p>
       </div>
-
       <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
         <div class="flex items-center justify-between mb-4">
           <div class="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center">
@@ -101,7 +88,6 @@
       </div>
     </div>
 
-    <!-- Impact Cards -->
     <div class="grid md:grid-cols-3 gap-6">
       <div class="bg-gradient-to-br from-[#1D9E75] to-[#178a66] rounded-xl p-8 text-white shadow-lg">
         <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center mb-4">
@@ -116,7 +102,6 @@
           <span>+12%</span>
         </div>
       </div>
-
       <div class="bg-gradient-to-br from-[#F5A623] to-[#e09615] rounded-xl p-8 text-white shadow-lg">
         <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center mb-4">
           <mat-icon class="text-white icon-size-7" svgIcon="feather:gift"></mat-icon>
@@ -130,7 +115,6 @@
           <span>+8%</span>
         </div>
       </div>
-
       <div class="bg-gradient-to-br from-[#0F3460] to-[#0a2340] rounded-xl p-8 text-white shadow-lg">
         <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center mb-4">
           <mat-icon class="text-white icon-size-7" svgIcon="feather:truck"></mat-icon>
@@ -146,7 +130,6 @@
       </div>
     </div>
 
-    <!-- Recent Activity -->
     <div class="grid md:grid-cols-2 gap-6">
       <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
         <h3 class="text-lg font-semibold text-[#1A1A2E] mb-4">Activité récente</h3>
@@ -157,24 +140,24 @@
               <p class="text-[#1A1A2E] text-sm font-medium">{{ res.employeNom }}</p>
               <p class="text-gray-500 text-xs">{{ res.trajet }} - {{ res.heure }}</p>
             </div>
-            <span [class]="res.type === 'navette' ? 'bg-blue-50 text-blue-700' : 'bg-green-50 text-green-700'" class="px-2 py-1 rounded text-xs font-medium">
-              {{ res.type }}
-            </span>
+            <span [class]="res.type === 'navette' ? 'bg-blue-50 text-blue-700' : 'bg-green-50 text-green-700'"
+              class="px-2 py-1 rounded text-xs font-medium">{{ res.type }}</span>
           </div>
         </div>
       </div>
-
       <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
         <h3 class="text-lg font-semibold text-[#1A1A2E] mb-4">Navettes performantes</h3>
         <div class="space-y-3">
           <div *ngFor="let navette of navettes" class="flex items-center justify-between">
             <div class="flex-1">
-              <p class="text-[#1A1A2E] text-sm font-medium mb-1">{{ navette.nom }}</p>
+              <p class="text-[#1A1A2E] text-sm font-medium mb-1">{{ navette.marque }} {{ navette.modele }} - {{ navette.ligne }}</p>
               <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
-                <div class="h-full bg-[#1D9E75] rounded-full" [style.width.%]="(navette.reservations / navette.capacite) * 100"></div>
+                <div class="h-full bg-[#1D9E75] rounded-full"
+                  [style.width.%]="navette.capacite ? ((navette.capacite - (navette.placesRestantes || 0)) / navette.capacite) * 100 : 0">
+                </div>
               </div>
             </div>
-            <span class="ml-4 text-sm text-gray-600">{{ navette.reservations }}/{{ navette.capacite }}</span>
+            <span class="ml-4 text-sm text-gray-600">{{ navette.placesRestantes }}/{{ navette.capacite }}</span>
           </div>
         </div>
       </div>
@@ -186,59 +169,85 @@
     <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
       <div class="relative">
         <mat-icon class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 icon-size-5" svgIcon="feather:search"></mat-icon>
-        <input type="text" [(ngModel)]="searchTerm" placeholder="Rechercher une navette..." class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1D9E75] focus:border-transparent outline-none">
+        <input type="text" [(ngModel)]="searchTerm" placeholder="Rechercher un bus..."
+          class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1D9E75] focus:border-transparent outline-none">
       </div>
     </div>
 
+    <div *ngIf="isLoading" class="text-center py-10 text-gray-500">Chargement...</div>
+    <div *ngIf="errorMessage" class="bg-red-50 text-red-600 p-4 rounded-xl">{{ errorMessage }}</div>
+
     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <div *ngFor="let navette of navettes" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition">
-        <div class="bg-gradient-to-r from-[#0F3460] to-[#1D9E75] p-4 text-white">
-          <div class="flex items-start justify-between mb-2">
-            <div>
-              <h4 class="text-lg font-semibold mb-1">{{ navette.nom }}</h4>
-              <p class="text-white/80 text-sm">{{ navette.ligne }}</p>
-            </div>
+      <div *ngFor="let bus of filteredNavettes" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition">
+
+        <!-- Photo -->
+        <div class="relative h-36 overflow-hidden">
+          <img [src]="bus.photoUrl || 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=400'"
+            [alt]="bus.marque" class="w-full h-full object-cover">
+          <div class="absolute inset-0 bg-gradient-to-t from-[#0F3460]/80 to-transparent"></div>
+          <div class="absolute bottom-3 left-4 text-white">
+            <h4 class="text-lg font-semibold">{{ bus.marque }} {{ bus.modele }}</h4>
+            <p class="text-white/80 text-sm">{{ bus.ligne }}</p>
           </div>
-          <div class="flex items-center gap-2 mt-3">
-            <span class="px-2 py-1 bg-white/20 rounded text-xs">{{ navette.busNumber }}</span>
-            <span [class]="navette.actif ? 'bg-green-400/20 text-green-100' : 'bg-gray-400/20 text-gray-100'" class="px-2 py-1 rounded text-xs">
-              {{ navette.actif ? 'Actif' : 'Inactif' }}
-            </span>
+          <div class="absolute top-3 right-3 flex gap-2">
+            <span class="px-2 py-1 bg-white/20 backdrop-blur-sm rounded text-xs text-white">{{ bus.immatriculation }}</span>
+            <span [class]="bus.statut === 'ACTIF' ? 'bg-green-500/80' : 'bg-gray-500/80'"
+              class="px-2 py-1 rounded text-xs text-white">{{ bus.statut }}</span>
           </div>
         </div>
-        <div class="p-4 space-y-4">
-          <div class="flex items-center gap-3">
-            <img [src]="navette.chauffeurPhoto" [alt]="navette.chauffeurNom" class="w-10 h-10 rounded-full">
-            <div>
-              <p class="text-xs text-gray-500">Chauffeur</p>
-              <p class="text-sm font-medium text-[#1A1A2E]">{{ navette.chauffeurNom }}</p>
-            </div>
-          </div>
+
+        <!-- Content -->
+        <div class="p-4 space-y-3">
           <div class="grid grid-cols-2 gap-3">
             <div class="bg-gray-50 rounded-lg p-3">
-              <p class="text-xs text-gray-500 mb-1">Horaires</p>
-              <p class="text-sm text-[#1A1A2E]">{{ navette.horaires }}</p>
+              <p class="text-xs text-gray-500 mb-1">Départ</p>
+              <p class="text-sm text-[#1A1A2E]">{{ bus.heureDepart }}</p>
             </div>
             <div class="bg-gray-50 rounded-lg p-3">
-              <p class="text-xs text-gray-500 mb-1">Arrêts</p>
-              <p class="text-sm text-[#1A1A2E]">{{ navette.arrets.length }} points</p>
+              <p class="text-xs text-gray-500 mb-1">Durée</p>
+              <p class="text-sm text-[#1A1A2E]">{{ bus.dureeMinutes }} min</p>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-3">
+              <p class="text-xs text-gray-500 mb-1">Capacité</p>
+              <p class="text-sm text-[#1A1A2E]">{{ bus.capacite }} places</p>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-3">
+              <p class="text-xs text-gray-500 mb-1">Carburant</p>
+              <p class="text-sm text-[#1A1A2E]">{{ bus.typeCarburant }}</p>
             </div>
           </div>
+
+          <!-- Jours en badges -->
+          <div class="bg-gray-50 rounded-lg p-3">
+            <p class="text-xs text-gray-500 mb-2">Jours disponibles</p>
+            <div class="flex flex-wrap gap-1">
+              <span *ngFor="let jour of bus.joursDisponibles?.split(',')"
+                class="px-2 py-0.5 bg-[#1D9E75]/10 text-[#1D9E75] rounded text-xs font-medium">
+                {{ jour.trim() }}
+              </span>
+            </div>
+          </div>
+
           <div>
             <div class="flex items-center justify-between mb-2">
-              <p class="text-xs text-gray-500">Occupation</p>
-              <p class="text-sm font-medium text-[#1A1A2E]">{{ navette.reservations }}/{{ navette.capacite }}</p>
+              <p class="text-xs text-gray-500">Places restantes</p>
+              <p class="text-sm font-medium text-[#1A1A2E]">{{ bus.placesRestantes }}/{{ bus.capacite }}</p>
             </div>
             <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
-              <div class="h-full bg-[#1D9E75] rounded-full" [style.width.%]="(navette.reservations / navette.capacite) * 100"></div>
+              <div class="h-full bg-[#1D9E75] rounded-full"
+                [style.width.%]="bus.capacite ? ((bus.capacite - (bus.placesRestantes || 0)) / bus.capacite) * 100 : 0">
+              </div>
             </div>
           </div>
+
           <div class="flex gap-2 pt-2 border-t border-gray-100">
-            <button class="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gray-50 text-[#1A1A2E] rounded-lg hover:bg-gray-100 transition">
+            <button (click)="openEditModal(bus)"
+              class="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gray-50 text-[#1A1A2E] rounded-lg hover:bg-gray-100 transition">
               <mat-icon class="icon-size-4" svgIcon="feather:edit-2"></mat-icon>
               <span class="text-sm">Modifier</span>
             </button>
-            <button class="px-3 py-2 bg-red-50 text-[#E94560] rounded-lg hover:bg-red-100 transition">
+            <button (click)="deleteBus(bus.id!)"
+              class="px-3 py-2 bg-red-50 text-[#E94560] rounded-lg hover:bg-red-100 transition">
               <mat-icon class="icon-size-4" svgIcon="feather:trash-2"></mat-icon>
             </button>
           </div>
@@ -251,19 +260,23 @@
   <div *ngIf="activeSection === 'reservations'" class="space-y-4">
     <div class="bg-white rounded-xl p-2 shadow-sm border border-gray-200">
       <div class="flex gap-2">
-        <button (click)="setReservationType('navette')" [class]="reservationType === 'navette' ? 'bg-[#0F3460] text-white' : 'text-[#1A1A2E] hover:bg-gray-100'" class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition">
+        <button (click)="setReservationType('navette')"
+          [class]="reservationType === 'navette' ? 'bg-[#0F3460] text-white' : 'text-[#1A1A2E] hover:bg-gray-100'"
+          class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition">
           <mat-icon class="icon-size-4" svgIcon="feather:truck"></mat-icon>
           Navettes ({{ stats.reservationsNavette }})
         </button>
-        <button (click)="setReservationType('covoiturage')" [class]="reservationType === 'covoiturage' ? 'bg-[#1D9E75] text-white' : 'text-[#1A1A2E] hover:bg-gray-100'" class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition">
+        <button (click)="setReservationType('covoiturage')"
+          [class]="reservationType === 'covoiturage' ? 'bg-[#1D9E75] text-white' : 'text-[#1A1A2E] hover:bg-gray-100'"
+          class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition">
           <mat-icon class="icon-size-4" svgIcon="feather:car"></mat-icon>
           Covoiturage ({{ stats.reservationsCovoiturage }})
         </button>
       </div>
     </div>
-
     <div class="space-y-3">
-      <div *ngFor="let reservation of filteredReservations" class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition">
+      <div *ngFor="let reservation of filteredReservations"
+        class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:shadow-md transition">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-4">
             <img [src]="reservation.employePhoto" [alt]="reservation.employeNom" class="w-12 h-12 rounded-full">
@@ -278,11 +291,13 @@
               <p class="font-medium text-[#1A1A2E]">{{ reservation.date }} à {{ reservation.heure }}</p>
             </div>
             <div class="flex items-center gap-2">
-              <span [class]="reservation.statut === 'Confirmée' ? 'bg-green-50 text-green-700' : (reservation.statut === 'En attente' ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700')" class="px-4 py-2 rounded-lg text-sm flex items-center gap-2">
+              <span [class]="reservation.statut === 'Confirmée' ? 'bg-green-50 text-green-700' : (reservation.statut === 'En attente' ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700')"
+                class="px-4 py-2 rounded-lg text-sm flex items-center gap-2">
                 <mat-icon class="icon-size-4" [svgIcon]="reservation.statut === 'Confirmée' ? 'feather:check-circle' : (reservation.statut === 'En attente' ? 'feather:clock' : 'feather:alert-circle')"></mat-icon>
                 {{ reservation.statut }}
               </span>
-              <button *ngIf="reservation.statut === 'En attente'" class="px-4 py-2 bg-[#1D9E75] text-white rounded-lg hover:bg-[#178a66] transition text-sm">
+              <button *ngIf="reservation.statut === 'En attente'"
+                class="px-4 py-2 bg-[#1D9E75] text-white rounded-lg hover:bg-[#178a66] transition text-sm">
                 Confirmer
               </button>
               <button class="px-4 py-2 bg-red-50 text-[#E94560] rounded-lg hover:bg-red-100 transition text-sm">
@@ -323,18 +338,19 @@
           </div>
           <p class="text-gray-600 text-sm">Stock Disponible</p>
         </div>
-<p class="text-3xl font-bold text-[#1A1A2E]">{{ totalStock }}</p>
+        <p class="text-3xl font-bold text-[#1A1A2E]">{{ totalStock }}</p>
       </div>
     </div>
-
     <div class="grid md:grid-cols-3 gap-4">
-      <div *ngFor="let cadeau of cadeaux" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition">
+      <div *ngFor="let cadeau of cadeaux"
+        class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition">
         <div class="relative h-40">
           <img [src]="cadeau.image" [alt]="cadeau.titre" class="w-full h-full object-cover">
           <div class="absolute top-3 right-3 text-4xl bg-white/90 backdrop-blur-sm rounded-full w-16 h-16 flex items-center justify-center">
             {{ cadeau.icon }}
           </div>
-          <div [class]="cadeau.actif ? 'bg-green-500' : 'bg-gray-500'" class="absolute top-3 left-3 px-3 py-1.5 rounded-lg text-xs text-white">
+          <div [class]="cadeau.actif ? 'bg-green-500' : 'bg-gray-500'"
+            class="absolute top-3 left-3 px-3 py-1.5 rounded-lg text-xs text-white">
             {{ cadeau.actif ? 'Actif' : 'Inactif' }}
           </div>
         </div>
@@ -370,4 +386,153 @@
       </div>
     </div>
   </div>
+
+  <!-- MODAL -->
+  <div *ngIf="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+
+      <!-- Header -->
+      <div class="flex items-center justify-between p-6 border-b border-gray-200">
+        <h2 class="text-xl font-semibold text-[#1A1A2E]">{{ isEditing ? 'Modifier le bus' : 'Nouveau bus' }}</h2>
+        <button (click)="closeModal()" class="p-2 hover:bg-gray-100 rounded-lg transition">
+          <mat-icon svgIcon="feather:x" class="text-gray-500"></mat-icon>
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="p-6 space-y-4">
+
+        <!-- Marque & Modèle -->
+<div class="grid grid-cols-2 gap-4">
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">Marque <span class="text-red-500">*</span></label>
+    <input type="text" [(ngModel)]="busForm.marque" placeholder="Ex: Mercedes"
+      [class]="submitted && !busForm.marque?.trim() ? 'border-red-300' : 'border-gray-300'"
+      class="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#1D9E75] outline-none">
+    <p *ngIf="submitted && !busForm.marque?.trim()" class="text-red-500 text-xs mt-1">Champ requis</p>
+  </div>
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">Modèle <span class="text-red-500">*</span></label>
+    <input type="text" [(ngModel)]="busForm.modele" placeholder="Ex: Sprinter"
+      [class]="submitted && !busForm.modele?.trim() ? 'border-red-300' : 'border-gray-300'"
+      class="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#1D9E75] outline-none">
+    <p *ngIf="submitted && !busForm.modele?.trim()" class="text-red-500 text-xs mt-1">Champ requis</p>
+  </div>
+</div>
+
+<!-- Immatriculation & Capacité -->
+<div class="grid grid-cols-2 gap-4">
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">Immatriculation <span class="text-red-500">*</span></label>
+    <input type="text" [(ngModel)]="busForm.immatriculation" placeholder="Ex: TUN-1234"
+      [class]="submitted && !busForm.immatriculation?.trim() ? 'border-red-300' : 'border-gray-300'"
+      class="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#1D9E75] outline-none">
+    <p *ngIf="submitted && !busForm.immatriculation?.trim()" class="text-red-500 text-xs mt-1">Champ requis</p>
+  </div>
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">Capacité <span class="text-red-500">*</span></label>
+    <input type="number" [(ngModel)]="busForm.capacite" min="1"
+      [class]="submitted && busForm.capacite <= 0 ? 'border-red-300' : 'border-gray-300'"
+      class="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#1D9E75] outline-none">
+    <p *ngIf="submitted && busForm.capacite <= 0" class="text-red-500 text-xs mt-1">Doit être supérieur à 0</p>
+  </div>
+</div>
+
+<!-- Ligne -->
+<div class="grid grid-cols-2 gap-4">
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">Départ <span class="text-red-500">*</span></label>
+    <input type="text" [(ngModel)]="busForm.depart" 
+      placeholder="Lieu de départ"
+      [class]="submitted && !busForm.depart?.trim() ? 'border-red-300' : 'border-gray-300'"
+      class="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#1D9E75] outline-none">
+    <p *ngIf="submitted && !busForm.depart?.trim()" class="text-red-500 text-xs mt-1">Champ requis</p>
+  </div>
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">Arrivée <span class="text-red-500">*</span></label>
+    <input type="text" [(ngModel)]="busForm.arrivee" 
+      placeholder="Lieu d'arrivée"
+      [class]="submitted && !busForm.arrivee?.trim() ? 'border-red-300' : 'border-gray-300'"
+      class="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#1D9E75] outline-none">
+    <p *ngIf="submitted && !busForm.arrivee?.trim()" class="text-red-500 text-xs mt-1">Champ requis</p>
+  </div>
+</div>
+
+<!-- Heure & Durée -->
+<div class="grid grid-cols-2 gap-4">
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">Heure de départ <span class="text-red-500">*</span></label>
+    <input type="time" [(ngModel)]="busForm.heureDepart"
+      [class]="submitted && !busForm.heureDepart?.trim() ? 'border-red-300' : 'border-gray-300'"
+      class="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#1D9E75] outline-none">
+    <p *ngIf="submitted && !busForm.heureDepart?.trim()" class="text-red-500 text-xs mt-1">Champ requis</p>
+  </div>
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">Durée (minutes) <span class="text-red-500">*</span></label>
+    <input type="number" [(ngModel)]="busForm.dureeMinutes" min="1"
+      [class]="submitted && busForm.dureeMinutes <= 0 ? 'border-red-300' : 'border-gray-300'"
+      class="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#1D9E75] outline-none">
+    <p *ngIf="submitted && busForm.dureeMinutes <= 0" class="text-red-500 text-xs mt-1">Doit être supérieur à 0</p>
+  </div>
+</div>
+
+<!-- Jours en boutons -->
+<div>
+  <label class="block text-sm font-medium text-gray-700 mb-2">Jours disponibles <span class="text-red-500">*</span></label>
+  <div class="flex flex-wrap gap-2">
+    <button *ngFor="let jour of joursOptions" type="button"
+      (click)="toggleJour(jour)"
+      [class]="isJourSelected(jour) ? 'bg-[#1D9E75] text-white border-[#1D9E75]' : 'bg-white text-gray-700 border-gray-300 hover:border-[#1D9E75]'"
+      class="px-3 py-1.5 border rounded-lg text-sm transition">
+      {{ jour }}
+    </button>
+  </div>
+  <p *ngIf="submitted && joursSelectionnes.length === 0" class="text-red-500 text-xs mt-1">Sélectionnez au moins un jour</p>
+</div>
+        <!-- Carburant & Statut -->
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Type de carburant</label>
+            <select [(ngModel)]="busForm.typeCarburant"
+              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1D9E75] outline-none bg-white">
+              <option *ngFor="let t of typeCarburantOptions" [value]="t">{{ t }}</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Statut</label>
+            <select [(ngModel)]="busForm.statut"
+              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1D9E75] outline-none bg-white">
+              <option *ngFor="let s of statutOptions" [value]="s">{{ s }}</option>
+            </select>
+          </div>
+        </div>
+<!-- Photo URL -->
+<div>
+  <label class="block text-sm font-medium text-gray-700 mb-1">Photo (URL)</label>
+  <input type="text" [(ngModel)]="busForm.photoUrl"
+    placeholder="https://images.unsplash.com/..."
+    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1D9E75] outline-none">
+  <div *ngIf="busForm.photoUrl" class="mt-2">
+    <img [src]="busForm.photoUrl" alt="Aperçu" class="h-24 w-full object-cover rounded-lg">
+  </div>
+</div>
+
+        <div *ngIf="errorMessage" class="bg-red-50 text-red-600 p-3 rounded-lg text-sm">{{ errorMessage }}</div>
+      </div>
+
+      <!-- Footer -->
+      <div class="flex gap-3 p-6 border-t border-gray-200">
+        <button (click)="closeModal()"
+          class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+          Annuler
+        </button>
+        <button (click)="saveBus()" [disabled]="!isFormValid()"
+          [class]="isFormValid() ? 'bg-[#1D9E75] hover:bg-[#178a66] cursor-pointer' : 'bg-gray-300 cursor-not-allowed'"
+          class="flex-1 px-6 py-3 text-white rounded-lg transition">
+          {{ isEditing ? 'Modifier' : 'Créer' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
 </div>

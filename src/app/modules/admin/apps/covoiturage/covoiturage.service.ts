@@ -127,4 +127,30 @@ getTotalPointsEco(employeId: string): Observable<number> {
   getAllTrajets(): Observable<Trajet[]> {
     return this.http.get<Trajet[]>(`${this.apiUrl}/trajets`);
   }
+
+  // Ajoutez avec les autres méthodes
+getShuttles(): Observable<any[]> {
+  return this.http.get<any[]>(`${this.apiUrl}/bus`);
+}
+
+
+
+
+getReservationsNavetteByEmploye(employeId: string): Observable<any[]> {
+  return this.http.get<any[]>(`${this.apiUrl}/reservations-navette/employe/${employeId}`);
+}
+
+reserverNavette(reservation: any): Observable<any> {
+  return this.http.post(`${this.apiUrl}/reservations-navette`, reservation);
+}
+
+annulerReservationNavette(reservationId: string): Observable<any> {
+  return this.http.delete(`${this.apiUrl}/reservations-navette/${reservationId}`);
+}
+
+getTotalPointsNavette(employeId: string): Observable<number> {
+  return this.http.get<number>(`${this.apiUrl}/reservations-navette/employe/${employeId}/points`);
+}
+
+
 }
