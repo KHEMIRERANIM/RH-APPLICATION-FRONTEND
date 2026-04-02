@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { CovoiturageUserComponent } from './user/covoiturage-user.component';
 import { CovoiturageAdminComponent } from './admin/covoiturage-admin.component';
+import { ChauffeurTrackingComponent } from './user/chauffeur-tracking/chauffeur-tracking.component';
 import { CovoiturageGuard } from 'app/core/auth/guards/covoiturage.guard';
 
 const routes: Routes = [
@@ -19,6 +20,11 @@ const routes: Routes = [
     path: 'admin',
     component: CovoiturageAdminComponent,
     title: 'Gestion Covoiturage - Admin'
+  },
+  {
+    path: 'chauffeur',
+    component: ChauffeurTrackingComponent,
+    title: 'Interface Chauffeur'
   }
 ];
 

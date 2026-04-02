@@ -168,7 +168,7 @@ export class ProjectComponent implements OnInit, OnDestroy
     }
     
     loadEmployees(): void {
-    this._http.get<any[]>('http://localhost:8081/api/users')
+    this._http.get<any[]>('http://10.90.222.174:8081/api/users')
         .subscribe({
             next: (data) => {
                 console.log('=== DONNÉES REÇUES ===');
@@ -205,7 +205,7 @@ export class ProjectComponent implements OnInit, OnDestroy
 }
     
     loadDepartments(): void {
-        this._http.get<any[]>('http://localhost:8081/api/departments')
+        this._http.get<any[]>('http://10.90.222.174:8081/api/departments')
             .subscribe({
                 next: (data) => this.departments = data,
                 error: () => console.error('Erreur chargement départements')
@@ -213,7 +213,7 @@ export class ProjectComponent implements OnInit, OnDestroy
     }
     
     loadJobTitles(): void {
-        this._http.get<any[]>('http://localhost:8081/api/job-titles')
+        this._http.get<any[]>('http://10.90.222.174:8081/api/job-titles')
             .subscribe({
                 next: (data) => this.jobTitles = data,
                 error: () => console.error('Erreur chargement postes')
@@ -221,7 +221,7 @@ export class ProjectComponent implements OnInit, OnDestroy
     }
     
     loadManagers(): void {
-        this._http.get<any[]>('http://localhost:8081/api/users/managers')
+        this._http.get<any[]>('http://10.90.222.174:8081/api/users/managers')
             .subscribe({
                 next: (data) => this.managers = data,
                 error: () => console.error('Erreur chargement managers')
@@ -461,7 +461,7 @@ export class ProjectComponent implements OnInit, OnDestroy
             };
             
             if (this.isEditMode) {
-                this._http.put(`http://localhost:8081/api/users/${this.employeeFormValue.id}`, data)
+                this._http.put(`http://10.90.222.174:8081/api/users/${this.employeeFormValue.id}`, data)
                     .subscribe({
                         next: () => {
                             this.toastr?.success('Utilisateur modifié avec succès', 'Succès');
@@ -473,7 +473,7 @@ export class ProjectComponent implements OnInit, OnDestroy
                         }
                     });
             } else {
-                this._http.post('http://localhost:8081/api/users', data)
+                this._http.post('http://10.90.222.174:8081/api/users', data)
                     .subscribe({
                         next: () => {
                             this.toastr?.success('Utilisateur ajouté avec succès', 'Succès');
@@ -509,12 +509,12 @@ deleteEmployee(user: any): void {
     console.log('=== DÉBUT SUPPRESSION ===');
     console.log('Utilisateur à supprimer:', user);
     console.log('ID:', user.id);
-    console.log('URL:', `http://localhost:8081/api/users/${user.id}`);
+    console.log('URL:', `http://10.90.222.174:8081/api/users/${user.id}`);
     
     const confirmDelete = confirm(`⚠️ Supprimer ${user.prenom} ${user.nom} ?`);
     
     if (confirmDelete) {
-        this._http.delete(`http://localhost:8081/api/users/${user.id}`)
+        this._http.delete(`http://10.90.222.174:8081/api/users/${user.id}`)
             .subscribe({
                 next: (response) => {
                     console.log('✅ SUCCÈS:', response);

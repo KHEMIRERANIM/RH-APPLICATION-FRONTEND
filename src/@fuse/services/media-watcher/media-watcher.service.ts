@@ -5,8 +5,7 @@ import { map, switchMap } from 'rxjs/operators';
 import { FuseTailwindService } from '@fuse/services/tailwind/tailwind.service';
 
 @Injectable()
-export class FuseMediaWatcherService
-{
+export class FuseMediaWatcherService {
     private _onMediaChange: ReplaySubject<{ matchingAliases: string[]; matchingQueries: any }> = new ReplaySubject<{ matchingAliases: string[]; matchingQueries: any }>(1);
 
     /**
@@ -15,10 +14,9 @@ export class FuseMediaWatcherService
     constructor(
         private _breakpointObserver: BreakpointObserver,
         private _fuseTailwindConfigService: FuseTailwindService
-    )
-    {
+    ) {
         this._fuseTailwindConfigService.tailwindConfig$.pipe(
-            switchMap(config => this._breakpointObserver.observe(Object.values(config.breakpoints)).pipe(
+            switchMap(config => this._breakpointObserver.observe(Object.values(config?.breakpoints ?? {})).pipe(
                 map((state) => {
 
                     // Prepare the observable values and set their defaults
@@ -27,14 +25,12 @@ export class FuseMediaWatcherService
 
                     // Get the matching breakpoints and use them to fill the subject
                     const matchingBreakpoints = Object.entries(state.breakpoints).filter(([query, matches]) => matches) ?? [];
-                    for ( const [query] of matchingBreakpoints )
-                    {
+                    for (const [query] of matchingBreakpoints) {
                         // Find the alias of the matching query
-                        const matchingAlias = Object.entries(config.breakpoints).find(([alias, q]) => q === query)[0];
+                        const matchingAlias = Object.entries(config?.breakpoints ?? {}).find(([alias, q]) => q === query)?.[0];
 
                         // Add the matching query to the observable values
-                        if ( matchingAlias )
-                        {
+                        if (matchingAlias) {
                             matchingAliases.push(matchingAlias);
                             matchingQueries[matchingAlias] = query;
                         }
@@ -57,8 +53,7 @@ export class FuseMediaWatcherService
     /**
      * Getter for _onMediaChange
      */
-    get onMediaChange$(): Observable<{ matchingAliases: string[]; matchingQueries: any }>
-    {
+    get onMediaChange$(): Observable<{ matchingAliases: string[]; matchingQueries: any }> {
         return this._onMediaChange.asObservable();
     }
 
@@ -71,8 +66,7 @@ export class FuseMediaWatcherService
      *
      * @param query
      */
-    onMediaQueryChange$(query: string | string[]): Observable<BreakpointState>
-    {
+    onMediaQueryChange$(query: string | string[]): Observable<BreakpointState> {
         return this._breakpointObserver.observe(query);
     }
 }

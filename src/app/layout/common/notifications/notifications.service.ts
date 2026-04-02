@@ -46,7 +46,7 @@ export class NotificationsService {
 
         try {
             const localUser = JSON.parse(localUserStr);
-            return this._httpClient.get<any[]>(`http://localhost:8081/api/notifications/destinataire/${localUser.id}/non-lues`).pipe(
+            return this._httpClient.get<any[]>(`http://10.90.222.174:8081/api/notifications/destinataire/${localUser.id}/non-lues`).pipe(
                 map(backendNotifs => backendNotifs.map(bn => ({
                     id: bn.id,
                     icon: bn.type === 'DEMANDE_CONFIRMATION' ? 'heroicons_outline:question-mark-circle' : 'heroicons_outline:bell',
@@ -62,7 +62,7 @@ export class NotificationsService {
                     contenu: bn.contenu
                 }))),
                 catchError((error) => {
-                    console.error("ERREUR DE CHARGEMENT BACKEND NOTIFICATIONS: Veuillez vérifier que votre NotificationController existe et répond bien sur l'URL: http://localhost:8081/api/notifications/employe/{id}/non-lues", error);
+                    console.error("ERREUR DE CHARGEMENT BACKEND NOTIFICATIONS: Veuillez vérifier que votre NotificationController existe et répond bien sur l'URL: http://10.90.222.174:8081/api/notifications/employe/{id}/non-lues", error);
                     return of([]);
                 }),
                 tap((notifications) => {
@@ -111,7 +111,7 @@ export class NotificationsService {
             switchMap(notifications => {
                 // If backend notification, assume we can hit the marquer-lu endpoint
                 if (notification.type) {
-                    return this._httpClient.put<Notification>(`http://localhost:8081/api/notifications/${id}/lire`, {}).pipe(
+                    return this._httpClient.put<Notification>(`http://10.90.222.174:8081/api/notifications/${id}/lire`, {}).pipe(
                         map((backendNotif: any) => {
                             const updatedNotification = { ...notification, read: true };
                             const index = notifications.findIndex(item => item.id === id);
@@ -150,7 +150,7 @@ export class NotificationsService {
                 let request$: Observable<boolean>;
                 
                 if (targetNode?.type) {
-                    request$ = this._httpClient.delete<boolean>(`http://localhost:8081/api/notifications/${id}`).pipe(
+                    request$ = this._httpClient.delete<boolean>(`http://10.90.222.174:8081/api/notifications/${id}`).pipe(
                         map(() => true),
                         catchError(() => of(false))
                     );
@@ -183,7 +183,7 @@ export class NotificationsService {
                 if (localUserStr) {
                     try {
                         const localUser = JSON.parse(localUserStr);
-                        return this._httpClient.put<boolean>(`http://localhost:8081/api/notifications/destinataire/${localUser.id}/lire-tout`, {}).pipe(
+                        return this._httpClient.put<boolean>(`http://10.90.222.174:8081/api/notifications/destinataire/${localUser.id}/lire-tout`, {}).pipe(
                             map(() => {
                                 notifications.forEach((notification, index) => {
                                     notifications[index].read = true;

@@ -190,7 +190,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
             employeId: notification.expediteurId
         };
 
-        this._httpClient.put(`http://localhost:8081/api/reservations/${notification.reservationId}`, payload)
+        this._httpClient.put(`http://10.90.222.174:8081/api/reservations/${notification.reservationId}`, payload)
             .subscribe({
                 next: () => {
                     // Supprimer la notification ou la marquer comme lue

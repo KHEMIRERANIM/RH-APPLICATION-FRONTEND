@@ -24,7 +24,7 @@ export interface Bus {
 
 @Injectable({ providedIn: 'root' })
 export class BusService {
-  private apiUrl = 'http://localhost:8081/api/bus';
+  private apiUrl = 'http://10.90.222.174:8081/api/bus';
 
   constructor(private http: HttpClient) {}
 

@@ -10,13 +10,15 @@ import { VehicleModalComponent } from './components/vehicle-modal/vehicle-modal.
 
 import { CovoiturageRoutingModule } from './covoiturage-routing.module';
 import { NavetteTrackingComponent } from './user/navette-tracking/navette-tracking.component';
+import { ChauffeurTrackingComponent } from './user/chauffeur-tracking/chauffeur-tracking.component';
 
 @NgModule({
   declarations: [
     CovoiturageUserComponent,
     CovoiturageAdminComponent,
     NavetteTrackingComponent,
-    VehicleModalComponent
+    VehicleModalComponent,
+    ChauffeurTrackingComponent
   ],
   imports: [
     CommonModule,
