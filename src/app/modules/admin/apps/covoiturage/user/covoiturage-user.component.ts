@@ -825,7 +825,9 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
           case error.TIMEOUT: message = 'Délai dépassé'; break;
         }
         alert(message);
-      }
+      },
+      { enableHighAccuracy: false, maximumAge: Infinity, timeout: 15000 }
+
     );
   }
 
@@ -1104,7 +1106,9 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
         },
         (error) => {
           console.warn("Géolocalisation bloquée ou introuvable : ", error);
-        }
+        },
+        { enableHighAccuracy: false, maximumAge: Infinity, timeout: 15000 }
+
       );
     }
 

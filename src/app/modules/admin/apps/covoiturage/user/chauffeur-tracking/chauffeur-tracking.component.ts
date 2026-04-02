@@ -111,7 +111,8 @@ export class ChauffeurTrackingComponent implements OnInit, AfterViewInit, OnDest
       () => {
         // silently ignore if GPS denied
       },
-      { enableHighAccuracy: true, maximumAge: 60000, timeout: 15000 }
+      //{ enableHighAccuracy: true, maximumAge: 60000, timeout: 15000 }
+      { enableHighAccuracy: false, maximumAge: Infinity, timeout: 15000 }
     );
   }
 
@@ -252,7 +253,8 @@ export class ChauffeurTrackingComponent implements OnInit, AfterViewInit, OnDest
         this.enRoute = false;
         this.cdr.detectChanges();
       },
-      { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
+      //{ enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
+      { enableHighAccuracy: false, maximumAge: Infinity, timeout: 10000 }
     );
   }
 
