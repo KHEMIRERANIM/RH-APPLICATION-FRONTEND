@@ -170,18 +170,18 @@ export class ChauffeurTrackingComponent implements OnInit, AfterViewInit, OnDest
     this.progression = 0;
 
     const trajet = this.trajetsActifs.find(t => t.vehiculeId === this.vehiculeId);
-    const adresseArrivee = (trajet?.adresseArrivee || '').trim();
-    if (!adresseArrivee) return;
+    const adresseDepart = (trajet?.adresseDepart || '').trim();
+    if (!adresseDepart) return;
 
     try {
       const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(adresseArrivee)}&limit=1&countrycodes=tn&accept-language=fr`
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(adresseDepart)}&limit=1&countrycodes=tn&accept-language=fr`
       );
       const data = await res.json();
       if (data?.[0]) {
         this.arretLat = parseFloat(data[0].lat);
         this.arretLng = parseFloat(data[0].lon);
-        this.libelleArret = adresseArrivee.split(',')[0]?.trim() || 'Votre arrêt';
+        this.libelleArret = adresseDepart.split(',')[0]?.trim() || 'Point de départ';
       }
     } catch {
       // garde les valeurs par défaut

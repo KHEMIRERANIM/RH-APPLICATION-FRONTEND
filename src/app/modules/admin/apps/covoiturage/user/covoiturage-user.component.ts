@@ -210,6 +210,14 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
   shuttleFilterArrivee: string = '';
   shuttleFilterHeure: string = '';
   selectedNavetteDays: { [shuttleId: string]: string[] } = {};
+  alternatives: any[] = [];
+showAlternativesModal: boolean = false;
+showNotificationAnnulation: boolean = false;
+notificationAnnulation: any = null;
+reservationAnnuleeId: string = '';
+trajetAnnuleId: string = '';
+isLoadingAlternatives: boolean = false;
+private notifStompClient!: any;
 
   get shuttleDeparts(): string[] {
     return [...new Set(this.shuttles.map(s => s.adresseDepart).filter(Boolean))];
@@ -841,6 +849,11 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     }, 400);
   }
 
+  getAdresseDepartPourTracking(): string {
+  const trajet = this.allTrajets.find(t => t.vehiculeId === this.trackingVehiculeId);
+  return trajet?.adresseDepart || '';
+}
+
   onPubSearchInput() {
     if (this.pubSearchTimeout) clearTimeout(this.pubSearchTimeout);
     if (this.pubSearchQuery.length < 3) {
@@ -1254,6 +1267,11 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
       this.map.invalidateSize();
     }, 400);
   }
+
+  getAdresseArriveePourTracking(): string {
+  const trajet = this.allTrajets.find(t => t.vehiculeId === this.trackingVehiculeId);
+  return trajet?.adresseArrivee || '';
+}
 
   private initPublishMap() {
     if (!this.publishMapDiv) return;

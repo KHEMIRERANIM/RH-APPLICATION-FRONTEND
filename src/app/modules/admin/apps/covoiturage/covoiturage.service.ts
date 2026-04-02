@@ -151,6 +151,22 @@ annulerReservationNavette(reservationId: string): Observable<any> {
 getTotalPointsNavette(employeId: string): Observable<number> {
   return this.http.get<number>(`${this.apiUrl}/reservations-navette/employe/${employeId}/points`);
 }
+annulerTrajetConducteur(trajetId: string): Observable<void> {
+  return this.http.post<void>(
+    `${this.apiUrl}/alternatives/annuler-trajet/${trajetId}`, {}
+  );
+}
 
+getAlternatives(trajetId: string, employeId: string): Observable<any[]> {
+  return this.http.get<any[]>(
+    `${this.apiUrl}/alternatives/annulation/${trajetId}?employeId=${employeId}`
+  );
+}
+
+remplacerReservation(request: any): Observable<any> {
+  return this.http.post<any>(
+    `${this.apiUrl}/alternatives/remplacer`, request
+  );
+}
 
 }

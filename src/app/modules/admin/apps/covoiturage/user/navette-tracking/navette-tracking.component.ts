@@ -46,22 +46,14 @@ export class NavetteTrackingComponent implements OnInit, AfterViewInit, OnDestro
   notificationsNonLues: number = 0;
 
   // Position arrêt employé
+@Input() adresseDepart: string = '';
+  @Input() adresseArrivee: string = '';
   arretLat: number = 36.8065;
   arretLng: number = 10.1815;
+  private departLat: number = 0;
+  private departLng: number = 0;
 
-  // Points du trajet simulé
-  private trajets: { lat: number, lng: number }[] = [
-    { lat: 36.8900, lng: 10.1600 }, // départ Ariana
-    { lat: 36.8800, lng: 10.1650 },
-    { lat: 36.8700, lng: 10.1680 },
-    { lat: 36.8600, lng: 10.1700 },
-    { lat: 36.8500, lng: 10.1720 }, // ← retard ici
-    { lat: 36.8400, lng: 10.1740 },
-    { lat: 36.8300, lng: 10.1760 },
-    { lat: 36.8200, lng: 10.1780 },
-    { lat: 36.8150, lng: 10.1800 },
-    { lat: 36.8065, lng: 10.1815 }, // arrivée
-  ];
+  private trajets: { lat: number, lng: number }[] = [];
 
 public etapeActuelle: number = 0;
   private enRetard: boolean = false;
@@ -69,9 +61,56 @@ public etapeActuelle: number = 0;
   constructor(private cdr: ChangeDetectorRef) { }
 
   ngOnInit() {
-    this.connecterWebSocket();
-  }
+  this.chargerAdresseDepart();
+  this.connecterWebSocket();
+}
+private async chargerAdresseDepart(): Promise<void> {
+  if (!this.adresseDepart || !this.adresseArrivee) return;
+  try {
+    // Point où attend l'employé = adresseDepart du trajet
+    const resA = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(this.adresseDepart)}&limit=1&countrycodes=tn`
+    );
+    const dataA = await resA.json();
+    if (dataA?.[0]) {
+      this.arretLat = parseFloat(dataA[0].lat);
+      this.arretLng = parseFloat(dataA[0].lon);
+    }
 
+    // Position initiale du conducteur = adresseArrivee du trajet
+    const resD = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(this.adresseArrivee)}&limit=1&countrycodes=tn`
+    );
+    const dataD = await resD.json();
+    if (dataD?.[0]) {
+      this.departLat = parseFloat(dataD[0].lat);
+      this.departLng = parseFloat(dataD[0].lon);
+    }
+
+    // Génère le vrai trajet simulé
+    await this.genererTrajetSimule();
+
+  } catch { }
+}
+
+private async genererTrajetSimule(): Promise<void> {
+  try {
+    const res = await fetch(
+      `https://router.project-osrm.org/route/v1/driving/` +
+      `${this.departLng},${this.departLat};${this.arretLng},${this.arretLat}` +
+      `?overview=full&geometries=geojson`
+    );
+    const data = await res.json();
+    if (data?.routes?.[0]) {
+      const coords = data.routes[0].geometry.coordinates;
+      const step = Math.max(1, Math.floor(coords.length / 10));
+      this.trajets = coords
+        .filter((_: any, i: number) => i % step === 0)
+        .slice(0, 10)
+        .map((c: any) => ({ lat: c[1], lng: c[0] }));
+    }
+  } catch { }
+}
   ngAfterViewInit() {
     setTimeout(() => {
       this.initMap();
@@ -130,7 +169,14 @@ public etapeActuelle: number = 0;
   }
 
   // ===== SIMULATION =====
-  demarrerSimulation() {
+async demarrerSimulation() {     if (this.trajets.length === 0) {
+    await this.chargerAdresseDepart();
+  }
+  
+  if (this.trajets.length === 0) {
+    alert('Trajet non chargé, réessayez dans quelques secondes');
+    return;
+  }
     this.statut = 'En route';
     this.ajouterNotification(
       'info', '🚌 Navette en route',
@@ -287,21 +333,13 @@ public etapeActuelle: number = 0;
       iconAnchor: [7, 7]
     });
 
-    const depart = this.trajets[0];
-    L.marker([depart.lat, depart.lng], { icon: departIcon })
-      .addTo(this.map);
-
-    // Trajet complet en gris clair
-    const tousLesPoints = this.trajets.map(p => [p.lat, p.lng]);
-    L.polyline(tousLesPoints, {
-      color: '#D1D5DB',
-      weight: 4,
-      opacity: 0.6,
-      dashArray: '8 6'
-    }).addTo(this.map);
-
-    // Fit bounds pour voir tout le trajet
-    this.map.fitBounds(tousLesPoints as any, { padding: [40, 40] });
+   if (this.trajets.length > 0) {
+  const depart = this.trajets[0];
+  L.marker([depart.lat, depart.lng], { icon: departIcon }).addTo(this.map);
+  const tousLesPoints = this.trajets.map(p => [p.lat, p.lng]);
+  L.polyline(tousLesPoints, { color: '#D1D5DB', weight: 4, opacity: 0.6, dashArray: '8 6' }).addTo(this.map);
+  this.map.fitBounds(tousLesPoints as any, { padding: [40, 40] });
+}
   }
 
   updateNavettePosition(lat: number, lng: number) {
