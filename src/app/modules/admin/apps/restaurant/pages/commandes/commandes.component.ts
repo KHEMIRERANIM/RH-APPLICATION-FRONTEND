@@ -5,6 +5,7 @@ import { MenuService } from 'src/app/services/menu.service';
 import { HttpClient } from '@angular/common/http';
 import { Menu, Plat } from 'src/app/models/menu';
 import { RoleService } from 'app/core/auth/role.service';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-commandes',
@@ -28,22 +29,49 @@ export class CommandesComponent implements OnInit {
   step = 1;
   statuts = ['en_attente', 'confirmee', 'prete', 'livree'];
   newCommande = { menuId: '' };
+  private requestedPlatId = '';
 
   constructor(
     private commandeService: CommandeService,
     private menuService: MenuService,
     private http: HttpClient,
-    public roleService: RoleService
+    public roleService: RoleService,
+    private route: ActivatedRoute,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
+    this.route.queryParamMap.subscribe(params => {
+      this.newCommande.menuId = params.get('menuId') || '';
+      this.requestedPlatId = params.get('platId') || '';
+    });
     this.loadMenus();
     this.loadCommandes();
   }
 
   loadMenus(): void {
     this.menuService.getAllMenus().subscribe({
-      next: (data) => { this.menus = data; }
+      next: (data) => {
+        this.menus = data;
+        this.applyCommandeFromQuery();
+      }
+    });
+  }
+
+  applyCommandeFromQuery(): void {
+    if (!this.roleService.isEmploye() || !this.newCommande.menuId) {
+      return;
+    }
+    this.showForm = true;
+    this.onMenuChange();
+    if (this.requestedPlatId && this.platsDisponibles.some(p => p.platId === this.requestedPlatId)) {
+      this.platsSelectionnes = [this.requestedPlatId];
+    }
+    this.step = this.platsDisponibles.length > 0 ? 2 : 1;
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {},
+      replaceUrl: true
     });
   }
 
@@ -112,6 +140,9 @@ export class CommandesComponent implements OnInit {
   }
 
   ouvrirFormulaire(): void {
+    if (!this.roleService.isEmploye()) {
+      return;
+    }
     this.showForm = true;
     this.step = 1;
     this.newCommande = { menuId: '' };
@@ -147,6 +178,10 @@ export class CommandesComponent implements OnInit {
   }
 
   submitCommande(): void {
+    if (!this.roleService.isEmploye()) {
+      this.errorMsg = 'Seul un employe peut passer une commande.';
+      return;
+    }
     if (!this.newCommande.menuId || this.platsSelectionnes.length === 0) {
       this.errorMsg = 'Choisissez un menu et au moins un plat.'; return;
     }
@@ -159,13 +194,21 @@ export class CommandesComponent implements OnInit {
     };
     this.commandeService.createCommande(commande).subscribe({
       next: () => {
-        this.successMsg = 'Commande envoyée !';
-        setTimeout(() => this.successMsg = '', 4000);
-        this.showForm = false;
-        this.loadCommandes();
+        this.menuService.decrementPlatsApresCommande(commande.menuId!, commande.plats).subscribe({
+          next: () => this.finaliserCommandeReussie(),
+          error: () => this.finaliserCommandeReussie()
+        });
       },
       error: (err) => { this.errorMsg = err.error?.message || 'Erreur création commande.'; }
     });
+  }
+
+  private finaliserCommandeReussie(): void {
+    this.successMsg = 'Commande envoyée !';
+    setTimeout(() => this.successMsg = '', 4000);
+    this.showForm = false;
+    this.loadMenus();
+    this.loadCommandes();
   }
 
   voirDetails(commande: Commande): void {

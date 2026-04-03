@@ -10,6 +10,7 @@ import { PlatsComponent } from './pages/plats/plats.component';
 import { CommandesComponent } from './pages/commandes/commandes.component';
 import { AvisComponent } from './pages/avis/avis.component';
 import { RestaurantComponent } from './restaurant/restaurant.component';
+import { RestaurantMiniPanierComponent } from './restaurant-mini-panier/restaurant-mini-panier.component';
 
 @NgModule({
   declarations: [
@@ -17,7 +18,8 @@ import { RestaurantComponent } from './restaurant/restaurant.component';
     PlatsComponent,
     CommandesComponent,
     AvisComponent,
-    RestaurantComponent
+    RestaurantComponent,
+    RestaurantMiniPanierComponent
   ],
   imports: [
     CommonModule,

@@ -1,0 +1,55 @@
+<div *ngIf="roleService.isEmploye() && lignes.length > 0" class="mini-panier-root">
+
+  <div *ngIf="panier.panierOuvert" class="mini-panier-panel">
+    <div class="mini-panier-panel-header">
+      <div>
+        <p class="mini-panier-title">Panier</p>
+        <p class="mini-panier-sub">{{ lignes[0]?.menuTitre }}</p>
+      </div>
+      <button type="button" class="mini-panier-close" (click)="panier.panierOuvert = false" aria-label="Fermer">×</button>
+    </div>
+
+    <p *ngIf="ajustementMsg" class="mini-panier-hint">{{ ajustementMsg }}</p>
+    <p *ngIf="errorMsg" class="mini-panier-error">{{ errorMsg }}</p>
+
+    <ul class="mini-panier-list">
+      <li *ngFor="let l of lignes" class="mini-panier-line">
+        <img [src]="l.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=120'" [alt]="l.nom" class="mini-panier-thumb" />
+        <div class="mini-panier-line-body">
+          <p class="mini-panier-line-name">{{ l.nom }}</p>
+          <p class="mini-panier-line-meta">Max {{ l.stockMax }} · {{ l.prix | number:'1.2-2' }} TND / u.</p>
+          <div class="mini-panier-qty">
+            <button type="button" (click)="dec(l.platId)" class="mini-panier-qty-btn" aria-label="Moins">−</button>
+            <span class="mini-panier-qty-val">{{ l.quantite }}</span>
+            <button type="button" (click)="inc(l.platId)" class="mini-panier-qty-btn" aria-label="Plus">+</button>
+            <button type="button" (click)="retirer(l.platId)" class="mini-panier-remove">Retirer</button>
+          </div>
+        </div>
+      </li>
+    </ul>
+
+    <div class="mini-panier-footer">
+      <div class="mini-panier-total-row">
+        <span>Total</span>
+        <span class="mini-panier-total">{{ panier.montantTotal | number:'1.2-2' }} TND</span>
+      </div>
+      <div class="mini-panier-actions">
+        <button type="button" class="btn-secondary" (click)="vider()">Vider</button>
+        <button type="button" class="btn-primary" [disabled]="loading" (click)="confirmer()">
+          {{ loading ? 'Envoi…' : 'Confirmer la commande' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <button
+    type="button"
+    class="mini-panier-fab"
+    (click)="toggle()"
+    [attr.aria-expanded]="panier.panierOuvert">
+    <svg class="mini-panier-fab-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+    </svg>
+    <span class="mini-panier-badge">{{ panier.totalArticles }}</span>
+  </button>
+</div>

@@ -1,20 +1,11 @@
-﻿<div class="min-h-screen bg-gray-50 p-6">
+﻿<div>
 
   <div class="flex items-center justify-between mb-8">
     <div>
       <h1 class="text-2xl font-bold text-gray-900">Catalogue des Plats</h1>
       <p class="text-sm text-gray-500 mt-1">
-        {{ roleService.isEmploye() ? 'Cliquez sur un plat pour commander' : 'Vue globale de tous les plats disponibles' }}
+        {{ roleService.isEmploye() ? 'Commander avec quantité : le mini-panier en bas à droite suit votre sélection' : 'Vue globale de tous les plats disponibles' }}
       </p>
-    </div>
-    <div class="flex items-center gap-3">
-      <button *ngIf="roleService.isEmploye() && panier.length > 0" (click)="showPanier=true"
-        class="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg font-medium text-sm hover:bg-blue-700 shadow-sm">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-        </svg>
-        Panier ({{ panier.length }}) · {{ getMontantPanier() | number:'1.2-2' }} TND
-      </button>
     </div>
   </div>
 
@@ -69,27 +60,6 @@
       class="px-3.5 py-2 bg-gray-100 text-gray-500 rounded-lg text-sm hover:bg-gray-200">Effacer</button>
   </div>
 
-  <!-- Panier en cours -->
-  <div *ngIf="roleService.isEmploye() && panier.length > 0"
-    class="mb-5 flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-xl">
-    <div class="flex items-center gap-3">
-      <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-        </svg>
-      </div>
-      <div>
-        <p class="text-sm font-semibold text-blue-800">{{ panier.length }} plat(s) · {{ panier[0]?.menuTitre }}</p>
-        <p class="text-xs text-blue-500">Cliquez sur Commander pour valider</p>
-      </div>
-    </div>
-    <div class="flex items-center gap-2">
-      <span class="font-bold text-blue-700">{{ getMontantPanier() | number:'1.2-2' }} TND</span>
-      <button (click)="showPanier=true" class="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">Commander</button>
-      <button (click)="panier=[]" class="text-xs text-blue-400 hover:text-blue-600">Vider</button>
-    </div>
-  </div>
-
   <!-- Loading -->
   <div *ngIf="loading" class="flex flex-col items-center py-16">
     <div class="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-3"></div>
@@ -99,32 +69,30 @@
   <!-- Grille -->
   <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4" *ngIf="!loading">
     <div *ngFor="let plat of filtered"
-      (click)="roleService.isEmploye() && plat.disponible && !isMenuDejaCommande(plat.menuId) && onPlatClick(plat)"
+      (click)="clicPlatEmploye(plat)"
       class="group bg-white rounded-xl border shadow-sm overflow-hidden transition-all"
       [ngClass]="{
-        'cursor-pointer hover:shadow-lg hover:border-blue-300': roleService.isEmploye() && plat.disponible && !isMenuDejaCommande(plat.menuId),
-        'border-blue-400 ring-2 ring-blue-200': isPlatInPanier(plat.platId!),
-        'border-gray-200': !isPlatInPanier(plat.platId!)
+        'cursor-pointer hover:shadow-lg hover:border-blue-300': peutCommanderPlat(plat),
+        'border-blue-400 ring-2 ring-blue-200': getQtyDansPanier(plat.platId) > 0,
+        'border-gray-200': getQtyDansPanier(plat.platId) === 0
       }">
       <div class="relative overflow-hidden h-40">
         <img [src]="plat.image || getImageForPlat(plat.nom)" [alt]="plat.nom"
           class="w-full h-full object-cover transition-transform duration-300"
-          [ngClass]="roleService.isEmploye() && plat.disponible ? 'group-hover:scale-110' : ''"
+          [ngClass]="peutCommanderPlat(plat) ? 'group-hover:scale-110' : ''"
           onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'" />
         <span class="absolute top-2 right-2 text-xs px-1.5 py-0.5 rounded-md font-medium"
           [ngClass]="plat.disponible ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'">
           {{ plat.disponible ? 'Dispo' : 'Indispo' }}
         </span>
-        <div *ngIf="isPlatInPanier(plat.platId!)"
-          class="absolute top-2 left-2 w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center shadow-md">
-          <svg class="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-          </svg>
+        <div *ngIf="getQtyDansPanier(plat.platId) > 0"
+          class="absolute top-2 left-2 min-w-[1.5rem] h-6 px-1.5 bg-blue-600 rounded-full flex items-center justify-center shadow-md text-white text-xs font-bold">
+          {{ getQtyDansPanier(plat.platId) }}
         </div>
-        <div *ngIf="roleService.isEmploye() && plat.disponible && !isMenuDejaCommande(plat.menuId)"
+        <div *ngIf="peutCommanderPlat(plat)"
           class="absolute inset-0 bg-blue-600/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <span class="bg-white text-blue-700 font-bold text-sm px-4 py-2 rounded-lg shadow-lg">
-            {{ isPlatInPanier(plat.platId!) ? 'Dans le panier' : 'Commander' }}
+            Commander
           </span>
         </div>
       </div>
@@ -134,9 +102,22 @@
         <div class="flex flex-wrap gap-1 my-1.5">
           <span *ngFor="let tag of plat.tags" class="px-1.5 py-0.5 text-xs bg-gray-100 text-gray-600 rounded-md">{{ tag }}</span>
         </div>
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between gap-2">
           <span class="font-bold text-blue-600 text-sm">{{ plat.prix }} TND</span>
-          <span class="text-xs text-gray-400">x{{ plat.quantite }}</span>
+          <span class="text-xs font-medium text-blue-800 bg-blue-50 px-2 py-0.5 rounded-md text-right leading-tight">
+            {{ libelleQuantiteRestante(plat) }}
+          </span>
+        </div>
+        <div *ngIf="roleService.isEmploye()" class="mt-2" (click)="$event.stopPropagation()">
+          <button
+            (click)="ouvrirCommande(plat)"
+            [disabled]="!peutCommanderPlat(plat)"
+            [ngClass]="!peutCommanderPlat(plat)
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              : 'bg-blue-600 text-white hover:bg-blue-700'"
+            class="w-full py-1.5 rounded-lg text-xs font-semibold transition-all">
+            {{ !plat.disponible ? 'Indisponible' : (isMenuDejaCommande(plat.menuId) ? 'Menu deja commande' : ((plat.quantite != null && plat.quantite <= 0) ? 'Rupture de stock' : 'Commander')) }}
+          </button>
         </div>
         <div *ngIf="isMenuDejaCommande(plat.menuId) && roleService.isEmploye()"
           class="mt-2 text-center py-1 bg-gray-100 rounded-lg text-xs text-gray-400">
@@ -154,79 +135,36 @@
     </div>
   </div>
 
-  <!-- Modal détail plat + commande -->
-  <div *ngIf="platSelectionne"
-    class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden">
-      <div class="relative h-52">
-        <img [src]="platSelectionne.image || getImageForPlat(platSelectionne.nom)"
-          class="w-full h-full object-cover" />
-        <button (click)="platSelectionne=null"
-          class="absolute top-3 right-3 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center text-gray-600 hover:bg-white shadow-md">
-          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
-        </button>
-        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-          <h3 class="font-bold text-white text-lg">{{ platSelectionne.nom }}</h3>
-          <p class="text-xs text-white/70">{{ platSelectionne.menuTitre }}</p>
-        </div>
+  <!-- Modal quantité -->
+  <div *ngIf="qtyModal && roleService.isEmploye()"
+    class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[110] p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden border border-blue-100">
+      <div class="p-5 border-b border-gray-100 bg-blue-50/80">
+        <h3 class="font-bold text-gray-900">Commander</h3>
+        <p class="text-sm text-blue-800 font-medium mt-1">{{ qtyModal.nom }}</p>
+        <p class="text-xs text-gray-500">{{ qtyModal.menuTitre }}</p>
       </div>
-      <div class="p-5">
-        <p class="text-sm text-gray-500 mb-3">{{ platSelectionne.description }}</p>
-        <div class="flex flex-wrap gap-1 mb-4">
-          <span *ngFor="let tag of platSelectionne.tags"
-            class="px-2 py-0.5 text-xs bg-blue-50 text-blue-700 rounded-full border border-blue-100">{{ tag }}</span>
-        </div>
-        <div class="flex items-center justify-between mb-5 p-3 bg-gray-50 rounded-xl">
-          <div>
-            <p class="text-xs text-gray-400">Prix</p>
-            <p class="text-2xl font-extrabold text-blue-600">{{ platSelectionne.prix }} TND</p>
-          </div>
-          <div class="text-right">
-            <p class="text-xs text-gray-400">Disponibilite</p>
-            <p class="text-sm font-semibold text-emerald-600">{{ platSelectionne.quantite }} restants</p>
+      <div class="p-5 space-y-4">
+        <div class="flex items-center justify-between gap-3">
+          <span class="text-sm text-gray-600">Quantité</span>
+          <div class="flex items-center gap-2">
+            <button type="button" (click)="qtyChoisie = qtyChoisie > 1 ? qtyChoisie - 1 : 1"
+              class="w-9 h-9 rounded-lg border border-blue-200 text-blue-700 font-bold hover:bg-blue-50">−</button>
+            <input type="number" min="1" [max]="maxQtyModal" [(ngModel)]="qtyChoisie"
+              class="w-16 text-center border border-gray-200 rounded-lg py-1.5 text-sm font-semibold" />
+            <button type="button" (click)="qtyChoisie = qtyChoisie < maxQtyModal ? qtyChoisie + 1 : maxQtyModal"
+              class="w-9 h-9 rounded-lg border border-blue-200 text-blue-700 font-bold hover:bg-blue-50">+</button>
           </div>
         </div>
-        <button (click)="ajouterAuPanier()"
-          [ngClass]="isPlatInPanier(platSelectionne.platId!) ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-600 hover:bg-blue-700'"
-          class="w-full py-3 text-white rounded-xl font-bold text-sm shadow-md transition-all mb-2">
-          {{ isPlatInPanier(platSelectionne.platId!) ? 'Retirer du panier' : 'Ajouter au panier' }}
-        </button>
-        <button *ngIf="panier.length > 0 || isPlatInPanier(platSelectionne.platId!)" (click)="commanderMaintenant()"
-          class="w-full py-2.5 bg-emerald-600 text-white rounded-xl font-bold text-sm hover:bg-emerald-700 transition-all">
-          Commander maintenant
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal Panier -->
-  <div *ngIf="showPanier" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md">
-      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-        <h3 class="font-bold text-gray-900">Mon Panier</h3>
-        <button (click)="showPanier=false" class="text-gray-400 hover:text-gray-600">
-          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
-        </button>
-      </div>
-      <div class="px-6 py-4">
-        <div class="space-y-3 mb-5 max-h-64 overflow-y-auto">
-          <div *ngFor="let p of panier" class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-            <img [src]="p.image || getImageForPlat(p.nom)" class="w-12 h-12 rounded-lg object-cover" />
-            <div class="flex-1">
-              <p class="font-semibold text-sm text-gray-900">{{ p.nom }}</p>
-              <p class="text-xs text-gray-400">{{ p.menuTitre }}</p>
-            </div>
-            <p class="font-bold text-blue-600 text-sm">{{ p.prix }} TND</p>
-          </div>
+        <p class="text-xs text-gray-500">
+          Vous pouvez commander au maximum <strong>{{ maxQtyModal }}</strong> unité(s) (stock restant, panier inclus).
+        </p>
+        <div class="flex gap-2">
+          <button type="button" (click)="fermerQtyModal()"
+            class="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-600 text-sm font-semibold hover:bg-gray-50">Annuler</button>
+          <button type="button" (click)="confirmerAjoutPanier()"
+            class="flex-1 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-bold hover:bg-blue-700">Ajouter au panier</button>
         </div>
-        <div class="flex justify-between items-center pt-4 border-t border-gray-200 mb-4">
-          <span class="font-bold text-gray-700">Total</span>
-          <span class="text-2xl font-extrabold text-blue-600">{{ getMontantPanier() | number:'1.2-2' }} TND</span>
-        </div>
-        <button (click)="commander()"
-          class="w-full py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-md shadow-blue-200">
-          Confirmer la commande
-        </button>
       </div>
     </div>
   </div>

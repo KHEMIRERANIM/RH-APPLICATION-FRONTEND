@@ -1,20 +1,24 @@
-﻿import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { Menu, Plat } from 'src/app/models/menu';
 import { MenuService } from 'src/app/services/menu.service';
 import { CommandeService } from 'src/app/services/commande.service';
 import { RoleService } from 'app/core/auth/role.service';
-import { Commande } from 'src/app/models/commande';
+import { RestaurantPanierService } from '../../services/restaurant-panier.service';
+
+type PlatVue = Plat & { menuTitre: string; menuDate: string; menuId: string };
 
 @Component({
   selector: 'app-plats',
   templateUrl: './plats.component.html',
   styleUrls: ['./plats.component.scss']
 })
-export class PlatsComponent implements OnInit {
-  allPlats: (Plat & { menuTitre: string; menuDate: string; menuId: string })[] = [];
-  filtered: (Plat & { menuTitre: string; menuDate: string; menuId: string })[] = [];
-  panier: (Plat & { menuTitre: string; menuDate: string; menuId: string })[] = [];
-  platSelectionne: (Plat & { menuTitre: string; menuDate: string; menuId: string }) | null = null;
+export class PlatsComponent implements OnInit, OnDestroy {
+  private readonly destroy$ = new Subject<void>();
+
+  allPlats: PlatVue[] = [];
+  filtered: PlatVue[] = [];
   loading = false;
   searchTerm = '';
   filterDispo: 'tous' | 'dispo' | 'indispo' = 'tous';
@@ -23,17 +27,33 @@ export class PlatsComponent implements OnInit {
   successMsg = '';
   errorMsg = '';
   menusCommandesIds: string[] = [];
-  showPanier = false;
+
+  qtyModal: PlatVue | null = null;
+  qtyChoisie = 1;
 
   constructor(
     private menuService: MenuService,
     private commandeService: CommandeService,
-    public roleService: RoleService
+    public roleService: RoleService,
+    public panier: RestaurantPanierService
   ) {}
 
   ngOnInit(): void {
     this.loadPlats();
-    if (this.roleService.isEmploye()) this.loadMesCommandes();
+    if (this.roleService.isEmploye()) {
+      this.loadMesCommandes();
+      this.panier.commandePassee$.pipe(takeUntil(this.destroy$)).subscribe(() => {
+        this.loadPlats();
+        this.loadMesCommandes();
+        this.successMsg = 'Commande passee avec succes !';
+        setTimeout(() => this.successMsg = '', 4000);
+      });
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   loadPlats(): void {
@@ -76,75 +96,90 @@ export class PlatsComponent implements OnInit {
     return this.menusCommandesIds.includes(menuId);
   }
 
-  onPlatClick(plat: Plat & { menuTitre: string; menuDate: string; menuId: string }): void {
-    this.platSelectionne = plat;
-  }
-
-  ajouterAuPanier(): void {
-    if (!this.platSelectionne) return;
-    if (this.isPlatInPanier(this.platSelectionne.platId!)) {
-      this.panier = this.panier.filter(p => p.platId !== this.platSelectionne!.platId);
-    } else {
-      if (this.panier.length > 0 && this.panier[0].menuId !== this.platSelectionne.menuId) {
-        this.errorMsg = 'Vous ne pouvez commander que des plats du meme menu.';
-        setTimeout(() => this.errorMsg = '', 3000);
-        this.platSelectionne = null;
-        return;
-      }
-      this.panier.push(this.platSelectionne);
+  libelleQuantiteRestante(plat: Plat): string {
+    const q = plat.quantite != null ? Number(plat.quantite) : NaN;
+    if (Number.isNaN(q)) {
+      return '';
     }
-  }
-
-  commanderMaintenant(): void {
-    if (!this.platSelectionne) return;
-    if (!this.isPlatInPanier(this.platSelectionne.platId!)) {
-      this.panier.push(this.platSelectionne);
+    if (q <= 0) {
+      return 'Rupture de stock';
     }
-    this.platSelectionne = null;
-    this.showPanier = true;
-  }
-
-  togglePanier(plat: Plat & { menuTitre: string; menuDate: string; menuId: string }): void {
-    const idx = this.panier.findIndex(p => p.platId === plat.platId);
-    if (idx >= 0) {
-      this.panier.splice(idx, 1);
-    } else {
-      if (this.panier.length > 0 && this.panier[0].menuId !== plat.menuId) {
-        this.errorMsg = 'Meme menu uniquement.';
-        setTimeout(() => this.errorMsg = '', 3000);
-        return;
-      }
-      this.panier.push(plat);
+    if (this.roleService.isEmploye()) {
+      const cmd = this.panier.quantiteRestanteCommandable(plat);
+      return cmd < q ? `Stock ${q} · encore ${cmd} pour vous` : `Il reste ${q}`;
     }
+    return `Il reste ${q}`;
   }
 
-  isPlatInPanier(platId: string): boolean {
-    return this.panier.some(p => p.platId === platId);
+  peutCommanderPlat(plat: PlatVue): boolean {
+    if (!this.roleService.isEmploye()) {
+      return false;
+    }
+    if (!plat.disponible || this.isMenuDejaCommande(plat.menuId)) {
+      return false;
+    }
+    const q = plat.quantite != null ? Number(plat.quantite) : NaN;
+    if (!Number.isNaN(q) && q <= 0) {
+      return false;
+    }
+    return this.panier.quantiteRestanteCommandable(plat) > 0;
   }
 
-  getMontantPanier(): number {
-    return this.panier.reduce((sum, p) => sum + (p.prix || 0), 0);
+  clicPlatEmploye(plat: PlatVue): void {
+    if (!this.roleService.isEmploye()) {
+      return;
+    }
+    if (!this.peutCommanderPlat(plat)) {
+      return;
+    }
+    this.ouvrirCommande(plat);
   }
 
-  commander(): void {
-    if (this.panier.length === 0) return;
-    const commande: Commande = {
-      userId: this.roleService.userId,
-      menuId: this.panier[0].menuId,
-      plats: this.panier.map(p => p.platId!),
-      dateCommande: new Date().toISOString().split('T')[0],
-      statut: 'en_attente'
-    };
-    this.commandeService.createCommande(commande).subscribe({
-      next: () => {
-        this.successMsg = 'Commande passee avec succes !';
-        setTimeout(() => this.successMsg = '', 4000);
-        this.panier = [];
-        this.showPanier = false;
-        this.loadMesCommandes();
-      },
-      error: (err) => { this.errorMsg = err.error?.message || 'Erreur commande.'; }
-    });
+  ouvrirCommande(plat: PlatVue): void {
+    if (!this.peutCommanderPlat(plat)) {
+      return;
+    }
+    this.qtyModal = plat;
+    this.qtyChoisie = 1;
+  }
+
+  fermerQtyModal(): void {
+    this.qtyModal = null;
+  }
+
+  get maxQtyModal(): number {
+    if (!this.qtyModal) {
+      return 1;
+    }
+    return Math.max(1, this.panier.quantiteRestanteCommandable(this.qtyModal));
+  }
+
+  confirmerAjoutPanier(): void {
+    if (!this.qtyModal) {
+      return;
+    }
+    const max = this.maxQtyModal;
+    const q = Math.min(Math.max(1, Math.floor(this.qtyChoisie)), max);
+    const err = this.panier.ajouterPlat(
+      this.qtyModal.menuId,
+      this.qtyModal.menuTitre,
+      this.qtyModal,
+      q
+    );
+    if (err) {
+      this.errorMsg = err;
+      setTimeout(() => this.errorMsg = '', 5000);
+      return;
+    }
+    this.qtyModal = null;
+    this.panier.panierOuvert = true;
+  }
+
+  getQtyDansPanier(platId: string | undefined): number {
+    if (!platId) {
+      return 0;
+    }
+    return this.panier.getQtyPourPlat(platId);
   }
 
   getImageForPlat(nomPlat: string): string {
