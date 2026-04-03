@@ -1,11 +1,10 @@
 ﻿import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Commande } from 'src/app/models/commande';
 import { CommandeService } from 'src/app/services/commande.service';
 import { MenuService } from 'src/app/services/menu.service';
-import { HttpClient } from '@angular/common/http';
 import { Menu, Plat } from 'src/app/models/menu';
 import { RoleService } from 'app/core/auth/role.service';
-import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-commandes',
@@ -17,62 +16,31 @@ export class CommandesComponent implements OnInit {
   menus: Menu[] = [];
   platsDisponibles: Plat[] = [];
   platsSelectionnes: string[] = [];
+  menusCommandesIds: string[] = [];
   usersCache: { [id: string]: string } = {};
-  commandeSelectionnee: Commande | null = null;
 
   loading = false;
   errorMsg = '';
   successMsg = '';
   selectedStatut = '';
-  searchUser = '';
+  searchUserId = '';
   showForm = false;
   step = 1;
   statuts = ['en_attente', 'confirmee', 'prete', 'livree'];
   newCommande = { menuId: '' };
-  private requestedPlatId = '';
+  codeRetrait = '';
+  codeErreur = '';
 
   constructor(
     private commandeService: CommandeService,
     private menuService: MenuService,
     private http: HttpClient,
-    public roleService: RoleService,
-    private route: ActivatedRoute,
-    private router: Router
+    public roleService: RoleService
   ) {}
 
   ngOnInit(): void {
-    this.route.queryParamMap.subscribe(params => {
-      this.newCommande.menuId = params.get('menuId') || '';
-      this.requestedPlatId = params.get('platId') || '';
-    });
     this.loadMenus();
     this.loadCommandes();
-  }
-
-  loadMenus(): void {
-    this.menuService.getAllMenus().subscribe({
-      next: (data) => {
-        this.menus = data;
-        this.applyCommandeFromQuery();
-      }
-    });
-  }
-
-  applyCommandeFromQuery(): void {
-    if (!this.roleService.isEmploye() || !this.newCommande.menuId) {
-      return;
-    }
-    this.showForm = true;
-    this.onMenuChange();
-    if (this.requestedPlatId && this.platsDisponibles.some(p => p.platId === this.requestedPlatId)) {
-      this.platsSelectionnes = [this.requestedPlatId];
-    }
-    this.step = this.platsDisponibles.length > 0 ? 2 : 1;
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: {},
-      replaceUrl: true
-    });
   }
 
   loadCommandes(): void {
@@ -85,6 +53,7 @@ export class CommandesComponent implements OnInit {
         this.commandes = data.sort((a, b) =>
           new Date(b.dateCommande).getTime() - new Date(a.dateCommande).getTime()
         );
+        this.menusCommandesIds = this.commandes.map(c => c.menuId);
         if (this.roleService.isAdmin()) {
           const ids = [...new Set(data.map(c => c.userId))];
           ids.forEach(id => this.loadUserNom(id));
@@ -99,9 +68,7 @@ export class CommandesComponent implements OnInit {
     if (this.usersCache[userId]) return;
     this.usersCache[userId] = '...';
     this.http.get<any>('http://localhost:8081/api/users/' + userId).subscribe({
-      next: (u) => {
-        this.usersCache[userId] = (u.prenom || '') + ' ' + (u.nom || '');
-      },
+      next: (u) => { this.usersCache[userId] = (u.prenom || '') + ' ' + (u.nom || ''); },
       error: () => { this.usersCache[userId] = userId; }
     });
   }
@@ -110,48 +77,46 @@ export class CommandesComponent implements OnInit {
     return this.usersCache[userId] || userId;
   }
 
-  getPlatNom(platId: string): string {
-    for (const menu of this.menus) {
-      const plat = (menu.plats || []).find(p => p.platId === platId);
-      if (plat) return plat.nom;
-    }
-    return '—';
+  loadMenus(): void {
+    this.menuService.getAllMenus().subscribe({
+      next: (data) => { this.menus = data; }
+    });
   }
 
-  getMenuTitre(menuId: string): string {
-    const menu = this.menus.find(m => m.id === menuId);
-    return menu ? menu.titre : '—';
+  getCodeRetrait(commande: Commande): string {
+    return (commande.id || '').slice(-4).toUpperCase();
   }
 
-  getPlatImage(platId: string): string {
-    for (const menu of this.menus) {
-      const plat = (menu.plats || []).find(p => p.platId === platId);
-      if (plat?.image) return plat.image;
-    }
-    return 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400';
+  getCommandesPretes(): Commande[] {
+    return this.commandes.filter(c => c.statut === 'prete');
   }
 
-  getPlatPrix(platId: string): number {
-    for (const menu of this.menus) {
-      const plat = (menu.plats || []).find(p => p.platId === platId);
-      if (plat) return plat.prix;
+  validerParCode(): void {
+    this.codeErreur = '';
+    if (!this.codeRetrait || this.codeRetrait.length < 4) {
+      this.codeErreur = 'Entrez un code a 4 caracteres.';
+      return;
     }
-    return 0;
+    const commande = this.commandes.find(c =>
+      c.statut === 'prete' &&
+      (c.id || '').slice(-4).toUpperCase() === this.codeRetrait.toUpperCase()
+    );
+    if (!commande) {
+      this.codeErreur = 'Aucune commande prete avec ce code.';
+      return;
+    }
+    this.updateStatut(commande.id!, 'livree');
+    this.codeRetrait = '';
+    this.successMsg = 'Livraison validee pour ' + this.getUserNom(commande.userId) + ' !';
+    setTimeout(() => this.successMsg = '', 4000);
   }
 
   ouvrirFormulaire(): void {
-    if (!this.roleService.isEmploye()) {
-      return;
-    }
     this.showForm = true;
     this.step = 1;
     this.newCommande = { menuId: '' };
     this.platsDisponibles = [];
     this.platsSelectionnes = [];
-  }
-
-  getMenusDisponibles(): Menu[] {
-    return this.menus.filter(m => m.statut === 'publie' && m.plats && m.plats.length > 0);
   }
 
   onMenuChange(): void {
@@ -177,13 +142,22 @@ export class CommandesComponent implements OnInit {
       .reduce((sum, p) => sum + (p.prix || 0), 0);
   }
 
-  submitCommande(): void {
-    if (!this.roleService.isEmploye()) {
-      this.errorMsg = 'Seul un employe peut passer une commande.';
-      return;
+  getPlatNom(platId: string): string {
+    for (const menu of this.menus) {
+      const plat = (menu.plats || []).find(p => p.platId === platId);
+      if (plat) return plat.nom;
     }
+    return '-';
+  }
+
+  isMenuDejaCommande(menuId: string): boolean {
+    return this.menusCommandesIds.includes(menuId);
+  }
+
+  submitCommande(): void {
     if (!this.newCommande.menuId || this.platsSelectionnes.length === 0) {
-      this.errorMsg = 'Choisissez un menu et au moins un plat.'; return;
+      this.errorMsg = 'Choisissez un menu et au moins un plat.';
+      return;
     }
     const commande: Commande = {
       userId: this.roleService.userId,
@@ -194,37 +168,12 @@ export class CommandesComponent implements OnInit {
     };
     this.commandeService.createCommande(commande).subscribe({
       next: () => {
-        this.menuService.decrementPlatsApresCommande(commande.menuId!, commande.plats).subscribe({
-          next: () => this.finaliserCommandeReussie(),
-          error: () => this.finaliserCommandeReussie()
-        });
+        this.successMsg = 'Commande envoyee avec succes !';
+        setTimeout(() => this.successMsg = '', 4000);
+        this.showForm = false;
+        this.loadCommandes();
       },
-      error: (err) => { this.errorMsg = err.error?.message || 'Erreur création commande.'; }
-    });
-  }
-
-  private finaliserCommandeReussie(): void {
-    this.successMsg = 'Commande envoyée !';
-    setTimeout(() => this.successMsg = '', 4000);
-    this.showForm = false;
-    this.loadMenus();
-    this.loadCommandes();
-  }
-
-  voirDetails(commande: Commande): void {
-    this.commandeSelectionnee = commande;
-  }
-
-  fermerDetails(): void {
-    this.commandeSelectionnee = null;
-  }
-
-  getFiltered(): Commande[] {
-    return this.commandes.filter(c => {
-      const matchStatut = !this.selectedStatut || c.statut === this.selectedStatut;
-      const matchUser = !this.searchUser ||
-        this.getUserNom(c.userId).toLowerCase().includes(this.searchUser.toLowerCase());
-      return matchStatut && matchUser;
+      error: (err) => { this.errorMsg = err.error?.message || 'Erreur creation commande.'; }
     });
   }
 
@@ -233,17 +182,23 @@ export class CommandesComponent implements OnInit {
     return commande.statut === 'en_attente';
   }
 
+  getFiltered(): Commande[] {
+    return this.commandes.filter(c => {
+      const matchStatut = !this.selectedStatut || c.statut === this.selectedStatut;
+      const matchUser = !this.searchUserId ||
+        this.getUserNom(c.userId).toLowerCase().includes(this.searchUserId.toLowerCase());
+      return matchStatut && matchUser;
+    });
+  }
+
   updateStatut(id: string, statut: string): void {
     this.commandeService.updateStatut(id, statut).subscribe({
       next: () => {
-        this.successMsg = 'Statut mis à jour !';
+        this.successMsg = 'Statut mis a jour !';
         setTimeout(() => this.successMsg = '', 3000);
-        if (this.commandeSelectionnee?.id === id) {
-          this.commandeSelectionnee = { ...this.commandeSelectionnee, statut };
-        }
         this.loadCommandes();
       },
-      error: () => { this.errorMsg = 'Erreur mise à jour.'; }
+      error: () => { this.errorMsg = 'Erreur mise a jour statut.'; }
     });
   }
 
@@ -251,9 +206,8 @@ export class CommandesComponent implements OnInit {
     if (!confirm('Supprimer cette commande ?')) return;
     this.commandeService.deleteCommande(id).subscribe({
       next: () => {
-        this.successMsg = 'Commande supprimée.';
+        this.successMsg = 'Commande supprimee.';
         setTimeout(() => this.successMsg = '', 3000);
-        this.fermerDetails();
         this.loadCommandes();
       },
       error: () => { this.errorMsg = 'Erreur suppression.'; }
@@ -270,16 +224,6 @@ export class CommandesComponent implements OnInit {
     }
   }
 
-  getStatutIcon(statut: string): string {
-    switch (statut) {
-      case 'en_attente': return '⏳';
-      case 'confirmee':  return '✅';
-      case 'prete':      return '🍽️';
-      case 'livree':     return '🚀';
-      default:           return '❓';
-    }
-  }
-
   getNextStatut(statut: string): string | null {
     const flow = ['en_attente', 'confirmee', 'prete', 'livree'];
     const idx = flow.indexOf(statut);
@@ -287,8 +231,8 @@ export class CommandesComponent implements OnInit {
   }
 
   getNextStatutLabel(statut: string): string {
-    const labels: any = { confirmee: 'Confirmer', prete: 'Marquer Prête', livree: 'Marquer Livrée' };
     const next = this.getNextStatut(statut);
+    const labels: any = { confirmee: 'Confirmer', prete: 'Marquer Prete', livree: 'Marquer Livree' };
     return next ? labels[next] : '';
   }
 
@@ -298,5 +242,10 @@ export class CommandesComponent implements OnInit {
 
   getTotalMontant(): number {
     return this.getFiltered().reduce((sum, c) => sum + (c.montantTotal || 0), 0);
+  }
+
+  getMenuTitre(menuId: string): string {
+    const menu = this.menus.find(m => m.id === menuId);
+    return menu ? menu.titre : '-';
   }
 }

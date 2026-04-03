@@ -1,4 +1,4 @@
-/* eslint-disable */
+﻿/* eslint-disable */
 export const contacts = [
     {
         id          : 'cd5fa417-b667-482d-b208-798d9da3213c',
@@ -4430,3 +4430,4 @@ export const tags = [
         title: 'Band'
     }
 ];
+

@@ -1,305 +1,280 @@
-﻿<div>
+﻿<div class="p-6">
 
-  <!-- Header -->
-  <div class="flex items-center justify-between mb-8">
+  <div class="flex items-center justify-between mb-6">
     <div>
-      <h1 class="text-2xl font-bold text-gray-900">
-        {{ roleService.isAdmin() ? 'Gestion des Menus' : 'Menus du Restaurant' }}
-      </h1>
-      <p class="text-sm text-gray-500 mt-1">
-        {{ roleService.isAdmin() ? 'Gerez vos menus et plats' : 'Consultez les menus disponibles' }}
-      </p>
+      <h2 class="text-2xl font-bold text-gray-900">Menus du Restaurant</h2>
+      <p class="text-sm text-gray-500 mt-1">Consultez les menus disponibles</p>
     </div>
     <button *ngIf="roleService.isAdmin()" (click)="showCreateForm = !showCreateForm"
-      class="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-sm transition-all shadow-sm">
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-      </svg>
-      Nouveau Menu
+      class="px-5 py-2 bg-blue-700 text-white rounded-xl hover:bg-blue-800 font-semibold shadow-md">
+      + Nouveau Menu
     </button>
   </div>
 
-  <!-- Messages -->
-  <div *ngIf="successMsg" class="mb-4 flex items-center gap-3 p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-lg text-sm">
-    <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-    <span class="flex-1">{{ successMsg }}</span>
-    <button (click)="successMsg=''" class="text-emerald-500 hover:text-emerald-700 font-bold">x</button>
+  <div *ngIf="successMsg" class="mb-4 p-3 bg-green-100 text-green-700 rounded-xl flex justify-between">
+    <span>{{ successMsg }}</span>
+    <button (click)="successMsg=''" class="font-bold">X</button>
   </div>
-  <div *ngIf="errorMsg" class="mb-4 flex items-center gap-3 p-3.5 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
-    <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
-    <span class="flex-1">{{ errorMsg }}</span>
-    <button (click)="errorMsg=''" class="text-red-500 hover:text-red-700 font-bold">x</button>
+  <div *ngIf="errorMsg" class="mb-4 p-3 bg-red-100 text-red-700 rounded-xl flex justify-between">
+    <span>{{ errorMsg }}</span>
+    <button (click)="errorMsg=''" class="font-bold">X</button>
   </div>
 
-  <!-- Formulaire création -->
+  <!-- Formulaire creation menu -->
   <div *ngIf="showCreateForm && roleService.isAdmin()"
-    class="mb-6 p-5 bg-white border border-gray-200 rounded-xl shadow-sm">
-    <h3 class="text-sm font-bold text-gray-800 mb-4">Nouveau menu</h3>
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-      <input type="text" placeholder="Titre *" [(ngModel)]="newMenu.titre"
-        class="px-3.5 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+    class="mb-6 p-5 bg-blue-50 border border-blue-200 rounded-2xl">
+    <h3 class="font-bold text-gray-800 mb-4">Nouveau Menu</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+      <input type="text" placeholder="Titre" [(ngModel)]="newMenu.titre"
+        class="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
       <input type="date" [(ngModel)]="newMenu.date"
-        class="px-3.5 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        class="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
       <select [(ngModel)]="newMenu.statut"
-        class="px-3.5 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+        class="px-4 py-2 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
         <option value="publie">Publie</option>
         <option value="brouillon">Brouillon</option>
       </select>
     </div>
-    <div class="flex gap-2 mt-3">
-      <button (click)="createMenu()" class="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium text-sm hover:bg-blue-700">Creer</button>
-      <button (click)="showCreateForm=false" class="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg text-sm hover:bg-gray-200">Annuler</button>
+    <div class="flex gap-3">
+      <button (click)="createMenu()"
+        class="px-5 py-2 bg-blue-700 text-white rounded-xl text-sm font-bold hover:bg-blue-800">
+        Creer
+      </button>
+      <button (click)="showCreateForm = false"
+        class="px-5 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-sm hover:bg-gray-50">
+        Annuler
+      </button>
     </div>
   </div>
 
-  <!-- Recherche -->
-  <div class="bg-white border border-gray-200 rounded-xl p-3.5 mb-6 shadow-sm flex flex-wrap gap-3 items-center">
-    <div class="relative flex-1 min-w-48">
-      <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/>
-      </svg>
-      <input type="text" placeholder="Rechercher un plat..." [(ngModel)]="searchTerm"
-        class="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+  <!-- Formulaire edition menu -->
+  <div *ngIf="showEditMenuForm && roleService.isAdmin()"
+    class="mb-6 p-5 bg-yellow-50 border border-yellow-200 rounded-2xl">
+    <h3 class="font-bold text-gray-800 mb-4">Modifier le Menu</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+      <input type="text" placeholder="Titre" [(ngModel)]="editMenu.titre"
+        class="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      <input type="date" [(ngModel)]="editMenu.date"
+        class="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      <select [(ngModel)]="editMenu.statut"
+        class="px-4 py-2 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <option value="publie">Publie</option>
+        <option value="brouillon">Brouillon</option>
+      </select>
     </div>
+    <div class="flex gap-3">
+      <button (click)="saveEditMenu()"
+        class="px-5 py-2 bg-yellow-600 text-white rounded-xl text-sm font-bold hover:bg-yellow-700">
+        Sauvegarder
+      </button>
+      <button (click)="showEditMenuForm = false"
+        class="px-5 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-sm hover:bg-gray-50">
+        Annuler
+      </button>
+    </div>
+  </div>
+
+  <!-- Formulaire ajout plat -->
+  <div *ngIf="showAddPlatForm && roleService.isAdmin()"
+    class="mb-6 p-5 bg-green-50 border border-green-200 rounded-2xl">
+    <h3 class="font-bold text-gray-800 mb-4">Ajouter un Plat</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+      <input type="text" placeholder="Nom du plat" [(ngModel)]="newPlat.nom"
+        class="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      <input type="text" placeholder="Description" [(ngModel)]="newPlat.description"
+        class="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      <input type="number" placeholder="Prix (TND)" [(ngModel)]="newPlat.prix"
+        class="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      <input type="number" placeholder="Quantite" [(ngModel)]="newPlat.quantite"
+        class="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      <input type="text" placeholder="Tags (ex: vegetarien, sans_gluten)" [(ngModel)]="newPlatTags"
+        class="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 sm:col-span-2" />
+    </div>
+    <div class="flex items-center gap-3 mb-4">
+      <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+        <input type="checkbox" [(ngModel)]="newPlat.disponible" class="rounded" />
+        Disponible
+      </label>
+    </div>
+    <div class="flex gap-3">
+      <button (click)="addPlat()"
+        class="px-5 py-2 bg-green-600 text-white rounded-xl text-sm font-bold hover:bg-green-700">
+        Ajouter
+      </button>
+      <button (click)="showAddPlatForm = false"
+        class="px-5 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-sm hover:bg-gray-50">
+        Annuler
+      </button>
+    </div>
+  </div>
+
+  <!-- Formulaire edition plat -->
+  <div *ngIf="showEditPlatForm && roleService.isAdmin()"
+    class="mb-6 p-5 bg-orange-50 border border-orange-200 rounded-2xl">
+    <h3 class="font-bold text-gray-800 mb-4">Modifier le Plat</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+      <input type="text" placeholder="Nom" [(ngModel)]="editPlat.nom"
+        class="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      <input type="text" placeholder="Description" [(ngModel)]="editPlat.description"
+        class="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      <input type="number" placeholder="Prix" [(ngModel)]="editPlat.prix"
+        class="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      <input type="number" placeholder="Quantite" [(ngModel)]="editPlat.quantite"
+        class="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      <input type="text" placeholder="Tags" [(ngModel)]="editPlatTags"
+        class="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 sm:col-span-2" />
+    </div>
+    <div class="flex items-center gap-3 mb-4">
+      <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+        <input type="checkbox" [(ngModel)]="editPlat.disponible" class="rounded" />
+        Disponible
+      </label>
+    </div>
+    <div class="flex gap-3">
+      <button (click)="saveEditPlat()"
+        class="px-5 py-2 bg-orange-600 text-white rounded-xl text-sm font-bold hover:bg-orange-700">
+        Sauvegarder
+      </button>
+      <button (click)="showEditPlatForm = false"
+        class="px-5 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-sm hover:bg-gray-50">
+        Annuler
+      </button>
+    </div>
+  </div>
+
+  <!-- Recherche et filtres -->
+  <div class="flex flex-col sm:flex-row gap-4 mb-6">
+    <input type="text" placeholder="Rechercher un plat..."
+      [(ngModel)]="searchTerm"
+      class="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
     <div class="flex gap-2 flex-wrap">
-      <button *ngFor="let filter of filters" (click)="toggleFilter(filter)"
-        [ngClass]="selectedFilters.includes(filter) ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-200 hover:border-blue-400'"
-        class="px-3 py-1.5 rounded-lg border text-xs font-medium transition-all">{{ filter }}</button>
-      <button *ngIf="isSearchActive()" (click)="searchTerm=''; selectedFilters=[]"
-        class="px-3 py-1.5 bg-gray-100 text-gray-500 rounded-lg text-xs">Effacer</button>
+      <button *ngFor="let filter of filters"
+        (click)="toggleFilter(filter)"
+        [ngClass]="{
+          'bg-blue-600 text-white border-blue-600': selectedFilters.includes(filter),
+          'bg-white text-gray-600 border-gray-200 hover:border-gray-300': !selectedFilters.includes(filter)
+        }"
+        class="px-4 py-2 rounded-lg border transition-colors text-sm">
+        {{ filter }}
+      </button>
     </div>
   </div>
 
   <!-- Loading -->
-  <div *ngIf="loading" class="flex flex-col items-center py-16">
-    <div class="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-3"></div>
-    <p class="text-gray-400 text-sm">Chargement...</p>
+  <div *ngIf="loading" class="text-center py-12">
+    <div class="inline-block w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+    <p class="mt-3 text-gray-500">Chargement...</p>
   </div>
 
-  <!-- Liste menus -->
-  <div class="space-y-3" *ngIf="!loading">
+  <!-- Liste des menus -->
+  <div class="space-y-4" *ngIf="!loading">
     <div *ngFor="let menu of getFilteredMenus()"
-      class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
 
       <!-- Header menu -->
-      <div class="px-5 py-4 flex items-center gap-4">
-        <button (click)="toggleMenu(menu.id!)" class="flex-1 flex items-center gap-3 text-left">
-          <div class="w-9 h-9 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0">
-            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-            </svg>
-          </div>
+      <div class="flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors">
+        <button (click)="toggleMenu(menu.id!)" class="flex-1 flex items-center gap-4 text-left">
           <div>
-            <p class="font-semibold text-gray-900 text-sm">{{ menu.titre }}</p>
-            <p class="text-xs text-gray-400">{{ menu.date }} · {{ menu.plats?.length || 0 }} plat(s)</p>
+            <h3 class="text-lg font-semibold text-gray-900">{{ menu.titre }}</h3>
+            <p class="text-sm text-gray-500">{{ menu.date }} - {{ menu.plats?.length || 0 }} plat(s)</p>
           </div>
         </button>
         <div class="flex items-center gap-2">
-          <span class="px-2 py-0.5 rounded-md text-xs font-medium"
-            [ngClass]="menu.statut === 'publie' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'">
-            {{ menu.statut === 'publie' ? 'Publie' : 'Brouillon' }}
+          <span class="px-3 py-1 rounded-full text-sm font-medium"
+            [ngClass]="{
+              'bg-green-100 text-green-700': menu.statut === 'publie',
+              'bg-gray-100 text-gray-600': menu.statut !== 'publie'
+            }">
+            {{ menu.statut === 'publie' ? 'Publie' : menu.statut }}
           </span>
-          <ng-container *ngIf="roleService.isAdmin()">
-            <button (click)="openAddPlat(menu.id!)" class="flex items-center gap-1 px-2.5 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-medium hover:bg-blue-700">
-              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-              Plat
+          <div *ngIf="roleService.isAdmin()" class="flex gap-1 ml-2">
+            <button (click)="openEditMenu(menu)"
+              class="px-3 py-1 bg-yellow-50 text-yellow-700 border border-yellow-200 rounded-lg text-xs hover:bg-yellow-100">
+              Modifier
             </button>
-            <button (click)="openEditMenu(menu)" class="px-2.5 py-1.5 bg-gray-100 text-gray-600 rounded-lg text-xs font-medium hover:bg-gray-200">Modifier</button>
-            <button (click)="deleteMenu(menu.id!)" class="px-2.5 py-1.5 bg-red-50 text-red-600 rounded-lg text-xs font-medium hover:bg-red-100">Supprimer</button>
-          </ng-container>
-          <button (click)="toggleMenu(menu.id!)" class="w-7 h-7 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-500">
-            <svg class="w-4 h-4 transition-transform duration-200" [ngClass]="expandedMenu === menu.id ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-            </svg>
+            <button (click)="openAddPlat(menu.id!)"
+              class="px-3 py-1 bg-green-50 text-green-700 border border-green-200 rounded-lg text-xs hover:bg-green-100">
+              + Plat
+            </button>
+            <button (click)="deleteMenu(menu.id!)"
+              class="px-3 py-1 bg-red-50 text-red-600 border border-red-200 rounded-lg text-xs hover:bg-red-100">
+              Supprimer
+            </button>
+          </div>
+          <button (click)="toggleMenu(menu.id!)" class="ml-2 text-gray-400 hover:text-gray-600">
+            {{ expandedMenu === menu.id ? '▲' : '▼' }}
           </button>
         </div>
       </div>
 
       <!-- Plats -->
-      <div *ngIf="expandedMenu === menu.id" class="border-t border-gray-100">
-        <div *ngIf="menu.plats && menu.plats.length > 0" class="p-5 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          <div *ngFor="let plat of menu.plats"
-            class="group relative bg-white rounded-xl border border-gray-200 overflow-hidden transition-all"
-            [ngClass]="peutCommanderPlat(menu.id!, plat) ? 'cursor-pointer hover:shadow-lg hover:border-blue-300' : 'cursor-default'"
-            (click)="clicPlatEmploye(menu, plat)">
-            <div class="relative overflow-hidden h-36">
-              <img [src]="plat.image || getImageForPlat(plat.nom)" [alt]="plat.nom"
-                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'" />
-              <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
-              <span class="absolute top-2 right-2 text-xs px-1.5 py-0.5 rounded-md font-medium"
-                [ngClass]="plat.disponible ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'">
-                {{ plat.disponible ? 'Dispo' : 'Indispo' }}
-              </span>
-              <div *ngIf="peutCommanderPlat(menu.id!, plat)"
-                class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <div class="bg-white/90 backdrop-blur-sm rounded-lg px-3 py-1.5 text-sm font-bold text-blue-600 shadow-lg">
-                  Commander
-                </div>
-              </div>
-            </div>
-            <div class="p-3">
-              <p class="font-semibold text-gray-900 text-sm truncate">{{ plat.nom }}</p>
-              <p class="text-xs text-gray-400 truncate mb-2">{{ plat.description }}</p>
-              <div class="flex items-center justify-between gap-2">
-                <span class="font-bold text-blue-600 text-sm">{{ plat.prix }} TND</span>
-                <span class="text-xs font-medium text-blue-800 bg-blue-50 px-2 py-0.5 rounded-md text-right leading-tight">
-                  {{ libelleQuantiteRestante(plat) }}
+      <div *ngIf="expandedMenu === menu.id" class="px-6 pb-6 pt-2 border-t border-gray-100">
+        <div *ngIf="menu.plats && menu.plats.length > 0"
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div *ngFor="let plat of filterPlats(menu.plats || [])"
+            class="border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow">
+            <img
+              [src]="plat.image || getImageForPlat(plat.nom)"
+              [alt]="plat.nom"
+              class="w-full h-40 object-cover"
+              onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'" />
+            <div class="p-4">
+              <div class="flex items-start justify-between mb-1">
+                <h4 class="text-base font-semibold text-gray-900">{{ plat.nom }}</h4>
+                <span class="text-xs px-2 py-0.5 rounded-full ml-2 flex-shrink-0"
+                  [ngClass]="plat.disponible ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'">
+                  {{ plat.disponible ? 'Dispo' : 'Indispo' }}
                 </span>
               </div>
-              <div *ngIf="roleService.isEmploye()" class="mt-2" (click)="$event.stopPropagation()">
-                <button
-                  (click)="ouvrirCommande(menu, plat)"
-                  [disabled]="!peutCommanderPlat(menu.id!, plat)"
-                  [ngClass]="!peutCommanderPlat(menu.id!, plat)
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'bg-blue-600 text-white hover:bg-blue-700'"
-                  class="w-full py-1.5 rounded-lg text-xs font-semibold transition-all">
-                  {{ !plat.disponible ? 'Indisponible' : (menusCommandesIds.includes(menu.id!) ? 'Menu deja commande' : ((plat.quantite != null && plat.quantite <= 0) ? 'Rupture de stock' : 'Commander')) }}
-                </button>
+              <p class="text-xs text-gray-400 mb-2">{{ plat.description }}</p>
+              <div class="flex flex-wrap gap-1 mb-3">
+                <span *ngFor="let tag of plat.tags"
+                  class="px-2 py-0.5 rounded text-xs bg-blue-50 text-blue-700">
+                  {{ tag }}
+                </span>
               </div>
-              <div *ngIf="roleService.isAdmin()" class="flex gap-1.5 mt-2" (click)="$event.stopPropagation()">
-                <button (click)="openEditPlat(menu.id!, plat)" class="flex-1 py-1 bg-gray-100 text-gray-600 rounded-lg text-xs font-medium hover:bg-gray-200">Modifier</button>
-                <button (click)="deletePlat(menu.id!, plat.platId!)" class="flex-1 py-1 bg-red-50 text-red-600 rounded-lg text-xs font-medium hover:bg-red-100">Supprimer</button>
+              <div class="flex items-center justify-between">
+                <div>
+                  <span class="text-lg font-bold text-gray-900">{{ plat.prix }} TND</span>
+                  <p class="text-xs mt-0.5"
+                    [ngClass]="(plat.quantite != null && plat.quantite <= 0) ? 'text-red-500' : 'text-gray-400'">
+                    {{ libelleQuantiteRestante(plat) }}
+                  </p>
+                </div>
+                <div class="flex flex-col gap-1 items-end">
+                  <button *ngIf="roleService.isEmploye()"
+                    (click)="commanderPlat(menu, plat)"
+                    [disabled]="!peutCommanderPlat(menu.id!, plat)"
+                    [ngClass]="!peutCommanderPlat(menu.id!, plat) ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'"
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                    {{ !plat.disponible ? 'Indisponible' : ((plat.quantite != null && plat.quantite <= 0) ? 'Rupture' : 'Commander') }}
+                  </button>
+                  <div *ngIf="roleService.isAdmin()" class="flex gap-1">
+                    <button (click)="openEditPlat(menu.id!, plat)"
+                      class="px-2 py-1 bg-yellow-50 text-yellow-700 border border-yellow-200 rounded-lg text-xs hover:bg-yellow-100">
+                      Modifier
+                    </button>
+                    <button (click)="deletePlat(menu.id!, plat.platId!)"
+                      class="px-2 py-1 bg-red-50 text-red-600 border border-red-200 rounded-lg text-xs hover:bg-red-100">
+                      Supprimer
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-        <div *ngIf="!menu.plats || menu.plats.length === 0"
-          class="py-10 flex flex-col items-center text-gray-400">
-          <svg class="w-10 h-10 mb-2 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-          </svg>
-          <p class="text-sm">Aucun plat dans ce menu</p>
-          <button *ngIf="roleService.isAdmin()" (click)="openAddPlat(menu.id!)"
-            class="mt-2 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-medium hover:bg-blue-700">
-            Ajouter un plat
-          </button>
-        </div>
+        <p *ngIf="!menu.plats || menu.plats.length === 0"
+          class="text-gray-500 text-center py-4">
+          Aucun plat disponible
+        </p>
       </div>
     </div>
 
     <div *ngIf="getFilteredMenus().length === 0"
-      class="flex flex-col items-center py-16 bg-white rounded-xl border border-gray-200">
-      <svg class="w-12 h-12 mb-3 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-      </svg>
-      <p class="text-gray-400 text-sm">Aucun menu trouve</p>
+      class="text-center py-16 bg-white rounded-2xl border border-gray-200">
+      <p class="text-gray-400">Aucun menu disponible.</p>
     </div>
   </div>
 
-  <!-- Modal quantité (employé) -->
-  <div *ngIf="qtyModal && roleService.isEmploye()"
-    class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[110] p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden border border-blue-100">
-      <div class="p-5 border-b border-gray-100 bg-blue-50/80">
-        <h3 class="font-bold text-gray-900">Commander</h3>
-        <p class="text-sm text-blue-800 font-medium mt-1">{{ qtyModal.plat.nom }}</p>
-        <p class="text-xs text-gray-500">{{ qtyModal.menuTitre }}</p>
-      </div>
-      <div class="p-5 space-y-4">
-        <div class="flex items-center justify-between gap-3">
-          <span class="text-sm text-gray-600">Quantité</span>
-          <div class="flex items-center gap-2">
-            <button type="button" (click)="qtyChoisie = qtyChoisie > 1 ? qtyChoisie - 1 : 1"
-              class="w-9 h-9 rounded-lg border border-blue-200 text-blue-700 font-bold hover:bg-blue-50">−</button>
-            <input type="number" min="1" [max]="maxQtyModal" [(ngModel)]="qtyChoisie"
-              class="w-16 text-center border border-gray-200 rounded-lg py-1.5 text-sm font-semibold" />
-            <button type="button" (click)="qtyChoisie = qtyChoisie < maxQtyModal ? qtyChoisie + 1 : maxQtyModal"
-              class="w-9 h-9 rounded-lg border border-blue-200 text-blue-700 font-bold hover:bg-blue-50">+</button>
-          </div>
-        </div>
-        <p class="text-xs text-gray-500">
-          Stock restant pour ce plat : <strong>{{ maxQtyModal }}</strong> (déjà réservé dans votre panier pris en compte).
-        </p>
-        <div class="flex gap-2">
-          <button type="button" (click)="fermerQtyModal()"
-            class="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-600 text-sm font-semibold hover:bg-gray-50">Annuler</button>
-          <button type="button" (click)="confirmerAjoutPanier()"
-            class="flex-1 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-bold hover:bg-blue-700">Ajouter au panier</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modals Admin -->
-  <div *ngIf="showAddPlatForm && roleService.isAdmin()" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md">
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="font-bold text-gray-900">Ajouter un plat</h3>
-        <button (click)="showAddPlatForm=false" class="text-gray-400 hover:text-gray-600">
-          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
-        </button>
-      </div>
-      <div class="space-y-3">
-        <input type="text" placeholder="Nom *" [(ngModel)]="newPlat.nom" class="w-full px-3.5 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        <input type="text" placeholder="Description" [(ngModel)]="newPlat.description" class="w-full px-3.5 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        <div class="grid grid-cols-2 gap-3">
-          <input type="number" placeholder="Prix (TND)" [(ngModel)]="newPlat.prix" class="px-3.5 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          <input type="number" placeholder="Quantite" [(ngModel)]="newPlat.quantite" class="px-3.5 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        </div>
-        <input type="text" placeholder="Tags: diabetique, sans_gluten..." [(ngModel)]="newPlatTags" class="w-full px-3.5 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        <label class="flex items-center gap-2 cursor-pointer">
-          <input type="checkbox" [(ngModel)]="newPlat.disponible" class="w-4 h-4 accent-blue-600" />
-          <span class="text-sm text-gray-600">Disponible</span>
-        </label>
-      </div>
-      <div class="flex gap-2 mt-4">
-        <button (click)="addPlat()" class="flex-1 py-2.5 bg-blue-600 text-white rounded-lg font-medium text-sm hover:bg-blue-700">Ajouter</button>
-        <button (click)="showAddPlatForm=false" class="flex-1 py-2.5 bg-gray-100 text-gray-600 rounded-lg text-sm hover:bg-gray-200">Annuler</button>
-      </div>
-    </div>
-  </div>
-
-  <div *ngIf="showEditMenuForm && roleService.isAdmin()" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md">
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="font-bold text-gray-900">Modifier le menu</h3>
-        <button (click)="showEditMenuForm=false" class="text-gray-400 hover:text-gray-600">
-          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
-        </button>
-      </div>
-      <div class="space-y-3">
-        <input type="text" placeholder="Titre" [(ngModel)]="editMenu.titre" class="w-full px-3.5 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        <input type="date" [(ngModel)]="editMenu.date" class="w-full px-3.5 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        <select [(ngModel)]="editMenu.statut" class="w-full px-3.5 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-          <option value="publie">Publie</option>
-          <option value="brouillon">Brouillon</option>
-        </select>
-      </div>
-      <div class="flex gap-2 mt-4">
-        <button (click)="saveEditMenu()" class="flex-1 py-2.5 bg-blue-600 text-white rounded-lg font-medium text-sm hover:bg-blue-700">Sauvegarder</button>
-        <button (click)="showEditMenuForm=false" class="flex-1 py-2.5 bg-gray-100 text-gray-600 rounded-lg text-sm hover:bg-gray-200">Annuler</button>
-      </div>
-    </div>
-  </div>
-
-  <div *ngIf="showEditPlatForm && roleService.isAdmin()" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md">
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="font-bold text-gray-900">Modifier le plat</h3>
-        <button (click)="showEditPlatForm=false" class="text-gray-400 hover:text-gray-600">
-          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
-        </button>
-      </div>
-      <div class="space-y-3">
-        <input type="text" placeholder="Nom" [(ngModel)]="editPlat.nom" class="w-full px-3.5 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        <input type="text" placeholder="Description" [(ngModel)]="editPlat.description" class="w-full px-3.5 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        <div class="grid grid-cols-2 gap-3">
-          <input type="number" placeholder="Prix" [(ngModel)]="editPlat.prix" class="px-3.5 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          <input type="number" placeholder="Quantite" [(ngModel)]="editPlat.quantite" class="px-3.5 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        </div>
-        <input type="text" placeholder="Tags" [(ngModel)]="editPlatTags" class="w-full px-3.5 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        <label class="flex items-center gap-2 cursor-pointer">
-          <input type="checkbox" [(ngModel)]="editPlat.disponible" class="w-4 h-4 accent-blue-600" />
-          <span class="text-sm text-gray-600">Disponible</span>
-        </label>
-      </div>
-      <div class="flex gap-2 mt-4">
-        <button (click)="saveEditPlat()" class="flex-1 py-2.5 bg-blue-600 text-white rounded-lg font-medium text-sm hover:bg-blue-700">Sauvegarder</button>
-        <button (click)="showEditPlatForm=false" class="flex-1 py-2.5 bg-gray-100 text-gray-600 rounded-lg text-sm hover:bg-gray-200">Annuler</button>
-      </div>
-    </div>
-  </div>
 </div>
-

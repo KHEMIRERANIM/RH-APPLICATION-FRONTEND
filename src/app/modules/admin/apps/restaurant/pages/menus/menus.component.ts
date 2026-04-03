@@ -1,9 +1,9 @@
-﻿import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { Menu, Plat } from 'src/app/models/menu';
 import { MenuService } from 'src/app/services/menu.service';
-import { CommandeService } from 'src/app/services/commande.service';
 import { RoleService } from 'app/core/auth/role.service';
 import { RestaurantPanierService } from '../../services/restaurant-panier.service';
 
@@ -35,26 +35,19 @@ export class MenusComponent implements OnInit, OnDestroy {
   loading = false;
   errorMsg = '';
   successMsg = '';
-  menusCommandesIds: string[] = [];
-
-  /** Modal quantité pour ajout au panier employé */
-  qtyModal: { menuId: string; menuTitre: string; plat: Plat } | null = null;
-  qtyChoisie = 1;
 
   constructor(
     private menuService: MenuService,
-    private commandeService: CommandeService,
     public roleService: RoleService,
-    public panier: RestaurantPanierService
+    public panier: RestaurantPanierService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
     this.loadMenus();
     if (this.roleService.isEmploye()) {
-      this.loadMesCommandes();
       this.panier.commandePassee$.pipe(takeUntil(this.destroy$)).subscribe(() => {
         this.loadMenus();
-        this.loadMesCommandes();
         this.successMsg = 'Commande passee avec succes !';
         setTimeout(() => this.successMsg = '', 4000);
       });
@@ -77,89 +70,28 @@ export class MenusComponent implements OnInit, OnDestroy {
     });
   }
 
-  loadMesCommandes(): void {
-    this.commandeService.getCommandesByUser(this.roleService.userId).subscribe({
-      next: (data) => { this.menusCommandesIds = data.map(c => c.menuId); }
-    });
-  }
-
   libelleQuantiteRestante(plat: Plat): string {
     const q = plat.quantite != null ? Number(plat.quantite) : NaN;
-    if (Number.isNaN(q)) {
-      return '';
-    }
-    if (q <= 0) {
-      return 'Rupture de stock';
-    }
-    if (this.roleService.isEmploye()) {
-      const cmd = this.panier.quantiteRestanteCommandable(plat);
-      return cmd < q ? `Stock ${q} · encore ${cmd} pour vous` : `Il reste ${q}`;
-    }
+    if (Number.isNaN(q)) return '';
+    if (q <= 0) return 'Rupture de stock';
     return `Il reste ${q}`;
   }
 
   peutCommanderPlat(menuId: string, plat: Plat): boolean {
-    if (!this.roleService.isEmploye()) {
-      return false;
-    }
-    if (!plat.disponible || this.menusCommandesIds.includes(menuId)) {
-      return false;
-    }
+    if (!this.roleService.isEmploye()) return false;
+    if (!plat.disponible) return false;
     const q = plat.quantite != null ? Number(plat.quantite) : NaN;
-    if (!Number.isNaN(q) && q <= 0) {
-      return false;
-    }
-    return this.panier.quantiteRestanteCommandable(plat) > 0;
+    if (!Number.isNaN(q) && q <= 0) return false;
+    return true;
   }
 
-  clicPlatEmploye(menu: Menu, plat: Plat): void {
-    if (!this.roleService.isEmploye()) {
-      return;
-    }
-    if (!this.peutCommanderPlat(menu.id!, plat)) {
-      return;
-    }
-    this.ouvrirCommande(menu, plat);
-  }
-
-  ouvrirCommande(menu: Menu, plat: Plat): void {
-    if (!this.peutCommanderPlat(menu.id!, plat)) {
-      return;
-    }
-    this.qtyModal = { menuId: menu.id!, menuTitre: menu.titre, plat };
-    this.qtyChoisie = 1;
-  }
-
-  fermerQtyModal(): void {
-    this.qtyModal = null;
-  }
-
-  get maxQtyModal(): number {
-    if (!this.qtyModal) {
-      return 1;
-    }
-    return Math.max(1, this.panier.quantiteRestanteCommandable(this.qtyModal.plat));
-  }
-
-  confirmerAjoutPanier(): void {
-    if (!this.qtyModal) {
-      return;
-    }
-    const max = this.maxQtyModal;
-    const q = Math.min(Math.max(1, Math.floor(this.qtyChoisie)), max);
-    const err = this.panier.ajouterPlat(
-      this.qtyModal.menuId,
-      this.qtyModal.menuTitre,
-      this.qtyModal.plat,
-      q
+  commanderPlat(menu: Menu, plat: Plat): void {
+    if (!this.roleService.isEmploye()) return;
+    if (!this.peutCommanderPlat(menu.id!, plat)) return;
+    this.router.navigate(
+      ['/apps/restaurant/commandes'],
+      { queryParams: { menuId: menu.id, platId: plat.platId } }
     );
-    if (err) {
-      this.errorMsg = err;
-      setTimeout(() => this.errorMsg = '', 5000);
-      return;
-    }
-    this.qtyModal = null;
-    this.panier.panierOuvert = true;
   }
 
   getImageForPlat(nomPlat: string): string {
@@ -182,7 +114,9 @@ export class MenusComponent implements OnInit, OnDestroy {
   }
 
   toggleFilter(f: string): void {
-    this.selectedFilters.includes(f) ? this.selectedFilters = this.selectedFilters.filter(x => x !== f) : this.selectedFilters.push(f);
+    this.selectedFilters.includes(f)
+      ? this.selectedFilters = this.selectedFilters.filter(x => x !== f)
+      : this.selectedFilters.push(f);
   }
   toggleMenu(id: string): void { this.expandedMenu = this.expandedMenu === id ? null : id; }
   isSearchActive(): boolean { return !!this.searchTerm || this.selectedFilters.length > 0; }
@@ -210,7 +144,13 @@ export class MenusComponent implements OnInit, OnDestroy {
       error: () => { this.errorMsg = 'Erreur creation menu.'; }
     });
   }
-  openEditMenu(menu: Menu): void { this.editMenu = { titre: menu.titre, date: menu.date, statut: menu.statut, plats: menu.plats }; this.selectedMenuId = menu.id!; this.showEditMenuForm = true; }
+
+  openEditMenu(menu: Menu): void {
+    this.editMenu = { titre: menu.titre, date: menu.date, statut: menu.statut, plats: menu.plats };
+    this.selectedMenuId = menu.id!;
+    this.showEditMenuForm = true;
+  }
+
   saveEditMenu(): void {
     if (!this.selectedMenuId) return;
     const orig = this.menus.find(m => m.id === this.selectedMenuId);
@@ -220,11 +160,22 @@ export class MenusComponent implements OnInit, OnDestroy {
       error: () => { this.errorMsg = 'Erreur modification menu.'; }
     });
   }
+
   deleteMenu(id: string): void {
     if (!confirm('Supprimer ce menu ?')) return;
-    this.menuService.deleteMenu(id).subscribe({ next: () => { this.loadMenus(); this.successMsg = 'Menu supprime.'; setTimeout(() => this.successMsg = '', 3000); }, error: () => { this.errorMsg = 'Erreur suppression.'; } });
+    this.menuService.deleteMenu(id).subscribe({
+      next: () => { this.loadMenus(); this.successMsg = 'Menu supprime.'; setTimeout(() => this.successMsg = '', 3000); },
+      error: () => { this.errorMsg = 'Erreur suppression.'; }
+    });
   }
-  openAddPlat(menuId: string): void { this.selectedMenuId = menuId; this.showAddPlatForm = true; this.newPlat = { nom: '', description: '', prix: 0, tags: [], quantite: 1, disponible: true }; this.newPlatTags = ''; }
+
+  openAddPlat(menuId: string): void {
+    this.selectedMenuId = menuId;
+    this.showAddPlatForm = true;
+    this.newPlat = { nom: '', description: '', prix: 0, tags: [], quantite: 1, disponible: true };
+    this.newPlatTags = '';
+  }
+
   addPlat(): void {
     if (!this.selectedMenuId || !this.newPlat.nom) { this.errorMsg = 'Nom obligatoire.'; return; }
     this.newPlat.tags = this.newPlatTags.split(',').map(t => t.trim()).filter(t => t);
@@ -234,11 +185,15 @@ export class MenusComponent implements OnInit, OnDestroy {
       error: () => { this.errorMsg = 'Erreur ajout plat.'; }
     });
   }
+
   openEditPlat(menuId: string, plat: Plat): void {
-    this.selectedMenuId = menuId; this.selectedPlatId = plat.platId!;
+    this.selectedMenuId = menuId;
+    this.selectedPlatId = plat.platId!;
     this.editPlat = { nom: plat.nom, description: plat.description, prix: plat.prix, quantite: plat.quantite, disponible: plat.disponible, image: plat.image, tags: plat.tags ? [...plat.tags] : [] };
-    this.editPlatTags = (plat.tags || []).join(', '); this.showEditPlatForm = true;
+    this.editPlatTags = (plat.tags || []).join(', ');
+    this.showEditPlatForm = true;
   }
+
   saveEditPlat(): void {
     if (!this.selectedMenuId || !this.selectedPlatId) return;
     this.editPlat.tags = this.editPlatTags.split(',').map(t => t.trim()).filter(t => t);
@@ -247,8 +202,12 @@ export class MenusComponent implements OnInit, OnDestroy {
       error: () => { this.errorMsg = 'Erreur modification plat.'; }
     });
   }
+
   deletePlat(menuId: string, platId: string): void {
     if (!confirm('Supprimer ce plat ?')) return;
-    this.menuService.deletePlat(menuId, platId).subscribe({ next: () => { this.loadMenus(); this.successMsg = 'Plat supprime.'; setTimeout(() => this.successMsg = '', 3000); }, error: () => { this.errorMsg = 'Erreur suppression plat.'; } });
+    this.menuService.deletePlat(menuId, platId).subscribe({
+      next: () => { this.loadMenus(); this.successMsg = 'Plat supprime.'; setTimeout(() => this.successMsg = '', 3000); },
+      error: () => { this.errorMsg = 'Erreur suppression plat.'; }
+    });
   }
 }

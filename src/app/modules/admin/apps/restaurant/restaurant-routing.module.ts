@@ -16,7 +16,7 @@ const routes: Routes = [
       { path: 'plats', component: PlatsComponent },
       { path: 'commandes', component: CommandesComponent, canActivate: [RoleGuard], data: { roles: ['ADMIN', 'EMPLOYE'] } },
       { path: 'avis', component: AvisComponent },
-      { path: '', redirectTo: 'menus', pathMatch: 'full' } // page par dÃ©faut
+      { path: '', redirectTo: 'menus', pathMatch: 'full' } // page par défaut
     ]
   }
 ];
@@ -26,6 +26,7 @@ const routes: Routes = [
   exports: [RouterModule]
 })
 export class RestaurantRoutingModule {}
+
 
 
 
