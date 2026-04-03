@@ -62,7 +62,7 @@ export interface Offre {
     createdAt?: string;
     detailsHotel?: DetailsHotel;
 
-    // Enrichi côté front pour affichage
+
     nomPartenaire?: string;
 }
 
@@ -101,7 +101,6 @@ export interface AvantageReservation {
     formule?: string;
     checkIn?: string;
     checkOut?: string;
-    // Enrichi côté front pour affichage
     titreOffre?: string;
     nomUser?: string;
 }
@@ -110,25 +109,34 @@ export interface AvantageReservation {
 // ─────────────────────────────────────────
 // Filtres & UI
 // ─────────────────────────────────────────
+
+export interface Wishlist {
+    id?: string;
+    idUser: string;
+    idOffre: string;
+    dateAjout?: string;
+    dernierPrixConnu?: number;
+}
+
 export interface OffreFiltres {
     categorie: CategorieOffre | 'TOUS';
 }
 
 export const CATEGORIE_LABELS: Record<CategorieOffre | 'TOUS', string> = {
-    TOUS    : 'Toutes les offres',
-    VOYAGE  : 'Voyages',
-    HOTEL   : 'Hôtels',
+    TOUS: 'Toutes les offres',
+    VOYAGE: 'Voyages',
+    HOTEL: 'Hôtels',
     FESTIVAL: 'Festivals'
 };
 
 export const CATEGORIE_ICONS: Record<CategorieOffre, string> = {
-    VOYAGE  : 'heroicons_outline:paper-airplane',
-    HOTEL   : 'heroicons_outline:office-building',
+    VOYAGE: 'heroicons_outline:paper-airplane',
+    HOTEL: 'heroicons_outline:office-building',
     FESTIVAL: 'heroicons_outline:music-note'
 };
 
 export const CATEGORIE_COLORS: Record<CategorieOffre, string> = {
-    VOYAGE  : '#6366f1',
-    HOTEL   : '#0ea5e9',
+    VOYAGE: '#6366f1',
+    HOTEL: '#0ea5e9',
     FESTIVAL: '#f59e0b'
 };

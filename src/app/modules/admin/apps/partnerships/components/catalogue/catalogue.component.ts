@@ -24,6 +24,8 @@ export class CatalogueComponent implements OnInit, OnDestroy {
     activeFilter: FilterType = 'TOUS';
     isLoading = true;
     isAdmin = false;
+    favoriMap: { [idOffre: string]: boolean } = {};
+    isTogglingFavori: { [idOffre: string]: boolean } = {};
 
     filters: { key: FilterType; label: string; icon: string }[] = [
         { key: 'TOUS',     label: 'Toutes',    icon: 'heroicons_outline:view-grid'        },
@@ -47,6 +49,7 @@ export class CatalogueComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         this.isAdmin = this._auth.isAdmin();
         this._loadData();
+        this._loadFavoris();
     }
 
     ngOnDestroy(): void {
@@ -94,6 +97,20 @@ export class CatalogueComponent implements OnInit, OnDestroy {
             });
     }
 
+    private _loadFavoris(): void {
+        this._svc.getMesFavoris()
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe({
+                next: (favoris) => {
+                    this.favoriMap = {};
+                    favoris.forEach(f => {
+                        this.favoriMap[f.idOffre] = true;
+                    });
+                },
+                error: () => console.error('Erreur lors du chargement des favoris')
+            });
+    }
+
     // ── Filtres ───────────────────────────────────────────────
 
     setFilter(filter: FilterType): void {
@@ -110,6 +127,41 @@ export class CatalogueComponent implements OnInit, OnDestroy {
     }
 
     // ── Actions ───────────────────────────────────────────────
+
+    toggleFavori(offre: Offre, event: Event): void {
+        event.stopPropagation(); // Empêche l'ouverture de la boîte de dialogue
+        
+        if (!offre.id || this.isTogglingFavori[offre.id]) return;
+        
+        this.isTogglingFavori[offre.id] = true;
+        const estFavori = this.favoriMap[offre.id];
+
+        if (estFavori) {
+            this._svc.retirerFavori(offre.id).subscribe({
+                next: () => {
+                    this.favoriMap[offre.id] = false;
+                    this._toastr.info('Offre retirée de vos favoris', 'Favoris');
+                    this.isTogglingFavori[offre.id] = false;
+                },
+                error: () => {
+                    this._toastr.error('Erreur lors du retrait du favori', 'Erreur');
+                    this.isTogglingFavori[offre.id] = false;
+                }
+            });
+        } else {
+            this._svc.ajouterFavori(offre.id).subscribe({
+                next: () => {
+                    this.favoriMap[offre.id] = true;
+                    this._toastr.success('Offre ajoutée à vos favoris ❤', 'Favoris');
+                    this.isTogglingFavori[offre.id] = false;
+                },
+                error: (err) => {
+                    this._toastr.error('Erreur ou offre déjà en favoris', 'Erreur');
+                    this.isTogglingFavori[offre.id] = false;
+                }
+            });
+        }
+    }
 
     ouvrirReservation(offre: Offre): void {
         const dialogRef = this._dialog.open(OffreDetailDialogComponent, {

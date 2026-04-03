@@ -25,6 +25,10 @@
                     <mat-icon svgIcon="heroicons_outline:bookmark"></mat-icon>
                     Mes Réservations
                 </button>
+                <button mat-flat-button class="btn-mes-favoris" routerLink="/apps/partnerships/mes-favoris" style="background-color: #fce7f3; color: #be185d; margin-left: 12px;">
+                    <mat-icon svgIcon="heroicons_outline:heart"></mat-icon>
+                    Mes Favoris
+                </button>
                 <button *ngIf="isAdmin" mat-flat-button class="btn-admin" (click)="allerAdmin()">
                     <mat-icon svgIcon="heroicons_outline:cog"></mat-icon>
                     Administration
@@ -127,6 +131,17 @@
                 <span class="eco-badge" *ngIf="getEconomie(offre) > 0">
                     -{{ getEconomie(offre) | number:'1.0-0' }} DT
                 </span>
+
+                <!-- Bouton Cœur (Favori) -->
+                <button mat-icon-button class="btn-favori" 
+                        (click)="toggleFavori(offre, $event)"
+                        [class.is-favori]="favoriMap[offre.id]"
+                        matTooltip="Ajouter aux favoris"
+                        style="position: absolute; top: 12px; right: 12px; background: rgba(255,255,255,0.9); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); transition: all 0.2s;">
+                    <mat-progress-spinner *ngIf="isTogglingFavori[offre.id]" mode="indeterminate" diameter="20"></mat-progress-spinner>
+                    <mat-icon *ngIf="!isTogglingFavori[offre.id]" [svgIcon]="favoriMap[offre.id] ? 'heroicons_solid:heart' : 'heroicons_outline:heart'" 
+                              [style.color]="favoriMap[offre.id] ? '#ef4444' : '#64748b'"></mat-icon>
+                </button>
             </div>
 
             <!-- Corps de la carte -->

@@ -3,7 +3,6 @@ import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
-// Angular Material
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -36,6 +35,7 @@ import { FuseCardModule } from '@fuse/components/card';
 import { CatalogueComponent } from './components/catalogue/catalogue.component';
 import { OffreDetailDialogComponent } from './components/offre-detail-dialog/offre-detail-dialog.component';
 import { MesReservationsComponent } from './components/mes-reservations/mes-reservations.component';
+import { MesFavorisComponent } from './components/mes-favoris/mes-favoris.component';
 import { AdminDashboardComponent } from './components/admin/admin-dashboard.component';
 import { PartenaireFormComponent } from './components/admin/partenaire-form/partenaire-form.component';
 import { OffreFormComponent } from './components/admin/offre-form/offre-form.component';
@@ -52,6 +52,7 @@ import { partnershipsRoutes } from './partnerships-routing';
         CatalogueComponent,
         OffreDetailDialogComponent,
         MesReservationsComponent,
+        MesFavorisComponent,
         AdminDashboardComponent,
         PartenaireFormComponent,
         OffreFormComponent,
@@ -93,4 +94,4 @@ import { partnershipsRoutes } from './partnerships-routing';
         PartnershipsService
     ]
 })
-export class PartnershipsModule {}
+export class PartnershipsModule { }

@@ -7,7 +7,8 @@ import {
     AvantageReservation,
     CategorieOffre,
     CreatePartenaireRequest,
-    CreateOffreRequest
+    CreateOffreRequest,
+    Wishlist
 } from '../models/partnerships.models';
 
 @Injectable({
@@ -154,5 +155,30 @@ export class PartnershipsService {
     /** GET /api/users — ADMIN seulement */
     getAllUsers(): Observable<any[]> {
         return this._http.get<any[]>(`${this.BASE_URL}/users`);
+    }
+
+    // ──────────────────────────────────────
+    // WISHLIST (FAVORIS)
+    // ──────────────────────────────────────
+
+    /** POST /api/wishlist?idOffre=... */
+    ajouterFavori(idOffre: string): Observable<Wishlist> {
+        let params = new HttpParams().set('idOffre', idOffre);
+        return this._http.post<Wishlist>(`${this.BASE_URL}/wishlist`, null, { params });
+    }
+
+    /** DELETE /api/wishlist/{idOffre} */
+    retirerFavori(idOffre: string): Observable<void> {
+        return this._http.delete<void>(`${this.BASE_URL}/wishlist/${idOffre}`);
+    }
+
+    /** GET /api/wishlist/mes-favoris */
+    getMesFavoris(): Observable<Wishlist[]> {
+        return this._http.get<Wishlist[]>(`${this.BASE_URL}/wishlist/mes-favoris`);
+    }
+
+    /** GET /api/wishlist/check/{idOffre} */
+    estEnFavori(idOffre: string): Observable<boolean> {
+        return this._http.get<boolean>(`${this.BASE_URL}/wishlist/check/${idOffre}`);
     }
 }
