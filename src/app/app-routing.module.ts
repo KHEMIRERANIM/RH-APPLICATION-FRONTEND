@@ -10,6 +10,7 @@ import { InitialDataResolver } from 'app/app.resolvers';
 export const appRoutes: Route[] = [
     
 {path: 'admin/team',loadChildren: () => import('./modules/admin/dashboards/project/team-admin/team-admin.module').then(m => m.TeamAdminModule)},
+    {path: 'recrutement/charte/:candidatureId', loadChildren: () => import('app/modules/recrutement/charte/charte.module').then(m => m.CharteModule)},
     // Redirect empty path to sign-in (unauthenticated) or dashboard (authenticated via NoAuthGuard)
     {path: '', pathMatch : 'full', redirectTo: 'sign-in'},
 

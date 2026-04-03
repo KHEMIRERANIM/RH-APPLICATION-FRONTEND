@@ -9,6 +9,7 @@ import { PipelineComponent } from './pipeline/pipeline.component';
 import { PlanifierEntretienComponent } from './entretiens/planifier-entretien.component';
 import { FeedbackEntretienComponent } from './entretiens/feedback-entretien.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
+import { CharteComponent } from './charte/charte.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'offres', pathMatch: 'full' },
@@ -23,6 +24,7 @@ const routes: Routes = [
   { path: 'admin/entretiens', component: PlanifierEntretienComponent },
   { path: 'admin/entretiens/planifier', component: PlanifierEntretienComponent },
   { path: 'admin/entretiens/:id/feedback', component: FeedbackEntretienComponent },
+  { path: 'charte/:candidatureId', component: CharteComponent },
 ];
 
 @NgModule({

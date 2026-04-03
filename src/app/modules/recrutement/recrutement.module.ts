@@ -29,6 +29,8 @@ import { PipelineComponent } from './pipeline/pipeline.component';
 import { PlanifierEntretienComponent } from './entretiens/planifier-entretien.component';
 import { FeedbackEntretienComponent } from './entretiens/feedback-entretien.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+
 
 @NgModule({
   declarations: [
@@ -65,6 +67,7 @@ import { DashboardComponent } from './dashboard/dashboard.component';
     MatCardModule,
     MatBadgeModule,
     FuseAlertModule,
+    MatCheckboxModule,
   ]
 })
 export class RecrutementModule {}
