@@ -69,7 +69,7 @@
       <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
         <div class="flex items-center justify-between mb-4">
           <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
-            <mat-icon class="text-[#1D9E75] icon-size-6" svgIcon="feather:car"></mat-icon>
+            <mat-icon class="text-[#1D9E75] icon-size-6" svgIcon="feather:truck"></mat-icon>
           </div>
           <span class="text-green-600 text-sm">+18%</span>
         </div>
@@ -164,111 +164,160 @@
     </div>
   </div>
 
-  <!-- NAVETTES SECTION -->
-  <div *ngIf="activeSection === 'navettes'" class="space-y-4">
-    <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
-      <div class="relative">
-        <mat-icon class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 icon-size-5" svgIcon="feather:search"></mat-icon>
-        <input type="text" [(ngModel)]="searchTerm" placeholder="Rechercher un bus..."
-          class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1D9E75] focus:border-transparent outline-none">
+  <!-- Bus SANS pack -->
+<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+  <div *ngFor="let bus of busSansPack"
+    class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition">
+    <div class="relative h-36 overflow-hidden">
+      <img [src]="bus.photoUrl || 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=400'"
+        [alt]="bus.marque" class="w-full h-full object-cover">
+      <div class="absolute inset-0 bg-gradient-to-t from-[#0F3460]/80 to-transparent"></div>
+      <div class="absolute bottom-3 left-4 text-white">
+        <h4 class="text-lg font-semibold">{{ bus.marque }} {{ bus.modele }}</h4>
+        <p class="text-white/80 text-sm">{{ bus.ligne }}</p>
+      </div>
+      <div class="absolute top-3 right-3 flex gap-2">
+        <span class="px-2 py-1 bg-white/20 backdrop-blur-sm rounded text-xs text-white">{{ bus.immatriculation }}</span>
+        <span [class]="bus.statut === 'ACTIF' ? 'bg-green-500/80' : 'bg-gray-500/80'"
+          class="px-2 py-1 rounded text-xs text-white">{{ bus.statut }}</span>
       </div>
     </div>
-
-    <div *ngIf="isLoading" class="text-center py-10 text-gray-500">Chargement...</div>
-    <div *ngIf="errorMessage" class="bg-red-50 text-red-600 p-4 rounded-xl">{{ errorMessage }}</div>
-
-    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <div *ngFor="let bus of filteredNavettes" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition">
-
-        <!-- Photo -->
-        <div class="relative h-36 overflow-hidden">
-          <img [src]="bus.photoUrl || 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=400'"
-            [alt]="bus.marque" class="w-full h-full object-cover">
-          <div class="absolute inset-0 bg-gradient-to-t from-[#0F3460]/80 to-transparent"></div>
-          <div class="absolute bottom-3 left-4 text-white">
-            <h4 class="text-lg font-semibold">{{ bus.marque }} {{ bus.modele }}</h4>
-            <p class="text-white/80 text-sm">{{ bus.ligne }}</p>
-          </div>
-          <div class="absolute top-3 right-3 flex gap-2">
-            <span class="px-2 py-1 bg-white/20 backdrop-blur-sm rounded text-xs text-white">{{ bus.immatriculation }}</span>
-            <span [class]="bus.statut === 'ACTIF' ? 'bg-green-500/80' : 'bg-gray-500/80'"
-              class="px-2 py-1 rounded text-xs text-white">{{ bus.statut }}</span>
+    <div class="p-4 space-y-3">
+      <div class="grid grid-cols-2 gap-3">
+        <div class="bg-gray-50 rounded-lg p-3">
+          <p class="text-xs text-gray-500 mb-1">Départ</p>
+          <p class="text-sm text-[#1A1A2E]">{{ bus.heureDepart }}</p>
+        </div>
+        <div class="bg-gray-50 rounded-lg p-3">
+          <p class="text-xs text-gray-500 mb-1">Durée</p>
+          <p class="text-sm text-[#1A1A2E]">{{ bus.dureeMinutes }} min</p>
+        </div>
+        <div class="bg-gray-50 rounded-lg p-3">
+          <p class="text-xs text-gray-500 mb-1">Capacité</p>
+          <p class="text-sm text-[#1A1A2E]">{{ bus.capacite }} places</p>
+        </div>
+        <div class="bg-gray-50 rounded-lg p-3">
+          <p class="text-xs text-gray-500 mb-1">Carburant</p>
+          <p class="text-sm text-[#1A1A2E]">{{ bus.typeCarburant }}</p>
+        </div>
+      </div>
+      <div class="bg-gray-50 rounded-lg p-3">
+        <p class="text-xs text-gray-500 mb-2">Jours disponibles</p>
+        <div class="flex flex-wrap gap-1">
+          <span *ngFor="let jour of bus.joursDisponibles?.split(',')"
+            class="px-2 py-0.5 bg-[#1D9E75]/10 text-[#1D9E75] rounded text-xs font-medium">
+            {{ jour.trim() }}
+          </span>
+        </div>
+      </div>
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <p class="text-xs text-gray-500">Places restantes</p>
+          <p class="text-sm font-medium text-[#1A1A2E]">{{ bus.placesRestantes }}/{{ bus.capacite }}</p>
+        </div>
+        <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+          <div class="h-full bg-[#1D9E75] rounded-full"
+            [style.width.%]="bus.capacite ? ((bus.capacite - (bus.placesRestantes || 0)) / bus.capacite) * 100 : 0">
           </div>
         </div>
+      </div>
+      <div *ngIf="reservantsPourBus(bus.id!).length > 0" class="bg-[#0F3460]/5 rounded-lg p-3 border border-[#0F3460]/10">
+        <p class="text-xs font-semibold text-[#0F3460] mb-2">Employés réservés</p>
+        <ul class="space-y-1.5 max-h-28 overflow-y-auto">
+          <li *ngFor="let r of reservantsPourBus(bus.id!)" class="flex items-center justify-between gap-2 text-sm">
+            <span class="text-[#1A1A2E] truncate">{{ getNomEmploye(r.employeId) }}</span>
+            <span class="text-xs shrink-0 px-2 py-0.5 rounded-full"
+              [ngClass]="r.statut === 'CONFIRME' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-900'">
+              {{ r.statut === 'CONFIRME' ? 'Confirmé' : 'En attente' }}
+            </span>
+          </li>
+        </ul>
+      </div>
+      <p *ngIf="reservantsPourBus(bus.id!).length === 0" class="text-xs text-gray-400 italic">Aucune réservation active sur ce bus.</p>
+      <div class="flex gap-2 pt-2 border-t border-gray-100">
+        <button (click)="openEditModal(bus)"
+          class="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gray-50 text-[#1A1A2E] rounded-lg hover:bg-gray-100 transition">
+          <mat-icon class="icon-size-4" svgIcon="feather:edit-2"></mat-icon>
+          <span class="text-sm">Modifier</span>
+        </button>
+        <button (click)="deleteBus(bus.id!)"
+          class="px-3 py-2 bg-red-50 text-[#E94560] rounded-lg hover:bg-red-100 transition">
+          <mat-icon class="icon-size-4" svgIcon="feather:trash-2"></mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
-        <!-- Content -->
-        <div class="p-4 space-y-3">
-          <div class="grid grid-cols-2 gap-3">
-            <div class="bg-gray-50 rounded-lg p-3">
-              <p class="text-xs text-gray-500 mb-1">Départ</p>
-              <p class="text-sm text-[#1A1A2E]">{{ bus.heureDepart }}</p>
-            </div>
-            <div class="bg-gray-50 rounded-lg p-3">
-              <p class="text-xs text-gray-500 mb-1">Durée</p>
-              <p class="text-sm text-[#1A1A2E]">{{ bus.dureeMinutes }} min</p>
-            </div>
-            <div class="bg-gray-50 rounded-lg p-3">
-              <p class="text-xs text-gray-500 mb-1">Capacité</p>
-              <p class="text-sm text-[#1A1A2E]">{{ bus.capacite }} places</p>
-            </div>
-            <div class="bg-gray-50 rounded-lg p-3">
-              <p class="text-xs text-gray-500 mb-1">Carburant</p>
-              <p class="text-sm text-[#1A1A2E]">{{ bus.typeCarburant }}</p>
+<!-- Bus groupés par PACK -->
+<div *ngFor="let pack of busParPack"
+  class="bg-white rounded-xl shadow-sm border border-[#0F3460]/20 overflow-hidden">
+  <div class="flex items-center justify-between px-5 py-3 bg-[#0F3460]/5 border-b border-[#0F3460]/10">
+    <div class="flex items-center gap-2">
+      <span class="px-2.5 py-1 bg-[#0F3460] text-white rounded-lg text-xs font-semibold">Pack</span>
+      <span class="text-sm font-medium text-[#0F3460]">{{ pack.buses[0].ligne }}</span>
+    </div>
+    <div class="flex items-center gap-3 text-xs text-gray-500">
+      <span>{{ pack.buses.length }} bus</span>
+      <span class="text-[#1D9E75] font-medium">{{ countActifs(pack.buses) }} actif(s)</span>
+      <span class="text-gray-400">{{ pack.buses.length - countActifs(pack.buses) }} réserve</span>
+    </div>
+  </div>
+  <div class="p-4 grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div *ngFor="let bus of pack.buses"
+      class="rounded-xl border overflow-hidden transition hover:shadow-md"
+      [class]="bus.statut === 'ACTIF' ? 'border-[#1D9E75]/30' : 'border-gray-200 opacity-80'">
+      <div class="relative h-28 overflow-hidden">
+        <img [src]="bus.photoUrl || 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=400'"
+          [alt]="bus.marque" class="w-full h-full object-cover">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+        <div class="absolute bottom-2 left-3 text-white">
+          <p class="text-sm font-semibold">{{ bus.marque }} {{ bus.modele }}</p>
+          <p class="text-white/70 text-xs">{{ bus.immatriculation }}</p>
+        </div>
+        <div class="absolute top-2 right-2">
+          <span [class]="bus.statut === 'ACTIF' ? 'bg-green-500/90' : 'bg-gray-500/90'"
+            class="px-2 py-0.5 rounded text-xs text-white font-medium">
+            {{ bus.statut === 'ACTIF' ? 'Actif' : 'Réserve' }}
+          </span>
+        </div>
+      </div>
+      <div class="p-3 space-y-2 bg-white">
+        <div class="grid grid-cols-2 gap-2">
+          <div class="bg-gray-50 rounded-lg p-2">
+            <p class="text-xs text-gray-400">Capacité</p>
+            <p class="text-sm font-medium text-[#1A1A2E]">{{ bus.capacite }} places</p>
+          </div>
+          <div class="bg-gray-50 rounded-lg p-2">
+            <p class="text-xs text-gray-400">Restantes</p>
+            <p class="text-sm font-medium text-[#1A1A2E]">{{ bus.placesRestantes }}</p>
+          </div>
+        </div>
+        <div *ngIf="bus.statut === 'ACTIF'">
+          <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+            <div class="h-full bg-[#1D9E75] rounded-full"
+              [style.width.%]="bus.capacite ? ((bus.capacite - (bus.placesRestantes || 0)) / bus.capacite) * 100 : 0">
             </div>
           </div>
-
-          <!-- Jours en badges -->
-          <div class="bg-gray-50 rounded-lg p-3">
-            <p class="text-xs text-gray-500 mb-2">Jours disponibles</p>
-            <div class="flex flex-wrap gap-1">
-              <span *ngFor="let jour of bus.joursDisponibles?.split(',')"
-                class="px-2 py-0.5 bg-[#1D9E75]/10 text-[#1D9E75] rounded text-xs font-medium">
-                {{ jour.trim() }}
-              </span>
-            </div>
-          </div>
-
-          <div>
-            <div class="flex items-center justify-between mb-2">
-              <p class="text-xs text-gray-500">Places restantes</p>
-              <p class="text-sm font-medium text-[#1A1A2E]">{{ bus.placesRestantes }}/{{ bus.capacite }}</p>
-            </div>
-            <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
-              <div class="h-full bg-[#1D9E75] rounded-full"
-                [style.width.%]="bus.capacite ? ((bus.capacite - (bus.placesRestantes || 0)) / bus.capacite) * 100 : 0">
-              </div>
-            </div>
-          </div>
-
-          <div *ngIf="reservantsPourBus(bus.id!).length > 0" class="bg-[#0F3460]/5 rounded-lg p-3 border border-[#0F3460]/10">
-            <p class="text-xs font-semibold text-[#0F3460] mb-2">Employés réservés</p>
-            <ul class="space-y-1.5 max-h-28 overflow-y-auto">
-              <li *ngFor="let r of reservantsPourBus(bus.id!)" class="flex items-center justify-between gap-2 text-sm">
-                <span class="text-[#1A1A2E] truncate">{{ getNomEmploye(r.employeId) }}</span>
-                <span class="text-xs shrink-0 px-2 py-0.5 rounded-full"
-                  [ngClass]="r.statut === 'CONFIRME' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-900'">
-                  {{ r.statut === 'CONFIRME' ? 'Confirmé' : 'En attente' }}
-                </span>
-              </li>
-            </ul>
-          </div>
-          <p *ngIf="reservantsPourBus(bus.id!).length === 0" class="text-xs text-gray-400 italic">Aucune réservation active sur ce bus.</p>
-
-          <div class="flex gap-2 pt-2 border-t border-gray-100">
-            <button (click)="openEditModal(bus)"
-              class="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gray-50 text-[#1A1A2E] rounded-lg hover:bg-gray-100 transition">
-              <mat-icon class="icon-size-4" svgIcon="feather:edit-2"></mat-icon>
-              <span class="text-sm">Modifier</span>
-            </button>
-            <button (click)="deleteBus(bus.id!)"
-              class="px-3 py-2 bg-red-50 text-[#E94560] rounded-lg hover:bg-red-100 transition">
-              <mat-icon class="icon-size-4" svgIcon="feather:trash-2"></mat-icon>
-            </button>
-          </div>
+        </div>
+        <p *ngIf="bus.statut !== 'ACTIF'" class="text-xs text-gray-400 italic text-center py-1">
+          Bus en réserve — liste d'attente possible
+        </p>
+        <div class="flex gap-2 pt-1 border-t border-gray-100">
+          <button (click)="openEditModal(bus)"
+            class="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 bg-gray-50 text-[#1A1A2E] rounded-lg hover:bg-gray-100 transition text-xs">
+            <mat-icon class="icon-size-3" svgIcon="feather:edit-2"></mat-icon>
+            Modifier
+          </button>
+          <button (click)="deleteBus(bus.id!)"
+            class="px-2 py-1.5 bg-red-50 text-[#E94560] rounded-lg hover:bg-red-100 transition">
+            <mat-icon class="icon-size-3" svgIcon="feather:trash-2"></mat-icon>
+          </button>
         </div>
       </div>
     </div>
   </div>
+</div>
 
   <!-- RESERVATIONS SECTION -->
   <div *ngIf="activeSection === 'reservations'" class="space-y-4">
@@ -283,7 +332,7 @@
         <button (click)="setReservationType('covoiturage')"
           [class]="reservationType === 'covoiturage' ? 'bg-[#1D9E75] text-white' : 'text-[#1A1A2E] hover:bg-gray-100'"
           class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition">
-          <mat-icon class="icon-size-4" svgIcon="feather:car"></mat-icon>
+          <mat-icon class="icon-size-4" svgIcon="feather:truck"></mat-icon>
           Covoiturage ({{ stats.reservationsCovoiturage }})
         </button>
       </div>
@@ -414,127 +463,188 @@
       </div>
 
       <!-- Body -->
-      <div class="p-6 space-y-4">
+<div class="p-6 space-y-4">
 
-        <!-- Marque & Modèle -->
-<div class="grid grid-cols-2 gap-4">
-  <div>
-    <label class="block text-sm font-medium text-gray-700 mb-1">Marque <span class="text-red-500">*</span></label>
-    <input type="text" [(ngModel)]="busForm.marque" placeholder="Ex: Mercedes"
-      [class]="submitted && !busForm.marque?.trim() ? 'border-red-300' : 'border-gray-300'"
-      class="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#1D9E75] outline-none">
-    <p *ngIf="submitted && !busForm.marque?.trim()" class="text-red-500 text-xs mt-1">Champ requis</p>
+  <!-- Marque & Modèle — visible si bus simple OU édition -->
+  <div *ngIf="!createBusPack || isEditing" class="grid grid-cols-2 gap-4">
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Marque <span class="text-red-500">*</span></label>
+      <input type="text" [(ngModel)]="busForm.marque" placeholder="Ex: Mercedes"
+        [class]="submitted && !busForm.marque?.trim() ? 'border-red-300' : 'border-gray-300'"
+        class="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#1D9E75] outline-none">
+      <p *ngIf="submitted && !busForm.marque?.trim()" class="text-red-500 text-xs mt-1">Champ requis</p>
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Modèle <span class="text-red-500">*</span></label>
+      <input type="text" [(ngModel)]="busForm.modele" placeholder="Ex: Sprinter"
+        [class]="submitted && !busForm.modele?.trim() ? 'border-red-300' : 'border-gray-300'"
+        class="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#1D9E75] outline-none">
+      <p *ngIf="submitted && !busForm.modele?.trim()" class="text-red-500 text-xs mt-1">Champ requis</p>
+    </div>
   </div>
-  <div>
-    <label class="block text-sm font-medium text-gray-700 mb-1">Modèle <span class="text-red-500">*</span></label>
-    <input type="text" [(ngModel)]="busForm.modele" placeholder="Ex: Sprinter"
-      [class]="submitted && !busForm.modele?.trim() ? 'border-red-300' : 'border-gray-300'"
-      class="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#1D9E75] outline-none">
-    <p *ngIf="submitted && !busForm.modele?.trim()" class="text-red-500 text-xs mt-1">Champ requis</p>
-  </div>
-</div>
 
-<!-- Immatriculation & Capacité -->
-<div class="grid grid-cols-2 gap-4">
-  <div>
-    <label class="block text-sm font-medium text-gray-700 mb-1">Immatriculation <span class="text-red-500">*</span></label>
-    <input type="text" [(ngModel)]="busForm.immatriculation" placeholder="Ex: TUN-1234"
-      [class]="submitted && !busForm.immatriculation?.trim() ? 'border-red-300' : 'border-gray-300'"
-      class="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#1D9E75] outline-none">
-    <p *ngIf="submitted && !busForm.immatriculation?.trim()" class="text-red-500 text-xs mt-1">Champ requis</p>
+  <!-- Immatriculation & Capacité — visible si bus simple OU édition -->
+  <div *ngIf="!createBusPack || isEditing" class="grid grid-cols-2 gap-4">
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Immatriculation <span class="text-red-500">*</span></label>
+      <input type="text" [(ngModel)]="busForm.immatriculation" placeholder="Ex: TUN-1234"
+        [class]="submitted && !busForm.immatriculation?.trim() ? 'border-red-300' : 'border-gray-300'"
+        class="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#1D9E75] outline-none">
+      <p *ngIf="submitted && !busForm.immatriculation?.trim()" class="text-red-500 text-xs mt-1">Champ requis</p>
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Capacité <span class="text-red-500">*</span></label>
+      <input type="number" [(ngModel)]="busForm.capacite" min="1"
+        [class]="submitted && busForm.capacite <= 0 ? 'border-red-300' : 'border-gray-300'"
+        class="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#1D9E75] outline-none">
+      <p *ngIf="submitted && busForm.capacite <= 0" class="text-red-500 text-xs mt-1">Doit être supérieur à 0</p>
+    </div>
   </div>
-  <div>
-    <label class="block text-sm font-medium text-gray-700 mb-1">Capacité <span class="text-red-500">*</span></label>
-    <input type="number" [(ngModel)]="busForm.capacite" min="1"
-      [class]="submitted && busForm.capacite <= 0 ? 'border-red-300' : 'border-gray-300'"
-      class="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#1D9E75] outline-none">
-    <p *ngIf="submitted && busForm.capacite <= 0" class="text-red-500 text-xs mt-1">Doit être supérieur à 0</p>
-  </div>
-</div>
 
-<!-- Ligne -->
-<div class="grid grid-cols-2 gap-4">
-  <div>
-    <label class="block text-sm font-medium text-gray-700 mb-1">Départ <span class="text-red-500">*</span></label>
-    <input type="text" [(ngModel)]="busForm.depart" 
-      placeholder="Lieu de départ"
-      [class]="submitted && !busForm.depart?.trim() ? 'border-red-300' : 'border-gray-300'"
-      class="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#1D9E75] outline-none">
-    <p *ngIf="submitted && !busForm.depart?.trim()" class="text-red-500 text-xs mt-1">Champ requis</p>
-  </div>
-  <div>
-    <label class="block text-sm font-medium text-gray-700 mb-1">Arrivée <span class="text-red-500">*</span></label>
-    <input type="text" [(ngModel)]="busForm.arrivee" 
-      placeholder="Lieu d'arrivée"
-      [class]="submitted && !busForm.arrivee?.trim() ? 'border-red-300' : 'border-gray-300'"
-      class="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#1D9E75] outline-none">
-    <p *ngIf="submitted && !busForm.arrivee?.trim()" class="text-red-500 text-xs mt-1">Champ requis</p>
-  </div>
-</div>
-
-<!-- Heure & Durée -->
-<div class="grid grid-cols-2 gap-4">
-  <div>
-    <label class="block text-sm font-medium text-gray-700 mb-1">Heure de départ <span class="text-red-500">*</span></label>
-    <input type="time" [(ngModel)]="busForm.heureDepart"
-      [class]="submitted && !busForm.heureDepart?.trim() ? 'border-red-300' : 'border-gray-300'"
-      class="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#1D9E75] outline-none">
-    <p *ngIf="submitted && !busForm.heureDepart?.trim()" class="text-red-500 text-xs mt-1">Champ requis</p>
-  </div>
-  <div>
-    <label class="block text-sm font-medium text-gray-700 mb-1">Durée (minutes) <span class="text-red-500">*</span></label>
-    <input type="number" [(ngModel)]="busForm.dureeMinutes" min="1"
-      [class]="submitted && busForm.dureeMinutes <= 0 ? 'border-red-300' : 'border-gray-300'"
-      class="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#1D9E75] outline-none">
-    <p *ngIf="submitted && busForm.dureeMinutes <= 0" class="text-red-500 text-xs mt-1">Doit être supérieur à 0</p>
-  </div>
-</div>
-
-<!-- Jours en boutons -->
-<div>
-  <label class="block text-sm font-medium text-gray-700 mb-2">Jours disponibles <span class="text-red-500">*</span></label>
-  <div class="flex flex-wrap gap-2">
-    <button *ngFor="let jour of joursOptions" type="button"
-      (click)="toggleJour(jour)"
-      [class]="isJourSelected(jour) ? 'bg-[#1D9E75] text-white border-[#1D9E75]' : 'bg-white text-gray-700 border-gray-300 hover:border-[#1D9E75]'"
-      class="px-3 py-1.5 border rounded-lg text-sm transition">
-      {{ jour }}
-    </button>
-  </div>
-  <p *ngIf="submitted && joursSelectionnes.length === 0" class="text-red-500 text-xs mt-1">Sélectionnez au moins un jour</p>
-</div>
-        <!-- Carburant & Statut -->
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Type de carburant</label>
-            <select [(ngModel)]="busForm.typeCarburant"
-              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1D9E75] outline-none bg-white">
-              <option *ngFor="let t of typeCarburantOptions" [value]="t">{{ t }}</option>
+  <!-- Section Pack — visible seulement en création -->
+  <div *ngIf="!isEditing" class="rounded-lg border border-[#1D9E75]/30 bg-[#1D9E75]/5 p-4 space-y-3">
+    <label class="flex items-center gap-2 cursor-pointer text-sm font-medium text-[#1A1A2E]">
+      <input type="checkbox" [(ngModel)]="createBusPack" class="rounded border-gray-300" />
+      Créer un pack (plusieurs bus sur la même ligne)
+    </label>
+    <p class="text-xs text-gray-600">
+      Tous les bus du pack partagent la même ligne. Chaque bus a sa propre marque, modèle, immatriculation et capacité.
+    </p>
+    <div *ngIf="createBusPack" class="space-y-3">
+      <div *ngFor="let packBus of packBusList; let i = index"
+        class="bg-white border border-gray-200 rounded-lg p-3 space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-[#0F3460]">Bus {{ i + 1 }}</span>
+          <div class="flex items-center gap-2">
+            <select [(ngModel)]="packBus.statut"
+              class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-[#1D9E75] outline-none">
+              <option value="ACTIF">Actif</option>
+              <option value="INACTIF">Inactif (réserve)</option>
             </select>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Statut</label>
-            <select [(ngModel)]="busForm.statut"
-              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1D9E75] outline-none bg-white">
-              <option *ngFor="let s of statutOptions" [value]="s">{{ s }}</option>
-            </select>
+            <button type="button" (click)="removePackBus(i)" *ngIf="packBusList.length > 1"
+              class="p-1.5 text-red-400 hover:bg-red-50 rounded-lg transition">
+              <mat-icon class="icon-size-4" svgIcon="feather:trash-2"></mat-icon>
+            </button>
           </div>
         </div>
-<!-- Photo URL -->
-<div>
-  <label class="block text-sm font-medium text-gray-700 mb-1">Photo (URL)</label>
-  <input type="text" [(ngModel)]="busForm.photoUrl"
-    placeholder="https://images.unsplash.com/..."
-    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1D9E75] outline-none">
-  <div *ngIf="busForm.photoUrl" class="mt-2">
-    <img [src]="busForm.photoUrl" alt="Aperçu" class="h-24 w-full object-cover rounded-lg">
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-xs text-gray-500 mb-1">Marque</label>
+            <input type="text" [(ngModel)]="packBus.marque" placeholder="Ex: Mercedes"
+              class="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#1D9E75] outline-none">
+          </div>
+          <div>
+            <label class="block text-xs text-gray-500 mb-1">Modèle</label>
+            <input type="text" [(ngModel)]="packBus.modele" placeholder="Ex: Sprinter"
+              class="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#1D9E75] outline-none">
+          </div>
+          <div>
+            <label class="block text-xs text-gray-500 mb-1">Immatriculation</label>
+            <input type="text" [(ngModel)]="packBus.immatriculation" placeholder="Ex: TUN-1234"
+              class="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#1D9E75] outline-none">
+          </div>
+          <div>
+            <label class="block text-xs text-gray-500 mb-1">Capacité</label>
+            <input type="number" [(ngModel)]="packBus.capacite" min="1"
+              class="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#1D9E75] outline-none">
+          </div>
+        </div>
+      </div>
+      <button type="button" (click)="addPackBus()"
+        class="flex items-center gap-2 px-4 py-2 border border-dashed border-[#1D9E75] text-[#1D9E75] rounded-lg text-sm hover:bg-[#1D9E75]/5 transition w-full justify-center">
+        <mat-icon class="icon-size-4" svgIcon="feather:plus"></mat-icon>
+        Ajouter un bus au pack
+      </button>
+      <div class="flex gap-4 text-xs text-gray-500 pt-1">
+        <span><strong class="text-[#1D9E75]">{{ packBusActifCount }}</strong> actif(s)</span>
+        <span><strong class="text-gray-600">{{ packBusInactifCount }}</strong> inactif(s) (réserve)</span>
+      </div>
+    </div>
   </div>
+
+  <!-- Départ & Arrivée — TOUJOURS visible -->
+  <div class="grid grid-cols-2 gap-4">
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Départ <span class="text-red-500">*</span></label>
+      <input type="text" [(ngModel)]="busForm.depart" placeholder="Lieu de départ"
+        [class]="submitted && !busForm.depart?.trim() ? 'border-red-300' : 'border-gray-300'"
+        class="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#1D9E75] outline-none">
+      <p *ngIf="submitted && !busForm.depart?.trim()" class="text-red-500 text-xs mt-1">Champ requis</p>
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Arrivée <span class="text-red-500">*</span></label>
+      <input type="text" [(ngModel)]="busForm.arrivee" placeholder="Lieu d'arrivée"
+        [class]="submitted && !busForm.arrivee?.trim() ? 'border-red-300' : 'border-gray-300'"
+        class="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#1D9E75] outline-none">
+      <p *ngIf="submitted && !busForm.arrivee?.trim()" class="text-red-500 text-xs mt-1">Champ requis</p>
+    </div>
+  </div>
+
+  <!-- Heure & Durée — TOUJOURS visible -->
+  <div class="grid grid-cols-2 gap-4">
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Heure de départ <span class="text-red-500">*</span></label>
+      <input type="time" [(ngModel)]="busForm.heureDepart"
+        [class]="submitted && !busForm.heureDepart?.trim() ? 'border-red-300' : 'border-gray-300'"
+        class="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#1D9E75] outline-none">
+      <p *ngIf="submitted && !busForm.heureDepart?.trim()" class="text-red-500 text-xs mt-1">Champ requis</p>
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Durée (minutes) <span class="text-red-500">*</span></label>
+      <input type="number" [(ngModel)]="busForm.dureeMinutes" min="1"
+        [class]="submitted && busForm.dureeMinutes <= 0 ? 'border-red-300' : 'border-gray-300'"
+        class="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#1D9E75] outline-none">
+      <p *ngIf="submitted && busForm.dureeMinutes <= 0" class="text-red-500 text-xs mt-1">Doit être supérieur à 0</p>
+    </div>
+  </div>
+
+  <!-- Jours — TOUJOURS visible -->
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-2">Jours disponibles <span class="text-red-500">*</span></label>
+    <div class="flex flex-wrap gap-2">
+      <button *ngFor="let jour of joursOptions" type="button"
+        (click)="toggleJour(jour)"
+        [class]="isJourSelected(jour) ? 'bg-[#1D9E75] text-white border-[#1D9E75]' : 'bg-white text-gray-700 border-gray-300 hover:border-[#1D9E75]'"
+        class="px-3 py-1.5 border rounded-lg text-sm transition">
+        {{ jour }}
+      </button>
+    </div>
+    <p *ngIf="submitted && joursSelectionnes.length === 0" class="text-red-500 text-xs mt-1">Sélectionnez au moins un jour</p>
+  </div>
+
+  <!-- Carburant & Statut — TOUJOURS visible -->
+  <div class="grid grid-cols-2 gap-4">
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Type de carburant</label>
+      <select [(ngModel)]="busForm.typeCarburant"
+        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1D9E75] outline-none bg-white">
+        <option *ngFor="let t of typeCarburantOptions" [value]="t">{{ t }}</option>
+      </select>
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Statut</label>
+      <select [(ngModel)]="busForm.statut"
+        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1D9E75] outline-none bg-white">
+        <option *ngFor="let s of statutOptions" [value]="s">{{ s }}</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Photo URL — TOUJOURS visible -->
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">Photo (URL)</label>
+    <input type="text" [(ngModel)]="busForm.photoUrl"
+      placeholder="https://images.unsplash.com/..."
+      class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1D9E75] outline-none">
+    <div *ngIf="busForm.photoUrl" class="mt-2">
+      <img [src]="busForm.photoUrl" alt="Aperçu" class="h-24 w-full object-cover rounded-lg">
+    </div>
+  </div>
+
+  <div *ngIf="errorMessage" class="bg-red-50 text-red-600 p-3 rounded-lg text-sm">{{ errorMessage }}</div>
 </div>
 
-        <div *ngIf="errorMessage" class="bg-red-50 text-red-600 p-3 rounded-lg text-sm">{{ errorMessage }}</div>
-      </div>
-
-      <!-- Footer -->
+<!--Footer--->>
       <div class="flex gap-3 p-6 border-t border-gray-200">
         <button (click)="closeModal()"
           class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">

@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { BusService, Bus } from '../bus.service';
+import { BusService, Bus, BusPackRequest } from '../bus.service';
 import { CovoiturageService } from '../covoiturage.service';
+import { forkJoin } from 'rxjs';
+
 import { UserService } from '../../../../../services/user.service';
 
 type AdminSection = 'statistiques' | 'navettes' | 'reservations' | 'cadeaux';
@@ -28,6 +30,14 @@ interface Cadeau {
   image: string;
   icon: string;
 }
+// Ajouter cette interface en haut du fichier (avant le @Component)
+interface PackBusEntry {
+  statut: 'ACTIF' | 'INACTIF';
+  capacite: number;
+  marque: string;
+  modele: string;
+  immatriculation: string;
+}
 
 @Component({
   selector: 'app-covoiturage-admin',
@@ -47,8 +57,13 @@ export class CovoiturageAdminComponent implements OnInit {
   submitted = false;
   defaultPhotoUrl = 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=400';
 
-
+  /** Création groupée : 1+ bus actifs + bus inactifs (réserve) partageant le même pack. */
+ // NOUVEAU
+createBusPack = false;
+packBusList: PackBusEntry[] = [];
   busForm: Bus = this.emptyBus();
+
+
   navettes: Bus[] = [];
   /** Toutes les réservations navette (pour afficher les employés par bus) */
   reservationsNavette: any[] = [];
@@ -124,7 +139,7 @@ export class CovoiturageAdminComponent implements OnInit {
     return this.employesMap.get(String(id)) || `Employé ${String(id).slice(0, 8)}…`;
   }
 
-  /** Réservations actives / en attente pour ce bus (non annulées) */
+  /** Réservations actives, en attente ou en attente d'activation (non annulées) */
   reservantsPourBus(busId: string | undefined): { employeId: string; statut: string }[] {
     if (!busId || !this.reservationsNavette.length) return [];
     return this.reservationsNavette
@@ -149,37 +164,40 @@ export class CovoiturageAdminComponent implements OnInit {
     });
   }
 
- openModal(): void {
+openModal(): void {
   this.isEditing = false;
   this.joursSelectionnes = [];
   this.busForm = this.emptyBus();
+  this.createBusPack = false;
+  this.packBusList = [];          // ← remplace packActiveCount/packInactiveCount
   this.submitted = false;
   this.showModal = true;
 }
 
 openEditModal(bus: Bus): void {
-  console.log('Bus à modifier:', bus);
-  
-  this.isEditing = true;
-  this.busForm = { ...bus };
-  this.submitted = false;
-  
-  // S'assurer que la photo existe
-  if (!this.busForm.photoUrl) {
-    this.busForm.photoUrl = this.defaultPhotoUrl;
-  }
-  
-  this.busForm.depart = '';
-  this.busForm.arrivee = '';
-  
-  if (bus.ligne && bus.ligne.includes(' - ')) {
-    const [depart, arrivee] = bus.ligne.split(' - ');
-    this.busForm.depart = depart;
-    this.busForm.arrivee = arrivee;
-  }
-  
-  this.joursSelectionnes = bus.joursDisponibles ? bus.joursDisponibles.split(',').map(j => j.trim()) : [];
-  this.showModal = true;
+    console.log('Bus à modifier:', bus);
+    
+    this.isEditing = true;
+    this.busForm = { ...bus };
+    this.submitted = false;
+    
+    // S'assurer que la photo existe
+    if (!this.busForm.photoUrl) {
+        this.busForm.photoUrl = this.defaultPhotoUrl;
+    }
+    
+    // ✅ Extraire départ et arrivée depuis ligne
+    if (bus.ligne && bus.ligne.includes(' - ')) {
+        const [depart, arrivee] = bus.ligne.split(' - ');
+        this.busForm.depart = depart;
+        this.busForm.arrivee = arrivee;
+    } else {
+        this.busForm.depart = bus.ligne || '';
+        this.busForm.arrivee = '';
+    }
+    
+    this.joursSelectionnes = bus.joursDisponibles ? bus.joursDisponibles.split(',').map(j => j.trim()) : [];
+    this.showModal = true;
 }
 
   toggleJour(jour: string): void {
@@ -196,71 +214,191 @@ openEditModal(bus: Bus): void {
     return this.joursSelectionnes.includes(jour);
   }
 
-  isFormValid(): boolean {
-    return !!(
-      this.busForm.marque?.trim() &&
-      this.busForm.modele?.trim() &&
-      this.busForm.immatriculation?.trim() &&
-      this.busForm.capacite > 0 &&
-   this.busForm.depart?.trim() &&
-    this.busForm.arrivee?.trim() &&      this.busForm.heureDepart?.trim() &&
-      this.busForm.dureeMinutes > 0 &&
-      this.joursSelectionnes.length > 0
+isFormValid(): boolean {
+    const base = !!(
+        this.busForm.depart?.trim() &&
+        this.busForm.arrivee?.trim() &&
+        this.busForm.heureDepart?.trim() &&
+        this.busForm.dureeMinutes > 0 &&
+        this.joursSelectionnes.length > 0
     );
-  }
+
+    // Édition — seuls les champs communs + marque/modèle/immat/capacité
+    if (this.isEditing) {
+        return base && !!(
+            this.busForm.marque?.trim() &&
+            this.busForm.modele?.trim() &&
+            this.busForm.immatriculation?.trim() &&
+            this.busForm.capacite > 0
+        );
+    }
+
+    // Création pack
+    if (this.createBusPack) {
+        return base &&
+            this.packBusList.length >= 1 &&
+            this.packBusList.every(b =>
+                b.capacite > 0 &&
+                !!b.marque?.trim() &&
+                !!b.modele?.trim() &&
+                !!b.immatriculation?.trim()
+            ) &&
+            this.packBusList.some(b => b.statut === 'ACTIF') &&
+            this.packBusList.some(b => b.statut === 'INACTIF');
+    }
+
+    // Création bus simple
+    return base && !!(
+        this.busForm.marque?.trim() &&
+        this.busForm.modele?.trim() &&
+        this.busForm.immatriculation?.trim() &&
+        this.busForm.capacite > 0
+    );
+}
 emptyBus(): Bus {
   return {
     marque: '', modele: '', immatriculation: '',
-    capacite: 0, typeCarburant: 'DIESEL', ligne: '',
+    capacite: 0,  // ← garder 0
+    typeCarburant: 'DIESEL', ligne: '',
     depart: '', arrivee: '',
-    heureDepart: '', dureeMinutes: 0, joursDisponibles: '',
+    heureDepart: '', dureeMinutes: 0, // ← garder 0
+    joursDisponibles: '',
     statut: 'ACTIF',
     placesRestantes: 0,
     photoUrl: this.defaultPhotoUrl
   };
 }
 
-  saveBus(): void {
-  this.submitted = true;
-  
-  if (!this.isFormValid()) return;
-  
-  // S'assurer que la photo a une valeur
-  const photoUrlValue = this.busForm.photoUrl && this.busForm.photoUrl.trim() !== '' 
-    ? this.busForm.photoUrl 
-    : this.defaultPhotoUrl;
-  
-  // Concaténer départ et arrivée avec tiret
-  const busToSave = {
-    ...this.busForm,
-    ligne: `${this.busForm.depart} - ${this.busForm.arrivee}`,
-    placesRestantes: this.busForm.capacite,
-    photoUrl: photoUrlValue  // Ajoutez cette ligne explicitement
-  };
-  
-  if (this.isEditing && this.busForm.id) {
-    this.busService.update(this.busForm.id, busToSave).subscribe({
-      next: () => { 
-        this.loadBus(); 
-        this.closeModal(); 
-      },
-      error: (err) => { 
-        console.error('Erreur modification:', err);
-        this.errorMessage = 'Erreur lors de la modification'; 
-      }
+saveBus(): void {
+    this.submitted = true;
+    if (!this.isFormValid()) return;
+
+    const photoUrlValue = this.busForm.photoUrl?.trim() || this.defaultPhotoUrl;
+    const fullLigne = `${this.busForm.depart} - ${this.busForm.arrivee}`;
+
+    // ═══════════════════════════════
+    // CAS 1 : MODIFICATION
+    // ═══════════════════════════════
+    if (this.isEditing && this.busForm.id) {
+        const occupiedCount = this.reservantsPourBus(this.busForm.id).length;
+        const busToUpdate: Partial<Bus> = {
+            marque: this.busForm.marque,
+            modele: this.busForm.modele,
+            immatriculation: this.busForm.immatriculation,
+            capacite: this.busForm.capacite,
+            typeCarburant: this.busForm.typeCarburant,
+            ligne: fullLigne,
+            heureDepart: this.busForm.heureDepart,
+            dureeMinutes: this.busForm.dureeMinutes,
+            joursDisponibles: this.joursSelectionnes.join(','),
+            statut: this.busForm.statut,
+            placesRestantes: this.busForm.capacite - occupiedCount,
+            photoUrl: photoUrlValue
+        };
+        this.busService.update(this.busForm.id, busToUpdate).subscribe({
+            next: () => { this.loadBus(); this.closeModal(); },
+            error: (err) => {
+                console.error('Erreur modification:', err);
+                this.errorMessage = 'Erreur lors de la modification';
+            }
+        });
+
+    // ═══════════════════════════════
+    // CAS 2 : CRÉATION PACK
+    // ═══════════════════════════════
+    } else if (this.createBusPack && this.packBusList.length >= 1) {
+        const packId = crypto.randomUUID();
+        const requests = this.packBusList.map(packBus =>
+            this.busService.create({
+                marque: packBus.marque,
+                modele: packBus.modele,
+                immatriculation: packBus.immatriculation,
+                capacite: packBus.capacite,
+                placesRestantes: packBus.capacite,
+                statut: packBus.statut,
+                typeCarburant: this.busForm.typeCarburant,
+                ligne: fullLigne,
+                heureDepart: this.busForm.heureDepart,
+                dureeMinutes: this.busForm.dureeMinutes,
+                joursDisponibles: this.joursSelectionnes.join(','),
+                photoUrl: photoUrlValue,
+                packId: packId
+            })
+        );
+        forkJoin(requests).subscribe({
+            next: () => { this.loadBus(); this.closeModal(); },
+            error: (err) => {
+                console.error('Erreur création pack:', err);
+                this.errorMessage = 'Erreur lors de la création du pack';
+            }
+        });
+
+    // ═══════════════════════════════
+    // CAS 3 : CRÉATION BUS SIMPLE
+    // ═══════════════════════════════
+    } else {
+        const newBus: Partial<Bus> = {
+            marque: this.busForm.marque,
+            modele: this.busForm.modele,
+            immatriculation: this.busForm.immatriculation,
+            capacite: this.busForm.capacite,
+            placesRestantes: this.busForm.capacite,
+            typeCarburant: this.busForm.typeCarburant,
+            ligne: fullLigne,
+            heureDepart: this.busForm.heureDepart,
+            dureeMinutes: this.busForm.dureeMinutes,
+            joursDisponibles: this.joursSelectionnes.join(','),
+            statut: this.busForm.statut,
+            photoUrl: photoUrlValue
+        };
+        this.busService.create(newBus).subscribe({
+            next: () => { this.loadBus(); this.closeModal(); },
+            error: (err) => {
+                console.error('Erreur création:', err);
+                this.errorMessage = 'Erreur lors de la création';
+            }
+        });
+    }
+}
+
+get packBusActifCount(): number {
+  return this.packBusList.filter(b => b.statut === 'ACTIF').length;
+}
+
+get packBusInactifCount(): number {
+  return this.packBusList.filter(b => b.statut === 'INACTIF').length;
+}
+get busSansPack(): Bus[] {
+  return this.filteredNavettes.filter(b => !b.packId);
+}
+
+get busParPack(): { packId: string; buses: Bus[] }[] {
+  const map = new Map<string, Bus[]>();
+  this.filteredNavettes
+    .filter(b => !!b.packId)
+    .forEach(b => {
+      const key = b.packId!;
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(b);
     });
-  } else {
-    this.busService.create(busToSave).subscribe({
-      next: () => { 
-        this.loadBus(); 
-        this.closeModal(); 
-      },
-      error: (err) => { 
-        console.error('Erreur création:', err);
-        this.errorMessage = 'Erreur lors de la création'; 
-      }
-    });
-  }
+  return Array.from(map.entries()).map(([packId, buses]) => ({ packId, buses }));
+}
+
+countActifs(buses: Bus[]): number {
+  return buses.filter(b => b.statut === 'ACTIF').length;
+}
+addPackBus(): void {
+  this.packBusList.push({ 
+    statut: 'INACTIF', 
+    capacite: 0,
+    marque: '',
+    modele: '',
+    immatriculation: ''
+  });
+}
+
+removePackBus(index: number): void {
+  this.packBusList.splice(index, 1);
 }
 
   deleteBus(id: string): void {
@@ -287,6 +425,9 @@ emptyBus(): Bus {
     this.joursSelectionnes = [];
     this.busForm = this.emptyBus();
     this.errorMessage = '';
+        this.createBusPack = false;  // ← ajouter
+    this.packBusList = [];       // ← ajouter
+    this.submitted = false;      // ← ajouter
   }
 
   

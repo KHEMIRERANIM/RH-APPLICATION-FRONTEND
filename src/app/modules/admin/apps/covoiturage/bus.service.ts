@@ -16,9 +16,19 @@ export interface Bus {
   placesRestantes?: number;
   statut?: string;
   dateCreation?: string;
-    depart: string;      // Ajouter
+  depart: string;      // Ajouter
   arrivee: string;     // Ajouter
     photoUrl?: string; // ✅ Ajout
+  /** Même pack que d'autres bus (activation dynamique). */
+  packId?: string;
+
+}
+
+export interface BusPackRequest {
+  busData: Partial<Bus>;
+  activeCount: number;
+  inactiveCount: number;
+    busCapacities?: number[];  // ← ajouter cette ligne
 
 }
 
@@ -36,13 +46,19 @@ export class BusService {
     return this.http.get<Bus>(`${this.apiUrl}/${id}`);
   }
 
-  create(bus: Bus): Observable<Bus> {
-    return this.http.post<Bus>(this.apiUrl, bus);
+ create(bus: Partial<Bus>): Observable<Bus> {
+  return this.http.post<Bus>(this.apiUrl, bus);
+}
+
+update(id: string, bus: Partial<Bus>): Observable<Bus> {
+  return this.http.put<Bus>(`${this.apiUrl}/${id}`, bus);
+}
+
+  createPack(request: BusPackRequest): Observable<Bus[]> {
+    return this.http.post<Bus[]>(`${this.apiUrl}/pack`, request);
   }
 
-  update(id: string, bus: Bus): Observable<Bus> {
-    return this.http.put<Bus>(`${this.apiUrl}/${id}`, bus);
-  }
+  
 
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);

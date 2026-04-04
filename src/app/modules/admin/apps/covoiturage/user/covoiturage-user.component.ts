@@ -412,26 +412,33 @@ ecouterNotifications() {
           const notifType = String(
             typeof rawType === 'string' ? rawType : (rawType as any)?.name || rawType || ''
           ).toUpperCase();
-          if (notifType === 'ALTERNATIVES_DISPONIBLES' || notifType === 'ANNULATION_TRAJET') {
-            this.notificationAnnulation = {
-              ...notif,
-              titre: notif?.titre || 'Trajet annule',
-              message: notif?.message || notif?.contenu || 'Le conducteur a annule son trajet.',
-              trajetAnnuleId: notif?.trajetAnnuleId || notif?.trajetId || ''
-            };
-            this.showNotificationAnnulation = true;
-            this.trajetAnnuleId = this.notificationAnnulation.trajetAnnuleId;
-            this.reservationAnnuleeId = notif?.reservationId || this.getReservationIdByTrajetId(this.trajetAnnuleId);
-            if (this.trajetAnnuleId) {
-              this.chercherAlternatives(this.trajetAnnuleId);
-            }
-            this.loadMesReservations();
-            this.cdr.detectChanges();
-          } else if (notifType === 'CONFIRMATION_ALTERNATIVE') {
-            // Optionnel: Gérer la confirmation
-            this.loadMesReservations();
-            this.cdr.detectChanges();
-          }
+         if (notifType === 'ALTERNATIVES_DISPONIBLES' || notifType === 'ANNULATION_TRAJET') {
+    this.notificationAnnulation = {
+        ...notif,
+        titre: notif?.titre || 'Trajet annule',
+        message: notif?.message || notif?.contenu || 'Le conducteur a annule son trajet.',
+        trajetAnnuleId: notif?.trajetAnnuleId || notif?.trajetId || ''
+    };
+    this.showNotificationAnnulation = true;
+    this.trajetAnnuleId = this.notificationAnnulation.trajetAnnuleId;
+    this.reservationAnnuleeId = notif?.reservationId || this.getReservationIdByTrajetId(this.trajetAnnuleId);
+    if (this.trajetAnnuleId) {
+        this.chercherAlternatives(this.trajetAnnuleId);
+    }
+    this.loadMesReservations();
+    this.cdr.detectChanges();
+} else if (notifType === 'CONFIRMATION_ALTERNATIVE') {
+    this.loadMesReservations();
+    this.cdr.detectChanges();
+} else if (notifType === 'BUS_ACTIVE') {
+    // ✅ Notification quand l'admin active un bus
+    console.log('📢 Bus activé !', notif);
+    this.showToast('✅ Bus activé !', notif.message || 'Votre réservation est maintenant confirmée');
+    this.loadMyShuttleReservations();
+    this.loadShuttles();
+    this.cdr.detectChanges();
+}
+          
         }
       );
     }
@@ -1053,7 +1060,18 @@ deleteTrajet(id?: string): void {
     if (!this.employeId) return;
     this.covoiturageService.getReservationsNavetteByEmploye(this.employeId).subscribe({
       next: (data) => {
-        this.myShuttleReservations = data;
+        this.myShuttleReservations = (data || []).map((r: any) => {
+          const bus = this.shuttles.find(s => s.id === r.busId);
+          const statut = typeof r.statut === 'string' ? r.statut : (r.statut?.name || '');
+          return {
+            ...r,
+            statut,
+            shuttleId: r.busId,
+            shuttleName: bus ? `${bus.marque} ${bus.modele}` : (r.ligne || 'Navette'),
+            route: bus?.ligne || r.ligne,
+            days: (r.joursSelectionnes || '').split(',').map((d: string) => d.trim()).filter(Boolean)
+          };
+        });
         this.cdr.detectChanges();
       },
       error: (err) => console.error('Erreur', err)
@@ -1072,6 +1090,7 @@ deleteTrajet(id?: string): void {
       next: (data) => {
         this.shuttles = data;
         this.isLoadingShuttles = false;
+        this.loadMyShuttleReservations();
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -1083,7 +1102,8 @@ deleteTrajet(id?: string): void {
   }
 
   get filteredShuttles() {
-    return this.shuttles.filter(s => {
+    // 1. Filtrage initial (recherche, départ, arrivée, heure)
+    const filteredBase = this.shuttles.filter(s => {
       const matchSearch = !this.shuttleSearchTerm ||
         s.ligne?.toLowerCase().includes(this.shuttleSearchTerm.toLowerCase()) ||
         s.marque?.toLowerCase().includes(this.shuttleSearchTerm.toLowerCase()) ||
@@ -1100,6 +1120,34 @@ deleteTrajet(id?: string): void {
 
       return matchSearch && matchDepart && matchArrivee && matchHeure;
     });
+
+    // 2. Logique de substitution renforcée
+    return filteredBase.filter(s => {
+      // Identifier le pack (via packId ou ligne par défaut)
+      const packBuses = this.shuttles.filter(b => 
+        (s.packId && b.packId === s.packId) || 
+        (!s.packId && b.ligne === s.ligne)
+      );
+
+      // S'il n'y a qu'un bus ou pas de pack détecté, on l'affiche
+      if (packBuses.length <= 1) return true;
+
+      // Chercher le bus actif de ce pack
+      const activeBus = packBuses.find(b => b.statut === 'ACTIF');
+
+      if (activeBus) {
+        const isActiveFull = (activeBus.placesRestantes || 0) === 0;
+        if (isActiveFull) {
+          // Bus actif plein → on n'affiche que le bus de réserve (INACTIF)
+          return s.statut === 'INACTIF';
+        } else {
+          // Bus actif disponible → on n'affiche que le bus actif
+          return s.statut === 'ACTIF';
+        }
+      }
+      
+      return true; // Fallback
+    });
   }
 
   rechercherNavettes() {
@@ -1107,8 +1155,63 @@ deleteTrajet(id?: string): void {
   }
 
   estDejaReserveNavette(shuttleId: string): boolean {
-    return this.myShuttleReservations.some(r => r.shuttleId === shuttleId);
+    return this.myShuttleReservations.some(
+      r => r.shuttleId === shuttleId && String(r.statut || '').toUpperCase() !== 'ANNULE'
+    );
   }
+
+  // Méthode pour savoir si un bus fait partie d'un pack (basé sur la ligne)
+estDansUnPack(shuttle: any): boolean {
+    // Cherche un autre bus avec la même ligne
+    return this.shuttles.some(s => 
+        s.id !== shuttle.id && 
+        s.ligne === shuttle.ligne
+    );
+}
+
+navetteReserveDisabled(shuttle: any): boolean {
+    if (this.estDejaReserveNavette(shuttle.id)) return true;
+    
+    // INACTIF mais fait partie d'un pack → cliquable (Réserver)
+    if (shuttle.statut === 'INACTIF') {
+        if (this.estDansUnPack(shuttle)) {
+            return false;  // ← cliquable
+        }
+        return true;
+    }
+    
+    if (shuttle.statut !== 'ACTIF') return true;
+    
+    // ACTIF complet mais fait partie d'un pack → cliquable (Liste d'attente)
+    if ((shuttle.placesRestantes ?? 0) === 0) {
+        if (this.estDansUnPack(shuttle)) {
+            return false;  // ← cliquable
+        }
+        return true;
+    }
+    
+    return false;
+}
+
+navetteReserveLabel(shuttle: any): string {
+    if (this.estDejaReserveNavette(shuttle.id)) return 'Déjà réservé';
+    
+    // INACTIF dans un pack → Réserver
+    if (shuttle.statut === 'INACTIF' && this.estDansUnPack(shuttle)) {
+        return 'Réserver';
+    }
+    
+    if (shuttle.statut !== 'ACTIF') return 'Indisponible';
+    
+    // ACTIF complet dans un pack → Liste d'attente
+    if ((shuttle.placesRestantes ?? 0) === 0 && this.estDansUnPack(shuttle)) {
+        return 'Liste d\'attente';
+    }
+    
+    if ((shuttle.placesRestantes ?? 0) === 0) return 'Complet';
+    
+    return 'Réserver';
+}
 
   reserverNavette(shuttle: any) {
     const jours = this.selectedNavetteDays[shuttle.id] || [];
@@ -1129,12 +1232,19 @@ deleteTrajet(id?: string): void {
       next: (res: any) => {
         this.loadMyShuttleReservations();  // recharger depuis le backend
         this.loadShuttles();               // mettre à jour les places restantes
-        this.selectedNavetteDays[shuttle.id] = []; alert('Réservation effectuée avec succès !');
+        this.selectedNavetteDays[shuttle.id] = [];
+        const st = typeof res?.statut === 'string' ? res.statut : res?.statut?.name;
+        const okMsg = st === 'EN_ATTENTE_ACTIVATION'
+          ? 'Vous êtes en liste d\'attente : le bus est complet. L\'admin sera alerté pour activer un bus de réserve uniquement lorsqu\'il y aura au moins autant d\'employés en attente que la moitié des places du bus de réserve.'
+          : 'Réservation effectuée avec succès !';
+        alert(okMsg);
         this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Erreur réservation', err);
-        alert('Erreur lors de la réservation : ' + (err.error?.message || err.message));
+        const body = err?.error;
+        const msg = typeof body === 'string' ? body : (body?.message || err?.message || 'Erreur inconnue');
+        alert('Erreur lors de la réservation : ' + msg);
       }
     });
   }
@@ -1489,6 +1599,10 @@ deleteTrajet(id?: string): void {
       setTimeout(() => this.initLeaflet(), 100);
     }
   }
+  showToast(title: string, message: string) {
+    // Utilisez alert pour simplifier, ou remplacez par votre système de notification
+    alert(title + '\n' + message);
+}
 
   ngOnDestroy() {
     if (this.map) {
@@ -1501,6 +1615,7 @@ deleteTrajet(id?: string): void {
     if (this.notifStompClient) this.notifStompClient.deactivate();
 
   }
+  
 
   switchSection(section: 'utilises' | 'proposes' | 'recompenses') {
     this.activeSection = section;

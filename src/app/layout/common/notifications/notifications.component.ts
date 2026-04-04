@@ -59,7 +59,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
                 // Si les notifications ont déjà été chargées, on met à jour les descriptions avec les noms
                 if (this.notifications) {
                     this.notifications = this.notifications.map(notif => {
-                        if (notif.type === 'DEMANDE_CONFIRMATION' || (notif.expediteurId && notif.type !== 'ALTERNATIVES_DISPONIBLES' && notif.type !== 'ANNULATION_TRAJET')) {
+                        if (notif.type === 'DEMANDE_CONFIRMATION' || (notif.expediteurId && notif.type !== 'ALTERNATIVES_DISPONIBLES' && notif.type !== 'ANNULATION_TRAJET' && notif.type !== 'ACTIVATION_BUS')) {
                             const nom = this._getEmployeeName(notif.expediteurId);
                             notif.description = notif.contenu ? `${nom} : ${notif.contenu}` : `Demande de ${nom}`;
                         }
@@ -80,7 +80,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
             .subscribe((notifications: Notification[]) => {
                 // Update descriptions with names if backend notification
                 const processed = notifications.map(notif => {
-                    if (notif.type === 'DEMANDE_CONFIRMATION' || (notif.expediteurId && notif.type !== 'ALTERNATIVES_DISPONIBLES' && notif.type !== 'ANNULATION_TRAJET')) {
+                    if (notif.type === 'DEMANDE_CONFIRMATION' || (notif.expediteurId && notif.type !== 'ALTERNATIVES_DISPONIBLES' && notif.type !== 'ANNULATION_TRAJET' && notif.type !== 'ACTIVATION_BUS')) {
                         const nom = this._getEmployeeName(notif.expediteurId);
                         notif.description = notif.contenu ? `${nom} : ${notif.contenu}` : `Demande de ${nom}`;
                     }

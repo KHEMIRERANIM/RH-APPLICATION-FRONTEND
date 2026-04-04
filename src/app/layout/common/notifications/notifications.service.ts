@@ -1,19 +1,112 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, ReplaySubject, of } from 'rxjs';
+import { Observable, ReplaySubject, forkJoin, of } from 'rxjs';
 import { Notification } from 'app/layout/common/notifications/notifications.types';
 import { map, switchMap, take, tap, catchError } from 'rxjs/operators';
+import { Client } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
+import { getWsTrackingSockJsUrl } from 'src/environments/environment';
+
+const NOTIF_API = 'http://10.188.81.174:8081/api/notifications';
 
 @Injectable({
     providedIn: 'root'
 })
 export class NotificationsService {
     private _notifications: ReplaySubject<Notification[]> = new ReplaySubject<Notification[]>(1);
+    private _stomp?: Client;
+    private _stompStarted = false;
 
     /**
      * Constructor
      */
     constructor(private _httpClient: HttpClient) {
+    }
+
+    private mapBackendRow(bn: any): Notification {
+        const t = typeof bn.type === 'string' ? bn.type : (bn.type?.name || String(bn.type || ''));
+        let title = 'Nouvelle notification';
+        if (t === 'DEMANDE_CONFIRMATION') title = 'Demande de réservation';
+        else if (t === 'RESERVATION') title = 'Mise à jour réservation';
+        else if (t === 'ALTERNATIVES_DISPONIBLES' || t === 'ANNULATION_TRAJET') title = 'Trajet annulé';
+        else if (t === 'ACTIVATION_BUS') title = 'Activation bus de réserve';
+        let icon = 'heroicons_outline:bell';
+        if (t === 'DEMANDE_CONFIRMATION') icon = 'heroicons_outline:question-mark-circle';
+        else if (t === 'ALTERNATIVES_DISPONIBLES' || t === 'ANNULATION_TRAJET') icon = 'heroicons_outline:arrow-path';
+        else if (t === 'ACTIVATION_BUS') icon = 'heroicons_outline:truck';
+        const n: Notification = {
+            id: bn.id,
+            icon,
+            title,
+            description: bn.contenu || 'Nouvelle notification système',
+            time: bn.dateCreation || new Date().toISOString(),
+            read: bn.lu || false,
+            type: t,
+            reservationId: bn.reservationId,
+            trajetId: bn.trajetId,
+            trajetAnnuleId: bn.trajetAnnuleId || bn.trajetId,
+            expediteurId: bn.expediteurId,
+            destinataireId: bn.destinataireId,
+            contenu: bn.contenu
+        };
+        if (t === 'ACTIVATION_BUS') {
+            n.link = '/apps/covoiturage/admin';
+            n.useRouter = true;
+        }
+        return n;
+    }
+
+    private mergeById(a: Notification[], b: Notification[]): Notification[] {
+        const map = new Map<string, Notification>();
+        [...a, ...b].forEach(n => {
+            if (n.id && !map.has(n.id)) map.set(n.id, n);
+        });
+        return Array.from(map.values()).sort((x, y) =>
+            String(y.time).localeCompare(String(x.time)));
+    }
+
+    private ensureStomp(localUser: { id: string; role?: string }): void {
+        if (this._stompStarted) return;
+        this._stompStarted = true;
+        const wsUrl = getWsTrackingSockJsUrl();
+        const token = localStorage.getItem('accessToken');
+        const sockJsUrl = token ? `${wsUrl}?access_token=${encodeURIComponent(token)}` : wsUrl;
+        this._stomp = new Client({
+            webSocketFactory: () => new SockJS(sockJsUrl) as any,
+            connectHeaders: token ? { Authorization: `Bearer ${token}` } : {},
+            reconnectDelay: 5000,
+            onConnect: () => {
+                this._stomp!.subscribe(`/topic/notifications/${localUser.id}`, (message: { body: string }) => {
+                    try {
+                        const row = JSON.parse(message.body);
+                        const mapped = this.mapBackendRow(row);
+                        this._notifications.pipe(take(1)).subscribe((cur) => {
+                            if (!cur.some(c => c.id === mapped.id)) {
+                                this._notifications.next(this.mergeById([mapped], cur));
+                            }
+                        });
+                    } catch {
+                        /* ignore */
+                    }
+                });
+                if (localUser.role === 'ADMIN') {
+                    this._stomp!.subscribe('/topic/notifications/ADMIN', (message: { body: string }) => {
+                        try {
+                            const row = JSON.parse(message.body);
+                            const mapped = this.mapBackendRow(row);
+                            this._notifications.pipe(take(1)).subscribe((cur) => {
+                                if (!cur.some(c => c.id === mapped.id)) {
+                                    this._notifications.next(this.mergeById([mapped], cur));
+                                }
+                            });
+                        } catch {
+                            /* ignore */
+                        }
+                    });
+                }
+            }
+        });
+        this._stomp.activate();
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -46,38 +139,25 @@ export class NotificationsService {
 
         try {
             const localUser = JSON.parse(localUserStr);
-            return this._httpClient.get<any[]>(`http://10.188.81.174:8081/api/notifications/destinataire/${localUser.id}/non-lues`).pipe(
-                map(backendNotifs => backendNotifs.map(bn => {
-                    const t = typeof bn.type === 'string' ? bn.type : (bn.type?.name || String(bn.type || ''));
-                    let title = 'Nouvelle notification';
-                    if (t === 'DEMANDE_CONFIRMATION') title = 'Demande de réservation';
-                    else if (t === 'RESERVATION') title = 'Mise à jour réservation';
-                    else if (t === 'ALTERNATIVES_DISPONIBLES' || t === 'ANNULATION_TRAJET') title = 'Trajet annulé';
-                    let icon = 'heroicons_outline:bell';
-                    if (t === 'DEMANDE_CONFIRMATION') icon = 'heroicons_outline:question-mark-circle';
-                    else if (t === 'ALTERNATIVES_DISPONIBLES' || t === 'ANNULATION_TRAJET') icon = 'heroicons_outline:arrow-path';
-                    return {
-                    id: bn.id,
-                    icon,
-                    title,
-                    description: bn.contenu || 'Nouvelle notification système',
-                    time: bn.dateCreation || new Date().toISOString(),
-                    read: bn.lu || false,
-                    type: t,
-                    reservationId: bn.reservationId,
-                    trajetId: bn.trajetId,
-                    trajetAnnuleId: bn.trajetAnnuleId || bn.trajetId,
-                    expediteurId: bn.expediteurId,
-                    destinataireId: bn.destinataireId,
-                    contenu: bn.contenu
-                    };
-                })),
+            const user$ = this._httpClient.get<any[]>(`${NOTIF_API}/destinataire/${localUser.id}/non-lues`).pipe(
                 catchError((error) => {
-                    console.error("ERREUR DE CHARGEMENT BACKEND NOTIFICATIONS: Veuillez vérifier que votre NotificationController existe et répond bien sur l'URL: http://10.188.81.174:8081/api/notifications/employe/{id}/non-lues", error);
+                    console.error('Chargement notifications utilisateur', error);
                     return of([]);
                 }),
+                map(rows => (rows || []).map(bn => this.mapBackendRow(bn)))
+            );
+            const admin$ = localUser.role === 'ADMIN'
+                ? this._httpClient.get<any[]>(`${NOTIF_API}/destinataire/ADMIN/non-lues`).pipe(
+                    catchError(() => of([])),
+                    map(rows => (rows || []).map(bn => this.mapBackendRow(bn)))
+                )
+                : of([] as Notification[]);
+
+            return forkJoin({ user: user$, admin: admin$ }).pipe(
+                map(({ user, admin }) => this.mergeById(user, admin)),
                 tap((notifications) => {
                     this._notifications.next(notifications);
+                    this.ensureStomp(localUser);
                 })
             );
         } catch (e) {
@@ -122,7 +202,7 @@ export class NotificationsService {
             switchMap(notifications => {
                 // If backend notification, assume we can hit the marquer-lu endpoint
                 if (notification.type) {
-                    return this._httpClient.put<Notification>(`http://10.188.81.174:8081/api/notifications/${id}/lire`, {}).pipe(
+                    return this._httpClient.put<Notification>(`${NOTIF_API}/${id}/lire`, {}).pipe(
                         map((backendNotif: any) => {
                             const updatedNotification = { ...notification, read: true };
                             const index = notifications.findIndex(item => item.id === id);
@@ -161,7 +241,7 @@ export class NotificationsService {
                 let request$: Observable<boolean>;
                 
                 if (targetNode?.type) {
-                    request$ = this._httpClient.delete<boolean>(`http://10.188.81.174:8081/api/notifications/${id}`).pipe(
+                    request$ = this._httpClient.delete<boolean>(`${NOTIF_API}/${id}`).pipe(
                         map(() => true),
                         catchError(() => of(false))
                     );
@@ -194,7 +274,15 @@ export class NotificationsService {
                 if (localUserStr) {
                     try {
                         const localUser = JSON.parse(localUserStr);
-                        return this._httpClient.put<boolean>(`http://10.188.81.174:8081/api/notifications/destinataire/${localUser.id}/lire-tout`, {}).pipe(
+                        const userMark$ = this._httpClient.put<void>(`${NOTIF_API}/destinataire/${localUser.id}/lire-tout`, {}).pipe(
+                            catchError(() => of(undefined))
+                        );
+                        const adminMark$ = localUser.role === 'ADMIN'
+                            ? this._httpClient.put<void>(`${NOTIF_API}/destinataire/ADMIN/lire-tout`, {}).pipe(
+                                catchError(() => of(undefined))
+                            )
+                            : of(undefined);
+                        return forkJoin([userMark$, adminMark$]).pipe(
                             map(() => {
                                 notifications.forEach((notification, index) => {
                                     notifications[index].read = true;

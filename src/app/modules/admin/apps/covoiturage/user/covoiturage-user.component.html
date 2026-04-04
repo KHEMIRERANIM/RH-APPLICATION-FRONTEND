@@ -430,13 +430,17 @@
                 </div>
               </div>
 
-              <button (click)="reserverNavette(shuttle)"
-                [disabled]="estDejaReserveNavette(shuttle.id) || shuttle.placesRestantes === 0 || shuttle.statut !== 'ACTIF'"
-                class="w-full py-2.5 rounded-lg font-semibold transition-all"
-                [ngClass]="estDejaReserveNavette(shuttle.id) ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : (shuttle.placesRestantes === 0 || shuttle.statut !== 'ACTIF') ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-[#1D9E75] text-white hover:bg-[#178a66]'">
-                {{ estDejaReserveNavette(shuttle.id) ? 'Déjà réservé' : (shuttle.placesRestantes === 0 ? 'Complet' :
-                'Réserver') }}
-              </button>
+             <button 
+    (click)="reserverNavette(shuttle)"
+    [disabled]="navetteReserveDisabled(shuttle)"
+    class="w-full py-2.5 rounded-lg font-semibold transition-all"
+    [ngClass]="{
+        'bg-gray-200 text-gray-400 cursor-not-allowed': navetteReserveDisabled(shuttle),
+        'bg-[#F5A623] text-white hover:bg-[#e09615]': !navetteReserveDisabled(shuttle) && shuttle.placesRestantes === 0 && shuttle.packId,
+        'bg-[#1D9E75] text-white hover:bg-[#178a66]': !navetteReserveDisabled(shuttle) && !(shuttle.placesRestantes === 0 && shuttle.packId)
+    }">
+    {{ navetteReserveLabel(shuttle) }}
+</button>
             </div>
           </div>
         </div>
@@ -458,7 +462,13 @@
                   <mat-icon class="text-white icon-size-7" svgIcon="feather:truck"></mat-icon>
                 </div>
                 <div>
-                  <p class="text-[#1A1A2E] font-medium">{{ reservation.shuttleName }}</p>
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <p class="text-[#1A1A2E] font-medium">{{ reservation.shuttleName }}</p>
+                    <span class="text-xs px-2 py-0.5 rounded-full font-medium"
+                      [ngClass]="reservation.statut === 'CONFIRME' ? 'bg-[#1D9E75] text-white' : (reservation.statut === 'EN_ATTENTE_ACTIVATION' ? 'bg-orange-500 text-white' : (reservation.statut === 'EN_ATTENTE' ? 'bg-yellow-500 text-white' : 'bg-red-500 text-white'))">
+                      {{ reservation.statut === 'CONFIRME' ? 'Confirmée' : (reservation.statut === 'EN_ATTENTE_ACTIVATION' ? 'Attente activation bus' : (reservation.statut === 'EN_ATTENTE' ? 'En attente' : 'Annulée')) }}
+                    </span>
+                  </div>
                   <div class="flex items-center gap-2 text-base text-gray-600 mt-1">
                     <mat-icon class="icon-size-5" svgIcon="feather:map-pin"></mat-icon>
                     <span>{{ reservation.route }}</span>
@@ -474,8 +484,7 @@
                   <span *ngFor="let day of reservation.days"
                     class="px-2 py-1 bg-[#0F3460] text-white text-sm rounded font-medium">{{ day }}</span>
                 </div>
-                <!-- AJOUTE CE BOUTON -->
-                <button (click)="openTracking(reservation.busId, false)" class="flex items-center gap-2 px-4 py-2 bg-[#0F3460] 
+                <button *ngIf="reservation.statut !== 'EN_ATTENTE_ACTIVATION'" (click)="openTracking(reservation.busId, false)" class="flex items-center gap-2 px-4 py-2 bg-[#0F3460] 
                text-white rounded-lg hover:bg-[#0a2442] transition font-medium">
                   📍 Suivre en direct
                 </button>
