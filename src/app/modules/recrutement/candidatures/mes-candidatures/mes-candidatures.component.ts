@@ -109,8 +109,4 @@ export class MesCandidaturesComponent implements OnInit {
     link.click();
     URL.revokeObjectURL(url);
   }
-
-  rejoindreMeet(lienVisio: string): void {
-    window.open(lienVisio, '_blank');
-  }
 }

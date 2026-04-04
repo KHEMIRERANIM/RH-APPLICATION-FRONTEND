@@ -14,6 +14,8 @@ export class PlanifierEntretienComponent implements OnInit {
 
   form: FormGroup;
   candidature: Candidature | null = null;
+  entretienId: string | null = null;
+  isEditMode = false;
   loading = false;
   submitted = false;
   meetLinkCreated = false;
@@ -41,14 +43,42 @@ export class PlanifierEntretienComponent implements OnInit {
       dateHeure:     ['', Validators.required],
       dureeMinutes:  [60, [Validators.required, Validators.min(15)]],
       lieu:          [''],
-      // ✅ PAS de lienVisio ici — généré automatiquement par le backend
     });
 
-    if (candidatureId) {
+    this.entretienId = this.route.snapshot.paramMap.get('id');
+    this.isEditMode = !!this.entretienId;
+
+    if (this.entretienId) {
+      this.loadEntretien(this.entretienId);
+    } else if (candidatureId) {
       this.candidatureService.getCandidatureById(candidatureId).subscribe({
         next: (c) => this.candidature = c,
       });
     }
+  }
+
+  // ✅ Une seule méthode loadEntretien
+  private loadEntretien(id: string): void {
+    this.loading = true;
+    this.entretienService.getEntretienById(id).subscribe({
+      next: (entretien) => {
+        this.loading = false;
+        this.form.patchValue({
+          candidatureId: entretien.candidatureId,
+          recruteurId:   entretien.recruteurId,
+          type:          entretien.type,
+          dateHeure:     entretien.dateHeure,
+          dureeMinutes:  entretien.dureeMinutes,
+          lieu:          entretien.lieu,
+        });
+        this.meetLinkCreated = entretien.type === 'VISIO' && !!entretien.lienVisio;
+        this.meetLink = entretien.lienVisio || '';
+      },
+      error: () => {
+        this.loading = false;
+        this.errorMsg = 'Impossible de charger l\'entretien.';
+      },
+    });
   }
 
   get showLieu(): boolean {
@@ -64,7 +94,6 @@ export class PlanifierEntretienComponent implements OnInit {
     this.loading = true;
     this.errorMsg = '';
 
-    // ✅ N'envoie PAS lienVisio — le backend le génère automatiquement
     const payload = {
       candidatureId: this.form.value.candidatureId,
       recruteurId:   this.form.value.recruteurId,
@@ -72,14 +101,17 @@ export class PlanifierEntretienComponent implements OnInit {
       dateHeure:     this.form.value.dateHeure,
       dureeMinutes:  this.form.value.dureeMinutes,
       lieu:          this.form.value.lieu || null,
-      lienVisio:     null, // ← null pour forcer la génération backend
+      lienVisio:     null, // ✅ null pour forcer génération backend
     };
 
-    this.entretienService.planifierEntretien(payload).subscribe({
+    const request$ = this.isEditMode && this.entretienId
+      ? this.entretienService.modifierEntretien(this.entretienId, payload)
+      : this.entretienService.planifierEntretien(payload);
+
+    request$.subscribe({
       next: (entretien) => {
         this.loading = false;
         this.submitted = true;
-        // Récupère le lien Meet généré par le backend
         if (entretien.lienVisio) {
           this.meetLinkCreated = true;
           this.meetLink = entretien.lienVisio;

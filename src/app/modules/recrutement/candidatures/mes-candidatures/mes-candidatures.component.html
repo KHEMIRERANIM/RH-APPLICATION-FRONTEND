@@ -84,14 +84,16 @@
                 </div>
 
                 <!-- Bouton Rejoindre Meet -->
-                <button *ngIf="e.type === 'VISIO' && e.lienVisio && e.statut === 'PLANIFIE'"
+                <a *ngIf="e.type === 'VISIO' && e.lienVisio && e.statut === 'PLANIFIE'"
                   mat-flat-button
                   class="bg-green-500 text-white text-sm"
-                  (click)="rejoindreMeet(e.lienVisio)"
+                  [href]="e.lienVisio"
+                  target="_blank"
+                  rel="noopener"
                   matTooltip="Rejoindre Google Meet">
                   <mat-icon class="icon-size-4 mr-1">videocam</mat-icon>
                   Rejoindre Meet
-                </button>
+                </a>
 
                 <!-- Bouton Télécharger entretien -->
                 <button mat-stroked-button

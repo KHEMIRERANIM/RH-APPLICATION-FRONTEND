@@ -136,10 +136,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.router.navigate(['/recrutement/admin/entretiens/modifier', entretien.id]);
   }
 
-  rejoindreMeet(lienVisio: string): void {
-    window.open(lienVisio, '_blank');
-  }
-
   private checkEntretienAlerts(): void {
     const now = new Date().getTime();
     const prochainEntretien = this.tousEntretiens.find(entretien => {
