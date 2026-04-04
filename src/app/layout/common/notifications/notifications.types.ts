@@ -16,6 +16,7 @@ export interface Notification
     trajetId?: string;
     reservationId?: string;
     type?: string;
+    trajetAnnuleId?: string;
     contenu?: string;
     lu?: boolean;
     dateCreation?: string;

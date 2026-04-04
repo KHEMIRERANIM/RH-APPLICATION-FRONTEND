@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://10.90.222.174:8081/api',
+  apiUrl: 'http://10.188.81.174:8081/api',
   wsTrackingUrl: '' as string
 };
 

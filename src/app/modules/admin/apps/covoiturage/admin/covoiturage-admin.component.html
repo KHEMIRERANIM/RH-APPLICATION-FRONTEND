@@ -240,6 +240,20 @@
             </div>
           </div>
 
+          <div *ngIf="reservantsPourBus(bus.id!).length > 0" class="bg-[#0F3460]/5 rounded-lg p-3 border border-[#0F3460]/10">
+            <p class="text-xs font-semibold text-[#0F3460] mb-2">Employés réservés</p>
+            <ul class="space-y-1.5 max-h-28 overflow-y-auto">
+              <li *ngFor="let r of reservantsPourBus(bus.id!)" class="flex items-center justify-between gap-2 text-sm">
+                <span class="text-[#1A1A2E] truncate">{{ getNomEmploye(r.employeId) }}</span>
+                <span class="text-xs shrink-0 px-2 py-0.5 rounded-full"
+                  [ngClass]="r.statut === 'CONFIRME' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-900'">
+                  {{ r.statut === 'CONFIRME' ? 'Confirmé' : 'En attente' }}
+                </span>
+              </li>
+            </ul>
+          </div>
+          <p *ngIf="reservantsPourBus(bus.id!).length === 0" class="text-xs text-gray-400 italic">Aucune réservation active sur ce bus.</p>
+
           <div class="flex gap-2 pt-2 border-t border-gray-100">
             <button (click)="openEditModal(bus)"
               class="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gray-50 text-[#1A1A2E] rounded-lg hover:bg-gray-100 transition">

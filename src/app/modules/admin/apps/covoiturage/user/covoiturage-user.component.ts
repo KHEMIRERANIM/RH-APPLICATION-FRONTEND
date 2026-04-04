@@ -3,9 +3,16 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CovoiturageService, Vehicule, Trajet, ReservationResponse, ReservationRequest } from '../covoiturage.service';
 import { UserService, Employee } from '../../../../../services/user.service';
+import { ActivatedRoute } from '@angular/router';
+import { Client } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
+import { getWsTrackingSockJsUrl as getWsTrackingSockJsUrlFromEnv } from '../../../../../../environments/environment';
+import { forkJoin, of, firstValueFrom } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 // Leaflet loaded via CDN
 declare var L: any;
+
 
 @Component({
   selector: 'app-covoiturage-user',
@@ -179,6 +186,24 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     this.trackingVehiculeId = '';
   }
 
+  annulerEtNotifierPassagers(id?: string): void {
+  if (!id) return;
+  if (!confirm('Annuler ce trajet ? Tous les passagers seront notifiés !')) return;
+  
+  this.covoiturageService.annulerTrajetConducteur(id).subscribe({
+    next: () => {
+      this.loadTrajets();
+      this.loadAllTrajets();
+      alert('✅ Trajet annulé — passagers notifiés !');
+      this.cdr.detectChanges();
+    },
+    error: (err) => {
+      console.error('Erreur annulation', err);
+      alert('❌ Erreur lors de l\'annulation');
+    }
+  });
+}
+
   // Conduite (Chauffeur) Modal State
   isConduiteModalOpen: boolean = false;
   conduiteVehiculeId: string = '';
@@ -211,6 +236,9 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
   shuttleFilterHeure: string = '';
   selectedNavetteDays: { [shuttleId: string]: string[] } = {};
   alternatives: any[] = [];
+  /** Référence du trajet annulé (pour filtrage auto + libellé modal) */
+  trajetAnnuleRef: Trajet | null = null;
+  remplacerEnCours = false;
 showAlternativesModal: boolean = false;
 showNotificationAnnulation: boolean = false;
 notificationAnnulation: any = null;
@@ -315,7 +343,8 @@ private notifStompClient!: any;
     private appRef: ApplicationRef,
     private fb: FormBuilder,
     private covoiturageService: CovoiturageService,
-    private userService: UserService
+    private userService: UserService,
+    private route: ActivatedRoute
   ) {
     this.trajetForm = this.fb.group({
       vehiculeId: ['', Validators.required],
@@ -333,6 +362,8 @@ private notifStompClient!: any;
       try {
         const localUser = JSON.parse(localUserStr);
         this.employeId = localUser.id;
+        this.ecouterNotifications();
+
         this.loadEmployees();
         this.loadVehicules();
         this.loadTrajets();
@@ -341,11 +372,462 @@ private notifStompClient!: any;
         this.loadTotalPoints();
         this.loadShuttles();           // <--- AJOUTE ICI
         this.loadMyShuttleReservations(); // <--- AJOUTE ICI
+        
+        // Ecouter les paramètres de requete
+        this.route.queryParams.subscribe(params => {
+          const tid = params['annulationTrajetId'];
+          if (tid) {
+            this.trajetAnnuleId = tid;
+            this.reservationAnnuleeId = params['reservationId'] || '';
+            this.chercherAlternatives(this.trajetAnnuleId);
+          }
+        });
       } catch (e) {
         console.error("Erreur parsing currentUser", e);
       }
     }
   }
+
+
+
+  // Méthodes
+  
+ecouterNotifications() {
+  const wsUrl = getWsTrackingSockJsUrlFromEnv();
+  const token = localStorage.getItem('accessToken');
+  const sockJsUrl = token
+    ? `${wsUrl}?access_token=${encodeURIComponent(token)}`
+    : wsUrl;
+
+  this.notifStompClient = new Client({
+    webSocketFactory: () => new SockJS(sockJsUrl) as any,
+    connectHeaders: token ? { Authorization: `Bearer ${token}` } : {},
+    reconnectDelay: 4000,
+    onConnect: () => {
+      this.notifStompClient.subscribe(
+        `/topic/notifications/${this.employeId}`,
+        (message: any) => {
+          const notif = JSON.parse(message.body);
+          const rawType = notif?.type;
+          const notifType = String(
+            typeof rawType === 'string' ? rawType : (rawType as any)?.name || rawType || ''
+          ).toUpperCase();
+          if (notifType === 'ALTERNATIVES_DISPONIBLES' || notifType === 'ANNULATION_TRAJET') {
+            this.notificationAnnulation = {
+              ...notif,
+              titre: notif?.titre || 'Trajet annule',
+              message: notif?.message || notif?.contenu || 'Le conducteur a annule son trajet.',
+              trajetAnnuleId: notif?.trajetAnnuleId || notif?.trajetId || ''
+            };
+            this.showNotificationAnnulation = true;
+            this.trajetAnnuleId = this.notificationAnnulation.trajetAnnuleId;
+            this.reservationAnnuleeId = notif?.reservationId || this.getReservationIdByTrajetId(this.trajetAnnuleId);
+            if (this.trajetAnnuleId) {
+              this.chercherAlternatives(this.trajetAnnuleId);
+            }
+            this.loadMesReservations();
+            this.cdr.detectChanges();
+          } else if (notifType === 'CONFIRMATION_ALTERNATIVE') {
+            // Optionnel: Gérer la confirmation
+            this.loadMesReservations();
+            this.cdr.detectChanges();
+          }
+        }
+      );
+    }
+  });
+  this.notifStompClient.activate();
+}
+
+loadingStep: string = '';
+
+chercherAlternatives(trajetId: string) {
+  this.isLoadingAlternatives = true;
+  this.showAlternativesModal = true;
+  this.loadingStep = 'covoiturage';
+  this.alternatives = [];
+  this.trajetAnnuleRef = null;
+  this.cdr.detectChanges();
+
+  setTimeout(() => {
+    this.covoiturageService.getTrajetById(trajetId).subscribe({
+      next: (trajet) => {
+        this.trajetAnnuleRef = trajet;
+        this.chargerAlternativesApresRef(trajetId);
+      },
+      error: () => {
+        this.trajetAnnuleRef = this.getTrajetInfo(trajetId) || null;
+        this.chargerAlternativesApresRef(trajetId);
+      }
+    });
+  }, 400);
+}
+
+  private chargerAlternativesApresRef(trajetId: string): void {
+    const ref = this.trajetAnnuleRef;
+    const driverId = ref?.employeId;
+
+    forkJoin({
+      apiAlts: this.covoiturageService.getAlternatives(trajetId, this.employeId).pipe(
+        catchError(() => of([] as any[]))
+      ),
+      driverTrajets: driverId
+        ? this.covoiturageService.getTrajetsByEmployeId(driverId).pipe(
+            catchError(() => of([] as Trajet[]))
+          )
+        : of([] as Trajet[])
+    }).subscribe({
+      next: ({ apiAlts, driverTrajets }) => {
+        const merged = this.fusionnerAlternativesEtTrajetsConducteur(
+          apiAlts || [],
+          driverTrajets || [],
+          trajetId,
+          ref
+        );
+        const list = this.filtrerAlternativesConformesUniquement(merged, ref);
+
+        if (list.length === 0) {
+          this.alternatives = [];
+          this.showAlternativesModal = false;
+          this.showNotificationAnnulation = false;
+          this.isLoadingAlternatives = false;
+          this.cdr.detectChanges();
+          return;
+        }
+
+        const covoiturages = list.filter(a => a.type === 'COVOITURAGE');
+        const busOnly = list.filter(a => a.type !== 'COVOITURAGE');
+        const hasCovoit = covoiturages.length > 0;
+
+        if (!hasCovoit && busOnly.length > 0) {
+          this.loadingStep = 'bus';
+          setTimeout(() => {
+            this.alternatives = this.trierAlternativesAuto(list);
+            this.isLoadingAlternatives = false;
+            this.cdr.detectChanges();
+          }, 600);
+        } else {
+          this.alternatives = this.trierAlternativesAuto(list);
+          this.isLoadingAlternatives = false;
+          this.cdr.detectChanges();
+        }
+      },
+      error: () => {
+        this.isLoadingAlternatives = false;
+        this.showAlternativesModal = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  /**
+   * API exclut les trajets du même conducteur : on réinjecte ici les autres trajets ACTIF du conducteur qui a annulé.
+   */
+  private fusionnerAlternativesEtTrajetsConducteur(
+    apiAlts: any[],
+    driverTrajets: Trajet[],
+    trajetAnnuleId: string,
+    ref: Trajet | null
+  ): any[] {
+    const out = [...(apiAlts || [])].filter(a => (a.placesRestantes ?? 0) > 0);
+    const ids = new Set(out.map(a => a.id));
+
+    if (!ref?.employeId) return out;
+
+    for (const t of driverTrajets) {
+      if (!t.id || t.id === trajetAnnuleId) continue;
+      const st = String(t.statut || '').toUpperCase();
+      if (st !== 'ACTIF') continue;
+      if ((t.placesRestantes ?? 0) <= 0) continue;
+      if (ids.has(t.id)) continue;
+
+      const dto = this.trajetVersAlternativeDto(t);
+      out.push(dto);
+      ids.add(t.id);
+    }
+    return out;
+  }
+
+  private trajetVersAlternativeDto(t: Trajet): any {
+    const hd =
+      typeof t.heureDepart === 'string'
+        ? t.heureDepart
+        : (t as any).heureDepart != null
+          ? String((t as any).heureDepart)
+          : '';
+    return {
+      id: t.id,
+      type: 'COVOITURAGE',
+      adresseDepart: t.adresseDepart,
+      adresseArrivee: t.adresseArrivee,
+      heureDepart: hd,
+      placesRestantes: t.placesRestantes,
+      priorite: 0,
+      conducteurNom: t.employeId ? this.getEmployeeName(t.employeId) : undefined,
+      _memeConducteur: true
+    };
+  }
+
+  /**
+   * Uniquement les propositions conformes au trajet réservé annulé (pas de liste élargie).
+   */
+  private filtrerAlternativesConformesUniquement(alts: any[], ref: Trajet | null): any[] {
+    if (!ref) {
+      return [];
+    }
+    return alts.filter(a => this.alternativeStrictementConforme(a, ref));
+  }
+
+  private alternativeStrictementConforme(alt: any, ref: Trajet): boolean {
+    if ((alt.placesRestantes ?? 0) <= 0) return false;
+
+    const refDep = this.normaliserTexte(ref.adresseDepart);
+    const refArr = this.normaliserTexte(ref.adresseArrivee);
+    const refMin = this.heureDepartEnMinutes(ref.heureDepart);
+
+    if (!refDep || !refArr) return false;
+
+    if (alt.type === 'COVOITURAGE') {
+      const depOk = this.lieuCommeReference(String(alt.adresseDepart || ''), refDep);
+      const arrOk = this.lieuCommeReference(String(alt.adresseArrivee || ''), refArr);
+      const hOk = this.heureNeDepassePasSouhaitee(alt.heureDepart, refMin);
+      return depOk && arrOk && hOk;
+    }
+
+    // BUS / navette : la ligne doit couvrir le même couple départ / arrivée (pas un seul bout)
+    const ligne = this.normaliserTexte(String(alt.adresseDepart || ''));
+    const busRouteOk =
+      this.ligneBusCouvreTrajet(ligne, refDep, refArr);
+    const hOk = this.heureNeDepassePasSouhaitee(alt.heureDepart, refMin);
+    return busRouteOk && hOk;
+  }
+
+  /** Départ ou arrivée d'une alternative covoiturage = même zone que le trajet annulé */
+  private lieuCommeReference(altTexte: string, refNormalise: string): boolean {
+    return this.texteProcheStrict(altTexte, refNormalise);
+  }
+
+  /**
+   * Ligne de bus : doit évoquer à la fois le départ et l'arrivée du trajet annulé
+   * (évite les lignes qui ne correspondent qu'à un seul bout).
+   */
+  private ligneBusCouvreTrajet(ligneNormalisee: string, refDep: string, refArr: string): boolean {
+    if (!ligneNormalisee) return false;
+    const depDansLigne = this.texteProcheStrict(ligneNormalisee, refDep);
+    const arrDansLigne = this.texteProcheStrict(ligneNormalisee, refArr);
+    return depDansLigne && arrDansLigne;
+  }
+
+  private normaliserTexte(s: string): string {
+    return (s || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  private texteProcheStrict(a: string, ref: string): boolean {
+    if (!ref) return true;
+    const na = this.normaliserTexte(a);
+    const nr = this.normaliserTexte(ref);
+    if (!na || !nr) return true;
+    if (na.includes(nr) || nr.includes(na)) return true;
+    const ta = na.split(/[\s,]+/).filter(t => t.length > 2);
+    const tb = nr.split(/[\s,]+/).filter(t => t.length > 2);
+    return ta.some(t => nr.includes(t)) || tb.some(t => na.includes(t));
+  }
+
+  private heureDepartEnMinutes(h: string | undefined): number | null {
+    if (!h) return null;
+    const m = String(h).match(/(\d{1,2}):(\d{2})/);
+    if (!m) return null;
+    return parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
+  }
+
+  /**
+   * Heure obligatoire : ne pas proposer un départ après l'heure du trajet annulé.
+   * Fenêtre autorisée : entre (référence − maxEarly) et référence (inclus).
+   */
+  private heureNeDepassePasSouhaitee(altHeure: string | undefined, refMin: number | null): boolean {
+    if (refMin === null) return false;
+    const a = this.heureDepartEnMinutes(altHeure);
+    if (a === null) return false;
+    if (a > refMin) return false;
+    const maxEarlyMin = 150;
+    if (a < refMin - maxEarlyMin) return false;
+    return true;
+  }
+
+  private trierAlternativesAuto(items: any[]): any[] {
+    const ref = this.trajetAnnuleRef;
+    const refMin = ref ? this.heureDepartEnMinutes(ref.heureDepart) : null;
+    const copy = [...items];
+    copy.sort((x, y) => {
+      const mx = x._memeConducteur ? 0 : 1;
+      const my = y._memeConducteur ? 0 : 1;
+      if (mx !== my) return mx - my;
+
+      const p = (x.priorite ?? 99) - (y.priorite ?? 99);
+      if (p !== 0) return p;
+      if (refMin !== null) {
+        const dx = this.heureDepartEnMinutes(x.heureDepart);
+        const dy = this.heureDepartEnMinutes(y.heureDepart);
+        if (dx !== null && dy !== null) {
+          const d = Math.abs(dx - refMin) - Math.abs(dy - refMin);
+          if (d !== 0) return d;
+        }
+      }
+      return (y.placesRestantes || 0) - (x.placesRestantes || 0);
+    });
+    return copy;
+  }
+
+  get alternativesCovoit(): any[] {
+    return this.alternatives.filter(a => a.type === 'COVOITURAGE');
+  }
+
+  get alternativesBus(): any[] {
+    return this.alternatives.filter(a => a.type !== 'COVOITURAGE');
+  }
+
+choisirAlternative(alternative: any, event?: Event) {
+  if (event) {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+  if (this.remplacerEnCours) return;
+
+  if (!this.reservationAnnuleeId && this.trajetAnnuleId) {
+    this.reservationAnnuleeId = this.getReservationIdByTrajetId(this.trajetAnnuleId);
+  }
+
+  if (!this.reservationAnnuleeId || !alternative?.id) {
+    alert('Impossible de remplacer la réservation: données manquantes.');
+    return;
+  }
+
+  const typeAlt = alternative.type === 'COVOITURAGE' ? 'COVOITURAGE' : 'BUS';
+
+  this.remplacerEnCours = true;
+
+  // Covoiturage : notification au conducteur ; remplacement réel après acceptation (backend)
+  if (typeAlt === 'COVOITURAGE') {
+    void this.executerChoixCovoiturageAvecDemandeConducteur(alternative);
+    return;
+  }
+
+  // Bus / navette : remplacement transactionnel immédiat (une réservation remplace l'autre)
+  this.covoiturageService.remplacerReservation({
+    ancienneReservationId: this.reservationAnnuleeId,
+    nouvelleAlternativeId: alternative.id,
+    typeAlternative: 'BUS',
+    employeId: this.employeId
+  }).subscribe({
+    next: () => {
+      this.remplacerEnCours = false;
+      this.showAlternativesModal = false;
+      this.showNotificationAnnulation = false;
+      alert('✅ Réservation navette confirmée — votre ancienne réservation a été remplacée.');
+      this.loadMesReservations();
+      this.loadTotalPoints();
+      this.loadAllTrajets();
+      this.loadMyShuttleReservations();
+      this.alternatives = [];
+      this.cdr.detectChanges();
+    },
+    error: (err) => {
+      this.remplacerEnCours = false;
+      alert('❌ ' + (err.error?.message || err.message || 'Erreur réservation'));
+      this.cdr.detectChanges();
+    }
+  });
+}
+
+  private async executerChoixCovoiturageAvecDemandeConducteur(alternative: any): Promise<void> {
+    const distanceKm = await this.calculerDistanceKmPourTrajetId(String(alternative.id));
+    this.covoiturageService
+      .demanderRemplacementCovoiturage({
+        ancienneReservationId: this.reservationAnnuleeId,
+        nouveauTrajetId: String(alternative.id),
+        employeId: this.employeId,
+        distanceKm
+      })
+      .subscribe({
+        next: () => {
+          this.remplacerEnCours = false;
+          this.showAlternativesModal = false;
+          this.showNotificationAnnulation = false;
+          alert(
+            'Demande envoyée au conducteur. Votre ancienne réservation sera remplacée lorsqu’il acceptera.'
+          );
+          this.loadMesReservations();
+          this.loadTotalPoints();
+          this.loadAllTrajets();
+          this.alternatives = [];
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.remplacerEnCours = false;
+          alert('❌ ' + (err.error?.message || err.message || 'Erreur demande'));
+          this.cdr.detectChanges();
+        }
+      });
+  }
+
+  private async calculerDistanceKmPourTrajetId(trajetId: string): Promise<number> {
+    let trajet = this.allTrajets.find(t => t.id === trajetId);
+    if (!trajet) {
+      try {
+        trajet = await firstValueFrom(this.covoiturageService.getTrajetById(trajetId));
+      } catch {
+        // ignore
+      }
+    }
+    let distanceKm = 25.0;
+    if (trajet) {
+      try {
+        const depRes = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(trajet.adresseDepart)}&limit=1&countrycodes=tn`
+        );
+        const depData = await depRes.json();
+        const arrRes = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(trajet.adresseArrivee)}&limit=1&countrycodes=tn`
+        );
+        const arrData = await arrRes.json();
+        if (depData[0] && arrData[0]) {
+          const osrmRes = await fetch(
+            `https://router.project-osrm.org/route/v1/driving/${depData[0].lon},${depData[0].lat};${arrData[0].lon},${arrData[0].lat}?overview=false`
+          );
+          const osrmData = await osrmRes.json();
+          if (osrmData.routes && osrmData.routes[0]) {
+            distanceKm = osrmData.routes[0].distance / 1000;
+          }
+        }
+      } catch (e) {
+        console.warn('Erreur calcul distance', e);
+      }
+    }
+    return Math.round(distanceKm * 10) / 10;
+  }
+
+// Conducteur annule son trajet
+deleteTrajet(id?: string): void {
+  if (!id) return;
+  if (!confirm('Êtes-vous sûr ? Les passagers seront notifiés !')) return;
+  
+  // Annuler via le nouveau endpoint
+  this.covoiturageService.annulerTrajetConducteur(id).subscribe({
+    next: () => {
+      this.loadTrajets();
+      alert('Trajet annulé — passagers notifiés !');
+    },
+    error: (err) => console.error('Erreur annulation', err)
+  });
+}
+
+
+
   loadEmployees(): void {
     this.userService.getAllEmployees().subscribe({
       next: (users) => {
@@ -482,11 +964,22 @@ private notifStompClient!: any;
     this.covoiturageService.getReservationsByEmploye(this.employeId).subscribe({
       next: (res) => {
         this.mesReservations = res;
+        if (!this.reservationAnnuleeId && this.trajetAnnuleId) {
+          this.reservationAnnuleeId = this.getReservationIdByTrajetId(this.trajetAnnuleId);
+        }
         this.loadTotalPoints(); // ← ajouter
         this.cdr.detectChanges();
       },
       error: (err) => console.error('Erreur chargement réservations', err)
     });
+  }
+
+  private getReservationIdByTrajetId(trajetId: string): string {
+    if (!trajetId) return '';
+    const reservation = this.mesReservations.find(
+      r => r.trajetId === trajetId && r.statut !== 'ANNULE'
+    );
+    return reservation?.id || '';
   }
   loadTotalPoints(): void {
     if (!this.employeId) return;
@@ -555,14 +1048,7 @@ private notifStompClient!: any;
   estDejaReserve(trajetId: string): boolean {
     return this.mesReservations.some(r => r.trajetId === trajetId && r.statut !== 'ANNULE');
   }
-  deleteTrajet(id?: string): void {
-    if (!id) return;
-    if (!confirm('Êtes-vous sûr de vouloir supprimer ce trajet ?')) return;
-    this.covoiturageService.deleteTrajet(id).subscribe({
-      next: () => this.loadTrajets(),
-      error: (err) => console.error('Erreur suppression trajet', err)
-    });
-  }
+  
   loadMyShuttleReservations() {
     if (!this.employeId) return;
     this.covoiturageService.getReservationsNavetteByEmploye(this.employeId).subscribe({
@@ -1007,10 +1493,13 @@ private notifStompClient!: any;
   ngOnDestroy() {
     if (this.map) {
       this.map.remove();
+      
     }
     if (this.publishMap) {
       this.publishMap.remove();
     }
+    if (this.notifStompClient) this.notifStompClient.deactivate();
+
   }
 
   switchSection(section: 'utilises' | 'proposes' | 'recompenses') {

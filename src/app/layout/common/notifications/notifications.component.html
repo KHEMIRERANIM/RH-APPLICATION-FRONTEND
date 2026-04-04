@@ -108,7 +108,7 @@
                         </div>
                         
                         <!-- Covoiturage Actions -->
-                        <div *ngIf="notification.reservationId" class="flex items-center gap-3 mt-4 mb-2">
+                        <div *ngIf="notification.reservationId && notification.type !== 'ANNULATION_TRAJET' && notification.type !== 'ALTERNATIVES_DISPONIBLES' && notification.type !== 'CONFIRMATION_ALTERNATIVE'" class="flex items-center gap-3 mt-4 mb-2">
                             <button class="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-green-50 hover:bg-green-100 text-green-700 rounded-full text-xs font-semibold transition-colors border border-green-200"
                                 (click)="repondreReservation(notification, 'CONFIRME', $event)">
                                 <mat-icon class="icon-size-3.5 text-green-600" [svgIcon]="'heroicons_solid:check'"></mat-icon>
@@ -118,6 +118,16 @@
                                 (click)="repondreReservation(notification, 'ANNULE', $event)">
                                 <mat-icon class="icon-size-3.5 text-red-600" [svgIcon]="'heroicons_solid:x'"></mat-icon>
                                 Refuser
+                            </button>
+                        </div>
+                        
+                        <!-- Alternative après annulation conducteur (backend: ALTERNATIVES_DISPONIBLES ou ANNULATION_TRAJET) -->
+                        <div *ngIf="notification.type === 'ALTERNATIVES_DISPONIBLES' || notification.type === 'ANNULATION_TRAJET'" class="flex flex-col gap-2 mt-4 mb-2 w-full">
+                            <button type="button"
+                                class="flex items-center justify-center gap-1.5 px-4 py-2.5 bg-[#1D9E75] hover:bg-[#168567] text-white rounded-lg text-sm font-semibold transition-colors shadow-sm w-full"
+                                (click)="trouverAlternative(notification, $event)">
+                                <mat-icon class="icon-size-4 text-white" [svgIcon]="'heroicons_outline:arrow-path'"></mat-icon>
+                                Choisir une alternative
                             </button>
                         </div>
                     </div>

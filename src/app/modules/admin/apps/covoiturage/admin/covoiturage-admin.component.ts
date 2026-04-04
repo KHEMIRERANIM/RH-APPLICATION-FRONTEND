@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { BusService, Bus } from '../bus.service';
+import { CovoiturageService } from '../covoiturage.service';
+import { UserService } from '../../../../../services/user.service';
 
 type AdminSection = 'statistiques' | 'navettes' | 'reservations' | 'cadeaux';
 type ReservationType = 'navette' | 'covoiturage';
@@ -48,6 +50,9 @@ export class CovoiturageAdminComponent implements OnInit {
 
   busForm: Bus = this.emptyBus();
   navettes: Bus[] = [];
+  /** Toutes les réservations navette (pour afficher les employés par bus) */
+  reservationsNavette: any[] = [];
+  employesMap: Map<string, string> = new Map();
 
   typeCarburantOptions = ['DIESEL', 'ESSENCE', 'ELECTRIQUE', 'HYBRIDE'];
   statutOptions = ['ACTIF', 'INACTIF', 'EN_MAINTENANCE'];
@@ -79,14 +84,67 @@ export class CovoiturageAdminComponent implements OnInit {
     { id: 6, titre: 'Bon 50 DT', description: "Bon d'achat premium", points: 1000, stock: 15, echanges: 5, actif: false, image: 'https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?w=400', icon: '🎁' }
   ];
 
-  constructor(private busService: BusService) {}
+  constructor(
+    private busService: BusService,
+    private covoiturageService: CovoiturageService,
+    private userService: UserService
+  ) {}
 
-  ngOnInit(): void { this.loadBus(); }
+  ngOnInit(): void {
+    this.loadEmployes();
+    this.loadBus();
+    this.loadReservationsNavette();
+  }
+
+  private loadEmployes(): void {
+    this.userService.getAllEmployees().subscribe({
+      next: (users: any[]) => {
+        users.forEach((u: any) => {
+          const nom = `${u.prenom || u.firstName || ''} ${u.nom || u.lastName || ''}`.trim();
+          this.employesMap.set(String(u.id), nom || `ID ${String(u.id).slice(0, 8)}`);
+        });
+      },
+      error: () => {}
+    });
+  }
+
+  loadReservationsNavette(): void {
+    this.covoiturageService.getAllReservationsNavette().subscribe({
+      next: (data) => {
+        this.reservationsNavette = data || [];
+      },
+      error: () => {
+        this.reservationsNavette = [];
+      }
+    });
+  }
+
+  getNomEmploye(id: string | undefined): string {
+    if (!id) return '—';
+    return this.employesMap.get(String(id)) || `Employé ${String(id).slice(0, 8)}…`;
+  }
+
+  /** Réservations actives / en attente pour ce bus (non annulées) */
+  reservantsPourBus(busId: string | undefined): { employeId: string; statut: string }[] {
+    if (!busId || !this.reservationsNavette.length) return [];
+    return this.reservationsNavette
+      .filter(
+        (r) =>
+          r.busId === busId &&
+          r.statut &&
+          String(r.statut).toUpperCase() !== 'ANNULE'
+      )
+      .map((r) => ({ employeId: r.employeId, statut: String(r.statut) }));
+  }
 
   loadBus(): void {
     this.isLoading = true;
     this.busService.getAll().subscribe({
-      next: (data) => { this.navettes = data; this.isLoading = false; },
+      next: (data) => {
+        this.navettes = data;
+        this.isLoading = false;
+        this.loadReservationsNavette();
+      },
       error: () => { this.errorMessage = 'Erreur de chargement'; this.isLoading = false; }
     });
   }

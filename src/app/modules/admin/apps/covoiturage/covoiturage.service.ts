@@ -56,7 +56,7 @@ export interface ReservationResponse {
   providedIn: 'root'
 })
 export class CovoiturageService {
-  private apiUrl = 'http://10.90.222.174:8081/api'; // Same base URL used in UserService
+  private apiUrl = 'http://10.188.81.174:8081/api'; // Same base URL used in UserService
 
   constructor(private http: HttpClient) { }
 
@@ -96,8 +96,8 @@ export class CovoiturageService {
     return this.http.delete<void>(`${this.apiUrl}/trajets/${id}`);
   }
 
-  private reservationsUrl = 'http://10.90.222.174:8081/api/reservations';
-  private empreintesUrl = 'http://10.90.222.174:8081/api/empreintes'; // ← ajouter
+  private reservationsUrl = 'http://10.188.81.174:8081/api/reservations';
+  private empreintesUrl = 'http://10.188.81.174:8081/api/empreintes'; // ← ajouter
 
 
   getReservationsByEmploye(employeId: string): Observable<ReservationResponse[]> {
@@ -126,6 +126,10 @@ getTotalPointsEco(employeId: string): Observable<number> {
 
   getAllTrajets(): Observable<Trajet[]> {
     return this.http.get<Trajet[]>(`${this.apiUrl}/trajets`);
+  }
+
+  getTrajetById(id: string): Observable<Trajet> {
+    return this.http.get<Trajet>(`${this.apiUrl}/trajets/${id}`);
   }
 
   // Ajoutez avec les autres méthodes
@@ -168,5 +172,26 @@ remplacerReservation(request: any): Observable<any> {
     `${this.apiUrl}/alternatives/remplacer`, request
   );
 }
+
+  /** Covoiturage : demande au conducteur ; remplacement effectif après acceptation (backend) */
+  demanderRemplacementCovoiturage(body: {
+    ancienneReservationId: string;
+    nouveauTrajetId: string;
+    employeId: string;
+    distanceKm?: number;
+  }): Observable<ReservationResponse> {
+    return this.http.post<ReservationResponse>(
+      `${this.apiUrl}/alternatives/demander-remplacement-covoiturage`,
+      body
+    );
+  }
+
+  getAllReservationsNavette(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/reservations-navette`);
+  }
+
+
+
+
 
 }

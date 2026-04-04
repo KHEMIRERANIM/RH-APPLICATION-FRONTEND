@@ -46,23 +46,34 @@ export class NotificationsService {
 
         try {
             const localUser = JSON.parse(localUserStr);
-            return this._httpClient.get<any[]>(`http://10.90.222.174:8081/api/notifications/destinataire/${localUser.id}/non-lues`).pipe(
-                map(backendNotifs => backendNotifs.map(bn => ({
+            return this._httpClient.get<any[]>(`http://10.188.81.174:8081/api/notifications/destinataire/${localUser.id}/non-lues`).pipe(
+                map(backendNotifs => backendNotifs.map(bn => {
+                    const t = typeof bn.type === 'string' ? bn.type : (bn.type?.name || String(bn.type || ''));
+                    let title = 'Nouvelle notification';
+                    if (t === 'DEMANDE_CONFIRMATION') title = 'Demande de réservation';
+                    else if (t === 'RESERVATION') title = 'Mise à jour réservation';
+                    else if (t === 'ALTERNATIVES_DISPONIBLES' || t === 'ANNULATION_TRAJET') title = 'Trajet annulé';
+                    let icon = 'heroicons_outline:bell';
+                    if (t === 'DEMANDE_CONFIRMATION') icon = 'heroicons_outline:question-mark-circle';
+                    else if (t === 'ALTERNATIVES_DISPONIBLES' || t === 'ANNULATION_TRAJET') icon = 'heroicons_outline:arrow-path';
+                    return {
                     id: bn.id,
-                    icon: bn.type === 'DEMANDE_CONFIRMATION' ? 'heroicons_outline:question-mark-circle' : 'heroicons_outline:bell',
-                    title: bn.type === 'DEMANDE_CONFIRMATION' ? 'Demande de réservation' : (bn.type === 'RESERVATION' ? 'Mise à jour réservation' : 'Nouvelle notification'),
+                    icon,
+                    title,
                     description: bn.contenu || 'Nouvelle notification système',
                     time: bn.dateCreation || new Date().toISOString(),
                     read: bn.lu || false,
-                    type: bn.type,
+                    type: t,
                     reservationId: bn.reservationId,
                     trajetId: bn.trajetId,
+                    trajetAnnuleId: bn.trajetAnnuleId || bn.trajetId,
                     expediteurId: bn.expediteurId,
                     destinataireId: bn.destinataireId,
                     contenu: bn.contenu
-                }))),
+                    };
+                })),
                 catchError((error) => {
-                    console.error("ERREUR DE CHARGEMENT BACKEND NOTIFICATIONS: Veuillez vérifier que votre NotificationController existe et répond bien sur l'URL: http://10.90.222.174:8081/api/notifications/employe/{id}/non-lues", error);
+                    console.error("ERREUR DE CHARGEMENT BACKEND NOTIFICATIONS: Veuillez vérifier que votre NotificationController existe et répond bien sur l'URL: http://10.188.81.174:8081/api/notifications/employe/{id}/non-lues", error);
                     return of([]);
                 }),
                 tap((notifications) => {
@@ -111,7 +122,7 @@ export class NotificationsService {
             switchMap(notifications => {
                 // If backend notification, assume we can hit the marquer-lu endpoint
                 if (notification.type) {
-                    return this._httpClient.put<Notification>(`http://10.90.222.174:8081/api/notifications/${id}/lire`, {}).pipe(
+                    return this._httpClient.put<Notification>(`http://10.188.81.174:8081/api/notifications/${id}/lire`, {}).pipe(
                         map((backendNotif: any) => {
                             const updatedNotification = { ...notification, read: true };
                             const index = notifications.findIndex(item => item.id === id);
@@ -150,7 +161,7 @@ export class NotificationsService {
                 let request$: Observable<boolean>;
                 
                 if (targetNode?.type) {
-                    request$ = this._httpClient.delete<boolean>(`http://10.90.222.174:8081/api/notifications/${id}`).pipe(
+                    request$ = this._httpClient.delete<boolean>(`http://10.188.81.174:8081/api/notifications/${id}`).pipe(
                         map(() => true),
                         catchError(() => of(false))
                     );
@@ -183,7 +194,7 @@ export class NotificationsService {
                 if (localUserStr) {
                     try {
                         const localUser = JSON.parse(localUserStr);
-                        return this._httpClient.put<boolean>(`http://10.90.222.174:8081/api/notifications/destinataire/${localUser.id}/lire-tout`, {}).pipe(
+                        return this._httpClient.put<boolean>(`http://10.188.81.174:8081/api/notifications/destinataire/${localUser.id}/lire-tout`, {}).pipe(
                             map(() => {
                                 notifications.forEach((notification, index) => {
                                     notifications[index].read = true;

@@ -160,7 +160,7 @@ export class ProfileComponent implements OnInit {
         const localUser = JSON.parse(localUserStr);
         
         this.savingPassword = true;
-        this._http.patch(`http://10.90.222.174:8081/api/users/${localUser.id}/password`, {
+        this._http.patch(`http://10.188.81.174:8081/api/users/${localUser.id}/password`, {
             ancienPassword: values.ancienPassword,
             nouveauPassword: values.nouveauPassword
         }).subscribe({

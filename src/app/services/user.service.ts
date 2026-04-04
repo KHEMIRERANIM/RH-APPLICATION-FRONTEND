@@ -62,7 +62,7 @@ export interface CreateEmployeeRequest {
     providedIn: 'root'
 })
 export class UserService {
-    private apiUrl = 'http://10.90.222.174:8081/api';
+    private apiUrl = 'http://10.188.81.174:8081/api';
 
     constructor(private http: HttpClient) { }
 

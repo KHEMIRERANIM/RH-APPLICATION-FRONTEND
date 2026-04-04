@@ -8,6 +8,7 @@ import { Notification } from 'app/layout/common/notifications/notifications.type
 import { NotificationsService } from 'app/layout/common/notifications/notifications.service';
 import { HttpClient } from '@angular/common/http';
 import { UserService } from 'app/services/user.service';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'notifications',
@@ -35,7 +36,8 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         private _overlay: Overlay,
         private _viewContainerRef: ViewContainerRef,
         private _httpClient: HttpClient,
-        private _userService: UserService
+        private _userService: UserService,
+        private _router: Router
     ) {
     }
 
@@ -57,13 +59,13 @@ export class NotificationsComponent implements OnInit, OnDestroy {
                 // Si les notifications ont déjà été chargées, on met à jour les descriptions avec les noms
                 if (this.notifications) {
                     this.notifications = this.notifications.map(notif => {
-                        if (notif.type === 'DEMANDE_CONFIRMATION' || notif.expediteurId) {
+                        if (notif.type === 'DEMANDE_CONFIRMATION' || (notif.expediteurId && notif.type !== 'ALTERNATIVES_DISPONIBLES' && notif.type !== 'ANNULATION_TRAJET')) {
                             const nom = this._getEmployeeName(notif.expediteurId);
-                            // On essaie de préserver le message d'origine, ou de le construire si manquant
-                            // Si le contenu a déjà la partie de texte avec "Employé...", on pourrait le remplacer, 
-                            // mais plus simple: se baser sur notif.contenu backend originel si on peut.
-                            // Comme on n'a pas gardé notif.contenu original dans l'objet notif s'il ne l'avait pas, on fait au mieux.
                             notif.description = notif.contenu ? `${nom} : ${notif.contenu}` : `Demande de ${nom}`;
+                        }
+                        if (notif.type === 'ALTERNATIVES_DISPONIBLES' || notif.type === 'ANNULATION_TRAJET') {
+                            const nom = this._getEmployeeName(notif.expediteurId);
+                            notif.description = notif.contenu ? `${nom} : ${notif.contenu}` : 'Des alternatives sont disponibles.';
                         }
                         return notif;
                     });
@@ -78,9 +80,13 @@ export class NotificationsComponent implements OnInit, OnDestroy {
             .subscribe((notifications: Notification[]) => {
                 // Update descriptions with names if backend notification
                 const processed = notifications.map(notif => {
-                    if (notif.type === 'DEMANDE_CONFIRMATION' || notif.expediteurId) {
+                    if (notif.type === 'DEMANDE_CONFIRMATION' || (notif.expediteurId && notif.type !== 'ALTERNATIVES_DISPONIBLES' && notif.type !== 'ANNULATION_TRAJET')) {
                         const nom = this._getEmployeeName(notif.expediteurId);
                         notif.description = notif.contenu ? `${nom} : ${notif.contenu}` : `Demande de ${nom}`;
+                    }
+                    if (notif.type === 'ALTERNATIVES_DISPONIBLES' || notif.type === 'ANNULATION_TRAJET') {
+                        const nom = this._getEmployeeName(notif.expediteurId);
+                        notif.description = notif.contenu ? `${nom} : ${notif.contenu}` : 'Des alternatives sont disponibles.';
                     }
                     return notif;
                 });
@@ -190,7 +196,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
             employeId: notification.expediteurId
         };
 
-        this._httpClient.put(`http://10.90.222.174:8081/api/reservations/${notification.reservationId}`, payload)
+        this._httpClient.put(`http://10.188.81.174:8081/api/reservations/${notification.reservationId}`, payload)
             .subscribe({
                 next: () => {
                     // Supprimer la notification ou la marquer comme lue
@@ -202,6 +208,25 @@ export class NotificationsComponent implements OnInit, OnDestroy {
                     alert("Erreur lors de la réponse. Regardez la console (F12).");
                 }
             });
+    }
+
+    /**
+     * Trouver une alternative suite à une annulation
+     */
+    trouverAlternative(notification: Notification, event: Event): void {
+        event.stopPropagation();
+        event.preventDefault();
+        const trajetId = notification.trajetAnnuleId || notification.trajetId;
+        if (!trajetId) {
+            alert('Identifiant du trajet annulé introuvable dans la notification.');
+            return;
+        }
+        this.closePanel();
+        const q: Record<string, string> = { annulationTrajetId: trajetId };
+        if (notification.reservationId) {
+            q['reservationId'] = notification.reservationId;
+        }
+        this._router.navigate(['/apps/covoiturage/user'], { queryParams: q });
     }
 
     /**
