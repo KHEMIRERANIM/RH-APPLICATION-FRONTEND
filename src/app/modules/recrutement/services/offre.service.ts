@@ -6,7 +6,7 @@ import { Offre, CreateOffreRequest } from '../models/recrutement.models';
 @Injectable({ providedIn: 'root' })
 export class OffreService {
 
-  private api = 'http://localhost:8081/api/recrutement/offres';
+  private api = `${window.location.protocol}//${window.location.hostname}:8081/api/recrutement/offres`;
 
   constructor(private http: HttpClient) {}
 

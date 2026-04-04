@@ -1,6 +1,7 @@
 <div class="flex flex-col flex-auto min-w-0 p-6 sm:p-10">
 
-  <div class="flex items-center gap-2 text-sm text-secondary mb-6 cursor-pointer" (click)="retour()">
+  <div class="flex items-center gap-2 text-sm text-secondary mb-6 cursor-pointer" 
+       (click)="retour()">
     <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:arrow-left'"></mat-icon>
     Retour
   </div>
@@ -8,26 +9,38 @@
   <div class="max-w-2xl mx-auto w-full">
     <h2 class="text-2xl font-bold mb-2">Planifier un entretien</h2>
     <p class="text-secondary mb-8">
-      Si vous choisissez <strong>Visio</strong>, un lien Google Meet sera créé automatiquement.
+      Si vous choisissez <strong>Visio</strong>, un lien Jitsi Meet sera créé automatiquement.
     </p>
 
     <!-- Succès -->
     <div *ngIf="submitted"
       class="bg-green-50 border border-green-200 rounded-2xl p-8 text-center">
-      <mat-icon class="icon-size-16 text-green-500 mb-4" 
+      <mat-icon class="icon-size-16 text-green-500 mb-4"
                 [svgIcon]="'heroicons_outline:check-circle'"></mat-icon>
       <h3 class="text-xl font-bold text-green-800 mb-2">Entretien planifié !</h3>
-      <p class="text-green-700 mb-2">Le candidat et le recruteur ont reçu une invitation par email.</p>
-      <p *ngIf="meetLinkCreated" class="text-green-700 font-medium mb-4">
-        🎥 Un lien Google Meet a été créé automatiquement.
+      <p class="text-green-700 mb-4">
+        Le candidat et le recruteur ont reçu une invitation par email.
       </p>
+
+      <!-- Lien Meet -->
+      <div *ngIf="meetLinkCreated"
+        class="bg-white border border-green-300 rounded-xl p-4 mb-4 text-left">
+        <p class="text-sm font-medium text-green-800 mb-2">
+          🎥 Lien Jitsi Meet créé automatiquement :
+        </p>
+        <a [href]="meetLink" target="_blank"
+          class="text-blue-600 font-medium break-all hover:underline">
+          {{ meetLink }}
+        </a>
+      </div>
+
       <button mat-flat-button [color]="'primary'" (click)="retour()">
         Retour au pipeline
       </button>
     </div>
 
     <!-- Formulaire -->
-    <form *ngIf="!submitted" [formGroup]="form" (ngSubmit)="submit()" 
+    <form *ngIf="!submitted" [formGroup]="form" (ngSubmit)="submit()"
           class="flex flex-col gap-6">
 
       <div class="bg-card rounded-2xl shadow p-6">
@@ -50,21 +63,21 @@
                            'heroicons_outline:office-building'">
               </mat-icon>
               <p class="text-sm font-medium">{{ type }}</p>
-              <p *ngIf="type === 'VISIO'" 
-                 class="text-xs text-primary mt-1">Meet auto 🎥</p>
+              <p *ngIf="type === 'VISIO'"
+                 class="text-xs text-primary mt-1">Jitsi Meet auto 🎥</p>
             </div>
           </div>
         </div>
 
-        <!-- Alerte Google Meet -->
-        <div *ngIf="form.get('type')?.value === 'VISIO'"
+        <!-- Alerte Jitsi Meet -->
+        <div *ngIf="isVisio"
           class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4 flex items-center gap-3">
-          <mat-icon class="text-blue-500 icon-size-6" 
+          <mat-icon class="text-blue-500 icon-size-6"
                     [svgIcon]="'heroicons_outline:video-camera'"></mat-icon>
           <div>
-            <p class="text-sm font-medium text-blue-800">Google Meet automatique</p>
+            <p class="text-sm font-medium text-blue-800">Jitsi Meet automatique</p>
             <p class="text-xs text-blue-600">
-              Un lien Meet sera créé et envoyé par email au candidat et au recruteur.
+              Un lien de réunion sera créé et envoyé par email au candidat et au recruteur.
             </p>
           </div>
         </div>
@@ -86,14 +99,14 @@
           <!-- Lieu si PRESENTIEL -->
           <mat-form-field *ngIf="showLieu">
             <mat-label>Lieu de l'entretien</mat-label>
-            <input matInput formControlName="lieu" 
+            <input matInput formControlName="lieu"
                    placeholder="Salle de réunion, adresse...">
           </mat-form-field>
 
-          <!-- Lien visio si TELEPHONIQUE (optionnel) -->
+          <!-- Numéro si TELEPHONIQUE -->
           <mat-form-field *ngIf="form.get('type')?.value === 'TELEPHONIQUE'">
             <mat-label>Numéro de téléphone (optionnel)</mat-label>
-            <input matInput formControlName="lienVisio" 
+            <input matInput formControlName="lieu"
                    placeholder="+216 XX XXX XXX">
           </mat-form-field>
         </div>
@@ -110,9 +123,7 @@
         </button>
         <button mat-flat-button [color]="'primary'" type="submit" class="flex-1"
           [disabled]="loading || form.invalid">
-          <mat-icon *ngIf="!loading" [svgIcon]="'heroicons_outline:calendar'" 
-                    class="mr-2"></mat-icon>
-          {{ loading ? 'Planification en cours...' : 'Planifier l\'entretien' }}
+          {{ loading ? 'Planification...' : 'Planifier l\'entretien' }}
         </button>
       </div>
 

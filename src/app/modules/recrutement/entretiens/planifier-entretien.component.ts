@@ -17,6 +17,7 @@ export class PlanifierEntretienComponent implements OnInit {
   loading = false;
   submitted = false;
   meetLinkCreated = false;
+  meetLink = '';
   errorMsg = '';
   typesEntretien: TypeEntretien[] = ['TELEPHONIQUE', 'VISIO', 'PRESENTIEL'];
 
@@ -40,7 +41,7 @@ export class PlanifierEntretienComponent implements OnInit {
       dateHeure:     ['', Validators.required],
       dureeMinutes:  [60, [Validators.required, Validators.min(15)]],
       lieu:          [''],
-      lienVisio:     [''],
+      // ✅ PAS de lienVisio ici — généré automatiquement par le backend
     });
 
     if (candidatureId) {
@@ -54,19 +55,35 @@ export class PlanifierEntretienComponent implements OnInit {
     return this.form.get('type')?.value === 'PRESENTIEL';
   }
 
+  get isVisio(): boolean {
+    return this.form.get('type')?.value === 'VISIO';
+  }
+
   submit(): void {
     if (this.form.invalid) return;
     this.loading = true;
     this.errorMsg = '';
 
-    const isVisio = this.form.get('type')?.value === 'VISIO';
+    // ✅ N'envoie PAS lienVisio — le backend le génère automatiquement
+    const payload = {
+      candidatureId: this.form.value.candidatureId,
+      recruteurId:   this.form.value.recruteurId,
+      type:          this.form.value.type,
+      dateHeure:     this.form.value.dateHeure,
+      dureeMinutes:  this.form.value.dureeMinutes,
+      lieu:          this.form.value.lieu || null,
+      lienVisio:     null, // ← null pour forcer la génération backend
+    };
 
-    this.entretienService.planifierEntretien(this.form.value).subscribe({
+    this.entretienService.planifierEntretien(payload).subscribe({
       next: (entretien) => {
         this.loading = false;
         this.submitted = true;
-        // Vérifie si un lien Meet a été créé
-        this.meetLinkCreated = isVisio && !!entretien.lienVisio;
+        // Récupère le lien Meet généré par le backend
+        if (entretien.lienVisio) {
+          this.meetLinkCreated = true;
+          this.meetLink = entretien.lienVisio;
+        }
       },
       error: (err) => {
         this.loading = false;

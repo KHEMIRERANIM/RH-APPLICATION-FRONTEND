@@ -10,7 +10,7 @@ import {
 @Injectable({ providedIn: 'root' })
 export class EntretienService {
 
-  private api = 'http://localhost:8081/api/recrutement/entretiens';
+  private api = `${window.location.protocol}//${window.location.hostname}:8081/api/recrutement/entretiens`;
 
   constructor(private http: HttpClient) {}
 

@@ -121,6 +121,13 @@
             {{ entretiensAVenir.length }}
           </span>
         </h3>
+        <button *ngIf="entretiensAVenir.length > 0" mat-stroked-button
+          class="text-blue-600 border-blue-300"
+          (click)="telechargerTousEntretiensAVenir()"
+          matTooltip="Télécharger tous les entretiens à venir">
+          <mat-icon [svgIcon]="'heroicons_outline:arrow-down-circle'" class="icon-size-4 mr-1"></mat-icon>
+          Télécharger tout
+        </button>
       </div>
 
       <div *ngIf="entretiensAVenir.length === 0"
@@ -150,12 +157,33 @@
           <!-- Boutons entretien à venir -->
           <div class="flex items-center gap-2">
             <!-- Rejoindre Meet -->
-            <button *ngIf="e.lienVisio" mat-flat-button
+            <a *ngIf="e.type === 'VISIO' && e.lienVisio"
+              mat-flat-button
               class="bg-green-500 text-white"
-              (click)="rejoindreMeet(e.lienVisio)"
+              [href]="e.lienVisio"
+              target="_blank"
+              rel="noopener"
               matTooltip="Rejoindre Google Meet">
               <mat-icon class="icon-size-4 mr-1">videocam</mat-icon>
               Rejoindre Meet
+            </a>
+
+            <!-- Télécharger entretien -->
+            <button mat-stroked-button
+              class="text-blue-600 border-blue-300"
+              (click)="telechargerEntretien(e)"
+              matTooltip="Télécharger les détails de l'entretien">
+              <mat-icon [svgIcon]="'heroicons_outline:arrow-down-circle'" class="icon-size-4 mr-1"></mat-icon>
+              Télécharger
+            </button>
+
+            <!-- Annuler entretien -->
+            <button mat-stroked-button
+              class="text-red-600 border-red-300"
+              (click)="annulerEntretien(e, $event)"
+              matTooltip="Annuler cet entretien">
+              <mat-icon [svgIcon]="'heroicons_outline:x-mark'" class="icon-size-4 mr-1"></mat-icon>
+              Annuler
             </button>
 
             <!-- Marquer réalisé -->
@@ -237,6 +265,13 @@
             {{ entretiensRealises.length }}
           </span>
         </h3>
+        <button mat-stroked-button
+          class="text-red-600 border-red-300"
+          (click)="supprimerTousEntretiensRealises()"
+          matTooltip="Supprimer tous les entretiens réalisés">
+          <mat-icon [svgIcon]="'heroicons_outline:trash'" class="icon-size-4 mr-1"></mat-icon>
+          Supprimer tout
+        </button>
       </div>
 
       <div class="flex flex-col gap-3">

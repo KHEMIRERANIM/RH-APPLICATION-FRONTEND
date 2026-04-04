@@ -1,21 +1,26 @@
-﻿import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { forkJoin } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { OffreService } from '../services/offre.service';
 import { EntretienService } from '../services/entretien.service';
+import { NotificationsService } from 'app/layout/common/notifications/notifications.service';
 import { AuthService } from 'app/core/auth/auth.service';
+import { Notification } from 'app/layout/common/notifications/notifications.types';
 import { Offre, Entretien, STATUT_LABELS } from '../models/recrutement.models';
 
 @Component({
   selector: 'app-recrutement-dashboard',
   templateUrl: './dashboard.component.html',
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
 
   loading = true;
   offres: Offre[] = [];
   tousEntretiens: Entretien[] = [];
   STATUT_LABELS = STATUT_LABELS;
+  private _alertInterval: any;
 
   // KPIs
   get totalOffres(): number { return this.offres.length; }
@@ -42,9 +47,13 @@ export class DashboardComponent implements OnInit {
     return this.tousEntretiens.filter(e => e.statut === 'REALISE');
   }
 
+  private _entretienAlertedIds: Set<string> = new Set();
+
   constructor(
     private offreService: OffreService,
     private entretienService: EntretienService,
+    private notificationsService: NotificationsService,
+    private _snackBar: MatSnackBar,
     private authService: AuthService,
     private router: Router,
   ) {}
@@ -61,9 +70,17 @@ export class DashboardComponent implements OnInit {
         this.offres = offres;
         this.tousEntretiens = entretiens;
         this.loading = false;
+        this.checkEntretienAlerts();
+        this._alertInterval = setInterval(() => this.checkEntretienAlerts(), 60000);
       },
       error: () => this.loading = false,
     });
+  }
+
+  ngOnDestroy(): void {
+    if (this._alertInterval) {
+      clearInterval(this._alertInterval);
+    }
   }
 
   // Navigation
@@ -99,6 +116,14 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  annulerEntretien(entretien: Entretien, event: Event): void {
+    event.stopPropagation();
+    if (!confirm('Voulez-vous vraiment annuler cet entretien ?')) return;
+    this.entretienService.annulerEntretien(entretien.id).subscribe(() => {
+      this.tousEntretiens = this.tousEntretiens.filter(e => e.id !== entretien.id);
+    });
+  }
+
   supprimerEntretienPasse(entretien: Entretien, event: Event): void {
     event.stopPropagation();
     if (!confirm('Supprimer cet entretien passé ?')) return;
@@ -113,6 +138,120 @@ export class DashboardComponent implements OnInit {
 
   rejoindreMeet(lienVisio: string): void {
     window.open(lienVisio, '_blank');
+  }
+
+  private checkEntretienAlerts(): void {
+    const now = new Date().getTime();
+    const prochainEntretien = this.tousEntretiens.find(entretien => {
+      if (entretien.statut !== 'PLANIFIE') {
+        return false;
+      }
+
+      const diff = new Date(entretien.dateHeure).getTime() - now;
+      return diff > 0 && diff <= 3600000 && !this._entretienAlertedIds.has(entretien.id);
+    });
+
+    if (!prochainEntretien) {
+      return;
+    }
+
+    this._entretienAlertedIds.add(prochainEntretien.id);
+
+    const notification: Notification = {
+      id: '',
+      icon: 'notification_important',
+      title: 'Entretien dans 1 heure',
+      description: `Entretien ${prochainEntretien.type} prévu à ${new Date(prochainEntretien.dateHeure).toLocaleTimeString()}`,
+      time: 'Maintenant',
+      link: `/recrutement/admin/entretiens/${prochainEntretien.id}`,
+      useRouter: true,
+      read: false,
+    };
+
+    this.notificationsService.create(notification).pipe(take(1)).subscribe();
+
+    this._snackBar.open(
+      `Entretien ${prochainEntretien.type} dans 1 heure`,
+      'Voir',
+      { duration: 8000 }
+    ).onAction().subscribe(() => {
+      this.router.navigate([notification.link]);
+    });
+  }
+
+  supprimerTousEntretiensRealises(): void {
+    if (!confirm('Voulez-vous vraiment supprimer tous les entretiens réalisés ?')) return;
+    const demandes = this.entretiensRealises.map(entretien =>
+      this.entretienService.annulerEntretien(entretien.id)
+    );
+
+    if (demandes.length === 0) {
+      return;
+    }
+
+    forkJoin(demandes).subscribe(() => {
+      this.tousEntretiens = this.tousEntretiens.filter(e => e.statut !== 'REALISE');
+    });
+  }
+
+  telechargerEntretien(entretien: Entretien): void {
+    const contenu = [
+      'Entretien',
+      '-------------------------',
+      `ID : ${entretien.id}`,
+      `Candidature : ${entretien.candidatureId}`,
+      `Recruteur : ${entretien.recruteurId}`,
+      `Type : ${entretien.type}`,
+      `Date / heure : ${new Date(entretien.dateHeure).toLocaleString()}`,
+      `Durée : ${entretien.dureeMinutes} minutes`,
+      `Lieu : ${entretien.lieu || 'Non spécifié'}`,
+      `Lien visio : ${entretien.lienVisio || 'Aucun'}`,
+      `Statut : ${entretien.statut}`,
+      `Feedback global : ${entretien.feedbackGlobal || 'Aucun'}`,
+      `Note globale : ${entretien.noteGlobale ?? 'N/A'}`,
+      `Points forts : ${entretien.pointsForts?.join(', ') || 'Aucun'}`,
+      `Points faibles : ${entretien.pointsFaibles?.join(', ') || 'Aucun'}`,
+      `Recommandation : ${entretien.recommandeEmbauche ? 'Oui' : 'Non'}`,
+      `Créé le : ${new Date(entretien.createdAt).toLocaleString()}`,
+    ].join('\r\n');
+
+    const blob = new Blob([contenu], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `entretien-${entretien.id}.txt`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  telechargerTousEntretiensAVenir(): void {
+    const contenu = this.entretiensAVenir.map((entretien, index) => [
+      `Entretien ${index + 1}`,
+      '-------------------------',
+      `ID : ${entretien.id}`,
+      `Candidature : ${entretien.candidatureId}`,
+      `Recruteur : ${entretien.recruteurId}`,
+      `Type : ${entretien.type}`,
+      `Date / heure : ${new Date(entretien.dateHeure).toLocaleString()}`,
+      `Durée : ${entretien.dureeMinutes} minutes`,
+      `Lieu : ${entretien.lieu || 'Non spécifié'}`,
+      `Lien visio : ${entretien.lienVisio || 'Aucun'}`,
+      `Statut : ${entretien.statut}`,
+      `Feedback global : ${entretien.feedbackGlobal || 'Aucun'}`,
+      `Note globale : ${entretien.noteGlobale ?? 'N/A'}`,
+      `Points forts : ${entretien.pointsForts?.join(', ') || 'Aucun'}`,
+      `Points faibles : ${entretien.pointsFaibles?.join(', ') || 'Aucun'}`,
+      `Recommandation : ${entretien.recommandeEmbauche ? 'Oui' : 'Non'}`,
+      `Créé le : ${new Date(entretien.createdAt).toLocaleString()}`,
+    ].join('\r\n')).join('\r\n\r\n');
+
+    const blob = new Blob([contenu], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `entretiens-a-venir.txt`;
+    link.click();
+    URL.revokeObjectURL(url);
   }
 
   isEntretienPasse(entretien: Entretien): boolean {
