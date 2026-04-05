@@ -1,11 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
+
 import { MobilityService } from '../../services/mobility.service';
 import { CareerService } from '../../services/career.service';
+
 import { MobilityRequest, MobilityStatus } from '../../models/mobility.model';
 import { Career } from '../../models/career.model';
+
 import { MobilityRequestFormComponent } from '../mobility-request-form/mobility-request-form.component';
+import { MotivationPreviewDialogComponent } from '../motivation-preview-dialog/motivation-preview-dialog.component';
 
 type FilterStatus = MobilityStatus | 'ALL';
 
@@ -20,12 +24,10 @@ export class MobilityDashboardComponent implements OnInit {
   careers: Career[] = [];
   isLoading = true;
 
-  // ✅ FIX IMPORTANT TYPE
   selectedStatus: FilterStatus = 'ALL';
 
   MobilityStatus = MobilityStatus;
 
-  // ✅ FIX LISTE TYPESAFE
   statuses: FilterStatus[] = [
     'ALL',
     MobilityStatus.PENDING,
@@ -58,20 +60,24 @@ export class MobilityDashboardComponent implements OnInit {
   ngOnInit(): void {
     this.loadAll();
     this.careerService.getAll().subscribe(data => this.careers = data);
+    
   }
 
   loadAll(): void {
     this.isLoading = true;
+
     this.mobilityService.getAll().subscribe({
       next: (data) => {
         this.requests = data;
         this.isLoading = false;
       },
-      error: () => this.isLoading = false
+      error: () => {
+        this.isLoading = false;
+        this.snackBar.open('Erreur chargement', 'Fermer', { duration: 3000 });
+      }
     });
   }
 
-  // ✅ FIX TYPE FILTER
   get filteredRequests(): MobilityRequest[] {
     if (this.selectedStatus === 'ALL') return this.requests;
     return this.requests.filter(r => r.status === this.selectedStatus);
@@ -89,22 +95,9 @@ export class MobilityDashboardComponent implements OnInit {
     return this.requests.filter(r => r.status === MobilityStatus.REJECTED).length;
   }
 
-  // ✅ FIX MISSING METHOD
-  openRequestForm(): void {
-    const ref = this.dialog.open(MobilityRequestFormComponent, {
-      width: '600px',
-      maxWidth: '95vw',
-      data: { careers: this.careers },
-      panelClass: 'career-dialog'
-    });
-
-    ref.afterClosed().subscribe(result => {
-      if (result) this.loadAll();
-    });
-  }
-
   review(req: MobilityRequest, status: MobilityStatus): void {
-    const comment = prompt(`Commentaire pour "${status}" :`);
+
+    const comment = prompt(`Commentaire pour ${status} :`);
     if (comment === null) return;
 
     this.mobilityService.review(req.id!, {
@@ -113,15 +106,17 @@ export class MobilityDashboardComponent implements OnInit {
       reviewComment: comment
     }).subscribe({
       next: () => {
-        this.snackBar.open(`Demande mise à jour`, 'OK', { duration: 3000 });
+        this.snackBar.open('Demande mise à jour', 'OK', { duration: 3000 });
         this.loadAll();
       },
-      error: () => this.snackBar.open('Erreur', 'Fermer', { duration: 3000 })
+      error: () => {
+        this.snackBar.open('Erreur', 'Fermer', { duration: 3000 });
+      }
     });
   }
 
   delete(req: MobilityRequest): void {
-    if (!confirm(`Supprimer la demande de ${req.employeeName} ?`)) return;
+    if (!confirm(`Supprimer ${req.employeeName} ?`)) return;
 
     this.mobilityService.delete(req.id!).subscribe({
       next: () => {
@@ -130,5 +125,29 @@ export class MobilityDashboardComponent implements OnInit {
       }
     });
   }
-  
+
+  openPreview(req: MobilityRequest): void {
+  this.dialog.open(MotivationPreviewDialogComponent, {
+    width: '92vw',
+    height: '92vh',
+    maxWidth: '92vw',
+    maxHeight: '92vh',
+    data: req,
+    panelClass: 'preview-dialog-fullsize'
+  });
+}
+
+  downloadFile(req: MobilityRequest): void {
+    this.mobilityService.downloadFile(req.id!).subscribe(blob => {
+
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = req.motivationFileName || 'file.pdf';
+      a.click();
+
+      window.URL.revokeObjectURL(url);
+    });
+  }
 }

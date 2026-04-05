@@ -12,54 +12,41 @@ export enum PlanStatus {
 }
 
 export interface MobilityRequest {
-  id: string;
-
+  id?: string;
   employeeId: string;
   employeeName?: string;
-
   currentCareerTitle?: string;
   currentDepartement?: string;
-
   targetCareerId: string;
   targetCareerTitle?: string;
   targetDepartement?: string;
-
   motivationLetter?: string;
-
+  motivationFileName?: string;
+  motivationFileBase64?: string;
   status?: MobilityStatus;
   reviewedBy?: string;
   reviewComment?: string;
   reviewedAt?: string;
-
   requestedAt?: string;
   updatedAt?: string;
 }
 
 export interface CareerPlan {
-  id: string;
-
+  id?: string;
   employeeId: string;
   employeeName?: string;
-
   currentCareerId: string;
   currentCareerTitle?: string;
-
   currentSkills: string[];
-
   targetCareerId: string;
   targetCareerTitle?: string;
-
   targetSkills?: string[];
   skillsAlreadyMet?: string[];
   skillsToAcquire?: string[];
-
   progressPercent?: number;
-
-  status: PlanStatus;
-
+  status?: PlanStatus;
   createdBy?: string;
   notes?: string;
-
   createdAt?: string;
   updatedAt?: string;
 }

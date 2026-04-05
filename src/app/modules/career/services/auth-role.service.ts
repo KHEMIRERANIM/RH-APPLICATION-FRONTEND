@@ -32,4 +32,5 @@ export class AuthRoleService {
   isAdminOrRH(): boolean {
     return this.isAdmin() || this.isRH();
   }
+  
 }

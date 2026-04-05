@@ -1,6 +1,9 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+
+import { CareerRoutingModule } from './career-routing.module';
+
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSortModule } from '@angular/material/sort';
@@ -14,7 +17,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { CareerRoutingModule } from './career-routing.module';
+
 import { CareerListComponent } from './components/career-list/career-list.component';
 import { CareerFormComponent } from './components/career-form/career-form.component';
 import { MobilityDashboardComponent } from './components/mobility-dashboard/mobility-dashboard.component';
@@ -24,7 +27,7 @@ import { CareerPlanFormComponent } from './components/career-plan-form/career-pl
 import { CareerEmployeesDialogComponent } from './components/career-employees-dialog/career-employees-dialog.component';
 import { EmployeeMobilityComponent } from './components/employee-mobility/employee-mobility.component';
 import { EmployeePlanComponent } from './components/employee-plan/employee-plan.component';
-
+import { MotivationPreviewDialogComponent } from './components/motivation-preview-dialog/motivation-preview-dialog.component';
 
 @NgModule({
   declarations: [
@@ -37,13 +40,14 @@ import { EmployeePlanComponent } from './components/employee-plan/employee-plan.
     CareerEmployeesDialogComponent,
     EmployeeMobilityComponent,
     EmployeePlanComponent,
-    
+    MotivationPreviewDialogComponent
   ],
   imports: [
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
     CareerRoutingModule,
+
     MatTableModule,
     MatPaginatorModule,
     MatSortModule,

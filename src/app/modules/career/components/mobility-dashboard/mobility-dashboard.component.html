@@ -10,60 +10,39 @@
         Gérez les demandes de changement de poste
       </p>
     </div>
-
-    
   </div>
 
   <!-- KPI -->
   <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px;">
     <div style="background:white; border-radius:16px; padding:20px;
                 border:1px solid #f3f4f6; box-shadow:0 1px 3px rgba(0,0,0,0.06);">
-      <p style="font-size:11px; font-weight:700; color:#6b7280; text-transform:uppercase; margin:0;">
-        En attente
-      </p>
-      <p style="font-size:36px; font-weight:800; color:#d97706; margin:8px 0 0;">
-        {{ totalPending }}
-      </p>
+      <p style="font-size:11px; font-weight:700; color:#6b7280; text-transform:uppercase; margin:0;">En attente</p>
+      <p style="font-size:36px; font-weight:800; color:#d97706; margin:8px 0 0;">{{ totalPending }}</p>
     </div>
-
     <div style="background:white; border-radius:16px; padding:20px;
                 border:1px solid #f3f4f6; box-shadow:0 1px 3px rgba(0,0,0,0.06);">
-      <p style="font-size:11px; font-weight:700; color:#6b7280; text-transform:uppercase; margin:0;">
-        Approuvées
-      </p>
-      <p style="font-size:36px; font-weight:800; color:#16a34a; margin:8px 0 0;">
-        {{ totalApproved }}
-      </p>
+      <p style="font-size:11px; font-weight:700; color:#6b7280; text-transform:uppercase; margin:0;">Approuvées</p>
+      <p style="font-size:36px; font-weight:800; color:#16a34a; margin:8px 0 0;">{{ totalApproved }}</p>
     </div>
-
     <div style="background:white; border-radius:16px; padding:20px;
                 border:1px solid #f3f4f6; box-shadow:0 1px 3px rgba(0,0,0,0.06);">
-      <p style="font-size:11px; font-weight:700; color:#6b7280; text-transform:uppercase; margin:0;">
-        Refusées
-      </p>
-      <p style="font-size:36px; font-weight:800; color:#dc2626; margin:8px 0 0;">
-        {{ totalRejected }}
-      </p>
+      <p style="font-size:11px; font-weight:700; color:#6b7280; text-transform:uppercase; margin:0;">Refusées</p>
+      <p style="font-size:36px; font-weight:800; color:#dc2626; margin:8px 0 0;">{{ totalRejected }}</p>
     </div>
   </div>
 
-  <!-- Filtres statut (FIX TYPESCRIPT ICI) -->
+  <!-- Filtres statut -->
   <div style="display:flex; gap:8px; flex-wrap:wrap;">
     <button *ngFor="let s of statuses"
             (click)="selectedStatus = s"
             [style]="selectedStatus === s
               ? 'padding:6px 16px; border-radius:9999px; border:none; background:#7c3aed; color:white; cursor:pointer; font-size:13px; font-weight:600; font-family:inherit;'
               : 'padding:6px 16px; border-radius:9999px; border:1px solid #e5e7eb; background:white; color:#374151; cursor:pointer; font-size:13px; font-weight:500; font-family:inherit;'">
-
-      {{ s === 'ALL'
-        ? '🔍 Tous'
-        : s === 'PENDING'
-          ? '⏳ En attente'
-          : s === 'APPROVED'
-            ? '✅ Approuvés'
-            : s === 'REJECTED'
-              ? '❌ Refusés'
-              : '⏸️ En suspens' }}
+      {{ s === 'ALL' ? '🔍 Tous'
+        : s === 'PENDING' ? '⏳ En attente'
+        : s === 'APPROVED' ? '✅ Approuvés'
+        : s === 'REJECTED' ? '❌ Refusés'
+        : '⏸️ En suspens' }}
     </button>
   </div>
 
@@ -82,46 +61,74 @@
 
     <div *ngFor="let req of filteredRequests"
          style="background:white; border-radius:16px; padding:20px;
-                border:1px solid #f3f4f6; box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+                border:1px solid #f3f4f6; box-shadow:0 1px 3px rgba(0,0,0,0.06); width:100%;">
 
-      <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; width:100%;">
 
-        <!-- Info -->
-        <div style="display:flex; gap:14px; align-items:flex-start;">
+        <!-- Info employé -->
+        <div style="display:flex; gap:14px; align-items:flex-start; flex:1; min-width:0;">
           <div style="width:44px; height:44px; border-radius:12px; background:#ede9fe;
                       display:flex; align-items:center; justify-content:center;
-                      font-size:18px;">👤</div>
+                      font-size:18px; flex-shrink:0;">👤</div>
 
-          <div>
+          <div style="min-width:0;">
             <p style="font-size:15px; font-weight:700; color:#111827; margin:0;">
               {{ req.employeeName }}
             </p>
-
             <p style="font-size:12px; color:#6b7280; margin:4px 0 0;">
               {{ req.currentCareerTitle || '—' }}
               <span style="margin:0 6px;">→</span>
               <strong style="color:#7c3aed;">{{ req.targetCareerTitle }}</strong>
             </p>
 
-            <p *ngIf="req.motivationLetter"
-               style="font-size:12px; color:#9ca3af; margin:6px 0 0; font-style:italic;">
-              "{{ req.motivationLetter }}"
-            </p>
+            <div style="display:flex; align-items:center; gap:10px; margin-top:8px; flex-wrap:wrap;">
+              <span style="font-size:12px; color:#6b7280;">
+                📎 {{ req.motivationFileName || req.motivationLetter || 'Aucun fichier' }}
+              </span>
+              <button (click)="openPreview(req)"
+                      style="padding:4px 10px; border-radius:6px;
+                             border:1px solid #7c3aed; background:white;
+                             color:#7c3aed; cursor:pointer; font-size:11px;">
+                👁️ Voir
+              </button>
+              <button (click)="downloadFile(req)"
+                      style="padding:4px 10px; border-radius:6px;
+                             border:1px solid #16a34a; background:white;
+                             color:#16a34a; cursor:pointer; font-size:11px;">
+                ⬇ Download
+              </button>
+            </div>
           </div>
         </div>
+        <!-- fin card-left -->
 
         <!-- Actions -->
-        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
+        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px; flex-shrink:0;">
 
           <span [style]="'padding:4px 12px; border-radius:9999px; font-size:12px; font-weight:700;' + statusColors[req.status]">
             {{ statusLabels[req.status] }}
           </span>
 
           <div *ngIf="req.status === MobilityStatus.PENDING"
-               style="display:flex; gap:6px;">
-            <button (click)="review(req, MobilityStatus.APPROVED)">✅</button>
-            <button (click)="review(req, MobilityStatus.ON_HOLD)">⏸️</button>
-            <button (click)="review(req, MobilityStatus.REJECTED)">❌</button>
+               style="display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end;">
+            <button (click)="review(req, MobilityStatus.APPROVED)"
+                    style="padding:6px 12px; border-radius:8px; border:none;
+                           background:#dcfce7; color:#166534; cursor:pointer;
+                           font-size:12px; font-weight:600; font-family:inherit;">
+              ✅ Approuver
+            </button>
+            <button (click)="review(req, MobilityStatus.ON_HOLD)"
+                    style="padding:6px 12px; border-radius:8px; border:none;
+                           background:#e0e7ff; color:#3730a3; cursor:pointer;
+                           font-size:12px; font-weight:600; font-family:inherit;">
+              ⏸️ Suspendre
+            </button>
+            <button (click)="review(req, MobilityStatus.REJECTED)"
+                    style="padding:6px 12px; border-radius:8px; border:none;
+                           background:#fee2e2; color:#991b1b; cursor:pointer;
+                           font-size:12px; font-weight:600; font-family:inherit;">
+              ❌ Refuser
+            </button>
           </div>
 
           <p *ngIf="req.reviewComment"
@@ -130,12 +137,21 @@
           </p>
 
           <button (click)="delete(req)"
-                  style="background:none; border:none; cursor:pointer; color:#dc2626;">
+                  style="background:none; border:none; cursor:pointer; color:#dc2626;
+                         font-size:12px; font-family:inherit;">
             🗑️ Supprimer
           </button>
+
         </div>
+        <!-- fin card-right -->
 
       </div>
+      <!-- fin card-inner -->
+
     </div>
+    <!-- fin *ngFor -->
+
   </div>
+  <!-- fin liste -->
+
 </div>

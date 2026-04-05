@@ -24,18 +24,26 @@ export enum CareerLevel {
 
 export interface Career {
   id?: string;
+
   title: string;
   description?: string;
+
   level: CareerLevel;
   domain: CareerDomain;
+
   requiredSkills?: string[];
+
   departement?: string;
   poste?: string;
+
   salaryMin?: number;
   salaryMax?: number;
+
   isRemoteFriendly?: boolean;
   isAccessibleForDisabled?: boolean;
+
   userId?: string;
+
   createdAt?: string;
   updatedAt?: string;
 }
