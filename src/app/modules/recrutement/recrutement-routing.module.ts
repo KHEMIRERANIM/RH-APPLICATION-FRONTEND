@@ -10,13 +10,21 @@ import { PlanifierEntretienComponent } from './entretiens/planifier-entretien.co
 import { FeedbackEntretienComponent } from './entretiens/feedback-entretien.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { CharteComponent } from './charte/charte.component';
+import { CalendrierComponent } from './calendrier/calendrier.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'offres', pathMatch: 'full' },
+
+  // 🔹 CANDIDAT
   { path: 'offres', component: OffresListComponent },
   { path: 'offres/:id', component: OffreDetailComponent },
   { path: 'postuler/:offreId', component: PostulerComponent },
   { path: 'mes-candidatures', component: MesCandidaturesComponent },
+
+  // 🔥 ✅ AJOUT IMPORTANT (POUR TOUS)
+  { path: 'calendrier', component: CalendrierComponent },
+
+  // 🔹 ADMIN
   { path: 'admin/dashboard', component: DashboardComponent },
   { path: 'admin/offres/creer', component: CreerOffreComponent },
   { path: 'admin/offres', component: OffresListComponent },
@@ -25,7 +33,12 @@ const routes: Routes = [
   { path: 'admin/entretiens', component: PlanifierEntretienComponent },
   { path: 'admin/entretiens/planifier', component: PlanifierEntretienComponent },
   { path: 'admin/entretiens/:id/feedback', component: FeedbackEntretienComponent },
+
+  // 🔹 AUTRES
   { path: 'charte/:candidatureId', component: CharteComponent },
+
+  // (optionnel garder admin aussi)
+  { path: 'admin/calendrier', component: CalendrierComponent },
 ];
 
 @NgModule({

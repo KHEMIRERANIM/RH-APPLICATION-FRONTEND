@@ -1,0 +1,243 @@
+<div class="flex flex-col flex-auto min-w-0 p-6 sm:p-10">
+
+  <!-- Header -->
+  <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+    <div>
+      <h2 class="text-3xl font-extrabold tracking-tight">Calendrier des entretiens</h2>
+      <p class="text-secondary mt-1">Vue complète de tous vos entretiens</p>
+    </div>
+    <div class="flex gap-2">
+      <button mat-stroked-button (click)="exporterExcel()">
+        <mat-icon class="icon-size-4 mr-1">download</mat-icon>
+        Exporter Excel
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="flex justify-center py-20">
+    <mat-progress-spinner [diameter]="40" [mode]="'indeterminate'"></mat-progress-spinner>
+  </div>
+
+  <ng-container *ngIf="!loading">
+
+    <!-- KPIs -->
+    <div class="grid grid-cols-3 gap-4 mb-6">
+      <div class="bg-card rounded-2xl shadow p-4 text-center">
+        <div class="text-3xl font-extrabold text-indigo-600">{{ totalPlanifies }}</div>
+        <div class="text-sm text-secondary mt-1">Planifiés</div>
+      </div>
+      <div class="bg-card rounded-2xl shadow p-4 text-center">
+        <div class="text-3xl font-extrabold text-green-600">{{ totalRealises }}</div>
+        <div class="text-sm text-secondary mt-1">Réalisés</div>
+      </div>
+      <div class="bg-card rounded-2xl shadow p-4 text-center">
+        <div class="text-3xl font-extrabold text-red-500">{{ totalAnnules }}</div>
+        <div class="text-sm text-secondary mt-1">Annulés</div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <!-- Calendrier -->
+      <div class="lg:col-span-2 bg-card rounded-2xl shadow overflow-hidden">
+
+        <!-- Navigation -->
+        <div class="flex items-center justify-between px-6 py-4 border-b">
+          <button mat-icon-button (click)="moisPrecedent()">
+            <mat-icon [svgIcon]="'heroicons_outline:chevron-left'"></mat-icon>
+          </button>
+          <div class="flex items-center gap-3">
+            <h3 class="text-lg font-semibold">{{ titreCalendrier }}</h3>
+            <button mat-stroked-button class="text-xs h-8" (click)="aujourdhui()">
+              Aujourd'hui
+            </button>
+          </div>
+          <button mat-icon-button (click)="moisSuivant()">
+            <mat-icon [svgIcon]="'heroicons_outline:chevron-right'"></mat-icon>
+          </button>
+        </div>
+
+        <!-- Jours de la semaine -->
+        <div class="grid grid-cols-7 border-b">
+          <div *ngFor="let jour of joursNoms"
+            class="text-center text-xs font-medium text-secondary py-2">
+            {{ jour }}
+          </div>
+        </div>
+
+        <!-- Grille du mois -->
+        <div>
+          <div *ngFor="let semaine of semaines" class="grid grid-cols-7 border-b last:border-b-0">
+            <div *ngFor="let jour of semaine"
+              class="min-h-20 p-1 border-r last:border-r-0 cursor-pointer hover:bg-hover transition-colors"
+              [ngClass]="{
+                'bg-gray-50': !jour.estMoisCourant,
+                'ring-2 ring-primary ring-inset': jour.estAujourdhui
+              }"
+              (click)="selectionnerJour(jour)">
+
+              <!-- Numéro du jour -->
+              <div class="flex justify-end p-1">
+                <span class="text-sm w-7 h-7 flex items-center justify-center rounded-full"
+                  [ngClass]="{
+                    'text-secondary': !jour.estMoisCourant,
+                    'bg-primary text-white font-bold': jour.estAujourdhui,
+                    'font-medium': jour.estMoisCourant && !jour.estAujourdhui
+                  }">
+                  {{ jour.date.getDate() }}
+                </span>
+              </div>
+
+              <!-- Entretiens du jour -->
+              <div class="flex flex-col gap-0.5 mt-0.5">
+                <div *ngFor="let e of jour.entretiens | slice:0:2"
+                  class="text-xs px-1.5 py-0.5 rounded text-white truncate cursor-pointer"
+                  [ngClass]="getCouleurStatut(e.statut)"
+                  (click)="selectionnerEntretien(e); $event.stopPropagation()"
+                  [matTooltip]="getIconType(e.type) + ' ' + (e.dateHeure | date:'HH:mm')">
+                  {{ getIconType(e.type) }} {{ e.dateHeure | date:'HH:mm' }}
+                </div>
+                <div *ngIf="jour.entretiens.length > 2"
+                  class="text-xs text-secondary px-1">
+                  +{{ jour.entretiens.length - 2 }} autres
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Légende -->
+        <div class="flex items-center gap-4 px-6 py-3 border-t text-xs text-secondary">
+          <span class="flex items-center gap-1">
+            <span class="w-3 h-3 rounded-full bg-indigo-500"></span> Planifié
+          </span>
+          <span class="flex items-center gap-1">
+            <span class="w-3 h-3 rounded-full bg-green-500"></span> Réalisé
+          </span>
+          <span class="flex items-center gap-1">
+            <span class="w-3 h-3 rounded-full bg-red-500"></span> Annulé
+          </span>
+          <span class="flex items-center gap-1">
+            <span class="w-3 h-3 rounded-full bg-yellow-500"></span> Reporté
+          </span>
+        </div>
+      </div>
+
+      <!-- Panneau droit -->
+      <div class="flex flex-col gap-4">
+
+        <!-- Détail entretien sélectionné -->
+        <div *ngIf="selectedEntretien" class="bg-card rounded-2xl shadow p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-semibold">Détail entretien</h3>
+            <button mat-icon-button (click)="fermer()">
+              <mat-icon [svgIcon]="'heroicons_outline:x-mark'" class="icon-size-4"></mat-icon>
+            </button>
+          </div>
+
+          <div class="flex flex-col gap-3">
+            <div class="flex items-center gap-2">
+              <span class="text-2xl">{{ getIconType(selectedEntretien.type) }}</span>
+              <span class="font-medium">{{ selectedEntretien.type }}</span>
+            </div>
+
+            <span class="px-2 py-0.5 rounded-full text-xs font-medium w-fit"
+              [ngClass]="getBadgeStatut(selectedEntretien.statut)">
+              {{ selectedEntretien.statut }}
+            </span>
+
+            <div class="text-sm text-secondary">
+              📅 {{ selectedEntretien.dateHeure | date:'dd/MM/yyyy à HH:mm' }}
+            </div>
+            <div class="text-sm text-secondary">
+              ⏱️ {{ selectedEntretien.dureeMinutes }} minutes
+            </div>
+            <div *ngIf="selectedEntretien.lieu" class="text-sm text-secondary">
+              📍 {{ selectedEntretien.lieu }}
+            </div>
+
+            <button *ngIf="selectedEntretien.lienVisio"
+              mat-flat-button class="bg-green-500 text-white mt-2"
+              (click)="rejoindreMeet(selectedEntretien.lienVisio)">
+              <mat-icon class="mr-1">videocam</mat-icon>
+              Rejoindre Meet
+            </button>
+
+            <mat-divider></mat-divider>
+
+            <button mat-stroked-button
+              (click)="exporterGoogleCalendar(selectedEntretien)">
+              <mat-icon class="icon-size-4 mr-1">event</mat-icon>
+              Ajouter à Google Calendar
+            </button>
+          </div>
+        </div>
+
+        <!-- Entretiens du jour sélectionné -->
+        <div *ngIf="selectedJour && !selectedEntretien" class="bg-card rounded-2xl shadow p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-semibold">
+              {{ selectedJour.date | date:'dd MMMM yyyy' }}
+            </h3>
+            <button mat-icon-button (click)="fermer()">
+              <mat-icon [svgIcon]="'heroicons_outline:x-mark'" class="icon-size-4"></mat-icon>
+            </button>
+          </div>
+
+          <div *ngIf="selectedJour.entretiens.length === 0"
+            class="text-secondary text-sm text-center py-4">
+            Aucun entretien ce jour
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <div *ngFor="let e of selectedJour.entretiens"
+              class="p-3 rounded-xl border cursor-pointer hover:bg-hover"
+              (click)="selectionnerEntretien(e)">
+              <div class="flex items-center gap-2 mb-1">
+                <span>{{ getIconType(e.type) }}</span>
+                <span class="text-sm font-medium">{{ e.dateHeure | date:'HH:mm' }}</span>
+                <span class="px-2 py-0.5 rounded-full text-xs"
+                  [ngClass]="getBadgeStatut(e.statut)">
+                  {{ e.statut }}
+                </span>
+              </div>
+              <div class="text-xs text-secondary">{{ e.dureeMinutes }} min</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Prochains entretiens -->
+        <div class="bg-card rounded-2xl shadow p-6">
+          <h3 class="font-semibold mb-4">Prochains entretiens</h3>
+
+          <div *ngIf="entretiensAVenir.length === 0"
+            class="text-secondary text-sm text-center py-4">
+            Aucun entretien à venir
+          </div>
+
+          <div class="flex flex-col gap-3">
+            <div *ngFor="let e of entretiensAVenir"
+              class="flex items-center gap-3 p-3 rounded-xl bg-indigo-50 border border-indigo-200 cursor-pointer"
+              (click)="selectionnerEntretien(e)">
+              <span class="text-xl">{{ getIconType(e.type) }}</span>
+              <div class="flex flex-col flex-auto">
+                <span class="text-sm font-medium">
+                  {{ e.dateHeure | date:'dd/MM à HH:mm' }}
+                </span>
+                <span class="text-xs text-secondary">{{ e.dureeMinutes }} min</span>
+              </div>
+              <button *ngIf="e.lienVisio" mat-icon-button class="text-green-600"
+                (click)="rejoindreMeet(e.lienVisio); $event.stopPropagation()"
+                matTooltip="Rejoindre">
+                <mat-icon>videocam</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </ng-container>
+</div>
