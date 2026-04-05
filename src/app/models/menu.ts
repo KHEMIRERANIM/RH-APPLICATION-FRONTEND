@@ -7,8 +7,8 @@
   image?: string;
   quantite: number;
   disponible: boolean;
+  ingredients?: string;
 }
-
 export interface Menu {
   id?: string;
   titre: string;

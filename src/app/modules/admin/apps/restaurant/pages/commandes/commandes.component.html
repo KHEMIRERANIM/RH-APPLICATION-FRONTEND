@@ -123,16 +123,16 @@
 
   <!-- VALIDATION PAR CODE — ADMIN -->
   <div *ngIf="roleService.isAdmin()"
-    class="mb-6 p-5 bg-purple-50 border border-purple-200 rounded-2xl">
-    <p class="text-sm font-bold text-purple-800 mb-3">Valider une livraison par code de retrait</p>
+    class="mb-6 p-5 bg-blue-50 border border-blue-200 rounded-2xl">
+    <p class="text-sm font-bold text-blue-800 mb-3">Valider une livraison par code de retrait</p>
     <div class="flex gap-3">
       <input type="text" placeholder="Saisir le code (ex: B7F2)"
         [(ngModel)]="codeRetrait"
         (ngModelChange)="codeRetrait = codeRetrait.toUpperCase()"
         maxlength="4"
-        class="flex-1 px-4 py-2 border border-purple-300 rounded-xl text-sm font-mono font-bold tracking-widest text-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white" />
+        class="flex-1 px-4 py-2 border border-blue-300 rounded-xl text-sm font-mono font-bold tracking-widest text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
       <button (click)="validerParCode()"
-        class="px-6 py-2 bg-purple-700 text-white rounded-xl font-bold hover:bg-purple-800 text-sm">
+        class="px-6 py-2 bg-blue-700 text-white rounded-xl font-bold hover:bg-blue-800 text-sm">
         Valider la livraison
       </button>
     </div>
@@ -146,21 +146,21 @@
       <p class="text-xs text-gray-400 mt-1">Mes commandes</p>
     </div>
     <div class="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm text-center">
-      <p class="text-3xl font-extrabold text-yellow-600">{{ getCountByStatut('en_attente') }}</p>
+      <p class="text-3xl font-extrabold text-blue-500">{{ getCountByStatut('en_attente') }}</p>
       <p class="text-xs text-gray-400 mt-1">En attente</p>
     </div>
     <div class="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm text-center">
-      <p class="text-3xl font-extrabold text-purple-600">{{ getTotalMontant() | number:'1.2-2' }} TND</p>
+      <p class="text-3xl font-extrabold text-blue-700">{{ getTotalMontant() | number:'1.2-2' }} TND</p>
       <p class="text-xs text-gray-400 mt-1">Total depense</p>
     </div>
   </div>
 
   <!-- TICKET DE RETRAIT — EMPLOYE (commandes pretes) -->
   <div *ngIf="roleService.isEmploye() && getCommandesPretes().length > 0" class="mb-6">
-    <p class="text-sm font-bold text-purple-700 mb-3">Votre repas est pret ! Montrez ce ticket au comptoir :</p>
+    <p class="text-sm font-bold text-blue-700 mb-3">Votre repas est pret ! Montrez ce ticket au comptoir :</p>
     <div *ngFor="let c of getCommandesPretes()"
       class="mb-3 p-5 bg-white border-2 border-purple-400 rounded-2xl shadow-lg relative overflow-hidden">
-      <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-purple-500 to-blue-500"></div>
+      <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-blue-500 to-indigo-500"></div>
       <div class="flex items-center justify-between mt-2">
         <div>
           <p class="text-xs text-gray-400 font-semibold mb-1">TICKET DE RETRAIT</p>
@@ -168,14 +168,14 @@
           <p class="text-sm text-gray-600">Date : {{ c.dateCommande }}</p>
           <div class="flex flex-wrap gap-1 mt-2">
             <span *ngFor="let platId of c.plats"
-              class="text-xs px-2 py-1 bg-purple-50 text-purple-700 rounded-full border border-purple-200">
+              class="text-xs px-2 py-1 bg-blue-50 text-blue-700 rounded-full border border-blue-200">
               {{ getPlatNom(platId) }}
             </span>
           </div>
           <p class="text-sm font-bold text-blue-700 mt-2">{{ c.montantTotal | number:'1.2-2' }} TND</p>
         </div>
         <div class="text-center ml-4">
-          <div class="w-24 h-24 bg-purple-700 rounded-2xl flex items-center justify-center shadow-lg">
+          <div class="w-24 h-24 bg-blue-700 rounded-2xl flex items-center justify-center shadow-lg">
             <span class="text-white font-black text-3xl tracking-widest">{{ getCodeRetrait(c) }}</span>
           </div>
           <p class="text-xs text-gray-400 mt-2">Code de retrait</p>
@@ -184,23 +184,65 @@
     </div>
   </div>
 
-    <!-- TICKET EMPLOYE -->
+      <!-- BLOC ALLERGIE EMPLOYE -->
+  <div *ngIf="roleService.isEmploye()" class="mb-6 p-5 bg-blue-50 border border-blue-200 rounded-2xl">
+    <div class="flex items-center gap-2 mb-3">
+      <p class="text-sm font-bold text-blue-800">Mes allergies — Verification IA</p>
+    </div>
+    <div class="flex gap-2 mb-3">
+      <input type="text" placeholder="Ajouter une allergie (ex: gluten, lactose...)"
+        [(ngModel)]="nouvelleAllergie"
+        (keyup.enter)="ajouterAllergie()"
+        class="flex-1 px-4 py-2 border border-blue-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+      <button (click)="ajouterAllergie()"
+        class="px-4 py-2 bg-blue-700 text-white rounded-xl text-sm font-bold hover:bg-blue-800">
+        Ajouter
+      </button>
+    </div>
+    <div *ngIf="allergiesEmploye.length > 0" class="flex flex-wrap gap-2 mb-3">
+      <span *ngFor="let a of allergiesEmploye"
+        class="flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 border border-blue-300 rounded-full text-xs font-semibold">
+        {{ a }}
+        <button (click)="supprimerAllergie(a)" class="ml-1 font-bold hover:text-blue-900">x</button>
+      </span>
+    </div>
+    <button *ngIf="allergiesEmploye.length > 0"
+      (click)="verifierAllergies()"
+      [disabled]="analyseEnCours"
+      class="px-5 py-2 bg-blue-700 text-white rounded-xl text-sm font-bold hover:bg-blue-800 disabled:opacity-50">
+      {{ analyseEnCours ? 'Analyse en cours...' : 'Verifier les plats disponibles' }}
+    </button>
+    <div *ngIf="alertesAllergie.length > 0" class="mt-4 space-y-2">
+      <p class="text-sm font-bold text-blue-700">Plats a eviter :</p>
+      <div *ngFor="let alerte of alertesAllergie"
+        class="p-3 bg-white border border-blue-200 rounded-xl flex items-start gap-3">
+        <div class="flex-1">
+          <p class="font-semibold text-sm text-gray-900">{{ alerte.nom }}</p>
+          <p class="text-xs text-blue-600 mt-1">Conflits : {{ alerte.conflits.join(', ') }}</p>
+          <p class="text-xs text-gray-400">Allergenes : {{ alerte.allergenes_presents.join(', ') }}</p>
+        </div>
+        <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs font-bold">A eviter</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TICKET EMPLOYE -->
   <div *ngIf="roleService.isEmploye() && getCommandesPretes().length > 0" class="mb-6">
-    <p class="text-sm font-bold text-purple-700 mb-3">Votre repas est pret ! Montrez ce ticket au comptoir :</p>
+    <p class="text-sm font-bold text-blue-700 mb-3">Votre repas est pret ! Montrez ce ticket au comptoir :</p>
     <div *ngFor="let c of getCommandesPretes()" class="mb-3 p-5 bg-white border-2 border-purple-400 rounded-2xl shadow-lg relative overflow-hidden">
-      <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-purple-500 to-blue-500"></div>
+      <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-blue-500 to-indigo-500"></div>
       <div class="flex items-center justify-between mt-2">
         <div>
           <p class="text-xs text-gray-400 font-semibold mb-1">TICKET DE RETRAIT</p>
           <p class="text-sm text-gray-600">Menu : <strong>{{ getMenuTitre(c.menuId) }}</strong></p>
           <p class="text-sm text-gray-600">Date : {{ c.dateCommande }}</p>
           <div class="flex flex-wrap gap-1 mt-2">
-            <span *ngFor="let platId of c.plats" class="text-xs px-2 py-1 bg-purple-50 text-purple-700 rounded-full border border-purple-200">{{ getPlatNom(platId) }}</span>
+            <span *ngFor="let platId of c.plats" class="text-xs px-2 py-1 bg-blue-50 text-blue-700 rounded-full border border-blue-200">{{ getPlatNom(platId) }}</span>
           </div>
           <p class="text-sm font-bold text-blue-700 mt-2">{{ c.montantTotal | number:'1.2-2' }} TND</p>
         </div>
         <div class="text-center ml-4">
-          <div class="w-24 h-24 bg-purple-700 rounded-2xl flex items-center justify-center shadow-lg">
+          <div class="w-24 h-24 bg-blue-700 rounded-2xl flex items-center justify-center shadow-lg">
             <span class="text-white font-black text-3xl tracking-widest">{{ getCodeRetrait(c) }}</span>
           </div>
           <p class="text-xs text-gray-400 mt-2">Code de retrait</p>
@@ -331,5 +373,7 @@
   </div>
 
 </div>
+
+
 
 

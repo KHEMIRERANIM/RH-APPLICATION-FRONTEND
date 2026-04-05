@@ -12,17 +12,14 @@
   </div>
 
   <div *ngIf="successMsg" class="mb-4 p-3 bg-green-100 text-green-700 rounded-xl flex justify-between">
-    <span>{{ successMsg }}</span>
-    <button (click)="successMsg=''" class="font-bold">X</button>
+    <span>{{ successMsg }}</span><button (click)="successMsg=''" class="font-bold">X</button>
   </div>
   <div *ngIf="errorMsg" class="mb-4 p-3 bg-red-100 text-red-700 rounded-xl flex justify-between">
-    <span>{{ errorMsg }}</span>
-    <button (click)="errorMsg=''" class="font-bold">X</button>
+    <span>{{ errorMsg }}</span><button (click)="errorMsg=''" class="font-bold">X</button>
   </div>
 
   <!-- Formulaire creation menu -->
-  <div *ngIf="showCreateForm && roleService.isAdmin()"
-    class="mb-6 p-5 bg-blue-50 border border-blue-200 rounded-2xl">
+  <div *ngIf="showCreateForm && roleService.isAdmin()" class="mb-6 p-5 bg-blue-50 border border-blue-200 rounded-2xl">
     <h3 class="font-bold text-gray-800 mb-4">Nouveau Menu</h3>
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
       <input type="text" placeholder="Titre" [(ngModel)]="newMenu.titre"
@@ -36,20 +33,13 @@
       </select>
     </div>
     <div class="flex gap-3">
-      <button (click)="createMenu()"
-        class="px-5 py-2 bg-blue-700 text-white rounded-xl text-sm font-bold hover:bg-blue-800">
-        Creer
-      </button>
-      <button (click)="showCreateForm = false"
-        class="px-5 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-sm hover:bg-gray-50">
-        Annuler
-      </button>
+      <button (click)="createMenu()" class="px-5 py-2 bg-blue-700 text-white rounded-xl text-sm font-bold hover:bg-blue-800">Creer</button>
+      <button (click)="showCreateForm = false" class="px-5 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-sm">Annuler</button>
     </div>
   </div>
 
   <!-- Formulaire edition menu -->
-  <div *ngIf="showEditMenuForm && roleService.isAdmin()"
-    class="mb-6 p-5 bg-yellow-50 border border-yellow-200 rounded-2xl">
+  <div *ngIf="showEditMenuForm && roleService.isAdmin()" class="mb-6 p-5 bg-blue-50 border border-blue-200 rounded-2xl">
     <h3 class="font-bold text-gray-800 mb-4">Modifier le Menu</h3>
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
       <input type="text" placeholder="Titre" [(ngModel)]="editMenu.titre"
@@ -63,21 +53,15 @@
       </select>
     </div>
     <div class="flex gap-3">
-      <button (click)="saveEditMenu()"
-        class="px-5 py-2 bg-yellow-600 text-white rounded-xl text-sm font-bold hover:bg-yellow-700">
-        Sauvegarder
-      </button>
-      <button (click)="showEditMenuForm = false"
-        class="px-5 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-sm hover:bg-gray-50">
-        Annuler
-      </button>
+      <button (click)="saveEditMenu()" class="px-5 py-2 bg-blue-700 text-white rounded-xl text-sm font-bold hover:bg-blue-800">Sauvegarder</button>
+      <button (click)="showEditMenuForm = false" class="px-5 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-sm">Annuler</button>
     </div>
   </div>
 
-  <!-- Formulaire ajout plat -->
-  <div *ngIf="showAddPlatForm && roleService.isAdmin()"
-    class="mb-6 p-5 bg-green-50 border border-green-200 rounded-2xl">
-    <h3 class="font-bold text-gray-800 mb-4">Ajouter un Plat</h3>
+  <!-- Formulaire ajout plat avec IA -->
+  <div *ngIf="showAddPlatForm && roleService.isAdmin()" class="mb-6 p-5 bg-indigo-50 border border-indigo-200 rounded-2xl">
+    <h3 class="font-bold text-gray-800 mb-1">Ajouter un Plat</h3>
+    <p class="text-xs text-indigo-700 mb-4">L IA detecte automatiquement les allergenes et suggere les tags</p>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
       <input type="text" placeholder="Nom du plat" [(ngModel)]="newPlat.nom"
         class="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
@@ -87,30 +71,82 @@
         class="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
       <input type="number" placeholder="Quantite" [(ngModel)]="newPlat.quantite"
         class="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-      <input type="text" placeholder="Tags (ex: vegetarien, sans_gluten)" [(ngModel)]="newPlatTags"
-        class="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 sm:col-span-2" />
-    </div>
-    <div class="flex items-center gap-3 mb-4">
-      <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
-        <input type="checkbox" [(ngModel)]="newPlat.disponible" class="rounded" />
-        Disponible
+      <input type="text" placeholder="Tags (remplis automatiquement par l IA)" [(ngModel)]="newPlatTags"
+        class="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer px-4 py-2">
+        <input type="checkbox" [(ngModel)]="newPlat.disponible" class="rounded" /> Disponible
       </label>
     </div>
+
+    <!-- Bloc IA -->
+    <div class="mb-4 p-4 bg-white border-2 border-indigo-200 rounded-xl">
+      <div class="flex items-center gap-2 mb-3">
+        <div class="w-6 h-6 bg-green-600 rounded-lg flex items-center justify-center">
+          <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+          </svg>
+        </div>
+        <p class="text-sm font-bold text-indigo-800">Detection IA des allergenes</p>
+      </div>
+      <div class="flex gap-2 mb-3">
+        <input type="text" placeholder="Saisir les ingredients (ex: farine oeuf lait tomate boeuf)"
+          [(ngModel)]="newPlat.ingredients"
+          class="flex-1 px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+        <button (click)="analyserNouveauPlat()" [disabled]="analyseEnCours || !newPlat.ingredients"
+          class="px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 disabled:opacity-40 whitespace-nowrap">
+          {{ analyseEnCours ? 'Analyse...' : 'Analyser' }}
+        </button>
+      </div>
+      <div *ngIf="analyseResultat" class="space-y-2 pt-2 border-t border-indigo-100">
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-gray-500 font-semibold">Niveau de risque :</span>
+          <span class="px-2 py-0.5 rounded-full text-xs font-bold" [ngClass]="getNiveauClass(analyseResultat.niveau_risque)">
+            {{ analyseResultat.niveau_risque }}
+          </span>
+        </div>
+        <div *ngIf="analyseResultat.allergenes.length > 0">
+          <p class="text-xs font-semibold text-red-600 mb-1">Allergenes detectes :</p>
+          <div class="flex flex-wrap gap-1">
+            <span *ngFor="let a of analyseResultat.allergenes"
+              class="px-2 py-0.5 bg-red-50 text-red-700 border border-red-200 rounded-full text-xs font-medium">
+              {{ a }}
+            </span>
+          </div>
+        </div>
+        <div *ngIf="analyseResultat.allergenes.length === 0">
+          <p class="text-xs text-green-600 font-semibold">Aucun allergene detecte - plat sur</p>
+        </div>
+        <div *ngIf="analyseResultat.tags_suggeres.length > 0">
+          <p class="text-xs font-semibold text-blue-600 mb-1">Tags ajoutes automatiquement dans le champ Tags :</p>
+          <div class="flex flex-wrap gap-1">
+            <span *ngFor="let t of analyseResultat.tags_suggeres"
+              class="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-full text-xs">
+              {{ t }}
+            </span>
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-3 pt-1">
+          <span class="text-xs" [ngClass]="analyseResultat.est_vegetarien ? 'text-green-600' : 'text-gray-400'">
+            {{ analyseResultat.est_vegetarien ? 'Vegetarien' : 'Contient de la viande' }}
+          </span>
+          <span class="text-xs" [ngClass]="analyseResultat.est_sans_gluten ? 'text-green-600' : 'text-red-500'">
+            {{ analyseResultat.est_sans_gluten ? 'Sans gluten' : 'Contient gluten' }}
+          </span>
+          <span class="text-xs" [ngClass]="analyseResultat.est_sans_lactose ? 'text-green-600' : 'text-red-500'">
+            {{ analyseResultat.est_sans_lactose ? 'Sans lactose' : 'Contient lactose' }}
+          </span>
+        </div>
+      </div>
+    </div>
+
     <div class="flex gap-3">
-      <button (click)="addPlat()"
-        class="px-5 py-2 bg-green-600 text-white rounded-xl text-sm font-bold hover:bg-green-700">
-        Ajouter
-      </button>
-      <button (click)="showAddPlatForm = false"
-        class="px-5 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-sm hover:bg-gray-50">
-        Annuler
-      </button>
+      <button (click)="addPlat()" class="px-5 py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700">Ajouter le plat</button>
+      <button (click)="showAddPlatForm = false" class="px-5 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-sm">Annuler</button>
     </div>
   </div>
 
-  <!-- Formulaire edition plat -->
-  <div *ngIf="showEditPlatForm && roleService.isAdmin()"
-    class="mb-6 p-5 bg-orange-50 border border-orange-200 rounded-2xl">
+  <!-- Formulaire edition plat avec IA -->
+  <div *ngIf="showEditPlatForm && roleService.isAdmin()" class="mb-6 p-5 bg-slate-50 border border-slate-200 rounded-2xl">
     <h3 class="font-bold text-gray-800 mb-4">Modifier le Plat</h3>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
       <input type="text" placeholder="Nom" [(ngModel)]="editPlat.nom"
@@ -122,34 +158,61 @@
       <input type="number" placeholder="Quantite" [(ngModel)]="editPlat.quantite"
         class="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
       <input type="text" placeholder="Tags" [(ngModel)]="editPlatTags"
-        class="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 sm:col-span-2" />
-    </div>
-    <div class="flex items-center gap-3 mb-4">
-      <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
-        <input type="checkbox" [(ngModel)]="editPlat.disponible" class="rounded" />
-        Disponible
+        class="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer px-4 py-2">
+        <input type="checkbox" [(ngModel)]="editPlat.disponible" class="rounded" /> Disponible
       </label>
     </div>
+    <div class="mb-4 p-4 bg-white border-2 border-slate-300 rounded-xl">
+      <div class="flex items-center gap-2 mb-3">
+        <div class="w-6 h-6 bg-orange-600 rounded-lg flex items-center justify-center">
+          <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+          </svg>
+        </div>
+        <p class="text-sm font-bold text-slate-700">Detection IA des allergenes</p>
+      </div>
+      <div class="flex gap-2 mb-3">
+        <input type="text" placeholder="Ingredients..." [(ngModel)]="editPlat.ingredients"
+          class="flex-1 px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+        <button (click)="analyserEditPlat()" [disabled]="analyseEnCours || !editPlat.ingredients"
+          class="px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 disabled:opacity-40 whitespace-nowrap">
+          {{ analyseEnCours ? 'Analyse...' : 'Analyser' }}
+        </button>
+      </div>
+      <div *ngIf="analyseEditResultat" class="space-y-2 pt-2 border-t border-slate-100">
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-gray-500 font-semibold">Niveau de risque :</span>
+          <span class="px-2 py-0.5 rounded-full text-xs font-bold" [ngClass]="getNiveauClass(analyseEditResultat.niveau_risque)">
+            {{ analyseEditResultat.niveau_risque }}
+          </span>
+        </div>
+        <div *ngIf="analyseEditResultat.allergenes.length > 0">
+          <p class="text-xs font-semibold text-red-600 mb-1">Allergenes detectes :</p>
+          <div class="flex flex-wrap gap-1">
+            <span *ngFor="let a of analyseEditResultat.allergenes"
+              class="px-2 py-0.5 bg-red-50 text-red-700 border border-red-200 rounded-full text-xs font-medium">
+              {{ a }}
+            </span>
+          </div>
+        </div>
+        <div *ngIf="analyseEditResultat.allergenes.length === 0">
+          <p class="text-xs text-green-600 font-semibold">Aucun allergene detecte</p>
+        </div>
+      </div>
+    </div>
     <div class="flex gap-3">
-      <button (click)="saveEditPlat()"
-        class="px-5 py-2 bg-orange-600 text-white rounded-xl text-sm font-bold hover:bg-orange-700">
-        Sauvegarder
-      </button>
-      <button (click)="showEditPlatForm = false"
-        class="px-5 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-sm hover:bg-gray-50">
-        Annuler
-      </button>
+      <button (click)="saveEditPlat()" class="px-5 py-2 bg-blue-700 text-white rounded-xl text-sm font-bold hover:bg-blue-800">Sauvegarder</button>
+      <button (click)="showEditPlatForm = false" class="px-5 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-sm">Annuler</button>
     </div>
   </div>
 
   <!-- Recherche et filtres -->
   <div class="flex flex-col sm:flex-row gap-4 mb-6">
-    <input type="text" placeholder="Rechercher un plat..."
-      [(ngModel)]="searchTerm"
+    <input type="text" placeholder="Rechercher un plat..." [(ngModel)]="searchTerm"
       class="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
     <div class="flex gap-2 flex-wrap">
-      <button *ngFor="let filter of filters"
-        (click)="toggleFilter(filter)"
+      <button *ngFor="let filter of filters" (click)="toggleFilter(filter)"
         [ngClass]="{
           'bg-blue-600 text-white border-blue-600': selectedFilters.includes(filter),
           'bg-white text-gray-600 border-gray-200 hover:border-gray-300': !selectedFilters.includes(filter)
@@ -160,62 +223,42 @@
     </div>
   </div>
 
-  <!-- Loading -->
   <div *ngIf="loading" class="text-center py-12">
     <div class="inline-block w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
     <p class="mt-3 text-gray-500">Chargement...</p>
   </div>
 
-  <!-- Liste des menus -->
+  <!-- Liste menus -->
   <div class="space-y-4" *ngIf="!loading">
     <div *ngFor="let menu of getFilteredMenus()"
       class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-
-      <!-- Header menu -->
-      <div class="flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors">
-        <button (click)="toggleMenu(menu.id!)" class="flex-1 flex items-center gap-4 text-left">
-          <div>
-            <h3 class="text-lg font-semibold text-gray-900">{{ menu.titre }}</h3>
-            <p class="text-sm text-gray-500">{{ menu.date }} - {{ menu.plats?.length || 0 }} plat(s)</p>
-          </div>
+      <div class="flex items-center justify-between px-6 py-4 hover:bg-gray-50">
+        <button (click)="toggleMenu(menu.id!)" class="flex-1 text-left">
+          <h3 class="text-lg font-semibold text-gray-900">{{ menu.titre }}</h3>
+          <p class="text-sm text-gray-500">{{ menu.date }} - {{ menu.plats?.length || 0 }} plat(s)</p>
         </button>
         <div class="flex items-center gap-2">
           <span class="px-3 py-1 rounded-full text-sm font-medium"
-            [ngClass]="{
-              'bg-green-100 text-green-700': menu.statut === 'publie',
-              'bg-gray-100 text-gray-600': menu.statut !== 'publie'
-            }">
+            [ngClass]="menu.statut === 'publie' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'">
             {{ menu.statut === 'publie' ? 'Publie' : menu.statut }}
           </span>
           <div *ngIf="roleService.isAdmin()" class="flex gap-1 ml-2">
-            <button (click)="openEditMenu(menu)"
-              class="px-3 py-1 bg-yellow-50 text-yellow-700 border border-yellow-200 rounded-lg text-xs hover:bg-yellow-100">
-              Modifier
-            </button>
-            <button (click)="openAddPlat(menu.id!)"
-              class="px-3 py-1 bg-green-50 text-green-700 border border-green-200 rounded-lg text-xs hover:bg-green-100">
-              + Plat
-            </button>
-            <button (click)="deleteMenu(menu.id!)"
-              class="px-3 py-1 bg-red-50 text-red-600 border border-red-200 rounded-lg text-xs hover:bg-red-100">
-              Supprimer
-            </button>
+            <button (click)="openEditMenu(menu)" class="px-3 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg text-xs hover:bg-blue-100">Modifier</button>
+            <button (click)="openAddPlat(menu.id!)" class="px-3 py-1 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg text-xs hover:bg-indigo-100">+ Plat</button>
+            <button (click)="deleteMenu(menu.id!)" class="px-3 py-1 bg-red-50 text-red-600 border border-red-200 rounded-lg text-xs hover:bg-red-100">Supprimer</button>
           </div>
-          <button (click)="toggleMenu(menu.id!)" class="ml-2 text-gray-400 hover:text-gray-600">
-            {{ expandedMenu === menu.id ? '▲' : '▼' }}
+          <button (click)="toggleMenu(menu.id!)" class="ml-2 text-gray-400 text-sm">
+            {{ expandedMenu === menu.id ? '[ - ]' : '[ + ]' }}
           </button>
         </div>
       </div>
 
-      <!-- Plats -->
       <div *ngIf="expandedMenu === menu.id" class="px-6 pb-6 pt-2 border-t border-gray-100">
         <div *ngIf="menu.plats && menu.plats.length > 0"
           class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div *ngFor="let plat of filterPlats(menu.plats || [])"
             class="border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow">
-            <img
-              [src]="plat.image || getImageForPlat(plat.nom)"
-              [alt]="plat.nom"
+            <img [src]="plat.image || getImageForPlat(plat.nom)" [alt]="plat.nom"
               class="w-full h-40 object-cover"
               onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'" />
             <div class="p-4">
@@ -227,12 +270,18 @@
                 </span>
               </div>
               <p class="text-xs text-gray-400 mb-2">{{ plat.description }}</p>
-              <div class="flex flex-wrap gap-1 mb-3">
-                <span *ngFor="let tag of plat.tags"
-                  class="px-2 py-0.5 rounded text-xs bg-blue-50 text-blue-700">
+              <div class="flex flex-wrap gap-1 mb-2">
+                <span *ngFor="let tag of plat.tags" class="px-2 py-0.5 rounded text-xs"
+                  [ngClass]="{
+                    'bg-green-100 text-green-700': tag === 'vegetarien' || tag === 'sans_gluten' || tag === 'sans_lactose',
+                    'bg-blue-50 text-blue-700': tag !== 'vegetarien' && tag !== 'sans_gluten' && tag !== 'sans_lactose'
+                  }">
                   {{ tag }}
                 </span>
               </div>
+              <p *ngIf="plat.ingredients" class="text-xs text-gray-400 mb-2 italic">
+                Ingredients : {{ plat.ingredients }}
+              </p>
               <div class="flex items-center justify-between">
                 <div>
                   <span class="text-lg font-bold text-gray-900">{{ plat.prix }} TND</span>
@@ -250,31 +299,20 @@
                     {{ !plat.disponible ? 'Indisponible' : ((plat.quantite != null && plat.quantite <= 0) ? 'Rupture' : 'Commander') }}
                   </button>
                   <div *ngIf="roleService.isAdmin()" class="flex gap-1">
-                    <button (click)="openEditPlat(menu.id!, plat)"
-                      class="px-2 py-1 bg-yellow-50 text-yellow-700 border border-yellow-200 rounded-lg text-xs hover:bg-yellow-100">
-                      Modifier
-                    </button>
-                    <button (click)="deletePlat(menu.id!, plat.platId!)"
-                      class="px-2 py-1 bg-red-50 text-red-600 border border-red-200 rounded-lg text-xs hover:bg-red-100">
-                      Supprimer
-                    </button>
+                    <button (click)="openEditPlat(menu.id!, plat)" class="px-2 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg text-xs hover:bg-blue-100">Modifier</button>
+                    <button (click)="deletePlat(menu.id!, plat.platId!)" class="px-2 py-1 bg-red-50 text-red-600 border border-red-200 rounded-lg text-xs hover:bg-red-100">Supprimer</button>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <p *ngIf="!menu.plats || menu.plats.length === 0"
-          class="text-gray-500 text-center py-4">
-          Aucun plat disponible
-        </p>
+        <p *ngIf="!menu.plats || menu.plats.length === 0" class="text-gray-500 text-center py-4">Aucun plat disponible</p>
       </div>
     </div>
-
-    <div *ngIf="getFilteredMenus().length === 0"
-      class="text-center py-16 bg-white rounded-2xl border border-gray-200">
+    <div *ngIf="getFilteredMenus().length === 0" class="text-center py-16 bg-white rounded-2xl border border-gray-200">
       <p class="text-gray-400">Aucun menu disponible.</p>
     </div>
   </div>
-
 </div>
+

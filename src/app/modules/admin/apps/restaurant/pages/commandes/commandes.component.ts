@@ -5,6 +5,7 @@ import { CommandeService } from 'src/app/services/commande.service';
 import { MenuService } from 'src/app/services/menu.service';
 import { Menu, Plat } from 'src/app/models/menu';
 import { RoleService } from 'app/core/auth/role.service';
+import { AllergieIaService, ResultatVerification } from 'src/app/services/allergie-ia.service';
 
 @Component({
   selector: 'app-commandes',
@@ -31,16 +32,24 @@ export class CommandesComponent implements OnInit {
   codeRetrait = '';
   codeErreur = '';
 
+  allergiesEmploye: string[] = [];
+  nouvelleAllergie = '';
+  alertesAllergie: ResultatVerification[] = [];
+  analyseEnCours = false;
+
   constructor(
     private commandeService: CommandeService,
     private menuService: MenuService,
     private http: HttpClient,
-    public roleService: RoleService
+    public roleService: RoleService,
+    private allergieIa: AllergieIaService
   ) {}
 
   ngOnInit(): void {
     this.loadMenus();
     this.loadCommandes();
+    const saved = localStorage.getItem('allergies_' + this.roleService.userId);
+    if (saved) this.allergiesEmploye = JSON.parse(saved);
   }
 
   loadCommandes(): void {
@@ -80,6 +89,49 @@ export class CommandesComponent implements OnInit {
   loadMenus(): void {
     this.menuService.getAllMenus().subscribe({
       next: (data) => { this.menus = data; }
+    });
+  }
+
+  ajouterAllergie(): void {
+    const a = this.nouvelleAllergie.trim().toLowerCase();
+    if (!a || this.allergiesEmploye.includes(a)) { this.nouvelleAllergie = ''; return; }
+    this.allergiesEmploye.push(a);
+    localStorage.setItem('allergies_' + this.roleService.userId, JSON.stringify(this.allergiesEmploye));
+    this.nouvelleAllergie = '';
+  }
+
+  supprimerAllergie(a: string): void {
+    this.allergiesEmploye = this.allergiesEmploye.filter(x => x !== a);
+    localStorage.setItem('allergies_' + this.roleService.userId, JSON.stringify(this.allergiesEmploye));
+    this.alertesAllergie = [];
+  }
+
+  verifierAllergies(): void {
+    if (this.allergiesEmploye.length === 0) { this.errorMsg = 'Ajoutez au moins une allergie.'; return; }
+    const tousLesPlats: any[] = [];
+    for (const menu of this.menus) {
+      for (const plat of (menu.plats || [])) {
+        tousLesPlats.push({
+          platId: plat.platId,
+          nom: plat.nom,
+          ingredients: plat.ingredients || '',
+          description: plat.description || ''
+        });
+      }
+    }
+    if (tousLesPlats.length === 0) { this.errorMsg = 'Aucun plat avec ingredients disponible.'; return; }
+    this.analyseEnCours = true;
+    this.alertesAllergie = [];
+    this.allergieIa.verifierAllergies(this.allergiesEmploye, tousLesPlats).subscribe({
+      next: (res) => {
+        this.alertesAllergie = res.filter(r => !r.sur);
+        this.analyseEnCours = false;
+        if (this.alertesAllergie.length === 0) {
+          this.successMsg = 'Aucun conflit allergie detecte sur les plats disponibles !';
+          setTimeout(() => this.successMsg = '', 4000);
+        }
+      },
+      error: () => { this.analyseEnCours = false; this.errorMsg = 'Erreur connexion IA.'; }
     });
   }
 
