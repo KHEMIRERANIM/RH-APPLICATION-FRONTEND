@@ -33,6 +33,10 @@
                     <mat-icon svgIcon="heroicons_outline:cog"></mat-icon>
                     Administration
                 </button>
+                <button *ngIf="isAdmin" mat-flat-button class="btn-statistiques" routerLink="/apps/partnerships/admin/stats-avantages" style="background-color: #e0e7ff; color: #4338ca; margin-left: 12px;">
+                    <mat-icon svgIcon="heroicons_outline:chart-bar"></mat-icon>
+                    Statistiques
+                </button>
             </div>
         </div>
 

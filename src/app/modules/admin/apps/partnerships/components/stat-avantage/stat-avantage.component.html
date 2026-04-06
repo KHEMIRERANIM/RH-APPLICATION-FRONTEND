@@ -1,0 +1,158 @@
+<div class="flex flex-col flex-auto min-w-0">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-6 sm:pb-8 sm:pt-10 border-b bg-card dark:bg-transparent">
+      <div class="flex-1 min-w-0 flex items-center">
+          <button mat-icon-button routerLink="/apps/partnerships" class="mr-4 bg-gray-100 hover:bg-gray-200" matTooltip="Retour au catalogue">
+              <mat-icon svgIcon="heroicons_outline:arrow-left"></mat-icon>
+          </button>
+          <div>
+              <!-- Title -->
+          <div class="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight text-gray-900 dark:text-white">
+              Dashboard Statistiques Avantages
+          </div>
+          <!-- Subtitle -->
+          <div class="mt-1 text-md text-secondary">
+              Aperçu analytique des réservations et des partenariats.
+          </div>
+      </div>
+  </div>
+</div>
+
+  <!-- Contenu Principal -->
+  <div class="flex-auto p-6 sm:p-10">
+
+      <!-- Loading skeleton (optional, simple check) -->
+      <ng-container *ngIf="!kpis">
+          <div class="flex justify-center items-center h-40">
+              <mat-spinner diameter="40"></mat-spinner>
+          </div>
+      </ng-container>
+
+      <ng-container *ngIf="kpis">
+          
+          <!-- KPI Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full mb-8">
+              
+              <!-- KPI 1 -->
+              <div class="flex flex-col bg-card shadow rounded-2xl overflow-hidden p-6 transition-transform hover:scale-105 duration-300">
+                  <div class="flex items-center justify-between">
+                      <div class="text-lg font-medium tracking-tight text-secondary">Total Réservations</div>
+                      <mat-icon class="text-blue-500" svgIcon="heroicons_outline:ticket"></mat-icon>
+                  </div>
+                  <div class="mt-4 text-4xl font-semibold tracking-tight text-blue-600">{{ kpis.totalReservations }}</div>
+              </div>
+
+              <!-- KPI 2 -->
+              <div class="flex flex-col bg-card shadow rounded-2xl overflow-hidden p-6 transition-transform hover:scale-105 duration-300">
+                  <div class="flex items-center justify-between">
+                      <div class="text-lg font-medium tracking-tight text-secondary">Ce Mois-ci</div>
+                      <mat-icon class="text-green-500" svgIcon="heroicons_outline:calendar"></mat-icon>
+                  </div>
+                  <div class="mt-4 text-4xl font-semibold tracking-tight text-green-600">{{ kpis.reservationsCeMois }}</div>
+              </div>
+
+              <!-- KPI 3 -->
+              <div class="flex flex-col bg-card shadow rounded-2xl overflow-hidden p-6 transition-transform hover:scale-105 duration-300">
+                  <div class="flex items-center justify-between">
+                      <div class="text-lg font-medium tracking-tight text-secondary">Offres Actives</div>
+                      <mat-icon class="text-amber-500" svgIcon="heroicons_outline:sparkles"></mat-icon>
+                  </div>
+                  <div class="mt-4 text-4xl font-semibold tracking-tight text-amber-600">{{ kpis.offresActives }}</div>
+              </div>
+
+              <!-- KPI 4 -->
+              <div class="flex flex-col bg-card shadow rounded-2xl overflow-hidden p-6 transition-transform hover:scale-105 duration-300">
+                  <div class="flex items-center justify-between">
+                      <div class="text-lg font-medium tracking-tight text-secondary">Partenaires Actifs</div>
+                      <mat-icon class="text-indigo-500" svgIcon="heroicons_outline:user-group"></mat-icon>
+                  </div>
+                  <div class="mt-4 text-4xl font-semibold tracking-tight text-indigo-600">{{ kpis.partenairesActifs }}</div>
+              </div>
+
+          </div>
+
+          <!-- Charts Grid -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full">
+              
+              <!-- Répartition par catégorie -->
+              <div class="flex flex-col bg-card shadow rounded-2xl overflow-hidden p-6">
+                  <div class="text-lg font-semibold tracking-tight mb-4 text-gray-800 dark:text-gray-100">Répartition par Catégorie</div>
+                  <div class="relative h-64 w-full flex justify-center items-center">
+                      <canvas *ngIf="hasData(pieChartData)" baseChart
+                              [data]="pieChartData"
+                              [options]="pieChartOptions"
+                              [type]="pieChartType">
+                      </canvas>
+                      <div *ngIf="!hasData(pieChartData)" class="text-secondary text-sm flex flex-col items-center">
+                          <mat-icon svgIcon="heroicons_outline:inbox" class="icon-size-8 mb-2"></mat-icon>
+                          Aucune donnée disponible
+                      </div>
+                  </div>
+              </div>
+
+              <!-- Répartition par Statut -->
+              <div class="flex flex-col bg-card shadow rounded-2xl overflow-hidden p-6">
+                  <div class="text-lg font-semibold tracking-tight mb-4 text-gray-800 dark:text-gray-100">Statuts des Réservations</div>
+                  <div class="relative h-64 w-full flex justify-center items-center">
+                      <canvas *ngIf="hasData(doughnutChartData)" baseChart
+                              [data]="doughnutChartData"
+                              [options]="doughnutChartOptions"
+                              [type]="doughnutChartType">
+                      </canvas>
+                      <div *ngIf="!hasData(doughnutChartData)" class="text-secondary text-sm flex flex-col items-center">
+                          <mat-icon svgIcon="heroicons_outline:inbox" class="icon-size-8 mb-2"></mat-icon>
+                          Aucune donnée disponible
+                      </div>
+                  </div>
+              </div>
+
+              <!-- Top 5 Offres -->
+              <div class="flex flex-col bg-card shadow rounded-2xl overflow-hidden p-6">
+                  <div class="text-lg font-semibold tracking-tight mb-4 text-gray-800 dark:text-gray-100">Top 5 des Offres (Confirmées)</div>
+                  <div class="relative h-80 w-full flex justify-center items-center">
+                      <canvas *ngIf="hasData(barChartData)" baseChart
+                              [data]="barChartData"
+                              [options]="barChartOptions"
+                              [type]="barChartType">
+                      </canvas>
+                      <div *ngIf="!hasData(barChartData)" class="text-secondary text-sm flex flex-col items-center">
+                          <mat-icon svgIcon="heroicons_outline:inbox" class="icon-size-8 mb-2"></mat-icon>
+                          Aucune donnée disponible
+                      </div>
+                  </div>
+              </div>
+
+              <!-- Évolution Mensuelle -->
+              <div class="flex flex-col bg-card shadow rounded-2xl overflow-hidden p-6">
+                  <div class="flex items-center justify-between mb-4">
+                      <div class="text-lg font-semibold tracking-tight text-gray-800 dark:text-gray-100">Évolution Mensuelle</div>
+                      <mat-form-field appearance="outline" class="fuse-mat-dense w-32">
+                          <mat-icon matPrefix class="icon-size-5 text-secondary mr-2" svgIcon="heroicons_outline:calendar"></mat-icon>
+                          <input matInput type="number" 
+                                 [(ngModel)]="anneeSelectionnee" 
+                                 (change)="onYearChange()" 
+                                 (keyup.enter)="onYearChange()"
+                                 min="2000" 
+                                 max="2099" 
+                                 placeholder="Année">
+                      </mat-form-field>
+                  </div>
+                  <div class="relative h-72 w-full flex justify-center items-center">
+                      <canvas *ngIf="hasData(lineChartData)" baseChart
+                              [data]="lineChartData"
+                              [options]="lineChartOptions"
+                              [type]="lineChartType">
+                      </canvas>
+                      <div *ngIf="!hasData(lineChartData)" class="text-secondary text-sm flex flex-col items-center">
+                          <mat-icon svgIcon="heroicons_outline:inbox" class="icon-size-8 mb-2"></mat-icon>
+                          Aucune donnée disponible
+                      </div>
+                  </div>
+              </div>
+
+          </div>
+      </ng-container>
+
+  </div>
+</div>

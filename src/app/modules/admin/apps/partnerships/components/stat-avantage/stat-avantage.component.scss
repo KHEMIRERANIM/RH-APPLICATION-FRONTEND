@@ -1,0 +1,5 @@
+// Les styles principaux sont gérés par Tailwind CSS dans le HTML.
+// On ajoute juste quelques min-height pour les charts si le conteneur shrink.
+canvas {
+    max-width: 100%;
+}

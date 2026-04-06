@@ -140,3 +140,37 @@ export const CATEGORIE_COLORS: Record<CategorieOffre, string> = {
     HOTEL: '#0ea5e9',
     FESTIVAL: '#f59e0b'
 };
+
+// ─────────────────────────────────────────
+// Statistiques (Dashboard)
+// ─────────────────────────────────────────
+
+export interface StatAvantageKpi {
+    totalReservations: number;
+    reservationsCeMois: number;
+    offresActives: number;
+    partenairesActifs: number;
+}
+
+export interface StatCategorie {
+    categorie: string;
+    count: number;
+    pourcentage: number;
+}
+
+export interface StatTopOffre {
+    idOffre: string;
+    titreOffre: string;
+    count: number;
+}
+
+export interface StatMensuelle {
+    mois: number;
+    count: number;
+}
+
+export interface StatStatut {
+    statut: string;
+    count: number;
+    pourcentage: number;
+}

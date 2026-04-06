@@ -44,8 +44,14 @@ import { ConfirmDialogComponent } from './components/admin/confirm-dialog/confir
 // Service
 import { PartnershipsService } from './services/partnerships.service';
 
+// Graphs
+import { BaseChartDirective } from 'ng2-charts';
+
 // Routing
 import { partnershipsRoutes } from './partnerships-routing';
+
+// Stats Component
+import { StatAvantageComponent } from './components/stat-avantage/stat-avantage.component';
 
 @NgModule({
     declarations: [
@@ -56,7 +62,8 @@ import { partnershipsRoutes } from './partnerships-routing';
         AdminDashboardComponent,
         PartenaireFormComponent,
         OffreFormComponent,
-        ConfirmDialogComponent
+        ConfirmDialogComponent,
+        StatAvantageComponent
     ],
     imports: [
         RouterModule.forChild(partnershipsRoutes),
@@ -88,7 +95,8 @@ import { partnershipsRoutes } from './partnerships-routing';
         MatDividerModule,
         MatSnackBarModule,
         MatRadioModule,
-        MatCheckboxModule
+        MatCheckboxModule,
+        BaseChartDirective
     ],
     providers: [
         PartnershipsService

@@ -8,7 +8,12 @@ import {
     CategorieOffre,
     CreatePartenaireRequest,
     CreateOffreRequest,
-    Wishlist
+    Wishlist,
+    StatAvantageKpi,
+    StatCategorie,
+    StatTopOffre,
+    StatMensuelle,
+    StatStatut
 } from '../models/partnerships.models';
 
 @Injectable({
@@ -180,5 +185,31 @@ export class PartnershipsService {
     /** GET /api/wishlist/check/{idOffre} */
     estEnFavori(idOffre: string): Observable<boolean> {
         return this._http.get<boolean>(`${this.BASE_URL}/wishlist/check/${idOffre}`);
+    }
+
+    // ──────────────────────────────────────
+    // STATISTIQUES (ADMIN)
+    // ──────────────────────────────────────
+
+    getKpisAvantages(): Observable<StatAvantageKpi> {
+        return this._http.get<StatAvantageKpi>(`${this.BASE_URL}/avantages/stats/kpis`);
+    }
+
+    getStatParCategorie(): Observable<StatCategorie[]> {
+        return this._http.get<StatCategorie[]>(`${this.BASE_URL}/avantages/stats/par-categorie`);
+    }
+
+    getTopOffres(): Observable<StatTopOffre[]> {
+        return this._http.get<StatTopOffre[]>(`${this.BASE_URL}/avantages/stats/top-offres`);
+    }
+
+    getStatParMois(annee?: number): Observable<StatMensuelle[]> {
+        let params = new HttpParams();
+        if (annee) params = params.set('annee', annee.toString());
+        return this._http.get<StatMensuelle[]>(`${this.BASE_URL}/avantages/stats/par-mois`, { params });
+    }
+
+    getStatStatuts(): Observable<StatStatut[]> {
+        return this._http.get<StatStatut[]>(`${this.BASE_URL}/avantages/stats/statuts`);
     }
 }
