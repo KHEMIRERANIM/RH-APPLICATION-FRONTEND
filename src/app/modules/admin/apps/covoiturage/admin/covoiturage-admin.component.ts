@@ -80,14 +80,10 @@ export class CovoiturageAdminComponent implements OnInit {
     'Bab Souika - Manouba'
   ];
 
-  reservations: Reservation[] = [
-    { id: 1, employeNom: 'Sophie Martin', employePhoto: 'https://i.pravatar.cc/150?img=1', type: 'navette', trajet: 'Navette Ligne A', date: '2026-03-29', heure: '08:00', statut: 'Confirmée' },
-    { id: 2, employeNom: 'Karim Mansour', employePhoto: 'https://i.pravatar.cc/150?img=68', type: 'navette', trajet: 'Navette Zone Industrielle', date: '2026-03-29', heure: '08:15', statut: 'En attente' }
-  ];
+  reservations: any[] = [];
+  trajets: any[] = [];
 
-  cadeaux: Cadeau[] = [
-    { id: 1, titre: 'Café gratuit', description: 'Un café premium au choix', points: 50, stock: 100, echanges: 45, actif: true, image: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400', icon: '☕' }
-  ];
+  cadeaux: Cadeau[] = [];
 
   constructor(
     private busService: BusService,
@@ -96,8 +92,81 @@ export class CovoiturageAdminComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadEmployes();
-    this.loadBus();
+    this.loadAllData();
+  }
+
+  private loadAllData(): void {
+    this.isLoading = true;
+    forkJoin({
+      employees: this.userService.getAllEmployees(),
+      buses: this.busService.getAll(),
+      trajets: this.covoiturageService.getAllTrajets(),
+      resNavette: this.covoiturageService.getAllReservationsNavette(),
+      resCovoit: this.covoiturageService.getAllReservations()
+    }).subscribe({
+      next: (results) => {
+        // 1. Map Employés
+        results.employees.forEach((u: any) => {
+          const nom = `${u.prenom || u.firstName || ''} ${u.nom || u.lastName || ''}`.trim();
+          this.employesMap.set(String(u.id), nom || `Employé ${String(u.id).slice(0, 5)}`);
+        });
+
+        // 2. Data
+        this.navettes = results.buses || [];
+        this.trajets = results.trajets || [];
+        this.reservationsNavette = results.resNavette || [];
+
+        // 3. Fusionner les réservations pour l'onglet Admin
+        const merged: any[] = [];
+
+        // Navettes
+        results.resNavette.forEach((rn: any) => {
+          const bus = this.navettes.find(b => b.id === rn.busId);
+          merged.push({
+            id: rn.id,
+            employeId: rn.employeId,
+            employeNom: this.getNomEmploye(rn.employeId),
+            employePhoto: `https://ui-avatars.com/api/?name=${this.getNomEmploye(rn.employeId)}&background=random`,
+            type: 'navette',
+            trajet: bus ? `${bus.depart} -> ${bus.arrivee}` : 'Navette',
+            date: rn.date || (rn.joursSelectionnes ? rn.joursSelectionnes[0] : '—'),
+            heure: bus?.heureDepart || '—',
+            statut: this.mapStatut(rn.statut)
+          });
+        });
+
+        // Covoiturage
+        results.resCovoit.forEach((rc: any) => {
+          const trajet = this.trajets.find(t => t.id === rc.trajetId);
+          merged.push({
+            id: rc.id,
+            employeId: rc.employeId,
+            employeNom: this.getNomEmploye(rc.employeId),
+            employePhoto: `https://ui-avatars.com/api/?name=${this.getNomEmploye(rc.employeId)}&background=random`,
+            type: 'covoiturage',
+            trajet: trajet ? `${trajet.adresseDepart} -> ${trajet.adresseArrivee}` : 'Covoiturage',
+            date: rc.dateReservation ? rc.dateReservation.split('T')[0] : '—',
+            heure: trajet?.heureDepart || '—',
+            statut: this.mapStatut(rc.statut)
+          });
+        });
+
+        this.reservations = merged;
+        this.isLoading = false;
+        this.checkWaitlists();
+      },
+      error: (err) => {
+        console.error('Erreur chargement admin:', err);
+        this.isLoading = false;
+      }
+    });
+  }
+
+  private mapStatut(s: string): string {
+    const st = String(s || '').toUpperCase();
+    if (st === 'CONFIRME' || st === 'CONFIRMÉE') return 'Confirmée';
+    if (st === 'ANNULE' || st === 'ANNULÉE') return 'Annulée';
+    return 'En attente';
   }
 
   private loadEmployes(): void {
@@ -146,18 +215,23 @@ export class CovoiturageAdminComponent implements OnInit {
       })
       .sort((a, b) => new Date(a.dateCreation || 0).getTime() - new Date(b.dateCreation || 0).getTime());
 
-    // Identifier les bus du pack (triés : ACTIF d'abord)
+    // Identifier les bus du pack (Ordre : ACTIF en premier, puis date de création)
     const packBuses = this.navettes
       .filter(b => b.packId === packId)
-      .sort((a, b) => (a.statut === 'ACTIF' ? -1 : 1));
+      .sort((a, b) => {
+        if (a.statut === 'ACTIF' && b.statut !== 'ACTIF') return -1;
+        if (a.statut !== 'ACTIF' && b.statut === 'ACTIF') return 1;
+        return new Date(a.dateCreation || 0).getTime() - new Date(b.dateCreation || 0).getTime();
+      });
 
     const distribution = new Map<string, any[]>();
     packBuses.forEach(b => distribution.set(b.id!, []));
 
-    const activeBusIds = packBuses.filter(b => b.statut === 'ACTIF').map(b => b.id);
-
-    // Distribuer les passagers
+    // Distribuer les passagers (Logique stable)
     let busIndex = 0;
+    // On extrait les 10 premiers caractères (YYYY-MM-DD) sans conversion Timezone
+    const targetDateStr = String(date).substring(0, 10);
+
     packReservations.forEach(r => {
       while (busIndex < packBuses.length && distribution.get(packBuses[busIndex].id!)!.length >= packBuses[busIndex].capacite) {
         busIndex++;
@@ -165,10 +239,14 @@ export class CovoiturageAdminComponent implements OnInit {
       
       const targetBusId = busIndex < packBuses.length ? packBuses[busIndex].id : packBuses[packBuses.length - 1].id;
       if (targetBusId) {
+        // Isolation parfaite par chaîne de texte brute
+        const jEnAttente = (r.joursEnAttente || []).map(d => String(d).substring(0, 10));
+        const isWaitlisted = jEnAttente.includes(targetDateStr);
+
         distribution.get(targetBusId)!.push({
           employeId: r.employeId,
           statut: String(r.statut),
-          isWaitlisted: !activeBusIds.includes(targetBusId) // Waitlisted si le bus cible n'est pas ACTIF
+          isWaitlisted: isWaitlisted
         });
       }
     });
@@ -302,12 +380,7 @@ export class CovoiturageAdminComponent implements OnInit {
 
       this.busService.update(this.busForm.id, busToUpdate).subscribe({
         next: () => {
-          if (wasInactive && busToUpdate.statut === 'ACTIF') {
-            console.log('Statut manuel passé à ACTIF, déclenchement transfert...');
-            this.activateBus(this.busForm.id!);
-          } else {
-            this.loadBus();
-          }
+          this.loadBus();
           this.closeModal();
         },
         error: () => this.errorMessage = 'Erreur lors de la modification'
@@ -416,7 +489,9 @@ export class CovoiturageAdminComponent implements OnInit {
     return this.navettes.filter(n => n.ligne?.toLowerCase().includes(this.searchTerm.toLowerCase()) || n.marque?.toLowerCase().includes(this.searchTerm.toLowerCase()) || n.immatriculation?.toLowerCase().includes(this.searchTerm.toLowerCase()));
   }
 
-  get filteredReservations(): Reservation[] { return this.reservations.filter(r => r.type === this.reservationType); }
+  get filteredReservations(): any[] { 
+    return this.reservations.filter(r => r.type === this.reservationType); 
+  }
   get totalStock(): number { return this.cadeaux.reduce((sum, c) => sum + c.stock, 0); }
 
   get stats() {
@@ -433,32 +508,42 @@ export class CovoiturageAdminComponent implements OnInit {
     };
   }
 
+  activateBusForDay(busId: string, date: string): void {
+    if (!confirm(`Activer un bus de réserve spécifiquement pour le ${date} ?`)) return;
+
+    this.busService.activateForDay(busId, date).subscribe({
+      next: () => {
+        this.loadBus();
+        this.loadReservationsNavette();
+        // Optionnel: Notification de succès locale (MatSnackBar si dispo)
+      },
+      error: (err) => console.error('Erreur activation', err)
+    });
+  }
+
   private checkWaitlists(): void {
     // 1. Trouver les bus de réserve (INACTIF) qui font partie d'un pack
     const reserveBuses = this.navettes.filter(b => b.statut === 'INACTIF' && !!b.packId);
     
     reserveBuses.forEach(bus => {
-      // 2. Compter toutes les personnes en attente d'activation pour ce pack
-      // On regroupe par packId car l'activation d'un bus de réserve bénéficie à tout le pack
-      const waitlist = this.reservationsNavette.filter(r => 
-        r.busId === bus.id && 
-        String(r.statut || '').includes('ACTIVATION')
-      );
-      
-      // 3. Calculer le ratio d'occupation potentielle du bus de réserve
-      const ratio = bus.capacite > 0 ? (waitlist.length / bus.capacite) : 0;
-      
-      // 4. Alerter si > 50%
-      if (ratio >= 0.5) {
-        this.addNotification({
-          id: `notif-${bus.id}`,
-          type: 'warning',
-          title: '⚡ Activation Recommandée',
-          message: `La file d'attente pour la ligne "${bus.ligne}" a atteint ${Math.round(ratio*100)}% de la capacité du bus de réserve ${bus.marque}.`,
-          busId: bus.id,
-          actionLabel: 'Activer maintenant'
-        });
-      }
+      // 2. Vérifier l'occupation pour CHAQUE jour du pack
+      this.packDates.forEach(date => {
+        const waitlistForDay = this.reservantsParJour(bus.id, date).filter(r => r.isWaitlisted);
+        const ratio = bus.capacite > 0 ? (waitlistForDay.length / bus.capacite) : 0;
+        
+        // 3. Alerter si > 50% pour AU MOINS un jour
+        if (ratio >= 0.5) {
+          this.addNotification({
+            id: `notif-${bus.id}-${date}`,
+            type: 'warning',
+            title: '⚡ Occupation Critique',
+            message: `Le jour ${new Date(date).toLocaleDateString()} a atteint ${Math.round(ratio*100)}% de la capacité sur ${bus.marque}.`,
+            busId: bus.id,
+            date: date,
+            actionLabel: 'Activer maintenant'
+          });
+        }
+      });
     });
   }
 
@@ -468,65 +553,75 @@ export class CovoiturageAdminComponent implements OnInit {
     }
   }
 
-  dismissNotification(id: any): void { this.notifications = this.notifications.filter(n => n.id !== id); }
+  dismissNotification(id: any): void { 
+    this.notifications = this.notifications.filter(n => n.id !== id); 
+  }
 
-  activateBus(busId: string): void {
-    const busBeingActivated = this.navettes.find(b => b.id === busId);
-    const packId = busBeingActivated?.packId;
+  activateBus(busId: string, date?: string): void {
     this.isLoading = true;
-
-    this.busService.update(busId, { statut: 'ACTIF' }).subscribe({
-      next: () => {
-        // 1. Identifier les candidats au transfert (Toute personne en attente ou en overflow dans le pack)
-        const candidates: any[] = [];
-        
-        this.navettes.filter(b => b.packId === packId && b.statut === 'ACTIF' && b.id !== busId).forEach(activeBus => {
-          this.packDates.forEach(date => {
-            const allForDay = this.reservantsParJour(activeBus.id, date);
-            allForDay.filter(r => r.isWaitlisted).forEach(ov => {
-              const res = this.reservationsNavette.find(rn => 
-                rn.employeId === ov.employeId && 
-                (rn.date === date || (rn.joursSelectionnes && rn.joursSelectionnes.includes(date))) &&
-                rn.busId === activeBus.id
-              );
-              if (res && !candidates.some(c => c.id === res.id)) candidates.push(res);
-            });
-          });
-        });
-
-        this.reservationsNavette.filter(r => {
-          const resBus = this.navettes.find(b => b.id === r.busId);
-          return resBus?.packId === packId && String(r.statut || '').includes('ACTIVATION');
-        }).forEach(r => {
-          if (!candidates.some(c => c.id === r.id)) candidates.push(r);
-        });
-
-        // 2. Transférer ces réservations vers le NOUVEAU bus et confirmer
-        if (candidates.length > 0) {
-          const updates = candidates.map(r => 
-            this.covoiturageService.updateReservationStatusNavette(r.id, { 
-              statut: 'CONFIRME',
-              busId: busId 
-            })
-          );
-
-          forkJoin(updates).subscribe({
-            next: () => {
-              this.loadBus();
-              this.notifications = this.notifications.filter(n => n.busId !== busId);
-            },
-            error: (err) => {
-              console.error('Erreur lors du transfert des passagers', err);
-              this.loadBus();
-            }
-          });
-        } else {
+    
+    if (date) {
+      this.busService.activateForDay(busId, date).subscribe({
+        next: () => {
           this.loadBus();
           this.notifications = this.notifications.filter(n => n.busId !== busId);
+          this.isLoading = false;
+        },
+        error: (err) => {
+          console.error('Erreur activation jour', err);
+          this.isLoading = false;
         }
+      });
+    } else {
+      this.busService.update(busId, { statut: 'ACTIF' }).subscribe({
+        next: () => {
+          this.loadBus();
+          this.notifications = this.notifications.filter(n => n.busId !== busId);
+          this.isLoading = false;
+        },
+        error: (err) => {
+          console.error('Erreur activation bus', err);
+          this.isLoading = false;
+        }
+      });
+    }
+  }
+
+  confirmReservation(res: any): void {
+    const update = { statut: 'CONFIRME' };
+    this.isLoading = true;
+    
+    const obs = res.type === 'navette' 
+      ? this.covoiturageService.updateReservationStatusNavette(res.id, update)
+      : this.covoiturageService.updateReservationStatus(res.id, update);
+
+    obs.subscribe({
+      next: () => {
+        this.loadAllData();
+        this.isLoading = false;
       },
       error: (err) => {
-        console.error('Erreur activation bus', err);
+        console.error('Erreur confirmation:', err);
+        this.isLoading = false;
+      }
+    });
+  }
+
+  cancelReservation(res: any): void {
+    if (!confirm('Voulez-vous vraiment annuler cette réservation ?')) return;
+    
+    this.isLoading = true;
+    const obs = res.type === 'navette'
+      ? this.covoiturageService.annulerReservationNavette(res.id)
+      : this.covoiturageService.annulerReservation(res.id);
+
+    obs.subscribe({
+      next: () => {
+        this.loadAllData();
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Erreur annulation:', err);
         this.isLoading = false;
       }
     });

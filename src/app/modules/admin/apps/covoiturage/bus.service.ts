@@ -66,4 +66,8 @@ update(id: string, bus: Partial<Bus>): Observable<Bus> {
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
+
+  activateForDay(busId: string, date: string): Observable<Bus> {
+    return this.http.post<Bus>(`${this.apiUrl}/${busId}/activate-for-day?date=${date}`, {});
+  }
 }

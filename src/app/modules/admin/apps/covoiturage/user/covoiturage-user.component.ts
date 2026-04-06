@@ -1061,39 +1061,21 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     });
   }
 
- getDayStatus(reservation: any, day: string): 'confirmed' | 'waiting' | 'none' {
-  if (!reservation || !day) return 'none';
-  if (!reservation.days || !reservation.days.includes(day)) return 'none';
+  getDayStatus(reservation: any, day: string): 'confirmed' | 'waiting' | 'none' {
+    if (!reservation || !day) return 'none';
+    if (!reservation.days || !reservation.days.includes(day)) return 'none';
 
-  const statut = String(reservation.statut || '').toUpperCase();
-  if (statut === 'ANNULE') return 'none';
+    const statut = String(reservation.statut || '').toUpperCase();
+    if (statut === 'ANNULE') return 'none';
 
-  const busId = reservation.busId || reservation.shuttleId;
-  const bus = this.shuttles.find(s => s.id === busId);
-  
-  console.log('=== getDayStatus ===', {
-    day,
-    busId,
-    busStatut: bus?.statut,
-    busPackId: bus?.packId,
-    dailyOccupancy: bus?.dailyOccupancy,
-    reservationId: reservation.id
-  });
+    // Priorité aux listes précises du backend
+    if (reservation.joursEnAttente?.includes(day)) return 'waiting';
+    if (reservation.joursConfirmes?.includes(day)) return 'confirmed';
 
-  if (!bus) return 'waiting';
-  if (!bus.packId) return bus.statut === 'ACTIF' ? 'confirmed' : 'waiting';
-
-  const packId = bus.packId;
-  const packBuses = this.shuttles.filter(b => b.packId === packId);
-  const activeBuses = packBuses.filter(b => b.statut === 'ACTIF');
-  const activeCap = activeBuses.reduce((sum, b) => sum + (b.capacite || 0), 0);
-  const activeOccForDay = activeBuses.reduce((sum, b) => sum + (b.dailyOccupancy?.[day] || 0), 0);
-
-  console.log('Pack check:', { activeCap, activeOccForDay, packBuses: packBuses.map(b => ({id: b.id, statut: b.statut, dailyOcc: b.dailyOccupancy})) });
-
-  if (activeOccForDay < activeCap) return 'confirmed';
-  return 'waiting';
-}
+    // Fallback si les listes ne sont pas encore peuplées (anciennes réservations)
+    if (statut === 'EN_ATTENTE_ACTIVATION') return 'waiting';
+    return statut === 'CONFIRME' ? 'confirmed' : 'waiting';
+  }
 
   loadShuttles() {
     this.isLoadingShuttles = true;
@@ -1349,44 +1331,28 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
         this.selectedNavetteDays[shuttle.id] = [];
         const st = typeof res?.statut === 'string' ? res.statut : res?.statut?.name;
         
-        const packBuses = this.shuttles.filter(b => b.packId === shuttle.packId);
-        const activeBuses = packBuses.filter(b => b.statut === 'ACTIF');
-        const activeCap = activeBuses.reduce((sum, b) => sum + (b.capacite || 0), 0);
-        const reserveBus = packBuses.find(b => b.statut === 'INACTIF');
-        const reserveCap = reserveBus?.capacite || 15;
+        const conf = res.joursConfirmes || [];
+        const wait = res.joursEnAttente || [];
 
-        // Détection de disponibilité au niveau du PACK (somme des bus actifs)
-        const confirmedDays: string[] = [];
-        const waitlistedDays: string[] = [];
-        const dailyWaitCounts: Map<string, number> = new Map();
-
-        joursLibres.forEach(d => {
-          const packOccupancyAtDate = packBuses.reduce((sum, b) => sum + (b.dailyOccupancy?.[d] || 0), 0);
-          if (packOccupancyAtDate < activeCap) {
-            confirmedDays.push(d);
-          } else {
-            waitlistedDays.push(d);
-            dailyWaitCounts.set(d, packOccupancyAtDate - activeCap + 1); // Pos dans la liste d'attente
-          }
-        });
-
-        let okMsg = '';
-        if (waitlistedDays.length === 0) {
-          okMsg = `Réservation confirmée pour : ${confirmedDays.join(', ')} !`;
+        let msg = '';
+        if (wait.length === 0) {
+          msg = `✅ Réservation confirmée avec succès pour tous les jours sélectionnés !`;
         } else {
-          const confirmedStr = confirmedDays.length > 0 ? `Confirmée pour : ${confirmedDays.join(', ')}. ` : '';
-          const waitingStr = `En attente (Liste d'attente) pour : ${waitlistedDays.join(', ')}.`;
+          const confStr = conf.length > 0 ? `Certains jours sont confirmés : ${conf.join(', ')}.\n` : '';
+          const waitStr = `⚠️ Jours en liste d'attente : ${wait.join(', ')}.\n\n`;
           
-          let maxWaitCount = 0;
-          dailyWaitCounts.forEach(val => { if (val > maxWaitCount) maxWaitCount = val; });
+          const packBuses = this.shuttles.filter(b => b.packId === shuttle.packId);
+          const reserveBus = packBuses.find(b => b.statut === 'INACTIF');
+          const reserveCap = reserveBus?.capacite || 15;
+          const seuil = Math.max(1, reserveCap / 2);
 
-          const thresholdMsg = maxWaitCount < reserveCap / 2 
-            ? 'Une alerte sera envoyée à l\'admin dès que le seuil de 50% de remplissage du bus de réserve sera atteint.'
-            : 'Seuil de 50% atteint ! L\'activation est en cours de validation par l\'administration.';
+          // On pourrait calculer le nombre exact en attente ici pour le message, 
+          // mais informons déjà l'utilisateur du principe du seuil de 50%.
+          const thresholdMsg = `ℹ️ Note: Un bus de réserve sera automatiquement activé dès que la liste d'attente globale atteindra ${seuil} personnes (50% de sa capacité).`;
 
-          okMsg = `${confirmedStr}${waitingStr} ${thresholdMsg}`;
+          msg = `${confStr}${waitStr}${thresholdMsg}`;
         }
-        alert(okMsg);
+        alert(msg);
         this.cdr.detectChanges();
       },
       error: (err) => {

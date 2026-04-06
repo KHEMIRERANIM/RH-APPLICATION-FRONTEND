@@ -98,7 +98,11 @@ export class CovoiturageService {
   }
 
   private reservationsUrl = 'http://10.188.81.174:8081/api/reservations';
-  private empreintesUrl = 'http://10.188.81.174:8081/api/empreintes'; // ← ajouter
+  private empreintesUrl = 'http://10.188.81.174:8081/api/empreintes';
+
+  getAllReservations(): Observable<ReservationResponse[]> {
+    return this.http.get<ReservationResponse[]>(this.reservationsUrl);
+  }
 
 
   getReservationsByEmploye(employeId: string): Observable<ReservationResponse[]> {
