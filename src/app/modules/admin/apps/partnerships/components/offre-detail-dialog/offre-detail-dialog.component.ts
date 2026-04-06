@@ -146,8 +146,9 @@ export class OffreDetailDialogComponent implements OnInit {
                 this._toastr.warning('Capacité dépassée.');
                 return;
             }
-            if (this.nuitsH <= 0) {
-                this._toastr.warning('Veuillez sélectionner des dates valides.');
+            const minNuits = this.offre.detailsHotel?.nombreNuits || 1;
+            if (this.nuitsH < minNuits) {
+                this._toastr.warning(`Le séjour minimum pour cet hôtel est de ${minNuits} nuit(s).`);
                 return;
             }
         }
@@ -204,8 +205,9 @@ export class OffreDetailDialogComponent implements OnInit {
                 this._toastr.warning('Capacité dépassée.');
                 return;
             }
-            if (this.nuitsH <= 0) {
-                this._toastr.warning('Veuillez sélectionner des dates valides.');
+            const minNuits = this.offre.detailsHotel?.nombreNuits || 1;
+            if (this.nuitsH < minNuits) {
+                this._toastr.warning(`Le séjour minimum pour cet hôtel est de ${minNuits} nuit(s).`);
                 return;
             }
         }
