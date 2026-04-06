@@ -21,7 +21,10 @@ export interface Bus {
     photoUrl?: string; // ✅ Ajout
   /** Même pack que d'autres bus (activation dynamique). */
   packId?: string;
-
+  /** Occupation par jour spécifique (ex: {"2026-04-06": 15, "2026-04-07": 0}) */
+  dailyOccupancy?: { [date: string]: number };
+  /** Dates spécifiques du pack (ex: ["2026-04-06", "2026-04-07", ...]) */
+  packDates?: string[];
 }
 
 export interface BusPackRequest {

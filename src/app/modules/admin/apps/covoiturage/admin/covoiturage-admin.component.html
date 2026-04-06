@@ -1,4 +1,28 @@
-<div class="space-y-6 p-6 w-full">
+<div class="space-y-6 p-6 w-full relative">
+
+  <!-- Notifications flottantes (Alerte File d'attente > 50%) -->
+  <div class="fixed top-24 right-6 z-[100] w-96 space-y-3 pointer-events-none">
+    <div *ngFor="let notif of notifications" 
+         class="pointer-events-auto bg-white border-l-4 border-amber-500 rounded-xl shadow-2xl p-4 flex gap-4 animate-in slide-in-from-right duration-300 transform hover:scale-105 transition-transform">
+      <div class="w-10 h-10 bg-amber-50 rounded-full flex items-center justify-center shrink-0">
+        <mat-icon class="text-amber-600 icon-size-5" svgIcon="feather:alert-triangle"></mat-icon>
+      </div>
+      <div class="flex-1 min-w-0">
+        <h4 class="text-sm font-bold text-[#1A1A2E] mb-0.5">{{ notif.title }}</h4>
+        <p class="text-xs text-gray-600 leading-relaxed">{{ notif.message }}</p>
+        <div class="flex gap-3 mt-3">
+          <button (click)="activateBus(notif.busId)" 
+            class="px-3 py-1.5 bg-[#1D9E75] text-white rounded-lg text-xs font-bold hover:bg-[#178a66] transition shadow-sm">
+            {{ notif.actionLabel }}
+          </button>
+          <button (click)="dismissNotification(notif.id)" 
+            class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg text-xs font-bold hover:bg-gray-200 transition">
+            Ignorer
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Header -->
   <div class="flex items-center justify-between">
@@ -148,16 +172,51 @@
       <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
         <h3 class="text-lg font-semibold text-[#1A1A2E] mb-4">Navettes performantes</h3>
         <div class="space-y-3">
-          <div *ngFor="let navette of navettes" class="flex items-center justify-between">
-            <div class="flex-1">
-              <p class="text-[#1A1A2E] text-sm font-medium mb-1">{{ navette.marque }} {{ navette.modele }} - {{ navette.ligne }}</p>
-              <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
-                <div class="h-full bg-[#1D9E75] rounded-full"
-                  [style.width.%]="navette.capacite ? ((navette.capacite - (navette.placesRestantes || 0)) / navette.capacite) * 100 : 0">
+          <div *ngFor="let navette of navettes" class="border-b last:border-0 py-3">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex-1">
+                <p class="text-[#1A1A2E] text-sm font-medium mb-1">{{ navette.marque }} {{ navette.modele }} - {{ navette.ligne }}</p>
+                <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <div class="h-full bg-[#1D9E75] rounded-full"
+                    [style.width.%]="navette.capacite ? ((navette.capacite - (navette.placesRestantes || 0)) / navette.capacite) * 100 : 0">
+                  </div>
+                </div>
+              </div>
+              <span class="ml-4 text-sm text-gray-600 font-medium">{{ navette.placesRestantes }}/{{ navette.capacite }}</span>
+            </div>
+
+            <!-- Détails par jour pour les packs (DANS la boucle ngFor) -->
+            <div *ngIf="navette.packId" class="mt-4 bg-gray-50/50 p-3 rounded-xl border border-gray-100">
+              <p class="text-[10px] font-bold text-gray-400 mb-2 uppercase tracking-widest">Occupation quotidienne</p>
+              <div class="grid grid-cols-5 gap-2">
+                <div *ngFor="let date of navette.packDates" class="p-2 rounded-lg border bg-white text-center relative group transition-all hover:shadow-sm"
+                     [class.border-green-100]="countConfirmesParJour(navette.id, date) < navette.capacite"
+                     [class.border-red-100]="countConfirmesParJour(navette.id, date) >= navette.capacite">
+                  <p class="text-[9px] font-bold text-gray-400">{{ date | date:'EEE' | uppercase }}</p>
+                  <p class="text-[11px] font-bold" 
+                     [class.text-green-600]="countConfirmesParJour(navette.id, date) < navette.capacite"
+                     [class.text-red-600]="countConfirmesParJour(navette.id, date) >= navette.capacite">
+                     {{ date | date:'dd/MM' }}
+                  </p>
+                  <p class="text-[9px] mt-1 text-gray-500 font-medium">
+                    {{ countConfirmesParJour(navette.id, date) }}/{{ navette.capacite }}
+                    <span *ngIf="reservantsParJour(navette.id, date).length > navette.capacite" class="text-orange-500">
+                      (+{{ reservantsParJour(navette.id, date).length - navette.capacite }})
+                    </span>
+                  </p>
+                  
+                  <!-- Tooltip passagers -->
+                  <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-40 bg-gray-900 text-white text-[9px] p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity z-50 pointer-events-none shadow-xl border border-white/10">
+                    <p class="font-bold border-b border-white/10 mb-1 pb-1">Passagers ({{ date | date:'dd/MM' }})</p>
+                    <p *ngFor="let r of reservantsParJour(navette.id, date)" class="truncate opacity-80 flex items-center gap-1">
+                      <span class="w-1.5 h-1.5 rounded-full" [class.bg-green-400]="!r.isWaitlisted" [class.bg-orange-400]="r.isWaitlisted"></span>
+                      • {{ getNomEmploye(r.employeId) }}
+                    </p>
+                    <p *ngIf="reservantsParJour(navette.id, date).length === 0" class="italic opacity-40">Aucun passager</p>
+                  </div>
                 </div>
               </div>
             </div>
-            <span class="ml-4 text-sm text-gray-600">{{ navette.placesRestantes }}/{{ navette.capacite }}</span>
           </div>
         </div>
       </div>
@@ -221,19 +280,32 @@
           </div>
         </div>
       </div>
-      <div *ngIf="reservantsPourBus(bus.id!).length > 0" class="bg-[#0F3460]/5 rounded-lg p-3 border border-[#0F3460]/10">
-        <p class="text-xs font-semibold text-[#0F3460] mb-2">Employés réservés</p>
-        <ul class="space-y-1.5 max-h-28 overflow-y-auto">
-          <li *ngFor="let r of reservantsPourBus(bus.id!)" class="flex items-center justify-between gap-2 text-sm">
-            <span class="text-[#1A1A2E] truncate">{{ getNomEmploye(r.employeId) }}</span>
-            <span class="text-xs shrink-0 px-2 py-0.5 rounded-full"
-              [ngClass]="r.statut === 'CONFIRME' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-900'">
-              {{ r.statut === 'CONFIRME' ? 'Confirmé' : 'En attente' }}
-            </span>
-          </li>
-        </ul>
+      <!-- Planning de la semaine (pour bus sans pack) -->
+      <div class="mt-2 pt-2 border-t border-gray-100">
+        <p class="text-xs font-bold text-gray-400 uppercase mb-2">Planning hebdomadaire</p>
+        <div class="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+          <div *ngFor="let jour of bus.joursDisponibles?.split(',')" class="bg-gray-50/50 rounded-lg p-2 border border-gray-100">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-[10px] font-bold text-[#0F3460] uppercase">{{ jour.trim() }}</span>
+              <span class="text-[9px] font-medium text-gray-500">
+                {{ countConfirmesParJour(bus.id, jour.trim()) }}/{{ bus.capacite }}
+                <span *ngIf="reservantsParJour(bus.id, jour.trim()).length > bus.capacite" class="text-orange-500 text-[8px]">
+                  (+{{ reservantsParJour(bus.id, jour.trim()).length - bus.capacite }})
+                </span>
+              </span>
+            </div>
+            <div class="flex flex-wrap gap-1">
+              <div *ngFor="let r of reservantsParJour(bus.id, jour.trim())" 
+                   class="flex items-center gap-1 px-1.5 py-0.5 bg-white border border-gray-200 rounded-lg shadow-xs">
+                <div class="w-2 h-2 rounded-full" [class.bg-[#1D9E75]]="!r.isWaitlisted" [class.bg-amber-400]="r.isWaitlisted"></div>
+                <span class="text-[9px] text-[#1A1A2E] font-medium">{{ getNomEmploye(r.employeId) }}</span>
+              </div>
+              <p *ngIf="reservantsParJour(bus.id, jour.trim()).length === 0" class="text-[9px] text-gray-400 italic py-0.5">Aucun passager</p>
+            </div>
+          </div>
+        </div>
       </div>
-      <p *ngIf="reservantsPourBus(bus.id!).length === 0" class="text-xs text-gray-400 italic">Aucune réservation active sur ce bus.</p>
+
       <div class="flex gap-2 pt-2 border-t border-gray-100">
         <button (click)="openEditModal(bus)"
           class="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gray-50 text-[#1A1A2E] rounded-lg hover:bg-gray-100 transition">
@@ -300,7 +372,33 @@
             </div>
           </div>
         </div>
-        <p *ngIf="bus.statut !== 'ACTIF'" class="text-xs text-gray-400 italic text-center py-1">
+        <!-- Planning détaillé par jour (pour bus en PACK) -->
+        <div *ngIf="bus.packDates && bus.packDates.length > 0" class="mt-2 pt-2 border-t border-gray-100">
+          <p class="text-[10px] font-bold text-gray-400 uppercase mb-2">Planning des dates</p>
+          <div class="space-y-2 max-h-40 overflow-y-auto pr-1 custom-scrollbar">
+            <div *ngFor="let date of bus.packDates" class="bg-blue-50/30 rounded-lg p-2 border border-blue-100/50">
+              <div class="flex items-center justify-between mb-1.5">
+                <span class="text-[9px] font-bold text-[#0F3460]">{{ date | date:'EEEE dd/MM' | uppercase }}</span>
+                <span class="text-[9px] font-bold text-[#1D9E75]">
+                  {{ countConfirmesParJour(bus.id, date) }}/{{ bus.capacite }}
+                  <span *ngIf="reservantsParJour(bus.id, date).length > bus.capacite" class="text-orange-500 text-[8px]">
+                    (+{{ reservantsParJour(bus.id, date).length - bus.capacite }})
+                  </span>
+                </span>
+              </div>
+              <div class="flex flex-wrap gap-1">
+                <div *ngFor="let r of reservantsParJour(bus.id, date)" 
+                     class="group relative flex items-center gap-1.5 px-2 py-1 bg-white border border-gray-100 rounded-md shadow-sm hover:border-[#1D9E75] transition-colors">
+                  <span class="text-[9px] text-[#1A1A2E] font-semibold">{{ getNomEmploye(r.employeId) }}</span>
+                  <div class="w-1.5 h-1.5 rounded-full" [class.bg-[#1D9E75]]="!r.isWaitlisted" [class.bg-orange-400]="r.isWaitlisted"></div>
+                </div>
+                <p *ngIf="reservantsParJour(bus.id, date).length === 0" class="text-[9px] text-gray-400 italic py-1">Aucun passager</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p *ngIf="bus.statut !== 'ACTIF' && (!bus.packDates || bus.packDates.length === 0)" class="text-xs text-gray-400 italic text-center py-1">
           Bus en réserve — liste d'attente possible
         </p>
         <div class="flex gap-2 pt-1 border-t border-gray-100">
@@ -319,7 +417,7 @@
   </div>
 </div>
 
-  <!-- RESERVATIONS SECTION -->
+<!-- RESERVATIONS SECTION -->
   <div *ngIf="activeSection === 'reservations'" class="space-y-4">
     <div class="bg-white rounded-xl p-2 shadow-sm border border-gray-200">
       <div class="flex gap-2">
@@ -510,7 +608,33 @@
     <p class="text-xs text-gray-600">
       Tous les bus du pack partagent la même ligne. Chaque bus a sa propre marque, modèle, immatriculation et capacité.
     </p>
-    <div *ngIf="createBusPack" class="space-y-3">
+    <div *ngIf="createBusPack" class="space-y-4">
+      <!-- NOUVEAU: Sélection des dates du pack -->
+      <div class="bg-white border border-[#1D9E75]/30 rounded-xl p-4 space-y-3 shadow-inner">
+        <div class="flex items-center justify-between">
+          <label class="text-sm font-bold text-[#0F3460]">Dates disponibles pour cette semaine</label>
+          <div class="flex gap-2">
+            <input type="date" #datePicker class="text-sm border rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-[#1D9E75] outline-none border-gray-300">
+            <button type="button" (click)="addPackDate(datePicker.value); datePicker.value=''" 
+              class="px-3 py-1.5 bg-[#0F3460] text-white rounded-lg text-xs font-semibold hover:bg-[#0a2342] transition shadow-sm">
+              Ajouter
+            </button>
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-2 min-h-[40px] p-2 bg-gray-50 rounded-lg border border-dashed border-gray-200">
+          <span *ngFor="let d of packDates; let idx = index" 
+            class="group flex items-center gap-2 px-3 py-1.5 bg-white border border-[#1D9E75]/20 rounded-full text-xs font-semibold text-[#1D9E75] shadow-sm animate-in fade-in zoom-in duration-200">
+            <mat-icon class="icon-size-3" svgIcon="feather:calendar"></mat-icon>
+            {{ d | date:'dd/MM/yyyy' }}
+            <button type="button" (click)="removePackDate(idx)" class="text-red-400 hover:text-red-600 transition ml-1">
+              <mat-icon class="icon-size-3" svgIcon="feather:x"></mat-icon>
+            </button>
+          </span>
+          <p *ngIf="packDates.length === 0" class="text-xs text-gray-400 italic w-full text-center py-2">
+            Sélectionnez les dates de service (ex: du Lundi au Vendredi)
+          </p>
+        </div>
+      </div>
       <div *ngFor="let packBus of packBusList; let i = index"
         class="bg-white border border-gray-200 rounded-lg p-3 space-y-2">
         <div class="flex items-center justify-between">
@@ -643,9 +767,8 @@
 
   <div *ngIf="errorMessage" class="bg-red-50 text-red-600 p-3 rounded-lg text-sm">{{ errorMessage }}</div>
 </div>
-
-<!--Footer--->>
-      <div class="flex gap-3 p-6 border-t border-gray-200">
+  <!-- Footer -->
+  <div class="flex gap-3 p-6 border-t border-gray-200">
         <button (click)="closeModal()"
           class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
           Annuler

@@ -1,6 +1,6 @@
 <div class="w-full flex-auto p-6 sm:p-10 space-y-6">
   <div class="flex items-center justify-end pb-2">
-    <button (click)="switchSection('recompenses')"
+    <button [routerLink]="['/apps/covoiturage/user/recompense']"
       class="relative p-5 bg-white rounded-xl shadow-md hover:shadow-lg transition-all group z-[90] mt-2 border border-gray-100">
       <img src="cadeau.png" alt="Cadeaux" class="w-8 h-8 object-contain drop-shadow-sm" />
       <span
@@ -18,8 +18,8 @@
     <button (click)="switchSection('proposes')"
       [class]="'flex-1 min-w-[180px] py-3 px-4 rounded-lg font-medium transition-all ' + (activeSection === 'proposes' ? 'bg-[#0F3460] text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100')">Mes
       transports proposés</button>
-    <button (click)="switchSection('recompenses')"
-      [class]="'flex-1 min-w-[180px] py-3 px-4 rounded-lg font-medium transition-all ' + (activeSection === 'recompenses' ? 'bg-[#0F3460] text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100')">Mes
+    <button [routerLink]="['/apps/covoiturage/user/recompense']"
+      class="flex-1 min-w-[180px] py-3 px-4 rounded-lg font-medium transition-all text-gray-600 hover:bg-gray-100">Mes
       récompenses</button>
   </div>
 
@@ -30,11 +30,6 @@
         [class]="'flex-1 py-3 px-4 rounded-lg font-medium transition-all ' + (selectedTab === 'covoiturage' ? 'bg-[#1D9E75] text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100')">Covoiturage</button>
       <button (click)="selectedTab = 'navette'"
         [class]="'flex-1 py-3 px-4 rounded-lg font-medium transition-all ' + (selectedTab === 'navette' ? 'bg-[#1D9E75] text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100')">Navette</button>
-      <button (click)="selectedTab = 'inter-sites'"
-        [class]="'flex-1 py-3 px-4 rounded-lg font-medium transition-all ' + (selectedTab === 'inter-sites' ? 'bg-[#1D9E75] text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100')">Inter-sites</button>
-      <button (click)="selectedTab = 'adapte'"
-        [class]="'flex-1 py-3 px-4 rounded-lg font-medium transition-all ' + (selectedTab === 'adapte' ? 'bg-[#1D9E75] text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100')">Transport
-        Adapté</button>
     </div>
 
     <!-- ===== COVOITURAGE TAB ===== -->
@@ -139,26 +134,52 @@
                 </div>
               </div>
               <div *ngIf="inputMode === 'manual'">
-                <div class="space-y-3">
+                <div class="space-y-4">
+                  <!-- Point de départ -->
                   <div class="flex items-start gap-3">
-                    <div class="mt-3">
+                    <div class="mt-4">
                       <div class="w-3 h-3 rounded-full bg-[#1D9E75] shadow-sm"></div>
                     </div>
-                    <div class="flex-1"><label class="block text-base font-medium text-gray-700 mb-1">Point de
-                        départ</label><input type="text" [(ngModel)]="manualDeparture" (input)="onManualInputChange()"
-                        placeholder="Ex: Ariana, Tunis"
-                        class="w-full h-10 px-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#1D9E75] bg-white" />
+                    <div class="flex-1">
+                      <label class="block text-sm font-bold text-gray-700 mb-1">Point de départ</label>
+                      <div class="relative">
+                        <mat-icon svgIcon="feather:map-pin" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 icon-size-5"></mat-icon>
+                        <input type="text" [(ngModel)]="manualDeparture" (input)="onManualInputChange()"
+                          placeholder="Ex: Siège Social, Tunis..."
+                          class="w-full h-11 pl-10 pr-4 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#1D9E75]/20 focus:border-[#1D9E75] bg-white font-medium text-gray-700 transition-all shadow-sm" />
+                      </div>
                     </div>
                   </div>
+
+                  <!-- Tous les points de départ -->
                   <div class="flex items-start gap-3">
-                    <div class="mt-3">
+                    <div class="mt-4">
+                      <div class="w-3 h-3 rounded-full bg-amber-400 shadow-sm"></div>
+                    </div>
+                    <div class="flex-1">
+                      <label class="block text-sm font-bold text-gray-700 mb-1">Tous les points de départ</label>
+                      <div class="relative">
+                        <mat-icon svgIcon="feather:search" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 icon-size-5"></mat-icon>
+                        <input type="text" [(ngModel)]="manualAllStartPoints" (input)="onManualInputChange()"
+                          placeholder="Rechercher parmis tous les points..."
+                          class="w-full h-11 pl-10 pr-4 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 bg-white font-medium text-gray-700 transition-all shadow-sm" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Destination -->
+                  <div class="flex items-start gap-3">
+                    <div class="mt-4">
                       <div class="w-3 h-3 rounded-full bg-[#E94560] shadow-sm"></div>
                     </div>
-                    <div class="flex-1"><label
-                        class="block text-base font-medium text-gray-700 mb-1">Destination</label><input type="text"
-                        [(ngModel)]="manualDestination" (input)="onManualInputChange()"
-                        placeholder="Ex: Centre-ville, Tunis"
-                        class="w-full h-10 px-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#1D9E75] bg-white" />
+                    <div class="flex-1">
+                      <label class="block text-sm font-bold text-gray-700 mb-1">Destination</label>
+                      <div class="relative">
+                        <mat-icon svgIcon="feather:flag" class="absolute left-3 top-3.5 text-gray-400 icon-size-5"></mat-icon>
+                        <textarea [(ngModel)]="manualDestination" (input)="onManualInputChange()"
+                          placeholder="Où voulez-vous aller ?" rows="2"
+                          class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#E94560]/20 focus:border-[#E94560] bg-white font-medium text-gray-700 transition-all shadow-sm resize-none"></textarea>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -340,19 +361,15 @@
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Point de départ</label>
-              <select [(ngModel)]="shuttleFilterDepart"
+              <input type="text" [(ngModel)]="shuttleFilterDepart"
+                placeholder="Entrez le lieu de départ..."
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1D9E75] focus:border-transparent outline-none bg-white">
-                <option value="">Tous les points de départ</option>
-                <option *ngFor="let depart of shuttleDeparts" [value]="depart">{{ depart }}</option>
-              </select>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Destination</label>
-              <select [(ngModel)]="shuttleFilterArrivee"
+              <input type="text" [(ngModel)]="shuttleFilterArrivee"
+                placeholder="Entrez la destination..."
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1D9E75] focus:border-transparent outline-none bg-white">
-                <option value="">Toutes les destinations</option>
-                <option *ngFor="let arrivee of shuttleArrivees" [value]="arrivee">{{ arrivee }}</option>
-              </select>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Heure souhaitée</label>
@@ -417,16 +434,54 @@
                   </div>
                 </div>
               </div>
-              <!-- Sélection des jours -->
+              <!-- NOUVEAU: Sélection par date avec indicateurs -->
               <div class="border-t border-gray-100 pt-3 mt-2">
-                <p class="text-xs text-gray-500 mb-2">Choisir vos jours</p>
-                <div class="flex flex-wrap gap-1">
-                  <button *ngFor="let jour of shuttle.joursDisponibles?.split(',')" type="button"
-                    (click)="toggleNavetteDay(shuttle.id, jour.trim())"
-                    [ngClass]="(selectedNavetteDays[shuttle.id] || []).includes(jour.trim()) ? 'bg-[#1D9E75] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
-                    class="px-2.5 py-1 rounded-lg text-xs font-medium transition-all">
-                    {{ jour.trim() }}
+                <div class="flex items-center justify-between mb-2">
+                  <p class="text-xs font-bold text-[#0F3460] uppercase tracking-wider">Dates de la semaine</p>
+                  <button *ngIf="shuttle.packDates?.length > 0" 
+                    (click)="selectAllWeek(shuttle.id, shuttle.packDates)"
+                    class="text-[10px] text-[#1D9E75] font-bold hover:underline">
+                    Tout sélectionner
                   </button>
+                </div>
+                
+                <div class="flex flex-wrap gap-2">
+                  <!-- Cas standard (si pas de packDates) -->
+                  <ng-container *ngIf="!shuttle.packDates">
+                    <button *ngFor="let jour of shuttle.joursDisponibles?.split(',')" type="button"
+                      (click)="toggleNavetteDay(shuttle.id, jour.trim())"
+                      [ngClass]="(selectedNavetteDays[shuttle.id] || []).includes(jour.trim()) ? 'bg-[#1D9E75] text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+                      class="px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all min-w-[3.5rem]">
+                      {{ jour.trim() }}
+                    </button>
+                  </ng-container>
+
+                  <!-- Cas PACK (dates spécifiques) -->
+                  <div *ngIf="shuttle.packDates" class="grid grid-cols-5 gap-2 w-full">
+                    <button *ngFor="let date of shuttle.packDates" type="button"
+                      (click)="toggleNavetteDay(shuttle.id, date)"
+                      [disabled]="disponibiliteParJour(shuttle, date) === 0 && !estDansUnPack(shuttle)"
+                      class="flex flex-col items-center justify-center p-2 rounded-xl border-2 transition-all relative group"
+                      [ngClass]="{
+                        'border-[#1D9E75] bg-[#1D9E75] text-white shadow-md scale-105 z-10': (selectedNavetteDays[shuttle.id] || []).includes(date),
+                        'border-gray-100 bg-white text-gray-700 hover:border-[#1D9E75]/30': !(selectedNavetteDays[shuttle.id] || []).includes(date),
+                        'opacity-50 grayscale cursor-not-allowed': disponibiliteParJour(shuttle, date) === 0 && !estDansUnPack(shuttle)
+                      }">
+                      
+                      <!-- Indicateur de disponibilité (Petit point) -->
+                      <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full border border-white shadow-sm"
+                            [class.bg-green-500]="disponibiliteParJour(shuttle, date) > 0"
+                            [class.bg-red-500]="disponibiliteParJour(shuttle, date) === 0"></span>
+                      
+                      <span class="text-[9px] font-bold uppercase opacity-60">{{ date | date:'EEE' }}</span>
+                      <span class="text-xs font-bold">{{ date | date:'dd' }}</span>
+                      
+                      <!-- Overlay info au survol -->
+                      <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-24 bg-gray-900 text-white text-[9px] p-1.5 rounded text-center z-50 shadow-lg font-medium">
+                        {{ disponibiliteParJour(shuttle, date) }} places restantes
+                      </div>
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -480,9 +535,16 @@
                 </div>
               </div>
               <div class="flex items-center gap-3">
-                <div class="flex gap-1">
+                <div class="flex gap-1.5 flex-wrap">
                   <span *ngFor="let day of reservation.days"
-                    class="px-2 py-1 bg-[#0F3460] text-white text-sm rounded font-medium">{{ day }}</span>
+                    [ngClass]="{
+                      'bg-green-600 text-white': getDayStatus(reservation, day) === 'confirmed',
+                      'bg-orange-500 text-white': getDayStatus(reservation, day) === 'waiting',
+                      'bg-gray-400 text-white': getDayStatus(reservation, day) === 'none'
+                    }"
+                    class="px-2 py-1 text-xs rounded font-bold shadow-sm min-w-[3.5rem] text-center border border-white/20">
+                    {{ day }}
+                  </span>
                 </div>
                 <button *ngIf="reservation.statut !== 'EN_ATTENTE_ACTIVATION'" (click)="openTracking(reservation.busId, false)" class="flex items-center gap-2 px-4 py-2 bg-[#0F3460] 
                text-white rounded-lg hover:bg-[#0a2442] transition font-medium">
@@ -726,195 +788,11 @@
   </div>
   <!-- ===================== FIN SECTION PROPOSES ===================== -->
 
-  <!-- ===================== SECTION RECOMPENSES ===================== -->
-  <div [hidden]="activeSection !== 'recompenses'"
-    class="bg-gray-50 rounded-2xl w-full shadow-sm overflow-hidden flex flex-col border border-gray-200">
-    <div class="flex items-center justify-between p-6 bg-white border-b border-gray-100 shrink-0">
-      <h2 class="text-3xl font-bold text-[#1A1A2E] flex items-center gap-3">
-        <mat-icon svgIcon="feather:gift" class="text-[#E94560] icon-size-8"></mat-icon>
-        Mes Récompenses
-      </h2>
-    </div>
-    <div class="p-6 overflow-y-auto space-y-6 flex-1">
-      <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-          <img src="https://i.pravatar.cc/150?img=68" alt="Profile"
-            class="w-24 h-24 rounded-full object-cover border-4 border-gray-50" />
-          <div class="flex-1 w-full">
-            <div class="flex flex-wrap items-center gap-3 mb-2">
-              <h2 class="text-2xl font-bold text-[#1A1A2E] m-0">Karim Mansour</h2>
-              <span
-                class="px-3 py-1 bg-[#1D9E75]/10 text-[#1D9E75] font-semibold text-sm rounded-full border border-[#1D9E75]/20">Conducteur
-                actif</span>
-            </div>
-            <div class="flex items-center gap-2 mb-4">
-              <mat-icon svgIcon="feather:award" class="text-[#F5A623] icon-size-8"></mat-icon>
-              <span class="text-3xl font-bold text-[#1A1A2E]">{{ userPointsReward }} <span
-                  class="text-lg font-medium text-gray-500">pts</span></span>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div class="bg-gray-50 border border-gray-100 rounded-xl p-5 flex flex-col">
-                <div class="flex items-center gap-2 mb-1"><mat-icon svgIcon="feather:truck"
-                    class="text-[#1D9E75] icon-size-5"></mat-icon>
-                  <p class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Trajets</p>
-                </div>
-                <p class="text-3xl font-bold text-[#1A1A2E] mt-auto">22</p>
-              </div>
-              <div class="bg-gray-50 border border-gray-100 rounded-xl p-5 flex flex-col">
-                <div class="flex items-center gap-2 mb-1"><mat-icon svgIcon="feather:trending-up"
-                    class="text-[#1D9E75] icon-size-5"></mat-icon>
-                  <p class="text-sm font-semibold text-gray-500 uppercase tracking-wider">CO2 éco</p>
-                </div>
-                <p class="text-3xl font-bold text-[#1A1A2E] mt-auto">42 <span
-                    class="text-base text-gray-500 font-medium">kg</span></p>
-              </div>
-              <div class="bg-[#F5A623]/10 border border-[#F5A623]/20 rounded-xl p-5 flex flex-col">
-                <div class="flex items-center gap-2 mb-1"><mat-icon svgIcon="feather:star"
-                    class="text-[#F5A623] icon-size-5"></mat-icon>
-                  <p class="text-sm font-semibold text-[#F5A623] uppercase tracking-wider">Classement</p>
-                </div>
-                <p class="text-3xl font-bold text-[#F5A623] mt-auto">1<span class="text-base align-super">er</span></p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-        <div class="flex items-center justify-between mb-3">
-          <div class="flex items-center gap-2">
-            <mat-icon svgIcon="feather:award" class="text-[#F5A623] icon-size-6"></mat-icon>
-            <span class="font-bold text-[#1A1A2E] text-xl">Niveau {{ userLevelReward }}</span>
-          </div>
-          <span class="text-base font-semibold text-gray-600">{{ userPointsReward }} / {{ pointsForNextLevelReward }}
-            pts</span>
-        </div>
-        <div class="relative h-3 bg-gray-100 rounded-full overflow-hidden mb-2 shadow-inner">
-          <div
-            class="absolute top-0 left-0 h-full bg-gradient-to-r from-[#1D9E75] to-[#F5A623] transition-all duration-500"
-            [style.width.%]="rewardProgressPercentage"></div>
-        </div>
-        <p class="text-base text-gray-500 text-right font-medium">
-          <span class="text-[#F5A623] font-bold">{{ pointsForNextLevelReward - userPointsReward }} pts</span> pour
-          atteindre le niveau {{ nextLevelReward }}
-        </p>
-      </div>
-
-      <div>
-        <h3 class="text-2xl font-bold text-[#1A1A2E] mb-4 flex items-center gap-2">
-          <mat-icon svgIcon="feather:gift" class="text-[#E94560] icon-size-6"></mat-icon>
-          Catalogue de récompenses
-        </h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 xl:gap-6">
-          <div *ngFor="let gift of rewardsGifts"
-            class="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md hover:border-[#F5A623]/30 transition-all group flex flex-col">
-            <div class="relative h-36 bg-gray-100 overflow-hidden shrink-0">
-              <img [src]="gift.image" [alt]="gift.title"
-                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-              <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-              <div
-                class="absolute top-3 right-3 text-3xl bg-white/90 backdrop-blur-md rounded-full w-10 h-10 flex items-center justify-center shadow-sm">
-                {{ gift.icon }}</div>
-            </div>
-            <div class="p-5 flex flex-col flex-1">
-              <h4 class="font-bold text-[#1A1A2E] mb-1 text-lg">{{ gift.title }}</h4>
-              <p class="text-sm text-gray-500 mb-4 line-clamp-2 leading-relaxed flex-1">{{ gift.description }}</p>
-              <div class="flex items-center justify-between mt-auto">
-                <div class="flex items-center gap-1.5 px-2 py-1 bg-[#F5A623]/10 rounded-lg">
-                  <mat-icon svgIcon="feather:star" class="text-[#F5A623] icon-size-5 fill-current"></mat-icon>
-                  <span class="font-bold text-[#F5A623] text-base">{{ gift.points }} pts</span>
-                </div>
-                <button [disabled]="!gift.available"
-                  class="px-4 py-1.5 rounded-lg text-base font-semibold transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-                  [ngClass]="gift.available ? 'bg-[#1D9E75] text-white hover:bg-[#168567] shadow-sm' : ''">
-                  {{ gift.available ? 'Échanger' : 'Insuffisant' }}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-2">
-          <h3 class="text-2xl font-bold text-[#1A1A2E] mb-4 flex items-center gap-2">
-            <mat-icon svgIcon="feather:clock" class="text-gray-400 icon-size-6"></mat-icon>
-            Historique
-          </h3>
-          <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="divide-y divide-gray-50">
-              <div *ngFor="let item of rewardsHistory"
-                class="p-5 hover:bg-gray-50 transition-colors flex items-center gap-4">
-                <div *ngIf="item.type === 'redeem' && item.image; else normalIcon" class="shrink-0 relative">
-                  <img [src]="item.image" [alt]="item.title"
-                    class="w-12 h-12 rounded-lg object-cover shadow-sm border border-gray-100" />
-                  <div
-                    class="absolute -bottom-1 -right-1 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-sm text-sm">
-                    {{ item.icon }}</div>
-                </div>
-                <ng-template #normalIcon>
-                  <div
-                    class="w-12 h-12 bg-gray-50 rounded-lg border border-gray-100 flex items-center justify-center text-2xl shrink-0 shadow-sm">
-                    {{ item.icon }}</div>
-                </ng-template>
-                <div class="flex-1 min-w-0">
-                  <p class="font-semibold text-[#1A1A2E] text-base truncate">{{ item.title }}</p>
-                  <p class="text-sm text-gray-500 flex items-center gap-1.5 mt-0.5">
-                    <mat-icon svgIcon="feather:calendar" class="icon-size-4"></mat-icon>
-                    {{ item.date }}
-                  </p>
-                </div>
-                <div class="text-right shrink-0">
-                  <p class="text-lg font-bold" [ngClass]="item.type === 'earn' ? 'text-[#1D9E75]' : 'text-[#E94560]'">
-                    {{ item.type === 'earn' ? '+' : ''}}{{ item.points }} pts
-                  </p>
-                  <div *ngIf="item.type === 'redeem' && item.status" class="mt-1">
-                    <span class="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider"
-                      [ngClass]="item.status === 'Livré' ? 'bg-[#1D9E75] text-white' : 'bg-yellow-400 text-yellow-900'">{{
-                      item.status }}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="lg:col-span-1">
-          <h3 class="text-2xl font-bold text-[#1A1A2E] mb-4 flex items-center gap-2">
-            <mat-icon svgIcon="feather:bar-chart-2" class="text-gray-400 icon-size-6"></mat-icon>
-            Classement
-          </h3>
-          <div
-            class="bg-gradient-to-br from-[#0F3460] to-[#1A1A2E] rounded-xl p-6 text-white shadow-lg relative overflow-hidden group">
-            <div
-              class="absolute -right-10 -top-10 w-32 h-32 bg-[#1D9E75] rounded-full blur-3xl opacity-20 group-hover:opacity-40 transition-opacity">
-            </div>
-            <div
-              class="absolute -left-10 -bottom-10 w-32 h-32 bg-[#E94560] rounded-full blur-3xl opacity-20 group-hover:opacity-40 transition-opacity">
-            </div>
-            <div class="relative z-10 flex flex-col items-center text-center">
-              <div
-                class="w-20 h-20 bg-gradient-to-br from-[#F5A623] to-amber-600 rounded-full flex items-center justify-center shadow-inner mb-4 border-2 border-amber-300">
-                <span class="text-4xl">🏆</span>
-              </div>
-              <h4 class="text-2xl font-bold mb-1">Bravo !</h4>
-              <p class="text-base text-gray-300 mb-6 font-medium">Vous êtes 1er du classement mensuel de mars.</p>
-              <button
-                class="w-full py-2.5 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-base font-semibold backdrop-blur-sm transition-all text-white flex items-center justify-center gap-2">
-                Voir le classement complet
-                <mat-icon svgIcon="feather:arrow-right" class="icon-size-5"></mat-icon>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <!-- ===================== FIN SECTION RECOMPENSES ===================== -->
+  <!-- TRACKING MODAL -->
 
   <!-- TRACKING MODAL -->
   <div *ngIf="isTrackingModalOpen" class="fixed inset-0 bg-black/60 z-[9999] flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden relative flex flex-col max-h-[90vh]">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl overflow-hidden relative flex flex-col h-[85vh]">
       <div class="flex items-center justify-between p-4 border-b border-gray-100 bg-gray-50 shrink-0">
         <h2 class="text-xl font-bold flex items-center gap-2 text-[#0F3460]">
           <mat-icon svgIcon="feather:map" class="icon-size-6 text-[#1D9E75]"></mat-icon>
@@ -933,7 +811,7 @@
 
   <!-- CONDUITE (CHAUFFEUR) MODAL -->
   <div *ngIf="isConduiteModalOpen" class="fixed inset-0 bg-black/60 z-[9999] flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl overflow-hidden relative flex flex-col max-h-[95vh] min-h-[min(92vh,900px)]">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-6xl overflow-hidden relative flex flex-col h-[92vh]">
       <div class="flex items-center justify-between p-4 border-b border-gray-100 bg-gray-50 shrink-0">
         <h2 class="text-xl font-bold flex items-center gap-2 text-[#0F3460]">
           <mat-icon svgIcon="feather:navigation" class="icon-size-6 text-[#1D9E75]"></mat-icon>

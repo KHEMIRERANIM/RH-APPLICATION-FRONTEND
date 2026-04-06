@@ -33,11 +33,12 @@ export interface Trajet {
 }
 
 export interface ReservationRequest {
-  trajetId: string;
-  employeId: string;
-  statut: 'EN_ATTENTE' | 'CONFIRME' | 'ANNULE';
-    distanceKm?: number;
-
+  trajetId?: string;
+  busId?: string;
+  employeId?: string;
+  statut?: string;
+  joursSelectionnes?: string;
+  distanceKm?: number;
 }
 
 export interface ReservationResponse {
@@ -189,9 +190,7 @@ remplacerReservation(request: any): Observable<any> {
   getAllReservationsNavette(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/reservations-navette`);
   }
-
-
-
-
-
+  updateReservationStatusNavette(id: string, update: Partial<ReservationRequest>): Observable<any> {
+    return this.http.put(`${this.apiUrl}/reservations-navette/${id}`, update);
+  }
 }
