@@ -10,7 +10,6 @@ export class MobilityService {
 
   constructor(private http: HttpClient) {}
 
-  // ✅ headers sécurisés
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('accessToken');
     return new HttpHeaders({
@@ -19,7 +18,7 @@ export class MobilityService {
   }
 
   // =========================
-  // 🔹 REQUESTS
+  // 🔹 ADMIN
   // =========================
 
   getAll(): Observable<MobilityRequest[]> {
@@ -35,28 +34,9 @@ export class MobilityService {
     );
   }
 
-  getMyRequests(): Observable<MobilityRequest[]> {
-    return this.http.get<MobilityRequest[]>(
-      `${this.apiUrl}/me`,
-      { headers: this.getHeaders() }
-    );
-  }
-
   getByStatus(status: MobilityStatus): Observable<MobilityRequest[]> {
     return this.http.get<MobilityRequest[]>(
       `${this.apiUrl}/status/${status}`,
-      { headers: this.getHeaders() }
-    );
-  }
-
-  submit(dto: {
-    employeeId: string;
-    targetCareerId: string;
-    motivationLetter: string;
-  }): Observable<MobilityRequest> {
-    return this.http.post<MobilityRequest>(
-      this.apiUrl,
-      dto,
       { headers: this.getHeaders() }
     );
   }
@@ -79,37 +59,55 @@ export class MobilityService {
     );
   }
 
+  // =========================
+  // 🔹 EMPLOYÉ
+  // =========================
+
+  /** Demandes de l'employé connecté */
+  getMyRequests(): Observable<MobilityRequest[]> {
+    return this.http.get<MobilityRequest[]>(
+      `${this.apiUrl}/me`,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  /** Soumettre sans fichier */
+  submit(dto: {
+    employeeId: string;
+    targetCareerId: string;
+    motivationLetter: string;
+  }): Observable<MobilityRequest> {
+    return this.http.post<MobilityRequest>(
+      this.apiUrl,
+      dto,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  /** Soumettre avec fichier PDF */
   submitWithFile(formData: FormData): Observable<MobilityRequest> {
     return this.http.post<MobilityRequest>(
       `${this.apiUrl}/with-file`,
       formData,
-      {
-        headers: this.getHeaders()
-      }
+      { headers: this.getHeaders() }
     );
   }
 
   // =========================
-  // 🔥 NEW FIX: PREVIEW PDF
+  // 🔹 FICHIERS
   // =========================
 
   getPreview(id: string): Observable<Blob> {
-  return this.http.get(
-    `${this.apiUrl}/${id}/preview`,
-    {
-      headers: this.getHeaders(),
-      responseType: 'blob'
-    }
-  );
-}
+    return this.http.get(
+      `${this.apiUrl}/${id}/preview`,
+      { headers: this.getHeaders(), responseType: 'blob' }
+    );
+  }
 
-downloadFile(id: string): Observable<Blob> {
-  return this.http.get(
-    `${this.apiUrl}/${id}/download`,
-    {
-      headers: this.getHeaders(),
-      responseType: 'blob'
-    }
-  );
-}
+  downloadFile(id: string): Observable<Blob> {
+    return this.http.get(
+      `${this.apiUrl}/${id}/download`,
+      { headers: this.getHeaders(), responseType: 'blob' }
+    );
+  }
 }

@@ -9,78 +9,499 @@
     <mat-spinner diameter="36"></mat-spinner>
   </div>
 
-  <div *ngIf="!isLoading && plans.length === 0"
-       style="text-align:center;padding:48px;color:#9ca3af;">
-    <p style="font-size:48px;margin:0;">🗺️</p>
-    <p style="font-size:14px;">Aucun plan d'évolution défini pour vous</p>
-    <p style="font-size:12px;color:#9ca3af;">Contactez votre RH pour créer votre plan</p>
-  </div>
+  <ng-container *ngIf="!isLoading && plan">
 
-  <div *ngFor="let plan of plans"
-       style="background:white;border-radius:16px;padding:24px;border:1px solid #f3f4f6;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
-
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+    <!-- Score header -->
+    <div style="background:white;border-radius:16px;padding:20px;
+                border:1px solid #f3f4f6;box-shadow:0 1px 3px rgba(0,0,0,.06);
+                display:flex;justify-content:space-between;align-items:center;
+                flex-wrap:wrap;gap:16px;">
       <div>
         <p style="font-size:15px;font-weight:700;color:#111827;margin:0;">
-          {{ plan.currentCareerTitle }} → <span style="color:#7c3aed;">{{ plan.targetCareerTitle }}</span>
+          {{ plan.currentCareerTitle || user?.poste || '—' }}
+          <span style="color:#9ca3af;margin:0 6px;">→</span>
+          <span style="color:#7c3aed;">{{ plan.targetCareerTitle || 'Poste cible non défini' }}</span>
         </p>
         <p style="font-size:12px;color:#6b7280;margin:4px 0 0;">
-          {{ plan.status === PlanStatus.COMPLETED ? '🎉 Plan complété !' : '🎯 En cours' }}
+          {{ plan.status === 'SUBMITTED' ? '📤 Soumis'
+           : plan.status === 'REVIEWED'  ? '✅ Examiné par RH'
+           :                               '✏️ Brouillon' }}
         </p>
       </div>
-      <span [style]="'padding:4px 12px;border-radius:9999px;font-size:12px;font-weight:700;' +
-                     (plan.status === PlanStatus.COMPLETED ? 'background:#dcfce7;color:#166534;' : 'background:#ede9fe;color:#7c3aed;')">
-        {{ plan.status === PlanStatus.COMPLETED ? '✅ Complété' : '🎯 Actif' }}
-      </span>
+
+      <div style="display:flex;gap:12px;">
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+                    width:72px;height:72px;border-radius:50%;border:3px solid #7c3aed;">
+          <span style="font-size:16px;font-weight:800;color:#111827;">{{ plan.scoreGlobal ?? 0 }}%</span>
+          <span style="font-size:10px;color:#6b7280;text-transform:uppercase;font-weight:600;">Global</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+                    width:72px;height:72px;border-radius:50%;border:3px solid #2563eb;">
+          <span style="font-size:16px;font-weight:800;color:#111827;">{{ plan.scoreTechnique ?? 0 }}%</span>
+          <span style="font-size:10px;color:#6b7280;text-transform:uppercase;font-weight:600;">Tech</span>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+                    width:72px;height:72px;border-radius:50%;border:3px solid #ea580c;">
+          <span style="font-size:16px;font-weight:800;color:#111827;">{{ plan.scoreSoftSkill ?? 0 }}%</span>
+          <span style="font-size:10px;color:#6b7280;text-transform:uppercase;font-weight:600;">Soft</span>
+        </div>
+      </div>
     </div>
 
     <!-- Barre de progression -->
-    <div style="margin-bottom:20px;">
-      <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
-        <span style="font-size:12px;font-weight:600;color:#374151;">Ma progression</span>
-        <span [style]="'font-size:14px;font-weight:800;color:' + getProgressColor(plan.progressPercent || 0)">
-          {{ plan.progressPercent }}%
-        </span>
-      </div>
-      <div style="background:#f3f4f6;border-radius:9999px;height:12px;overflow:hidden;">
-        <div [style]="'height:100%;border-radius:9999px;transition:width 0.5s;background:' +
-                      getProgressColor(plan.progressPercent || 0) + ';width:' + plan.progressPercent + '%'">
-        </div>
+    <div style="background:#f3f4f6;border-radius:9999px;height:10px;overflow:hidden;">
+      <div [style]="'height:100%;border-radius:9999px;transition:width .4s ease;width:'
+                    + (plan.scoreGlobal ?? 0) + '%;background:'
+                    + ((plan.scoreGlobal ?? 0) >= 75 ? '#16a34a'
+                    : (plan.scoreGlobal ?? 0) >= 40 ? '#d97706' : '#dc2626')">
       </div>
     </div>
 
-    <!-- Skills -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-      <div>
-        <p style="font-size:11px;font-weight:700;color:#16a34a;text-transform:uppercase;margin:0 0 8px;">
-          ✅ Je maîtrise ({{ plan.skillsAlreadyMet?.length || 0 }})
-        </p>
-        <div style="display:flex;flex-wrap:wrap;gap:6px;">
-          <span *ngFor="let s of plan.skillsAlreadyMet"
-                style="padding:3px 10px;border-radius:9999px;font-size:11px;font-weight:600;background:#dcfce7;color:#166534;">
-            {{ s }}
-          </span>
-          <span *ngIf="!plan.skillsAlreadyMet?.length" style="font-size:12px;color:#9ca3af;font-style:italic;">Aucune</span>
+    <!-- Tabs -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button *ngFor="let t of tabs"
+              (click)="activeTab = t.key"
+              [style]="activeTab === t.key
+                ? 'padding:8px 18px;border-radius:9999px;border:none;background:#7c3aed;color:white;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;'
+                : 'padding:8px 18px;border-radius:9999px;border:1px solid #e5e7eb;background:white;color:#374151;cursor:pointer;font-size:13px;font-weight:500;font-family:inherit;'">
+        {{ t.label }}
+      </button>
+    </div>
+
+    <!-- ═══ TAB : Poste cible ═══ -->
+    <div *ngIf="activeTab === 'poste'"
+         style="background:white;border-radius:16px;padding:24px;
+                border:1px solid #f3f4f6;box-shadow:0 1px 3px rgba(0,0,0,.06);
+                display:flex;flex-direction:column;gap:16px;">
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+
+        <!-- Poste actuel : lecture seule -->
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">
+            Poste actuel
+          </label>
+          <div style="padding:10px 14px;border-radius:8px;border:1.5px solid #e5e7eb;
+                      background:#f3f4f6;font-size:14px;color:#374151;">
+            {{ plan.currentCareerTitle || user?.poste || 'Non défini' }}
+          </div>
+        </div>
+
+        <!-- Poste cible : modifiable -->
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">
+            Poste cible *
+          </label>
+          <select [(ngModel)]="plan.targetCareerId"
+                  (ngModelChange)="onTargetCareerChange()"
+                  style="width:100%;padding:10px 14px;border-radius:8px;
+                         border:1.5px solid #e5e7eb;font-size:14px;outline:none;
+                         background:#fafafa;font-family:inherit;">
+            <option value="">Sélectionner</option>
+            <option *ngFor="let c of careers" [value]="c.id">{{ c.title }}</option>
+          </select>
         </div>
       </div>
-      <div>
-        <p style="font-size:11px;font-weight:700;color:#dc2626;text-transform:uppercase;margin:0 0 8px;">
-          📚 À acquérir ({{ plan.skillsToAcquire?.length || 0 }})
+
+      <!-- Gap -->
+      <div *ngIf="plan.gap?.length">
+        <p style="font-size:13px;font-weight:700;color:#374151;margin:0 0 10px;">
+          Gap de compétences
         </p>
-        <div style="display:flex;flex-wrap:wrap;gap:6px;">
-          <span *ngFor="let s of plan.skillsToAcquire"
-                style="padding:3px 10px;border-radius:9999px;font-size:11px;font-weight:600;background:#fee2e2;color:#991b1b;">
-            {{ s }}
-          </span>
-          <span *ngIf="!plan.skillsToAcquire?.length" style="font-size:12px;color:#9ca3af;font-style:italic;">Aucune 🎉</span>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div *ngFor="let g of plan.gap"
+               [style]="'display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;font-size:13px;background:'
+                        + (g.couverte ? '#dcfce7' : '#fee2e2')">
+            <span style="font-weight:700;">{{ g.couverte ? '✓' : '✗' }}</span>
+            <span style="flex:1;font-weight:600;">{{ g.competenceNom }}</span>
+            <span style="font-size:11px;color:#6b7280;">{{ g.niveauRequis }}</span>
+            <span *ngIf="g.couvertParCertif"
+                  style="font-size:10px;background:#e0e7ff;color:#3730a3;
+                         padding:2px 8px;border-radius:9999px;font-weight:700;">certif</span>
+          </div>
         </div>
+      </div>
+
+      <!-- Formations recommandées -->
+      <div *ngIf="plan.formationsRecommandees?.length">
+        <p style="font-size:13px;font-weight:700;color:#374151;margin:0 0 8px;">
+          💡 Formations recommandées par RH
+        </p>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          <span *ngFor="let f of plan.formationsRecommandees"
+                style="background:#ede9fe;color:#5b21b6;padding:4px 12px;
+                       border-radius:9999px;font-size:12px;font-weight:600;">
+            {{ f }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Commentaire RH -->
+      <div *ngIf="plan.commentaireAdmin"
+           style="background:#f9fafb;border-radius:8px;padding:12px;border-left:3px solid #7c3aed;">
+        <p style="font-size:12px;color:#6b7280;margin:0;">
+          💬 <strong>RH :</strong> {{ plan.commentaireAdmin }}
+        </p>
+      </div>
+
+      <button (click)="savePoste()"
+              style="padding:10px 20px;border-radius:8px;border:none;background:#7c3aed;
+                     color:white;cursor:pointer;font-size:14px;font-weight:600;
+                     font-family:inherit;align-self:flex-start;">
+        Enregistrer
+      </button>
+    </div>
+
+    <!-- ═══ TAB : Mes compétences ═══ -->
+    <div *ngIf="activeTab === 'competences'"
+         style="background:white;border-radius:16px;padding:24px;
+                border:1px solid #f3f4f6;box-shadow:0 1px 3px rgba(0,0,0,.06);
+                display:flex;flex-direction:column;gap:16px;">
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        <input [(ngModel)]="newComp.nom"
+               placeholder="Nom de la compétence..."
+               style="flex:1;min-width:160px;padding:8px 12px;border-radius:8px;
+                      border:1px solid #e5e7eb;font-size:14px;font-family:inherit;outline:none;" />
+        <select [(ngModel)]="newComp.niveau"
+                style="padding:8px 12px;border-radius:8px;border:1px solid #e5e7eb;
+                       font-size:14px;font-family:inherit;outline:none;background:white;">
+          <option value="DEBUTANT">Débutant</option>
+          <option value="INTERMEDIAIRE">Intermédiaire</option>
+          <option value="EXPERT">Expert</option>
+        </select>
+        <input [(ngModel)]="newComp.annees" type="number" min="0" max="30"
+               placeholder="Années"
+               style="width:80px;padding:8px 12px;border-radius:8px;
+                      border:1px solid #e5e7eb;font-size:14px;font-family:inherit;outline:none;" />
+        <button (click)="addCompetence()"
+                style="padding:8px 16px;border-radius:8px;border:none;
+                       background:#ede9fe;color:#5b21b6;cursor:pointer;
+                       font-size:13px;font-weight:600;font-family:inherit;">
+          + Ajouter
+        </button>
+      </div>
+
+      <div *ngIf="!plan.competencesActuelles?.length"
+           style="text-align:center;padding:24px;color:#9ca3af;font-size:14px;">
+        Aucune compétence déclarée
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div *ngFor="let c of plan.competencesActuelles; let i = index"
+             style="display:flex;align-items:center;gap:10px;padding:10px 14px;
+                    background:#f9fafb;border-radius:8px;font-size:13px;">
+          <span style="flex:1;font-weight:600;color:#111827;">{{ c.nom }}</span>
+          <span [style]="'padding:3px 10px;border-radius:9999px;font-size:11px;font-weight:700;'
+                         + (c.niveau === 'EXPERT'       ? 'background:#dcfce7;color:#166534;'
+                         : c.niveau === 'INTERMEDIAIRE' ? 'background:#e0e7ff;color:#3730a3;'
+                         :                                'background:#fef9c3;color:#854d0e;')">
+            {{ c.niveau }}
+          </span>
+          <span *ngIf="c.annees" style="font-size:11px;color:#6b7280;">{{ c.annees }} ans</span>
+          <button (click)="removeCompetence(i)"
+                  style="background:none;border:none;cursor:pointer;color:#dc2626;font-size:14px;">✕</button>
+        </div>
+      </div>
+
+      <button (click)="saveCompetences()"
+              style="padding:10px 20px;border-radius:8px;border:none;background:#7c3aed;
+                     color:white;cursor:pointer;font-size:14px;font-weight:600;
+                     font-family:inherit;align-self:flex-start;">
+        Enregistrer mes compétences
+      </button>
+    </div>
+
+    <!-- ═══ TAB : Certifs Techniques ═══ -->
+    <div *ngIf="activeTab === 'tech'"
+         style="background:white;border-radius:16px;padding:24px;
+                border:1px solid #f3f4f6;box-shadow:0 1px 3px rgba(0,0,0,.06);
+                display:flex;flex-direction:column;gap:16px;">
+
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <p style="font-size:13px;color:#6b7280;margin:0;">
+          Certifications techniques — requises ou ajoutées
+        </p>
+        <button (click)="showAddTech = !showAddTech"
+                style="padding:8px 16px;border-radius:8px;border:none;
+                       background:#ede9fe;color:#5b21b6;cursor:pointer;
+                       font-size:13px;font-weight:600;font-family:inherit;">
+          {{ showAddTech ? '✕ Annuler' : '+ Ajouter une certif' }}
+        </button>
+      </div>
+
+      <!-- Formulaire ajout technique -->
+      <div *ngIf="showAddTech"
+           style="background:#f9fafb;border-radius:12px;padding:16px;
+                  border:1px solid #e5e7eb;display:flex;flex-direction:column;gap:12px;">
+        <p style="font-size:13px;font-weight:700;color:#374151;margin:0;">
+          Nouvelle certification technique
+        </p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+          <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:160px;">
+            <label style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Nom *</label>
+            <input [(ngModel)]="newCertif.nom"
+                   placeholder="Ex: AWS Solutions Architect..."
+                   style="padding:8px 12px;border-radius:8px;border:1px solid #e5e7eb;
+                          font-size:13px;font-family:inherit;outline:none;" />
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;">
+            <label style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Statut</label>
+            <select [(ngModel)]="newCertif.statut"
+                    style="padding:8px 12px;border-radius:8px;border:1px solid #e5e7eb;
+                           font-size:13px;font-family:inherit;outline:none;background:white;width:160px;">
+              <option value="NON_COMMENCE">Non commencé</option>
+              <option value="EN_COURS">En cours</option>
+              <option value="OBTENU">Obtenu</option>
+            </select>
+          </div>
+          <div *ngIf="newCertif.statut === 'OBTENU'"
+               style="display:flex;flex-direction:column;gap:4px;">
+            <label style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">
+              Date d'obtention
+            </label>
+            <input type="date" [(ngModel)]="newCertif.dateObtention"
+                   style="padding:8px 12px;border-radius:8px;border:1px solid #e5e7eb;
+                          font-size:13px;font-family:inherit;outline:none;" />
+          </div>
+        </div>
+        <button (click)="addExtraCertif('TECHNIQUE')"
+                style="padding:8px 20px;border-radius:8px;border:none;background:#7c3aed;
+                       color:white;cursor:pointer;font-size:13px;font-weight:600;
+                       font-family:inherit;align-self:flex-start;">
+          ✓ Confirmer
+        </button>
+      </div>
+
+      <div *ngIf="!certifsTech.length && !showAddTech"
+           style="text-align:center;padding:24px;color:#9ca3af;font-size:14px;">
+        Aucune certification technique — cliquez "+ Ajouter une certif"
+      </div>
+
+      <div *ngFor="let c of certifsTech"
+           style="border:1px solid #e5e7eb;border-radius:12px;padding:16px;
+                  display:flex;flex-direction:column;gap:12px;">
+
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+          <div>
+            <span style="font-size:14px;font-weight:700;color:#111827;">{{ c.nom }}</span>
+            <span [style]="'margin-left:8px;padding:2px 10px;border-radius:9999px;font-size:11px;font-weight:700;'
+                           + (c.obligatoire ? 'background:#fee2e2;color:#991b1b;' : 'background:#e0e7ff;color:#3730a3;')">
+              {{ c.obligatoire ? 'Requise' : 'Personnelle' }}
+            </span>
+          </div>
+          <span [style]="'padding:4px 12px;border-radius:9999px;font-size:12px;font-weight:700;'
+                         + (c.statut === 'OBTENU'   ? 'background:#dcfce7;color:#166534;'
+                         : c.statut === 'EN_COURS' ? 'background:#fef9c3;color:#854d0e;'
+                         :                           'background:#f3f4f6;color:#6b7280;')">
+            {{ statusLabel(c.statut) }}
+          </span>
+        </div>
+
+        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Statut</label>
+            <select [(ngModel)]="c.statut"
+                    style="padding:8px 12px;border-radius:8px;border:1px solid #e5e7eb;
+                           font-size:13px;font-family:inherit;outline:none;background:white;width:160px;">
+              <option value="NON_COMMENCE">Non commencé</option>
+              <option value="EN_COURS">En cours</option>
+              <option value="OBTENU">Obtenu</option>
+            </select>
+          </div>
+          <div *ngIf="c.statut === 'OBTENU'" style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">
+              Date d'obtention
+            </label>
+            <input type="date" [(ngModel)]="c.dateObtention"
+                   style="padding:8px 12px;border-radius:8px;border:1px solid #e5e7eb;
+                          font-size:13px;font-family:inherit;outline:none;" />
+          </div>
+          <div *ngIf="c.statut === 'EN_COURS'" style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">
+              Date prévisionnelle
+            </label>
+            <input type="date" [(ngModel)]="c.datePrevisionnelle"
+                   style="padding:8px 12px;border-radius:8px;border:1px solid #e5e7eb;
+                          font-size:13px;font-family:inherit;outline:none;" />
+          </div>
+        </div>
+
+        <div *ngIf="c.statut === 'OBTENU'" style="display:flex;align-items:center;gap:10px;">
+          <span *ngIf="c.fichierNom" style="font-size:12px;color:#6b7280;">📎 {{ c.fichierNom }}</span>
+          <label style="padding:6px 12px;border-radius:8px;border:1px solid #16a34a;
+                        background:white;color:#16a34a;cursor:pointer;font-size:12px;font-weight:600;">
+            ⬆ Upload PDF
+            <input type="file" accept=".pdf,.png,.jpg"
+                   (change)="uploadCertifFile($event, c)" style="display:none;" />
+          </label>
+        </div>
+
+        <a *ngIf="c.organismeUrl" [href]="c.organismeUrl" target="_blank"
+           style="font-size:12px;color:#7c3aed;text-decoration:none;">
+          Voir l'organisme →
+        </a>
+
+        <div *ngIf="c.commentaireAdmin"
+             style="font-size:12px;color:#6b7280;background:#f9fafb;
+                    padding:8px 12px;border-radius:6px;border-left:3px solid #7c3aed;">
+          💬 Admin : {{ c.commentaireAdmin }}
+        </div>
+
+        <button (click)="saveCertif(c)"
+                style="padding:6px 14px;border-radius:8px;border:none;background:#7c3aed;
+                       color:white;cursor:pointer;font-size:12px;font-weight:600;
+                       font-family:inherit;align-self:flex-end;">
+          Enregistrer
+        </button>
       </div>
     </div>
 
-    <p *ngIf="plan.notes"
-       style="font-size:12px;color:#6b7280;margin:12px 0 0;padding-top:12px;border-top:1px solid #f3f4f6;font-style:italic;">
-      📝 Note RH : {{ plan.notes }}
-    </p>
-  </div>
+    <!-- ═══ TAB : Soft Skills ═══ -->
+    <div *ngIf="activeTab === 'soft'"
+         style="background:white;border-radius:16px;padding:24px;
+                border:1px solid #f3f4f6;box-shadow:0 1px 3px rgba(0,0,0,.06);
+                display:flex;flex-direction:column;gap:16px;">
 
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <p style="font-size:13px;color:#6b7280;margin:0;">
+          Compétences comportementales — certifiées ou auto-évaluées
+        </p>
+        <button (click)="showAddSoft = !showAddSoft"
+                style="padding:8px 16px;border-radius:8px;border:none;
+                       background:#ede9fe;color:#5b21b6;cursor:pointer;
+                       font-size:13px;font-weight:600;font-family:inherit;">
+          {{ showAddSoft ? '✕ Annuler' : '+ Ajouter une certif' }}
+        </button>
+      </div>
+
+      <!-- Formulaire ajout soft skill -->
+      <div *ngIf="showAddSoft"
+           style="background:#f9fafb;border-radius:12px;padding:16px;
+                  border:1px solid #e5e7eb;display:flex;flex-direction:column;gap:12px;">
+        <p style="font-size:13px;font-weight:700;color:#374151;margin:0;">
+          Nouvelle certification soft skill
+        </p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+          <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:160px;">
+            <label style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Nom *</label>
+            <input [(ngModel)]="newCertif.nom"
+                   placeholder="Ex: Leadership, Scrum Master..."
+                   style="padding:8px 12px;border-radius:8px;border:1px solid #e5e7eb;
+                          font-size:13px;font-family:inherit;outline:none;" />
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;">
+            <label style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Statut</label>
+            <select [(ngModel)]="newCertif.statut"
+                    style="padding:8px 12px;border-radius:8px;border:1px solid #e5e7eb;
+                           font-size:13px;font-family:inherit;outline:none;background:white;width:160px;">
+              <option value="NON_COMMENCE">Non commencé</option>
+              <option value="EN_COURS">En cours</option>
+              <option value="OBTENU">Obtenu</option>
+            </select>
+          </div>
+        </div>
+        <button (click)="addExtraCertif('SOFT_SKILL')"
+                style="padding:8px 20px;border-radius:8px;border:none;background:#7c3aed;
+                       color:white;cursor:pointer;font-size:13px;font-weight:600;
+                       font-family:inherit;align-self:flex-start;">
+          ✓ Confirmer
+        </button>
+      </div>
+
+      <div *ngIf="!certifsSoft.length && !showAddSoft"
+           style="text-align:center;padding:24px;color:#9ca3af;font-size:14px;">
+        Aucune certification soft skill — cliquez "+ Ajouter une certif"
+      </div>
+
+      <div *ngFor="let c of certifsSoft"
+           style="border:1px solid #e5e7eb;border-radius:12px;padding:16px;
+                  display:flex;flex-direction:column;gap:12px;">
+
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+          <div>
+            <span style="font-size:14px;font-weight:700;color:#111827;">{{ c.nom }}</span>
+            <span [style]="'margin-left:8px;padding:2px 10px;border-radius:9999px;font-size:11px;font-weight:700;'
+                           + (c.obligatoire ? 'background:#fee2e2;color:#991b1b;' : 'background:#e0e7ff;color:#3730a3;')">
+              {{ c.obligatoire ? 'Requise' : 'Personnelle' }}
+            </span>
+            <span style="margin-left:6px;padding:2px 8px;border-radius:9999px;
+                         font-size:10px;background:#f3f4f6;color:#374151;font-weight:600;">
+              {{ c.methodeEval === 'AUTO_EVAL' ? 'Auto-éval' : 'Certif' }}
+            </span>
+          </div>
+          <span [style]="'padding:4px 12px;border-radius:9999px;font-size:12px;font-weight:700;'
+                         + (c.statut === 'OBTENU'   ? 'background:#dcfce7;color:#166534;'
+                         : c.statut === 'EN_COURS' ? 'background:#fef9c3;color:#854d0e;'
+                         :                           'background:#f3f4f6;color:#6b7280;')">
+            {{ statusLabel(c.statut) }}
+          </span>
+        </div>
+
+        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Statut</label>
+            <select [(ngModel)]="c.statut"
+                    style="padding:8px 12px;border-radius:8px;border:1px solid #e5e7eb;
+                           font-size:13px;font-family:inherit;outline:none;background:white;width:160px;">
+              <option value="NON_COMMENCE">Non commencé</option>
+              <option value="EN_COURS">En cours</option>
+              <option value="OBTENU">Obtenu</option>
+            </select>
+          </div>
+          <div *ngIf="c.methodeEval === 'AUTO_EVAL'" style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">
+              Niveau déclaré
+            </label>
+            <select [(ngModel)]="c.niveauObtenu"
+                    style="padding:8px 12px;border-radius:8px;border:1px solid #e5e7eb;
+                           font-size:13px;font-family:inherit;outline:none;background:white;width:160px;">
+              <option value="DEBUTANT">Débutant</option>
+              <option value="INTERMEDIAIRE">Intermédiaire</option>
+              <option value="EXPERT">Expert</option>
+            </select>
+          </div>
+          <div *ngIf="c.statut === 'OBTENU'" style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Date</label>
+            <input type="date" [(ngModel)]="c.dateObtention"
+                   style="padding:8px 12px;border-radius:8px;border:1px solid #e5e7eb;
+                          font-size:13px;font-family:inherit;outline:none;" />
+          </div>
+        </div>
+
+        <div *ngIf="c.statut === 'OBTENU' && c.methodeEval === 'CERTIFICATION'"
+             style="display:flex;align-items:center;gap:10px;">
+          <span *ngIf="c.fichierNom" style="font-size:12px;color:#6b7280;">📎 {{ c.fichierNom }}</span>
+          <label style="padding:6px 12px;border-radius:8px;border:1px solid #16a34a;
+                        background:white;color:#16a34a;cursor:pointer;font-size:12px;font-weight:600;">
+            ⬆ Upload PDF
+            <input type="file" accept=".pdf,.png,.jpg"
+                   (change)="uploadCertifFile($event, c)" style="display:none;" />
+          </label>
+        </div>
+
+        <textarea *ngIf="c.methodeEval === 'AUTO_EVAL'"
+                  [(ngModel)]="c.commentaireEmploye"
+                  placeholder="Décrivez votre niveau, vos expériences..."
+                  style="padding:10px 12px;border-radius:8px;border:1px solid #e5e7eb;
+                         font-size:13px;font-family:inherit;resize:vertical;
+                         min-height:80px;width:100%;box-sizing:border-box;outline:none;">
+        </textarea>
+
+        <div *ngIf="c.commentaireAdmin"
+             style="font-size:12px;color:#6b7280;background:#f9fafb;
+                    padding:8px 12px;border-radius:6px;border-left:3px solid #7c3aed;">
+          💬 Admin : {{ c.commentaireAdmin }}
+        </div>
+
+        <button (click)="saveCertif(c)"
+                style="padding:6px 14px;border-radius:8px;border:none;background:#7c3aed;
+                       color:white;cursor:pointer;font-size:12px;font-weight:600;
+                       font-family:inherit;align-self:flex-end;">
+          Enregistrer
+        </button>
+      </div>
+    </div>
+
+  </ng-container>
 </div>

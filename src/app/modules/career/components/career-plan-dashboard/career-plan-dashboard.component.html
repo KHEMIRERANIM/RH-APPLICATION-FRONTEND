@@ -1,15 +1,34 @@
 <div style="padding:24px;display:flex;flex-direction:column;gap:20px;">
 
   <!-- Header -->
-  <div style="display:flex;justify-content:space-between;align-items:center;">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
     <div>
       <h3 style="font-size:20px;font-weight:700;color:#111827;margin:0;">📈 Plans d'Évolution</h3>
-      <p style="font-size:13px;color:#6b7280;margin:4px 0 0;">Suivez la progression des employés vers leurs postes cibles</p>
+      <p style="font-size:13px;color:#6b7280;margin:4px 0 0;">
+        Suivez la progression des employés vers leurs postes cibles
+      </p>
     </div>
-    <button (click)="openForm()"
-            style="padding:0 20px;height:40px;border-radius:8px;border:none;background:#7c3aed;color:white;cursor:pointer;font-size:14px;font-weight:600;font-family:inherit;display:flex;align-items:center;gap:6px;">
-      + Nouveau plan
-    </button>
+    <div style="display:flex;gap:8px;">
+      <button (click)="activeView = 'plans'"
+              [style]="activeView === 'plans'
+                ? 'padding:0 16px;height:40px;border-radius:8px;border:none;background:#7c3aed;color:white;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;'
+                : 'padding:0 16px;height:40px;border-radius:8px;border:1px solid #e5e7eb;background:white;color:#374151;cursor:pointer;font-size:13px;font-family:inherit;'">
+        Plans simples
+      </button>
+      <button (click)="activeView = 'evolution'"
+              [style]="activeView === 'evolution'
+                ? 'padding:0 16px;height:40px;border-radius:8px;border:none;background:#7c3aed;color:white;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;'
+                : 'padding:0 16px;height:40px;border-radius:8px;border:1px solid #e5e7eb;background:white;color:#374151;cursor:pointer;font-size:13px;font-family:inherit;'">
+        Plans + Certifs
+      </button>
+      <button *ngIf="activeView === 'plans'"
+              (click)="openForm()"
+              style="padding:0 20px;height:40px;border-radius:8px;border:none;
+                     background:#7c3aed;color:white;cursor:pointer;font-size:14px;
+                     font-weight:600;font-family:inherit;">
+        + Nouveau plan
+      </button>
+    </div>
   </div>
 
   <!-- KPI -->
@@ -19,11 +38,11 @@
       <p style="font-size:36px;font-weight:800;color:#7c3aed;margin:8px 0 0;">{{ totalActive }}</p>
     </div>
     <div style="background:white;border-radius:16px;padding:20px;border:1px solid #f3f4f6;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
-      <p style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;margin:0;">Complétés</p>
+      <p style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;margin:0;">Score 100%</p>
       <p style="font-size:36px;font-weight:800;color:#16a34a;margin:8px 0 0;">{{ totalCompleted }}</p>
     </div>
     <div style="background:white;border-radius:16px;padding:20px;border:1px solid #f3f4f6;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
-      <p style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;margin:0;">Progression moy.</p>
+      <p style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;margin:0;">Score moy.</p>
       <p style="font-size:36px;font-weight:800;color:#d97706;margin:8px 0 0;">{{ avgProgress }}%</p>
     </div>
   </div>
@@ -33,8 +52,8 @@
     <mat-spinner diameter="36"></mat-spinner>
   </div>
 
-  <!-- Plans -->
-  <div *ngIf="!isLoading" style="display:flex;flex-direction:column;gap:16px;">
+  <!-- ═══ VUE 1 : Plans simples ═══ -->
+  <ng-container *ngIf="!isLoading && activeView === 'plans'">
 
     <div *ngIf="plans.length === 0"
          style="text-align:center;padding:48px;color:#9ca3af;font-size:14px;">
@@ -42,16 +61,19 @@
     </div>
 
     <div *ngFor="let plan of plans"
-         style="background:white;border-radius:16px;padding:24px;border:1px solid #f3f4f6;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+         style="background:white;border-radius:16px;padding:24px;
+                border:1px solid #f3f4f6;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
 
-      <!-- Top row -->
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;
+                  flex-wrap:wrap;gap:12px;margin-bottom:16px;">
         <div style="display:flex;gap:14px;align-items:center;">
-          <div style="width:44px;height:44px;border-radius:12px;background:#ede9fe;display:flex;align-items:center;justify-content:center;font-size:18px;">👤</div>
+          <div style="width:44px;height:44px;border-radius:12px;background:#ede9fe;
+                      display:flex;align-items:center;justify-content:center;font-size:18px;">👤</div>
           <div>
             <p style="font-size:15px;font-weight:700;color:#111827;margin:0;">{{ plan.employeeName }}</p>
             <p style="font-size:12px;color:#6b7280;margin:4px 0 0;">
-              {{ plan.currentCareerTitle }} → <strong style="color:#7c3aed;">{{ plan.targetCareerTitle }}</strong>
+              {{ plan.currentCareerTitle || '—' }} →
+              <strong style="color:#7c3aed;">{{ plan.targetCareerTitle }}</strong>
             </p>
           </div>
         </div>
@@ -68,59 +90,322 @@
         </div>
       </div>
 
-      <!-- Progress bar -->
       <div style="margin-bottom:16px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
           <span style="font-size:12px;font-weight:600;color:#374151;">Progression</span>
           <span [style]="'font-size:14px;font-weight:800;color:' + getProgressColor(plan.progressPercent || 0)">
-            {{ plan.progressPercent }}%
+            {{ plan.progressPercent || 0 }}%
           </span>
         </div>
         <div style="background:#f3f4f6;border-radius:9999px;height:10px;overflow:hidden;">
-          <div [style]="'height:100%;border-radius:9999px;transition:width 0.5s ease;background:' +
-                        getProgressColor(plan.progressPercent || 0) +
-                        ';width:' + plan.progressPercent + '%'">
-          </div>
+          <div [style]="'height:100%;border-radius:9999px;transition:width 0.5s;background:'
+                        + getProgressColor(plan.progressPercent || 0)
+                        + ';width:' + (plan.progressPercent || 0) + '%'"></div>
         </div>
       </div>
 
-      <!-- Skills -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-
-        <!-- Skills acquises -->
         <div>
           <p style="font-size:11px;font-weight:700;color:#16a34a;text-transform:uppercase;margin:0 0 8px;">
-            ✅ Compétences acquises ({{ plan.skillsAlreadyMet?.length || 0 }})
+            ✅ Acquises ({{ plan.skillsAlreadyMet?.length || 0 }})
           </p>
           <div style="display:flex;flex-wrap:wrap;gap:6px;">
             <span *ngFor="let s of plan.skillsAlreadyMet"
-                  style="padding:3px 10px;border-radius:9999px;font-size:11px;font-weight:600;background:#dcfce7;color:#166534;">
-              {{ s }}
-            </span>
-            <span *ngIf="!plan.skillsAlreadyMet?.length" style="font-size:12px;color:#9ca3af;font-style:italic;">Aucune</span>
+                  style="padding:3px 10px;border-radius:9999px;font-size:11px;font-weight:600;
+                         background:#dcfce7;color:#166534;">{{ s }}</span>
+            <span *ngIf="!plan.skillsAlreadyMet?.length"
+                  style="font-size:12px;color:#9ca3af;font-style:italic;">Aucune</span>
           </div>
         </div>
-
-        <!-- Skills à acquérir -->
         <div>
           <p style="font-size:11px;font-weight:700;color:#dc2626;text-transform:uppercase;margin:0 0 8px;">
             ❌ À acquérir ({{ plan.skillsToAcquire?.length || 0 }})
           </p>
           <div style="display:flex;flex-wrap:wrap;gap:6px;">
             <span *ngFor="let s of plan.skillsToAcquire"
-                  style="padding:3px 10px;border-radius:9999px;font-size:11px;font-weight:600;background:#fee2e2;color:#991b1b;">
-              {{ s }}
-            </span>
-            <span *ngIf="!plan.skillsToAcquire?.length" style="font-size:12px;color:#9ca3af;font-style:italic;">Aucune 🎉</span>
+                  style="padding:3px 10px;border-radius:9999px;font-size:11px;font-weight:600;
+                         background:#fee2e2;color:#991b1b;">{{ s }}</span>
+            <span *ngIf="!plan.skillsToAcquire?.length"
+                  style="font-size:12px;color:#9ca3af;font-style:italic;">Aucune 🎉</span>
           </div>
         </div>
       </div>
 
-      <!-- Notes -->
       <p *ngIf="plan.notes"
-         style="font-size:12px;color:#6b7280;margin:12px 0 0;padding-top:12px;border-top:1px solid #f3f4f6;font-style:italic;">
+         style="font-size:12px;color:#6b7280;margin:12px 0 0;padding-top:12px;
+                border-top:1px solid #f3f4f6;font-style:italic;">
         📝 {{ plan.notes }}
       </p>
     </div>
-  </div>
+  </ng-container>
+
+  <!-- ═══ VUE 2 : Plans + Certifs ═══ -->
+  <ng-container *ngIf="!isLoading && activeView === 'evolution'">
+
+    <!-- Liste -->
+    <ng-container *ngIf="!selectedPlan">
+
+      <div *ngIf="!evolutionPlans.length"
+           style="text-align:center;padding:48px;color:#9ca3af;font-size:14px;">
+        <p style="font-size:48px;margin:0;">🗺️</p>
+        <p>Aucun plan soumis par les employés</p>
+        <p style="font-size:12px;">Les plans créés par les employés apparaîtront ici</p>
+      </div>
+
+      <div *ngFor="let p of evolutionPlans"
+           (click)="openEvolutionPlan(p)"
+           style="background:white;border-radius:16px;padding:20px;
+                  border:1px solid #f3f4f6;box-shadow:0 1px 3px rgba(0,0,0,.06);
+                  cursor:pointer;transition:box-shadow .15s;"
+           onmouseenter="this.style.boxShadow='0 4px 12px rgba(0,0,0,.1)'"
+           onmouseleave="this.style.boxShadow='0 1px 3px rgba(0,0,0,.06)'">
+
+        <div style="display:flex;justify-content:space-between;align-items:center;
+                    flex-wrap:wrap;gap:12px;">
+          <div style="display:flex;gap:14px;align-items:center;">
+            <div style="width:44px;height:44px;border-radius:12px;background:#ede9fe;
+                        display:flex;align-items:center;justify-content:center;font-size:18px;">👤</div>
+            <div>
+              <p style="font-size:15px;font-weight:700;color:#111827;margin:0;">
+                {{ p.employeeName || p.employeeId }}
+              </p>
+              <p style="font-size:12px;color:#6b7280;margin:4px 0 0;">
+                {{ p.currentCareerTitle || '—' }} →
+                <strong style="color:#7c3aed;">{{ p.targetCareerTitle || '—' }}</strong>
+              </p>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;">
+            <div style="text-align:center;">
+              <div style="font-size:22px;font-weight:800;color:#7c3aed;">{{ p.scoreGlobal ?? 0 }}%</div>
+              <div style="font-size:11px;color:#6b7280;text-transform:uppercase;">Global</div>
+            </div>
+            <div style="text-align:center;">
+              <div style="font-size:16px;font-weight:700;color:#2563eb;">{{ p.scoreTechnique ?? 0 }}%</div>
+              <div style="font-size:11px;color:#6b7280;text-transform:uppercase;">Tech</div>
+            </div>
+            <div style="text-align:center;">
+              <div style="font-size:16px;font-weight:700;color:#ea580c;">{{ p.scoreSoftSkill ?? 0 }}%</div>
+              <div style="font-size:11px;color:#6b7280;text-transform:uppercase;">Soft</div>
+            </div>
+            <span [style]="'padding:4px 12px;border-radius:9999px;font-size:12px;font-weight:700;'
+                           + evolutionStatusStyle(p.status)">
+              {{ evolutionStatusLabel(p.status) }}
+            </span>
+            <span style="font-size:12px;color:#9ca3af;">Voir →</span>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- Détail plan -->
+    <ng-container *ngIf="selectedPlan">
+
+      <button (click)="selectedPlan = null"
+              style="background:none;border:none;cursor:pointer;color:#7c3aed;
+                     font-size:13px;font-family:inherit;font-weight:600;align-self:flex-start;">
+        ← Retour à la liste
+      </button>
+
+      <!-- Header employé -->
+      <div style="background:white;border-radius:16px;padding:20px;border:1px solid #f3f4f6;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
+          <div>
+            <p style="font-size:18px;font-weight:700;color:#111827;margin:0;">
+              {{ selectedPlan.employeeName || selectedPlan.employeeId }}
+            </p>
+            <p style="font-size:13px;color:#6b7280;margin:4px 0 0;">
+              {{ selectedPlan.currentCareerTitle || '—' }} →
+              <strong style="color:#7c3aed;">{{ selectedPlan.targetCareerTitle || '—' }}</strong>
+            </p>
+          </div>
+          <span [style]="'padding:4px 12px;border-radius:9999px;font-size:12px;font-weight:700;'
+                         + evolutionStatusStyle(selectedPlan.status)">
+            {{ evolutionStatusLabel(selectedPlan.status) }}
+          </span>
+        </div>
+
+        <!-- Scores -->
+        <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:16px;">
+          <div *ngFor="let s of planScores()"
+               style="display:flex;flex-direction:column;align-items:center;
+                      width:80px;height:80px;border-radius:50%;border:3px solid;
+                      justify-content:center;"
+               [style.borderColor]="s.color">
+            <span style="font-size:18px;font-weight:800;color:#111827;">{{ s.value }}%</span>
+            <span style="font-size:10px;color:#6b7280;text-transform:uppercase;">{{ s.label }}</span>
+          </div>
+        </div>
+
+        <!-- Gap -->
+        <div *ngIf="selectedPlan.gap?.length" style="margin-top:16px;">
+          <p style="font-size:13px;font-weight:700;color:#374151;margin:0 0 8px;">Gap de compétences</p>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <div *ngFor="let g of selectedPlan.gap"
+                 [style.background]="g.couverte ? '#dcfce7' : '#fee2e2'"
+                 style="display:flex;align-items:center;gap:10px;padding:8px 12px;
+                        border-radius:8px;font-size:13px;">
+              <span style="font-weight:700;">{{ g.couverte ? '✓' : '✗' }}</span>
+              <span style="flex:1;font-weight:600;">{{ g.competenceNom }}</span>
+              <span style="font-size:11px;color:#6b7280;">{{ g.niveauRequis }}</span>
+              <span *ngIf="g.couvertParCertif"
+                    style="font-size:10px;background:#e0e7ff;color:#3730a3;
+                           padding:2px 8px;border-radius:9999px;font-weight:700;">certif</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Compétences déclarées -->
+      <div *ngIf="selectedPlan.competencesActuelles?.length"
+           style="background:white;border-radius:16px;padding:20px;border:1px solid #f3f4f6;">
+        <p style="font-size:15px;font-weight:700;color:#111827;margin:0 0 12px;">
+          🧠 Compétences déclarées
+        </p>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          <span *ngFor="let c of selectedPlan.competencesActuelles"
+                style="padding:4px 12px;border-radius:9999px;font-size:12px;font-weight:600;
+                       background:#ede9fe;color:#5b21b6;">
+            {{ c.nom }} — {{ c.niveau }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Certifications -->
+      <div style="background:white;border-radius:16px;padding:20px;border:1px solid #f3f4f6;">
+        <p style="font-size:15px;font-weight:700;color:#111827;margin:0 0 16px;">
+          Certifications de l'employé
+        </p>
+
+        <!-- Techniques -->
+        <p style="font-size:12px;font-weight:700;color:#2563eb;text-transform:uppercase;margin:0 0 10px;">
+          ⚙️ Techniques ({{ certifsTech().length }})
+        </p>
+
+        <div *ngIf="!certifsTech().length"
+             style="font-size:13px;color:#9ca3af;font-style:italic;margin-bottom:16px;">
+          Aucune certification technique
+        </div>
+
+        <div *ngFor="let c of certifsTech()"
+             style="display:flex;align-items:center;gap:10px;padding:12px 0;
+                    border-bottom:1px solid #f3f4f6;flex-wrap:wrap;">
+          <span style="flex:1;font-size:13px;font-weight:600;color:#111827;">{{ c.nom }}</span>
+          <span [style]="certifStatusStyle(c.statut)"
+                style="padding:3px 10px;border-radius:9999px;font-size:11px;font-weight:700;">
+            {{ certifStatusLabel(c.statut) }}
+          </span>
+          <span *ngIf="c.obligatoire"
+                style="font-size:10px;background:#fee2e2;color:#991b1b;
+                       padding:2px 8px;border-radius:9999px;font-weight:700;">Requise</span>
+          <span *ngIf="!c.obligatoire"
+                style="font-size:10px;background:#f3f4f6;color:#374151;
+                       padding:2px 8px;border-radius:9999px;">Personnelle</span>
+          <span *ngIf="c.dateObtention"
+                style="font-size:11px;color:#6b7280;">{{ c.dateObtention }}</span>
+          <a *ngIf="c.fichierUrl" [href]="c.fichierUrl" target="_blank"
+             style="font-size:11px;color:#7c3aed;text-decoration:none;">📄 PDF</a>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <mat-checkbox [(ngModel)]="c.valideParAdmin"
+                          (ngModelChange)="saveCertifAdmin(c)">
+              Validé admin
+            </mat-checkbox>
+          </div>
+        </div>
+
+        <!-- Soft Skills -->
+        <p style="font-size:12px;font-weight:700;color:#ea580c;text-transform:uppercase;margin:20px 0 10px;">
+          🤝 Soft Skills ({{ certifsSoft().length }})
+        </p>
+
+        <div *ngIf="!certifsSoft().length"
+             style="font-size:13px;color:#9ca3af;font-style:italic;margin-bottom:16px;">
+          Aucune certification soft skill
+        </div>
+
+        <div *ngFor="let c of certifsSoft()"
+             style="display:flex;align-items:center;gap:10px;padding:12px 0;
+                    border-bottom:1px solid #f3f4f6;flex-wrap:wrap;">
+          <span style="flex:1;font-size:13px;font-weight:600;color:#111827;">{{ c.nom }}</span>
+          <span [style]="certifStatusStyle(c.statut)"
+                style="padding:3px 10px;border-radius:9999px;font-size:11px;font-weight:700;">
+            {{ certifStatusLabel(c.statut) }}
+          </span>
+          <span style="font-size:10px;background:#f3f4f6;color:#374151;
+                       padding:2px 8px;border-radius:9999px;">
+            {{ c.methodeEval === 'AUTO_EVAL' ? 'Auto-éval' : 'Certif' }}
+          </span>
+          <span *ngIf="c.niveauObtenu"
+                style="font-size:11px;color:#6b7280;">{{ c.niveauObtenu }}</span>
+          <div *ngIf="c.commentaireEmploye"
+               style="width:100%;font-size:12px;color:#6b7280;background:#f9fafb;
+                      padding:6px 10px;border-radius:6px;font-style:italic;">
+            "{{ c.commentaireEmploye }}"
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <mat-checkbox [(ngModel)]="c.valideParAdmin"
+                          (ngModelChange)="saveCertifAdmin(c)">
+              Validé admin
+            </mat-checkbox>
+          </div>
+        </div>
+      </div>
+
+      <!-- Enrichissement admin -->
+      <div style="background:white;border-radius:16px;padding:20px;border:1px solid #f3f4f6;">
+        <p style="font-size:15px;font-weight:700;color:#111827;margin:0 0 16px;">
+          ✏️ Enrichissement RH
+        </p>
+
+        <label style="font-size:11px;font-weight:700;color:#6b7280;
+                      text-transform:uppercase;display:block;margin-bottom:8px;">
+          Formations recommandées
+        </label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+          <span *ngFor="let f of selectedPlan.formationsRecommandees; let i = index"
+                style="background:#ede9fe;color:#5b21b6;padding:4px 10px;
+                       border-radius:9999px;font-size:12px;font-weight:600;
+                       display:flex;align-items:center;gap:6px;">
+            {{ f }}
+            <button (click)="removeFormation(i)"
+                    style="background:none;border:none;cursor:pointer;
+                           color:#7c3aed;font-size:16px;line-height:1;">×</button>
+          </span>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:20px;">
+          <input [(ngModel)]="newFormation"
+                 placeholder="Ex: Formation Kubernetes avancé..."
+                 style="flex:1;padding:8px 12px;border-radius:8px;
+                        border:1px solid #e5e7eb;font-size:13px;font-family:inherit;outline:none;" />
+          <button (click)="addFormation()"
+                  style="padding:8px 14px;border-radius:8px;border:none;
+                         background:#ede9fe;color:#5b21b6;cursor:pointer;
+                         font-size:13px;font-weight:600;font-family:inherit;">
+            + Ajouter
+          </button>
+        </div>
+
+        <label style="font-size:11px;font-weight:700;color:#6b7280;
+                      text-transform:uppercase;display:block;margin-bottom:8px;">
+          Commentaire RH
+        </label>
+        <textarea [(ngModel)]="selectedPlan.commentaireAdmin"
+                  placeholder="Observations, recommandations pour cet employé..."
+                  style="width:100%;padding:10px 12px;border-radius:8px;
+                         border:1px solid #e5e7eb;font-size:13px;font-family:inherit;
+                         resize:vertical;min-height:100px;box-sizing:border-box;outline:none;">
+        </textarea>
+
+        <button (click)="saveEnrichissement()"
+                style="margin-top:12px;padding:10px 20px;border-radius:8px;border:none;
+                       background:#7c3aed;color:white;cursor:pointer;
+                       font-size:14px;font-weight:600;font-family:inherit;">
+          💾 Enregistrer
+        </button>
+      </div>
+
+    </ng-container>
+  </ng-container>
+
 </div>

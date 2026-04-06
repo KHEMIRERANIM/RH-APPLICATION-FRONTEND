@@ -21,14 +21,14 @@ export interface MobilityRequest {
   targetCareerTitle?: string;
   targetDepartement?: string;
   motivationLetter?: string;
-  motivationFileName?: string;
-  motivationFileBase64?: string;
   status?: MobilityStatus;
   reviewedBy?: string;
   reviewComment?: string;
   reviewedAt?: string;
   requestedAt?: string;
   updatedAt?: string;
+  motivationFileName?: string;      
+  motivationFileBase64?: string;
 }
 
 export interface CareerPlan {

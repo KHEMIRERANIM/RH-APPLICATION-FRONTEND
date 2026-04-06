@@ -25,12 +25,14 @@ export class AuthRoleService {
   }
 
   isEmployee(): boolean {
-    const role = this.getRole();
-    return role === 'EMPLOYEE' || role === 'USER';
-  }
+  const role = this.getRole();
+  // ✅ Gérer les deux orthographes
+  return role === 'EMPLOYEE' || role === 'EMPLOYE' || role === 'USER';
+}
 
-  isAdminOrRH(): boolean {
-    return this.isAdmin() || this.isRH();
-  }
+isAdminOrRH(): boolean {
+  const role = this.getRole();
+  return role === 'ADMIN' || role === 'RH';
+}
   
 }
