@@ -2,7 +2,9 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnIni
 import { MatDialog } from '@angular/material/dialog';
 import { MatTabGroup } from '@angular/material/tabs';
 import { Subject, takeUntil } from 'rxjs';
+import { ToastrService } from 'ngx-toastr';
 import { AcademyService } from '../academy.service';
+import { NotificationService } from 'src/app/services/notification.service';
 import { 
     DemandeConge, 
     BulletinSalaire, 
@@ -12,6 +14,12 @@ import {
     StatutConge,
     TypeConge
 } from '../academy.types';
+import { CreateBulletinDialogComponent } from './dialogs/create-bulletin-dialog.component';
+import { ValidateCongeDialogComponent } from './dialogs/validate-conge-dialog.component';
+import { BulletinDetailDialogComponent } from './dialogs/bulletin-detail-dialog.component';
+import { SoldeCongeDialogComponent } from './dialogs/solde-conge-dialog.component';
+import { ConfirmDialogComponent } from './dialogs/confirm-dialog.component';
+import { EditBulletinDialogComponent } from './dialogs/edit-bulletin-dialog.component';
 
 @Component({
     selector: 'academy-dashboard',
@@ -21,7 +29,7 @@ import {
 })
 export class AcademyDashboardComponent implements OnInit, OnDestroy {
     
-    @ViewChild('adminTabs') adminTabs: MatTabGroup;
+    @ViewChild('adminTabs', { static: false }) adminTabs?: MatTabGroup;
     
     demandes: DemandeConge[] = [];
     demandesFiltrees: DemandeConge[] = [];
@@ -39,17 +47,21 @@ export class AcademyDashboardComponent implements OnInit, OnDestroy {
     constructor(
         private _academyService: AcademyService,
         private _changeDetectorRef: ChangeDetectorRef,
-        private _dialog: MatDialog
+        private _dialog: MatDialog,
+        private toastr: ToastrService,
+        private notificationService: NotificationService
     ) {}
 
     ngOnInit(): void {
         this.loadData();
         
-        // Subscribe to data changes
+        // Filtrer pour n'afficher que EN_ATTENTE et APPROUVE
         this._academyService.demandes$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe(demandes => {
-                this.demandes = demandes || [];
+                this.demandes = (demandes || []).filter(d => 
+                    d.statut === 'EN_ATTENTE' || d.statut === 'APPROUVE'
+                );
                 this.demandesEnAttenteCount = this.demandes.filter(d => d.statut === 'EN_ATTENTE').length;
                 this.applyFilters();
                 this._changeDetectorRef.markForCheck();
@@ -76,13 +88,25 @@ export class AcademyDashboardComponent implements OnInit, OnDestroy {
                 this._changeDetectorRef.markForCheck();
             });
         
-        // Load alerts
         this.loadAlertes();
+
+        // S'abonner aux notifications WebSocket
+        this.notificationService.getNotifications().subscribe((notification: any) => {
+            if (notification.type === 'NOUVELLE_DEMANDE') {
+                this.toastr.info(notification.message, '📋 Nouvelle demande de congé', {
+                    timeOut: 5000,
+                    positionClass: 'toast-top-right',
+                    closeButton: true
+                });
+                this.loadData(); // Rafraîchir la liste
+            }
+        });
     }
     
     ngOnDestroy(): void {
         this._unsubscribeAll.next(null);
         this._unsubscribeAll.complete();
+        this.notificationService.disconnect();
     }
     
     loadData(): void {
@@ -95,22 +119,27 @@ export class AcademyDashboardComponent implements OnInit, OnDestroy {
     }
     
     loadAlertes(): void {
-        this._academyService.detecterTendances().subscribe(result => {
-            this.alertes = result.alertes || [];
-            this._changeDetectorRef.markForCheck();
+        const managerId = "69c9c83763d00230b5311df9";
+        
+        this._academyService.detecterTendances(managerId).subscribe({
+            next: (result) => {
+                console.log('Alertes reçues du backend:', result);
+                this.alertes = result.alertes || [];
+                console.log('Alertes après affectation:', this.alertes);
+                this._changeDetectorRef.markForCheck();
+            },
+            error: (err) => {
+                console.error('Erreur chargement alertes:', err);
+                this.alertes = [];
+                this._changeDetectorRef.markForCheck();
+            }
         });
     }
     
     onTabChange(index: number): void {
-        if (index === 0 && this.demandes.length === 0) {
-            this.loadData();
-        }
-        if (index === 1 && this.bulletins.length === 0) {
-            this.loadData();
-        }
-        if (index === 2 && this.employes.length === 0) {
-            this.loadData();
-        }
+        if (index === 0 && this.demandes.length === 0) this.loadData();
+        if (index === 1 && this.bulletins.length === 0) this.loadData();
+        if (index === 2 && this.employes.length === 0) this.loadData();
     }
     
     goToDemandes(): void {
@@ -131,13 +160,9 @@ export class AcademyDashboardComponent implements OnInit, OnDestroy {
     
     applyFilters(): void {
         let filtered = [...this.demandes];
-        
-        // Filter by status
         if (this.filtreStatut !== 'all') {
             filtered = filtered.filter(d => d.statut === this.filtreStatut);
         }
-        
-        // Filter by search query
         if (this.searchQuery) {
             const query = this.searchQuery.toLowerCase();
             filtered = filtered.filter(d => 
@@ -146,68 +171,100 @@ export class AcademyDashboardComponent implements OnInit, OnDestroy {
                 d.type?.toLowerCase().includes(query)
             );
         }
-        
         this.demandesFiltrees = filtered;
         this._changeDetectorRef.markForCheck();
     }
     
     openValidationDialog(demande: DemandeConge, decision: 'APPROUVE' | 'REFUSE'): void {
-        const commentaire = prompt(
-            decision === 'APPROUVE' 
-                ? 'Ajouter un commentaire (optionnel) :' 
-                : 'Motif du refus :'
-        );
-        
-        this._academyService.validerDemande(demande.id, {
-            statut: decision as StatutConge,
-            commentaireManager: commentaire || ''
-        }).subscribe(() => {
+    const dialogRef = this._dialog.open(ValidateCongeDialogComponent, {
+        width: '500px',
+        data: { demande, decision }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+        console.log('Dialogue fermé, résultat:', result);
+        if (result === true) {
+            // Recharger les données seulement si validation réussie
             this.loadData();
             this.loadAlertes();
+            // Afficher une notification de succès
+            const message = decision === 'APPROUVE' 
+                ? '✅ Demande approuvée avec succès' 
+                : '❌ Demande refusée';
+            this.toastr.success(message, 'Succès');
+        }
+    });
+}
+    
+    openCreateBulletinDialog(): void {
+        const dialogRef = this._dialog.open(CreateBulletinDialogComponent, {
+            width: '600px'
+        });
+        dialogRef.afterClosed().subscribe(result => {
+            if (result) this.loadData();
         });
     }
     
-    openCreateBulletinDialog(): void {
-        // TODO: Implémenter un dialogue modal pour création de bulletin
-        alert('Fonctionnalité de création de bulletin à implémenter');
-    }
-    
     viewBulletinDetail(bulletin: BulletinSalaire): void {
-        // TODO: Implémenter un dialogue modal pour afficher les détails
-        const details = `
-        Détails du bulletin - ${this.getMoisLabel(bulletin.mois)} ${bulletin.annee}
-        
-        Salaire brut: ${bulletin.salaireBrut} TND
-        Primes: ${bulletin.primes} TND
-        Heures supp.: ${bulletin.heuresSupplementaires} TND
-        CNSS: ${bulletin.cotisationsCNSS} TND
-        IRPP: ${bulletin.irpp} TND
-        Autres retenues: ${bulletin.autresRetenues} TND
-        ----------------------------------------
-        Salaire NET: ${bulletin.salaireNet} TND
-        `;
-        alert(details);
+        this._dialog.open(BulletinDetailDialogComponent, {
+            width: '550px',
+            data: bulletin
+        });
     }
     
-    deleteBulletin(id: string): void {
-        if (confirm('Supprimer ce bulletin de salaire ? Cette action est irréversible.')) {
-            this._academyService.supprimerBulletin(id).subscribe(() => {
+    deleteBulletin(id: string, mois?: number, annee?: number): void {
+        const dialogRef = this._dialog.open(ConfirmDialogComponent, {
+            width: '400px',
+            data: {
+                message: 'Supprimer ce bulletin de salaire ?',
+                details: mois && annee ? `Bulletin de ${this.getMoisLabel(mois)} ${annee}` : 'Cette action est irréversible.'
+            }
+        });
+
+        dialogRef.afterClosed().subscribe(result => {
+            if (result) {
+                this._academyService.supprimerBulletin(id).subscribe(() => {
+                    this.loadData();
+                });
+            }
+        });
+    }
+    
+    editBulletin(bulletin: BulletinSalaire): void {
+        const dialogRef = this._dialog.open(EditBulletinDialogComponent, {
+            width: '550px',
+            data: { bulletin }
+        });
+
+        dialogRef.afterClosed().subscribe(result => {
+            if (result) {
                 this.loadData();
-            });
-        }
+            }
+        });
     }
     
     viewSoldeConge(employeId: string): void {
-        this._academyService.getSoldeConge(employeId).subscribe(solde => {
-            const employe = this.getEmployeNom(employeId);
-            alert(`
-            Solde de congés - ${employe}
-            Année: ${solde.annee}
-            Total annuel: ${solde.joursTotal} jours
-            Utilisés: ${solde.joursUtilises} jours
-            En attente: ${solde.joursEnAttente} jours
-            Restants: ${solde.joursRestants} jours
-            `);
+        this._academyService.getSoldeConge(employeId).subscribe({
+            next: (solde) => {
+                this._dialog.open(SoldeCongeDialogComponent, {
+                    width: '400px',
+                    data: solde
+                });
+            },
+            error: (err) => {
+                console.error('Erreur chargement solde:', err);
+                this._dialog.open(SoldeCongeDialogComponent, {
+                    width: '400px',
+                    data: {
+                        employeId: employeId,
+                        annee: new Date().getFullYear(),
+                        joursTotal: 30,
+                        joursUtilises: 0,
+                        joursEnAttente: 0,
+                        joursRestants: 30
+                    }
+                });
+            }
         });
     }
     
@@ -255,13 +312,36 @@ export class AcademyDashboardComponent implements OnInit, OnDestroy {
     
     getTypeCongeClass(type: string): string {
         const classes: Record<string, string> = {
-            'CONGE_ANNUEL': 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
-            'CONGE_MALADIE': 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
-            'CONGE_MATERNITE': 'bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-400',
-            'CONGE_PATERNITE': 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400',
-            'CONGE_SANS_SOLDE': 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400',
-            'AUTRE': 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400'
+            'CONGE_ANNUEL': 'bg-blue-100 text-blue-800',
+            'CONGE_MALADIE': 'bg-red-100 text-red-800',
+            'CONGE_MATERNITE': 'bg-pink-100 text-pink-800',
+            'CONGE_PATERNITE': 'bg-cyan-100 text-cyan-800',
+            'CONGE_SANS_SOLDE': 'bg-gray-100 text-gray-800',
+            'AUTRE': 'bg-purple-100 text-purple-800'
         };
         return classes[type] || 'bg-gray-100 text-gray-800';
     }
+
+    telechargerPDF(id: string): void {
+    console.log('📄 Téléchargement PDF pour bulletin:', id);
+    this._academyService.telechargerPDF(id).subscribe({
+        next: (blob: Blob) => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `bulletin_${id}.pdf`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        },
+        error: (err) => {
+            console.error('Erreur téléchargement PDF:', err);
+            alert('Erreur lors du téléchargement du PDF');
+        }
+    });
+}
+
+getDocumentUrl(fileName: string): string {
+    if (!fileName) return '';
+    return `http://localhost:8081/api/uploads/${fileName}`;
+}
 }

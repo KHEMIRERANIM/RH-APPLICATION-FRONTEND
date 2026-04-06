@@ -70,22 +70,44 @@ export class AuthGuard implements CanActivate, CanActivateChild, CanLoad
      */
     private _check(redirectURL: string): Observable<boolean>
     {
-        // Check the authentication status
+        // 🔥 VÉRIFIER D'ABORD DANS LOCALSTORAGE
+        const userStr = localStorage.getItem('currentUser');
+        const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+        
+        console.log('🔒 AuthGuard - URL:', redirectURL);
+        console.log('🔒 AuthGuard - userStr:', userStr ? '✅ présent' : '❌ absent');
+        console.log('🔒 AuthGuard - token:', token ? '✅ présent' : '❌ absent');
+        
+        // Si l'utilisateur est dans localStorage, l'autoriser immédiatement
+        if (userStr && token) {
+            try {
+                const user = JSON.parse(userStr);
+                console.log('🔒 AuthGuard - Utilisateur:', user.email, 'Rôle:', user.role);
+                
+                // ADMIN et EMPLOYE sont autorisés
+                if (user.role === 'ADMIN' || user.role === 'EMPLOYE') {
+                    console.log('🔒 AuthGuard - ✅ ACCÈS AUTORISÉ (localStorage)');
+                    return of(true);
+                } else {
+                    console.log('🔒 AuthGuard - ❌ Rôle non autorisé:', user.role);
+                }
+            } catch(e) {
+                console.error('🔒 AuthGuard - Erreur parsing:', e);
+            }
+        }
+        
+        // Sinon, vérifier via le service d'auth
+        console.log('🔒 AuthGuard - Vérification via AuthService...');
         return this._authService.check()
                    .pipe(
                        switchMap((authenticated) => {
-
-                           // If the user is not authenticated...
                            if ( !authenticated )
                            {
-                               // Redirect to the sign-in page
+                               console.log('🔒 AuthGuard - ❌ NON AUTHENTIFIÉ, redirection login');
                                this._router.navigate(['sign-in'], {queryParams: {redirectURL}});
-
-                               // Prevent the access
                                return of(false);
                            }
-
-                           // Allow the access
+                           console.log('🔒 AuthGuard - ✅ ACCÈS AUTORISÉ (AuthService)');
                            return of(true);
                        })
                    );

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, forkJoin, map, catchError, of } from 'rxjs';
+import { BehaviorSubject, Observable, forkJoin, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { 
     DemandeConge, 
     DemandeCongeRequest, 
@@ -22,12 +23,12 @@ export class AcademyService
     private apiUrl = 'http://localhost:8081/api';
 
     // Subjects
-    private _demandes: BehaviorSubject<DemandeConge[] | null> = new BehaviorSubject(null);
-    private _demandesEnAttente: BehaviorSubject<DemandeConge[] | null> = new BehaviorSubject(null);
-    private _bulletins: BehaviorSubject<BulletinSalaire[] | null> = new BehaviorSubject(null);
-    private _employes: BehaviorSubject<User[] | null> = new BehaviorSubject(null);
-    private _alertes: BehaviorSubject<AlerteTendance[] | null> = new BehaviorSubject(null);
-    private _stats: BehaviorSubject<AdminStats | null> = new BehaviorSubject(null);
+    private _demandes: BehaviorSubject<DemandeConge[]> = new BehaviorSubject<DemandeConge[]>([]);
+    private _demandesEnAttente: BehaviorSubject<DemandeConge[]> = new BehaviorSubject<DemandeConge[]>([]);
+    private _bulletins: BehaviorSubject<BulletinSalaire[]> = new BehaviorSubject<BulletinSalaire[]>([]);
+    private _employes: BehaviorSubject<User[]> = new BehaviorSubject<User[]>([]);
+    private _alertes: BehaviorSubject<AlerteTendance[]> = new BehaviorSubject<AlerteTendance[]>([]);
+    private _stats: BehaviorSubject<AdminStats | null> = new BehaviorSubject<AdminStats | null>(null);
 
     constructor(private _httpClient: HttpClient)
     {
@@ -54,7 +55,7 @@ export class AcademyService
         return this._alertes.asObservable();
     }
 
-    get stats$(): Observable<AdminStats> {
+    get stats$(): Observable<AdminStats | null> {
         return this._stats.asObservable();
     }
 
@@ -62,8 +63,8 @@ export class AcademyService
     getAllDemandes(): Observable<DemandeConge[]> {
         return this._httpClient.get<DemandeConge[]>(`${this.apiUrl}/conges`).pipe(
             map(demandes => {
-                this._demandes.next(demandes);
-                return demandes;
+                this._demandes.next(demandes || []);
+                return demandes || [];
             }),
             catchError(error => {
                 console.error('Erreur chargement demandes:', error);
@@ -79,8 +80,8 @@ export class AcademyService
             : `${this.apiUrl}/conges/en-attente`;
         return this._httpClient.get<DemandeConge[]>(url).pipe(
             map(demandes => {
-                this._demandesEnAttente.next(demandes);
-                return demandes;
+                this._demandesEnAttente.next(demandes || []);
+                return demandes || [];
             }),
             catchError(error => {
                 console.error('Erreur chargement demandes en attente:', error);
@@ -91,13 +92,18 @@ export class AcademyService
     }
 
     validerDemande(id: string, validation: ValidationCongeRequest): Observable<DemandeConge> {
-        return this._httpClient.patch<DemandeConge>(`${this.apiUrl}/conges/${id}/valider`, validation).pipe(
-            map(demande => {
-                this.refreshDemandes();
-                return demande;
-            })
-        );
-    }
+    return this._httpClient.patch<DemandeConge>(`${this.apiUrl}/conges/${id}/valider`, validation).pipe(
+        map(demande => {
+            console.log('Validation réussie:', demande);
+            this.refreshDemandes();
+            return demande;
+        }),
+        catchError(error => {
+            console.error('Erreur validation:', error);
+            throw error;
+        })
+    );
+}
 
     detecterTendances(managerId?: string): Observable<{alertes: AlerteTendance[]}> {
         const url = managerId 
@@ -115,8 +121,8 @@ export class AcademyService
     getAllBulletins(): Observable<BulletinSalaire[]> {
         return this._httpClient.get<BulletinSalaire[]>(`${this.apiUrl}/salaires`).pipe(
             map(bulletins => {
-                this._bulletins.next(bulletins);
-                return bulletins;
+                this._bulletins.next(bulletins || []);
+                return bulletins || [];
             }),
             catchError(error => {
                 console.error('Erreur chargement bulletins:', error);
@@ -153,7 +159,12 @@ export class AcademyService
     }
 
     getBulletinsByEmploye(employeId: string): Observable<BulletinSalaire[]> {
-        return this._httpClient.get<BulletinSalaire[]>(`${this.apiUrl}/salaires/employe/${employeId}`);
+        return this._httpClient.get<BulletinSalaire[]>(`${this.apiUrl}/salaires/employe/${employeId}`).pipe(
+            catchError(error => {
+                console.error('Erreur chargement bulletins par employé:', error);
+                return of([]);
+            })
+        );
     }
 
     // Utilisateurs - Méthodes ADMIN
@@ -161,7 +172,7 @@ export class AcademyService
         return this._httpClient.get<any>(`${this.apiUrl}/users`).pipe(
             map((response: any) => {
                 const users = Array.isArray(response) ? response : [];
-                const employes = users.filter((u: any) => u.role === 'EMPLOYEE' || u.role === 'MANAGER');
+                const employes = users.filter((u: any) => u.role === 'EMPLOYE' || u.role === 'MANAGER');
                 this._employes.next(employes);
                 return employes;
             }),
@@ -174,7 +185,12 @@ export class AcademyService
     }
 
     getSoldeConge(employeId: string): Observable<SoldeConge> {
-        return this._httpClient.get<SoldeConge>(`${this.apiUrl}/conges/solde/${employeId}`);
+        return this._httpClient.get<SoldeConge>(`${this.apiUrl}/conges/solde/${employeId}`).pipe(
+            catchError(error => {
+                console.error('Erreur chargement solde:', error);
+                return of(null as any);
+            })
+        );
     }
 
     // Statistiques Admin
@@ -192,7 +208,7 @@ export class AcademyService
                 const stats: AdminStats = {
                     totalDemandesEnAttente: demandesEnAttente.length,
                     totalDemandesApprouvees: demandesApprouvees.length,
-                    totalEmployes: users.filter((u: any) => u.role === 'EMPLOYEE' || u.role === 'MANAGER').length,
+                    totalEmployes: users.filter((u: any) => u.role === 'EMPLOYE' || u.role === 'MANAGER').length,
                     moyenneJoursConge: demandesApprouvees.length > 0 ? totalJours / demandesApprouvees.length : 0
                 };
                 
@@ -233,16 +249,123 @@ export class AcademyService
 
     getEmployeNom(employeId: string): string {
         const employes = this._employes.getValue();
-        if (!employes) return employeId;
+        if (!employes || employes.length === 0) return employeId;
         const employe = employes.find(e => e.id === employeId);
         return employe ? `${employe.prenom} ${employe.nom}` : employeId;
     }
 
     getDemandeById(id: string): Observable<DemandeConge> {
-        return this._httpClient.get<DemandeConge>(`${this.apiUrl}/conges/${id}`);
+        return this._httpClient.get<DemandeConge>(`${this.apiUrl}/conges/${id}`).pipe(
+            catchError(error => {
+                console.error('Erreur chargement demande par ID:', error);
+                throw error;
+            })
+        );
     }
 
     getBulletinById(id: string): Observable<BulletinSalaire> {
-        return this._httpClient.get<BulletinSalaire>(`${this.apiUrl}/salaires/${id}`);
+        return this._httpClient.get<BulletinSalaire>(`${this.apiUrl}/salaires/${id}`).pipe(
+            catchError(error => {
+                console.error('Erreur chargement bulletin par ID:', error);
+                throw error;
+            })
+        );
     }
+
+    // =============================================================================
+    // @ EMPLOYÉ - Méthodes
+    // =============================================================================
+
+    /**
+     * Récupérer les demandes de l'employé connecté
+     */
+    getMesDemandes(employeId: string): Observable<DemandeConge[]> {
+        if (!employeId) {
+            console.error('getMesDemandes: employeId est null');
+            return of([]);
+        }
+        return this._httpClient.get<DemandeConge[]>(`${this.apiUrl}/conges/employe/${employeId}`).pipe(
+            catchError(error => {
+                console.error('Erreur chargement mes demandes:', error);
+                return of([]);
+            })
+        );
+    }
+
+    /**
+     * Soumettre une nouvelle demande de congé
+     */
+    soumettreDemande(request: DemandeCongeRequest): Observable<DemandeConge> {
+        return this._httpClient.post<DemandeConge>(`${this.apiUrl}/conges`, request).pipe(
+            catchError(error => {
+                console.error('Erreur soumission demande:', error);
+                throw error;
+            })
+        );
+    }
+
+    /**
+     * Modifier une demande de congé
+     */
+    modifierDemande(id: string, request: DemandeCongeRequest): Observable<DemandeConge> {
+        return this._httpClient.put<DemandeConge>(`${this.apiUrl}/conges/${id}`, request).pipe(
+            catchError(error => {
+                console.error('Erreur modification demande:', error);
+                throw error;
+            })
+        );
+    }
+
+    /**
+     * Supprimer définitivement une demande de congé
+     * Utilise le endpoint /supprimer/{id} pour une suppression totale
+     */
+    supprimerDemande(id: string, employeId: string): Observable<void> {
+        // ✅ URL correcte pour suppression définitive
+        return this._httpClient.delete<void>(`${this.apiUrl}/conges/supprimer/${id}`).pipe(
+            map(() => {
+                // Rafraîchir la liste
+                this.getMesDemandes(employeId).subscribe();
+                return;
+            }),
+            catchError(error => {
+                console.error('Erreur suppression demande:', error);
+                return of(void 0);
+            })
+        );
+    }
+
+    /**
+     * Récupérer les bulletins de l'employé
+     */
+    getMesBulletins(employeId: string): Observable<BulletinSalaire[]> {
+        if (!employeId) {
+            console.error('getMesBulletins: employeId est null');
+            return of([]);
+        }
+        return this._httpClient.get<BulletinSalaire[]>(`${this.apiUrl}/salaires/employe/${employeId}`).pipe(
+            catchError(error => {
+                console.error('Erreur chargement mes bulletins:', error);
+                return of([]);
+            })
+        );
+    }
+
+    telechargerPDF(id: string): Observable<Blob> {
+    return this._httpClient.get(`${this.apiUrl}/salaires/${id}/pdf`, {
+        responseType: 'blob'
+    });
+}
+
+/**
+ * Soumettre une nouvelle demande de congé avec fichier
+ */
+soumettreDemandeWithFile(formData: FormData): Observable<DemandeConge> {
+    return this._httpClient.post<DemandeConge>(`${this.apiUrl}/conges/with-file`, formData).pipe(
+        catchError(error => {
+            console.error('Erreur soumission demande avec fichier:', error);
+            throw error;
+        })
+    );
+}
 }

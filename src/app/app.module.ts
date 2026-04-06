@@ -7,9 +7,10 @@ import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { ToastrModule } from 'ngx-toastr';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MaterialModule } from './material.module';
+import { MatIconRegistry } from '@angular/material/icon';
+import { DomSanitizer } from '@angular/platform-browser';
 
-
-import { TextFieldModule } from '@angular/cdk/text-field';  // ← AJOUTER
+import { TextFieldModule } from '@angular/cdk/text-field';
 
 // Material Modules
 import { MatIconModule } from '@angular/material/icon';
@@ -52,8 +53,7 @@ const routerConfig: ExtraOptions = {
         BrowserAnimationsModule,
         HttpClientModule,
         FormsModule,
-        TextFieldModule,  // ← AJOUTER ICI
-
+        TextFieldModule,
         ReactiveFormsModule,
         
         // Material Modules
@@ -71,7 +71,6 @@ const routerConfig: ExtraOptions = {
         MaterialModule,
         MatDatepickerModule,
         MatNativeDateModule,
-        
         
         ToastrModule.forRoot({
             positionClass: 'toast-top-right',
@@ -98,4 +97,37 @@ const routerConfig: ExtraOptions = {
     ],
     bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule { 
+    constructor(
+        private matIconRegistry: MatIconRegistry,
+        private domSanitizer: DomSanitizer
+    ) {
+        this.registerIcons();
+    }
+
+    private registerIcons(): void {
+        const icons = [
+            'check-circle', 'clock', 'x-circle', 'calendar', 'users',
+            'document-text', 'plus', 'pencil', 'trash', 'eye',
+            'refresh', 'exclamation', 'search', 'lightning-bolt',
+            'arrow-path', 'bolt', 'exclamation-triangle', 'magnifying-glass',
+            'inbox', 'check', 'close'
+        ];
+
+        icons.forEach(icon => {
+            this.matIconRegistry.addSvgIcon(
+                `heroicons_outline:${icon}`,
+                this.domSanitizer.bypassSecurityTrustResourceUrl(`assets/icons/heroicons-outline/${icon}.svg`)
+            );
+        });
+        
+        // Ajouter les icônes solid si nécessaire
+        const solidIcons = ['check-circle', 'x-circle', 'plus', 'trash'];
+        solidIcons.forEach(icon => {
+            this.matIconRegistry.addSvgIcon(
+                `heroicons_solid:${icon}`,
+                this.domSanitizer.bypassSecurityTrustResourceUrl(`assets/icons/heroicons-solid/${icon}.svg`)
+            );
+        });
+    }
+}

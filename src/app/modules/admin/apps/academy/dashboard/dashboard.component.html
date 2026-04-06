@@ -61,7 +61,7 @@
                 <div class="rounded-2xl shadow-lg bg-card p-6">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-semibold">Actions rapides</h3>
-                        <mat-icon class="text-secondary" [svgIcon]="'heroicons_outline:bolt'"></mat-icon>
+                        <mat-icon class="text-secondary" [svgIcon]="'heroicons_outline:lightning-bolt'"></mat-icon>
                     </div>
                     <div class="flex flex-wrap gap-3">
                         <button mat-stroked-button color="primary" (click)="goToDemandes()">
@@ -73,7 +73,7 @@
                             <span class="ml-2">Créer bulletin</span>
                         </button>
                         <button mat-stroked-button color="primary" (click)="refreshData()">
-                            <mat-icon [svgIcon]="'heroicons_outline:arrow-path'"></mat-icon>
+                            <mat-icon [svgIcon]="'heroicons_outline:refresh'"></mat-icon>
                             <span class="ml-2">Actualiser</span>
                         </button>
                     </div>
@@ -82,16 +82,19 @@
                 <div class="rounded-2xl shadow-lg bg-card p-6">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-semibold">Alertes & Tendances</h3>
-                        <mat-icon class="text-amber-500" [svgIcon]="'heroicons_outline:exclamation-triangle'"></mat-icon>
+                        <mat-icon class="text-amber-500" [svgIcon]="'heroicons_outline:exclamation'"></mat-icon>
                     </div>
                     <div *ngIf="alertes.length === 0" class="text-secondary text-sm">
                         Aucune alerte détectée
                     </div>
                     <ul class="space-y-2">
-                        <li *ngFor="let alerte of alertes" class="text-sm text-amber-700 dark:text-amber-400 flex items-start gap-2">
-                            <mat-icon class="icon-size-4 mt-0.5">warning</mat-icon>
-                            <span>{{alerte.message}}</span>
-                        </li>
+                       <li *ngFor="let alerte of alertes" class="text-sm text-amber-700 dark:text-amber-400 flex items-start gap-2">
+                           <mat-icon class="icon-size-4 mt-0.5">warning</mat-icon>
+                           <span>
+                               ⚠️ L'employé <strong>{{getEmployeNom(alerte.employeId)}}</strong> 
+                               demande souvent un congé le {{alerte.jourSuspect}} ({{alerte.nombreOccurrences}} fois)
+                           </span>
+                       </li>
                     </ul>
                 </div>
             </div>
@@ -135,7 +138,7 @@
                                 <mat-form-field class="w-64" floatLabel="always">
                                     <mat-label>Rechercher</mat-label>
                                     <input matInput placeholder="Employé, motif..." (input)="searchDemandes($event)">
-                                    <mat-icon matPrefix [svgIcon]="'heroicons_outline:magnifying-glass'"></mat-icon>
+                                    <mat-icon matPrefix [svgIcon]="'heroicons_outline:search'"></mat-icon>
                                 </mat-form-field>
                             </div>
 
@@ -184,13 +187,13 @@
                                                             <mat-icon [svgIcon]="'heroicons_outline:check'"></mat-icon>
                                                         </button>
                                                         <button mat-icon-button color="warn" (click)="openValidationDialog(demande, 'REFUSE')" matTooltip="Refuser">
-                                                            <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+                                                            <mat-icon>-</mat-icon>                                                      
                                                         </button>
                                                     </div>
                                                     <span *ngIf="demande.statut !== 'EN_ATTENTE' && demande.commentaireManager" 
                                                           class="text-xs text-secondary cursor-help"
                                                           [matTooltip]="demande.commentaireManager">
-                                                        <mat-icon class="icon-size-4">chat-bubble-outline</mat-icon>
+                                                        <mat-icon class="icon-size-4">chat_bubble_outline</mat-icon>
                                                     </span>
                                                 </td>
                                             </tr>
@@ -253,10 +256,16 @@
                                                 <td class="px-6 py-4 text-right font-bold text-green-600">{{bulletin.salaireNet | number:'1.2-2'}} TND</td>
                                                 <td class="px-6 py-4 text-center">
                                                     <div class="flex justify-center gap-2">
+                                                        <button mat-icon-button color="primary" (click)="editBulletin(bulletin)" matTooltip="Modifier">
+                                                            <mat-icon [svgIcon]="'heroicons_outline:pencil'"></mat-icon>
+                                                        </button>
                                                         <button mat-icon-button color="primary" (click)="viewBulletinDetail(bulletin)" matTooltip="Détails">
                                                             <mat-icon [svgIcon]="'heroicons_outline:eye'"></mat-icon>
                                                         </button>
-                                                        <button mat-icon-button color="warn" (click)="deleteBulletin(bulletin.id)" matTooltip="Supprimer">
+                                                        <button mat-icon-button color="primary" (click)="telechargerPDF(bulletin.id)" matTooltip="Télécharger PDF">
+                                                            <mat-icon [svgIcon]="'heroicons_outline:document'"></mat-icon>
+                                                        </button>
+                                                        <button mat-icon-button color="warn" (click)="deleteBulletin(bulletin.id, bulletin.mois, bulletin.annee)" matTooltip="Supprimer">
                                                             <mat-icon [svgIcon]="'heroicons_outline:trash'"></mat-icon>
                                                         </button>
                                                     </div>
@@ -322,7 +331,7 @@
                                                         <span class="ml-1">Voir solde</span>
                                                     </button>
                                                 </td>
-                                            </tr>
+                                             </tr>
                                         </tbody>
                                     </table>
                                 </div>

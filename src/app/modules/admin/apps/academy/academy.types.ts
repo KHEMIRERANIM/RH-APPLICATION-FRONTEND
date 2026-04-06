@@ -110,7 +110,7 @@ export interface User {
 export enum Role {
     ADMIN = 'ADMIN',
     MANAGER = 'MANAGER',
-    EMPLOYEE = 'EMPLOYEE'
+    EMPLOYEE = 'EMPLOYE'
 }
 
 

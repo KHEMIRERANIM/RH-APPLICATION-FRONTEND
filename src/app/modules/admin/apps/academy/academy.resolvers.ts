@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, Resolve, Router, RouterStateSnapshot } from '@angular/router';
-import { Observable, throwError, map } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { DemandeConge, BulletinSalaire, User, AdminStats } from 'app/modules/admin/apps/academy/academy.types';
 import { AcademyService } from 'app/modules/admin/apps/academy/academy.service';
@@ -33,7 +33,9 @@ export class AcademyDemandesEnAttenteResolver implements Resolve<DemandeConge[]>
 
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<DemandeConge[]>
     {
-        return this._academyService.getDemandesEnAttente();
+        // Passer l'ID du manager (admin par défaut)
+        const managerId = "69c9c83763d00230b5311df9";
+        return this._academyService.getDemandesEnAttente(managerId);
     }
 }
 
@@ -85,12 +87,15 @@ export class AcademyDemandeResolver implements Resolve<DemandeConge>
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<DemandeConge>
     {
         const id = route.paramMap.get('id');
+        if (!id) {
+            return throwError(() => new Error('ID non fourni'));
+        }
         return this._academyService.getDemandeById(id).pipe(
             catchError((error) => {
                 console.error(error);
                 const parentUrl = state.url.split('/').slice(0, -1).join('/');
                 this._router.navigateByUrl(parentUrl);
-                return throwError(error);
+                return throwError(() => error);
             })
         );
     }
@@ -112,12 +117,15 @@ export class AcademyBulletinResolver implements Resolve<BulletinSalaire>
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<BulletinSalaire>
     {
         const id = route.paramMap.get('id');
+        if (!id) {
+            return throwError(() => new Error('ID non fourni'));
+        }
         return this._academyService.getBulletinById(id).pipe(
             catchError((error) => {
                 console.error(error);
                 const parentUrl = state.url.split('/').slice(0, -1).join('/');
                 this._router.navigateByUrl(parentUrl);
-                return throwError(error);
+                return throwError(() => error);
             })
         );
     }

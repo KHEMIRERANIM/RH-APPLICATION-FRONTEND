@@ -8,56 +8,52 @@ import { AuthUtils } from 'app/core/auth/auth.utils';
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor
 {
-    /**
-     * Constructor
-     */
+    private isRefreshing = false;
+
     constructor(private _authService: AuthService)
     {
     }
 
-    /**
-     * Intercept
-     *
-     * @param req
-     * @param next
-     */
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>>
     {
-        // Clone the request object
+        // Ne pas interférer avec la route de login
+        if (req.url.includes('/auth/login')) {
+            return next.handle(req);
+        }
+
         let newReq = req.clone();
 
-        // Request
-        //
-        // If the access token didn't expire, add the Authorization header.
-        // We won't add the Authorization header if the access token expired.
-        // This will force the server to return a "401 Unauthorized" response
-        // for the protected API routes which our response interceptor will
-        // catch and delete the access token from the local storage while logging
-        // the user out from the app.
-        if ( this._authService.accessToken && !AuthUtils.isTokenExpired(this._authService.accessToken) )
+        // Ajouter le token s'il existe et n'est pas expiré
+        const token = this._authService.accessToken;
+        if (token && !AuthUtils.isTokenExpired(token))
         {
             newReq = req.clone({
-                headers: req.headers.set('Authorization', 'Bearer ' + this._authService.accessToken)
+                headers: req.headers.set('Authorization', 'Bearer ' + token)
             });
         }
 
-        // Response
         return next.handle(newReq).pipe(
             catchError((error) => {
-
-                // Catch "401 Unauthorized" responses
-                if ( error instanceof HttpErrorResponse && error.status === 401 )
+                if (error instanceof HttpErrorResponse && error.status === 401)
                 {
-                    // Ne PAS faire location.reload() ici car ça déclenche une boucle infinie !
-                    // On nettoie juste la session et on redirige proprement vers sign-in
-                    // seulement si on n'est PAS déjà sur sign-in
-                    if (!window.location.pathname.includes('/sign-in')) {
-                        this._authService.signOut();
-                        window.location.href = '/sign-in';
+                    console.warn('⚠️ Erreur 401 sur:', req.url);
+                    
+                    // Vérifier si on est déjà sur sign-in pour éviter la boucle
+                    if (window.location.pathname.includes('/sign-in')) {
+                        return throwError(() => error);
                     }
+                    
+                    // Ne PAS supprimer le token si c'est une route employee qui échoue
+                    if (req.url.includes('/employee') || req.url.includes('/conges') || req.url.includes('/salaires')) {
+                        console.log('🔑 Route protégée mais token présent - on garde la session');
+                        return throwError(() => error);
+                    }
+                    
+                    // Pour les autres erreurs, déconnecter
+                    this._authService.signOut();
+                    window.location.href = '/sign-in';
                 }
-
-                return throwError(error);
+                return throwError(() => error);
             })
         );
     }
