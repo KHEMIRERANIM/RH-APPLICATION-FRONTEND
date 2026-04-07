@@ -520,8 +520,8 @@
                   <div class="flex items-center gap-2 flex-wrap">
                     <p class="text-[#1A1A2E] font-medium">{{ reservation.shuttleName }}</p>
                     <span class="text-xs px-2 py-0.5 rounded-full font-medium"
-                      [ngClass]="reservation.statut === 'CONFIRME' ? 'bg-[#1D9E75] text-white' : (reservation.statut === 'EN_ATTENTE_ACTIVATION' ? 'bg-orange-500 text-white' : (reservation.statut === 'EN_ATTENTE' ? 'bg-yellow-500 text-white' : 'bg-red-500 text-white'))">
-                      {{ reservation.statut === 'CONFIRME' ? 'Confirmée' : (reservation.statut === 'EN_ATTENTE_ACTIVATION' ? 'Attente activation bus' : (reservation.statut === 'EN_ATTENTE' ? 'En attente' : 'Annulée')) }}
+                      [ngClass]="getDisplayStatus(reservation) === 'CONFIRME' ? 'bg-[#1D9E75] text-white' : (getDisplayStatus(reservation) === 'EN_ATTENTE_ACTIVATION' ? 'bg-orange-500 text-white' : (getDisplayStatus(reservation) === 'EN_ATTENTE' ? 'bg-yellow-500 text-white' : 'bg-red-500 text-white'))">
+                      {{ getDisplayStatus(reservation) === 'CONFIRME' ? 'Confirmée' : (getDisplayStatus(reservation) === 'EN_ATTENTE_ACTIVATION' ? 'Attente activation bus' : (getDisplayStatus(reservation) === 'EN_ATTENTE' ? 'En attente' : 'Annulée')) }}
                     </span>
                   </div>
                   <div class="flex items-center gap-2 text-base text-gray-600 mt-1">

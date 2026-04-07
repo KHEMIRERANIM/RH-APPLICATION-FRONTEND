@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { BusService, Bus, BusPackRequest } from '../bus.service';
 import { CovoiturageService } from '../covoiturage.service';
-import { forkJoin } from 'rxjs';
-
+import { forkJoin, of } from 'rxjs';
 import { UserService } from '../../../../../services/user.service';
+import { catchError } from 'rxjs/operators';
 
 type AdminSection = 'statistiques' | 'navettes' | 'reservations' | 'cadeaux';
 type ReservationType = 'navette' | 'covoiturage';
@@ -65,6 +65,7 @@ export class CovoiturageAdminComponent implements OnInit {
   navettes: Bus[] = [];
   reservationsNavette: any[] = [];
   employesMap: Map<string, string> = new Map();
+  employeDetailsMap: Map<string, any> = new Map();
   notifications: any[] = [];
 
   typeCarburantOptions = ['DIESEL', 'ESSENCE', 'ELECTRIQUE', 'HYBRIDE'];
@@ -108,7 +109,9 @@ export class CovoiturageAdminComponent implements OnInit {
         // 1. Map Employés
         results.employees.forEach((u: any) => {
           const nom = `${u.prenom || u.firstName || ''} ${u.nom || u.lastName || ''}`.trim();
-          this.employesMap.set(String(u.id), nom || `Employé ${String(u.id).slice(0, 5)}`);
+          const uid = String(u.id);
+          this.employesMap.set(uid, nom || `Employé ${uid.slice(0, 5)}`);
+          this.employeDetailsMap.set(uid, u);
         });
 
         // 2. Data
@@ -195,7 +198,7 @@ export class CovoiturageAdminComponent implements OnInit {
     return this.employesMap.get(String(id)) || `Employé ${String(id).slice(0, 8)}…`;
   }
 
-  reservantsParJour(busId: string | undefined, date: string): { employeId: string; statut: string; isWaitlisted: boolean }[] {
+  reservantsParJour(busId: string | undefined, date: string): { id: string; employeId: string; statut: string; isWaitlisted: boolean }[] {
     if (!busId || !this.reservationsNavette.length || !date) return [];
     
     const bus = this.navettes.find(b => b.id === busId);
@@ -227,23 +230,27 @@ export class CovoiturageAdminComponent implements OnInit {
     const distribution = new Map<string, any[]>();
     packBuses.forEach(b => distribution.set(b.id!, []));
 
-    // Distribuer les passagers (Logique stable)
-    let busIndex = 0;
-    // On extrait les 10 premiers caractères (YYYY-MM-DD) sans conversion Timezone
-    const targetDateStr = String(date).substring(0, 10);
-
+    // Distribution finale avec application des statuts de groupe
+    let currentBusIndex = 0;
     packReservations.forEach(r => {
-      while (busIndex < packBuses.length && distribution.get(packBuses[busIndex].id!)!.length >= packBuses[busIndex].capacite) {
-        busIndex++;
+      while (currentBusIndex < packBuses.length && distribution.get(packBuses[currentBusIndex].id!)!.length >= packBuses[currentBusIndex].capacite) {
+        currentBusIndex++;
       }
       
-      const targetBusId = busIndex < packBuses.length ? packBuses[busIndex].id : packBuses[packBuses.length - 1].id;
+      const targetBus = currentBusIndex < packBuses.length ? packBuses[currentBusIndex] : packBuses[packBuses.length - 1];
+      const targetBusId = targetBus.id!;
+      
       if (targetBusId) {
-        // Isolation parfaite par chaîne de texte brute
-        const jEnAttente = (r.joursEnAttente || []).map(d => String(d).substring(0, 10));
-        const isWaitlisted = jEnAttente.includes(targetDateStr);
+        // Règle de groupe : Le statut "isWaitlisted" dépend de l'activation du bus
+        const confirmedDays = Array.isArray(r.joursConfirmes) 
+            ? r.joursConfirmes 
+            : (r.joursConfirmes || '').split(',').map((d: any) => String(d).trim()).filter(Boolean);
+            
+        const isConfirmedByDay = confirmedDays.includes(date);
+        const isWaitlisted = (targetBus.statut !== 'ACTIF' && !isConfirmedByDay);
 
         distribution.get(targetBusId)!.push({
+          id: r.id,
           employeId: r.employeId,
           statut: String(r.statut),
           isWaitlisted: isWaitlisted
@@ -508,18 +515,6 @@ export class CovoiturageAdminComponent implements OnInit {
     };
   }
 
-  activateBusForDay(busId: string, date: string): void {
-    if (!confirm(`Activer un bus de réserve spécifiquement pour le ${date} ?`)) return;
-
-    this.busService.activateForDay(busId, date).subscribe({
-      next: () => {
-        this.loadBus();
-        this.loadReservationsNavette();
-        // Optionnel: Notification de succès locale (MatSnackBar si dispo)
-      },
-      error: (err) => console.error('Erreur activation', err)
-    });
-  }
 
   private checkWaitlists(): void {
     // 1. Trouver les bus de réserve (INACTIF) qui font partie d'un pack
@@ -558,30 +553,55 @@ export class CovoiturageAdminComponent implements OnInit {
   }
 
   activateBus(busId: string, date?: string): void {
+    if (date && !confirm(`Confirmer l'activation de ce bus pour le ${new Date(date).toLocaleDateString()} ?`)) return;
+    if (!date && !confirm(`Voulez-vous activer ce bus de manière permanente ?`)) return;
+
     this.isLoading = true;
     
     if (date) {
       this.busService.activateForDay(busId, date).subscribe({
         next: () => {
-          this.loadBus();
-          this.notifications = this.notifications.filter(n => n.busId !== busId);
+          // 1. Déterminer les passagers à notifier (ceux qui étaient dans ce bus pour cette date)
+          const passengers = this.reservantsParJour(busId, date);
+          const bus = this.navettes.find(b => b.id === busId);
+          const busName = bus ? `${bus.marque} ${bus.modele}` : 'Navette';
+
+          passengers.forEach(p => {
+            const notification = {
+                destinataireId: p.employeId,
+                type: 'BUS_ACTIVE',
+                contenu: `Bonne nouvelle ! Votre navette "${busName}" pour le ${new Date(date).toLocaleDateString()} a été activée.`,
+                reservationId: p.id
+            };
+            this.covoiturageService.sendNotification(notification).subscribe({
+                error: (err) => console.error('Erreur envoi notification app', err)
+            });
+          });
+
+          // 2. Refresh complet
+          this.loadAllData();
+          this.notifications = this.notifications.filter(n => n.busId !== busId || n.date !== date);
           this.isLoading = false;
+          alert(`✅ Bus activé et ${passengers.length} notifications envoyées pour le ${new Date(date).toLocaleDateString()}`);
         },
         error: (err) => {
           console.error('Erreur activation jour', err);
           this.isLoading = false;
+          alert('❌ Erreur lors de l\'activation du bus pour cette date.');
         }
       });
     } else {
       this.busService.update(busId, { statut: 'ACTIF' }).subscribe({
         next: () => {
-          this.loadBus();
+          this.loadAllData();
           this.notifications = this.notifications.filter(n => n.busId !== busId);
           this.isLoading = false;
+          alert('✅ Bus activé de manière permanente.');
         },
         error: (err) => {
           console.error('Erreur activation bus', err);
           this.isLoading = false;
+          alert('❌ Erreur lors de l\'activation permanente du bus.');
         }
       });
     }

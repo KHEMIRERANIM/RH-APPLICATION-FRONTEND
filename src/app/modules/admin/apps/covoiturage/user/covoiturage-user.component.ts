@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CovoiturageService, Vehicule, Trajet, ReservationResponse, ReservationRequest } from '../covoiturage.service';
 import { UserService, Employee } from '../../../../../services/user.service';
+import { EmailService } from '../../../../../services/email.service';
 import { ActivatedRoute } from '@angular/router';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
@@ -83,6 +84,7 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
   ];
 
   myShuttleReservations: any[] = [];
+  allShuttleReservations: any[] = [];
   navetteTrackingId: string = '';
 
   availableShuttles = [
@@ -344,6 +346,7 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     private fb: FormBuilder,
     private covoiturageService: CovoiturageService,
     private userService: UserService,
+    private emailService: EmailService,
     private route: ActivatedRoute
   ) {
     this.trajetForm = this.fb.group({
@@ -1039,16 +1042,93 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
   // NAVETTES
   // ─────────────────────────────────────────────────────────────
 
+  /** Détermine quel bus du pack est assigné à l'utilisateur pour un jour donné (Logique identique à l'admin) */
+  private getBusForUserAndDay(packId: string, employeId: string, day: string): any | undefined {
+    if (!packId || !employeId || !day) return undefined;
+
+    // Charger TOUTES les réservations du pack pour ce jour
+    const packReservations = this.allShuttleReservations
+      .filter(r => {
+        const rBus = this.shuttles.find(b => b.id === r.busId);
+        const st = String(r.statut || '').toUpperCase();
+        const days = (r.joursSelectionnes || '').split(',').map((d: string) => d.trim()).filter(Boolean);
+        return rBus?.packId === packId && 
+               st !== 'ANNULE' &&
+               days.includes(day);
+      })
+      .sort((a, b) => new Date(a.dateCreation || 0).getTime() - new Date(b.dateCreation || 0).getTime());
+
+    // Identifier les bus du pack (Ordre : ACTIF en premier, puis date de création)
+    const packBuses = this.shuttles
+      .filter(b => b.packId === packId)
+      .sort((a, b) => {
+        if (a.statut === 'ACTIF' && b.statut !== 'ACTIF') return -1;
+        if (a.statut !== 'ACTIF' && b.statut === 'ACTIF') return 1;
+        return new Date(a.dateCreation || 0).getTime() - new Date(b.dateCreation || 0).getTime();
+      });
+
+    if (packBuses.length === 0) return undefined;
+
+    // Distribution
+    let currentBusIndex = 0;
+    const busOccupancy = new Map<string, number>();
+    packBuses.forEach(b => busOccupancy.set(b.id!, 0));
+
+    for (const r of packReservations) {
+      while (currentBusIndex < packBuses.length && (busOccupancy.get(packBuses[currentBusIndex].id!) || 0) >= (packBuses[currentBusIndex].capacite || 0)) {
+        currentBusIndex++;
+      }
+      
+      const targetBus = currentBusIndex < packBuses.length ? packBuses[currentBusIndex] : packBuses[packBuses.length - 1];
+      if (String(r.employeId) === String(employeId)) {
+        return targetBus;
+      }
+      
+      busOccupancy.set(targetBus.id!, (busOccupancy.get(targetBus.id!) || 0) + 1);
+    }
+
+    return undefined;
+  }
+
+  getDisplayStatus(reservation: any): string {
+    if (!reservation) return 'EN_ATTENTE';
+    const statut = String(reservation.statut || '').toUpperCase();
+    if (statut === 'ANNULE' || statut === 'ANNULÉE') return 'ANNULE';
+
+    // PRIORITÉ 1 : Données réelles du backend (Après activation par date)
+    if (reservation.joursConfirmes && (reservation.joursConfirmes.length > 0)) return 'CONFIRME';
+
+    const bus = this.shuttles.find(s => s.id === reservation.busId);
+    if (!bus) return statut;
+
+    const packId = bus.packId;
+    if (packId) {
+      const days = (reservation.joursSelectionnes || '').split(',').map((d: string) => d.trim()).filter(Boolean);
+      // PRIORITÉ 2 : Simulation par distribution (fallback/prédiction)
+      const hasConfirmed = days.some((day: string) => {
+        const targetBus = this.getBusForUserAndDay(packId, reservation.employeId, day);
+        return targetBus?.statut === 'ACTIF';
+      });
+      if (hasConfirmed) return 'CONFIRME';
+      return 'EN_ATTENTE_ACTIVATION';
+    }
+
+    return statut;
+  }
+
   loadMyShuttleReservations() {
     if (!this.employeId) return;
-    this.covoiturageService.getReservationsNavetteByEmploye(this.employeId).subscribe({
-      next: (data) => {
-        this.myShuttleReservations = (data || []).map((r: any) => {
+
+    forkJoin({
+      all: this.covoiturageService.getAllReservationsNavette(),
+      mine: this.covoiturageService.getReservationsNavetteByEmploye(this.employeId)
+    }).subscribe({
+      next: (res) => {
+        this.allShuttleReservations = res.all || [];
+        this.myShuttleReservations = (res.mine || []).map((r: any) => {
           const bus = this.shuttles.find(s => s.id === r.busId);
-          const statut = typeof r.statut === 'string' ? r.statut : (r.statut?.name || '');
           return {
             ...r,
-            statut,
             shuttleId: r.busId,
             shuttleName: bus ? `${bus.marque} ${bus.modele}` : (r.ligne || 'Navette'),
             route: bus?.ligne || r.ligne,
@@ -1057,7 +1137,7 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
         });
         this.cdr.detectChanges();
       },
-      error: (err) => console.error('Erreur', err)
+      error: (err) => console.error('Erreur chargement réservations navette:', err)
     });
   }
 
@@ -1066,13 +1146,27 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     if (!reservation.days || !reservation.days.includes(day)) return 'none';
 
     const statut = String(reservation.statut || '').toUpperCase();
-    if (statut === 'ANNULE') return 'none';
+    if (statut === 'ANNULE' || statut === 'ANNULÉE') return 'none';
 
-    // Priorité aux listes précises du backend
-    if (reservation.joursEnAttente?.includes(day)) return 'waiting';
+    // PRIORITÉ 1: Manuel / Activé par date (Source de vérité absolue)
     if (reservation.joursConfirmes?.includes(day)) return 'confirmed';
 
-    // Fallback si les listes ne sont pas encore peuplées (anciennes réservations)
+    const bus = this.shuttles.find(s => s.id === reservation.busId);
+    if (!bus) return 'none';
+
+    const packId = bus.packId;
+    if (packId) {
+      // PRIORITÉ 2: Simulation par distribution du pack
+      const targetBus = this.getBusForUserAndDay(packId, reservation.employeId, day);
+      if (targetBus) {
+        return targetBus.statut === 'ACTIF' ? 'confirmed' : 'waiting';
+      }
+    }
+
+    // PRIORITÉ 3: Fallback sur les listes d'attente du serveur
+    if (reservation.joursEnAttente?.includes(day)) return 'waiting';
+
+    // Fallback final
     if (statut === 'EN_ATTENTE_ACTIVATION') return 'waiting';
     return statut === 'CONFIRME' ? 'confirmed' : 'waiting';
   }
@@ -1315,7 +1409,9 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     const hasReserve = this.aUnBusDeReserve(shuttle);
     
     // On ne permet la liste d'attente "activation" QUE s'il reste un bus inactif dans le pack
-    const canWaitlist = isFull && this.estDansUnPack(shuttle) && hasReserve;
+    // OU si l'on réserve DIRECTEMENT sur un bus de réserve (INACTIF)
+    const isInactiveBus = shuttle.statut !== 'ACTIF';
+    const canWaitlist = isInactiveBus || (isFull && this.estDansUnPack(shuttle) && hasReserve);
 
     const reservation = {
       busId: shuttle.id,
@@ -1326,8 +1422,27 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
 
     this.covoiturageService.reserverNavette(reservation).subscribe({
       next: (res: any) => {
+        // Recharger d'abord
         this.loadMyShuttleReservations();
-        this.loadShuttles();
+        
+        // Vérifier le seuil de 50% sur le bus de réserve
+        this.covoiturageService.getShuttles().subscribe(updatedShuttles => {
+          this.shuttles = updatedShuttles;
+          const currentBus = updatedShuttles.find(s => s.id === shuttle.id);
+          if (currentBus && currentBus.statut !== 'ACTIF') {
+            daysArray.forEach(day => {
+              const occ = currentBus.dailyOccupancy ? (currentBus.dailyOccupancy[day] || 0) : 0;
+              if (occ === (currentBus.capacite || 0) / 2) {
+                this.emailService.sendThresholdNotification(currentBus.ligne || 'Navette', day, occ, currentBus.capacite).subscribe({
+                  next: () => console.log('✓ Email de notification envoyé'),
+                  error: (err) => console.error('✗ Erreur envoi email notification', err)
+                });
+              }
+            });
+          }
+          this.cdr.detectChanges();
+        });
+
         this.selectedNavetteDays[shuttle.id] = [];
         const st = typeof res?.statut === 'string' ? res.statut : res?.statut?.name;
         

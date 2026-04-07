@@ -197,4 +197,8 @@ remplacerReservation(request: any): Observable<any> {
   updateReservationStatusNavette(id: string, update: Partial<ReservationRequest>): Observable<any> {
     return this.http.put(`${this.apiUrl}/reservations-navette/${id}`, update);
   }
+
+  sendNotification(notification: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/notifications`, notification);
+  }
 }

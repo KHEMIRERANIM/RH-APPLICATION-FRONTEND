@@ -11,7 +11,7 @@
         <h4 class="text-sm font-bold text-[#1A1A2E] mb-1">{{ notif.title }}</h4>
         <p class="text-xs text-gray-600 leading-relaxed whitespace-pre-wrap break-words">{{ notif.message }}</p>
         <div class="flex gap-3 mt-4">
-          <button (click)="activateBus(notif.busId)" 
+          <button (click)="activateBus(notif.busId, notif.date)" 
             class="px-3 py-1.5 bg-[#1D9E75] text-white rounded-lg text-xs font-bold hover:bg-[#178a66] transition shadow-sm">
             {{ notif.actionLabel }}
           </button>
@@ -186,7 +186,7 @@
               <!-- Quick activation badges for Reserve Bus -->
               <div *ngIf="navette.statut === 'INACTIF'" class="flex flex-wrap gap-2 mb-4 animate-pulse-subtle">
                 <button *ngFor="let d of navette.packDates"
-                        (click)="activateBusForDay(navette.id, d)"
+                        (click)="activateBus(navette.id, d)"
                         [class.bg-orange-500]="reservantsParJour(navette.id, d).length > (navette.capacite / 2)"
                         [class.text-white]="reservantsParJour(navette.id, d).length > (navette.capacite / 2)"
                         [class.bg-gray-100]="reservantsParJour(navette.id, d).length <= (navette.capacite / 2)"
@@ -212,7 +212,7 @@
                   
                   <!-- Bouton d'activation par jour -->
                   <button *ngIf="navette.statut === 'INACTIF' && reservantsParJour(navette.id, date).length > 0"
-                          (click)="activateBusForDay(navette.id, date)"
+                          (click)="activateBus(navette.id, date)"
                           class="mt-1 w-full py-0.5 bg-orange-100 text-orange-600 rounded text-[7px] font-extrabold hover:bg-orange-200 transition-colors uppercase">
                     Activer Jour
                   </button>
