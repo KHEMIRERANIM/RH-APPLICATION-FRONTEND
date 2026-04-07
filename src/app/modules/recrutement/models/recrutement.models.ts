@@ -23,6 +23,7 @@ export interface Candidature {
   lettreMotivationFileId: string; statut: StatutCandidature; scoreMatching: number;
   etapeActuelle: string; notesRecruteur: string; historiqueStatuts: string[];
   competencesExtraites: string[]; competencesManquantes: string[]; anneesExperienceDetecte: number;
+  testLanguePasse: boolean; scoreLangue: number; formationRequise: boolean;
   datePostulation: string; dateDerniereMAJ: string;
 }
 export interface ChangerStatutRequest { nouveauStatut: StatutCandidature; commentaire: string; }

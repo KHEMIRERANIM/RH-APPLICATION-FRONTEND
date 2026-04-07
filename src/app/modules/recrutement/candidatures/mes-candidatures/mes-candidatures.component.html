@@ -141,7 +141,108 @@
 
         </div>
       </div>
+      
+      <!-- LIGNE RSE LANGUAGE TEST -->
+      <div class="px-8 pb-8 pt-0">
+        <!-- Action Requise si test ignoré -->
+        <div *ngIf="c.statut === 'ACCEPTE' && !c.testLanguePasse" class="bg-gradient-to-r from-red-50 to-orange-50 border-l-4 border-red-500 p-5 mt-4 rounded-r-xl shadow-sm">
+          <p class="font-extrabold text-red-800 text-lg flex items-center gap-2">
+            <mat-icon [svgIcon]="'heroicons_outline:video-camera'"></mat-icon>
+            Action Requise : Test Linguistique Supplémentaire
+          </p>
+          <p class="text-sm text-red-700 mb-4 mt-1">Vous devez valider votre niveau d'anglais par vidéo (Test IA court) afin d'officialiser votre recrutement par notre entreprise.</p>
+          <button mat-flat-button color="warn" (click)="ouvrirTestVideo(c)" class="rounded-full font-bold shadow-md hover:shadow-lg transition-shadow">
+            Démarrer la vérification vidéo (Lancer la Caméra)
+          </button>
+        </div>
+
+        <!-- Confirmé -->
+        <div *ngIf="c.testLanguePasse" class="bg-green-50/80 p-4 mt-4 text-green-900 border border-green-200 rounded-xl shadow-sm flex items-center gap-3">
+          <mat-icon class="text-green-500 bg-white rounded-full p-1 shadow-sm" [svgIcon]="'heroicons_outline:check-badge'"></mat-icon>
+          <div>
+            <p class="font-bold text-sm">Test Vidéo IA Analysé (Score : {{c.scoreLangue | number:'1.0-0'}}%)</p>
+          </div>
+        </div>
+
+        <!-- E-learning RSE si score fail -->
+        <div *ngIf="c.formationRequise" class="bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-200 p-6 mt-4 rounded-2xl shadow-md transform hover:-translate-y-1 transition-all">
+          <div class="flex items-start gap-4">
+            <div class="p-3 bg-indigo-100 rounded-lg text-indigo-600 shadow-inner">
+              <mat-icon [svgIcon]="'heroicons_outline:academic-cap'" class="icon-size-8"></mat-icon>
+            </div>
+            <div>
+              <p class="font-black text-indigo-900 text-lg">🎓 Mise à niveau Linguistique Offerte (RSE)</p>
+              <p class="text-sm text-indigo-700 mt-1 mb-4 leading-relaxed">
+                Votre test oral révèle l'opportunité de progresser en anglais. RH_RSE met en avant le développement de ses talents et vous offre ce parcours E-Learning Obligatoire.
+              </p>
+              <div class="flex gap-3">
+                <a mat-flat-button class="bg-indigo-600 text-white rounded-full font-bold" href="https://www.coursera.org/learn/business-english" target="_blank">
+                  Accéder à Coursera B2
+                </a>
+                <a mat-stroked-button class="border-indigo-300 text-indigo-700 bg-white rounded-full font-bold shadow-sm" href="https://www.udemy.com/course/english-for-it-software-engineers/" target="_blank">
+                  Accéder à Udemy Start
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
     </div>
 
   </div>
+
+  <!-- WEBCAM MOCK MODAL -->
+  <div *ngIf="showVideoModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-3xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col [@slideInUp]">
+      
+      <div class="p-6 border-b flex justify-between items-center bg-gray-50">
+        <h3 class="text-2xl font-black text-gray-800 flex items-center gap-2">
+          <mat-icon [svgIcon]="'heroicons_outline:viewfinder-circle'" class="text-indigo-600"></mat-icon>
+          Test Vidéo IA Officiel
+        </h3>
+        <button mat-icon-button (click)="fermerVideo()"><mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon></button>
+      </div>
+
+      <div class="p-8 flex flex-col items-center">
+        <!-- Prompt Box -->
+        <div class="text-center bg-blue-50 text-blue-900 p-5 rounded-xl border border-blue-200 mb-6 w-full max-w-xl">
+          <p class="text-xs font-bold uppercase tracking-widest text-blue-500 mb-2">Instructions d'enregistrement</p>
+          <p class="font-medium text-lg leading-snug">
+            🎥 Présentez-vous librement en anglais! Parlez-nous de vous, de vos <b>passions</b>, de vos <b>hobbies</b>, et de vos <b>motivations</b> pour rejoindre notre entreprise. Soyez naturel(le) !
+          </p>
+        </div>
+
+        <!-- Video stream -->
+        <div class="relative w-full max-w-lg aspect-video bg-gray-900 rounded-2xl overflow-hidden shadow-inner border-4 border-gray-800">
+          <video #videoPlayer autoplay playsinline muted class="w-full h-full object-cover"></video>
+          
+          <div *ngIf="isRecording" class="absolute top-4 right-4 flex items-center gap-2 bg-black/60 px-3 py-1 rounded-full text-white text-xs font-bold font-mono blink-animation">
+            <div class="w-2.5 h-2.5 rounded-full bg-red-500"></div> REC
+          </div>
+        </div>
+
+      </div>
+
+      <div class="p-6 bg-gray-50 border-t flex justify-center gap-4">
+        <button *ngIf="!isRecording && !uploadingVideo" mat-flat-button color="primary" class="rounded-full px-8 py-2 text-lg" (click)="startRecording()">
+          Démarrer l'enregistrement
+        </button>
+        <button *ngIf="isRecording && !uploadingVideo" mat-flat-button color="warn" class="rounded-full px-8 py-2 text-lg" (click)="submitVideo()">
+          Soumettre la vidéo à l'IA
+        </button>
+        <div *ngIf="uploadingVideo" class="flex items-center gap-3 font-medium text-indigo-600">
+          <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+          Analyse NLP et Transcription en cours...
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
 </div>
+
+<style>
+.blink-animation { animation: blinker 1.5s linear infinite; }
+@keyframes blinker { 50% { opacity: 0; } }
+</style>

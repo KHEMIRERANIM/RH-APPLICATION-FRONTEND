@@ -6,7 +6,11 @@ import { EntretienService } from '../../services/entretien.service';
 import { AuthService } from 'app/core/auth/auth.service';
 import { Candidature, Offre, Entretien, STATUT_LABELS, STATUT_COLORS, KANBAN_COLUMNS } from '../../models/recrutement.models';
 import { forkJoin, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, switchMap } from 'rxjs/operators';
+import { ElementRef, ViewChild } from '@angular/core';
+
+interface IWindow extends Window { webkitSpeechRecognition: any; }
+const { webkitSpeechRecognition } : IWindow = <IWindow><unknown>window;
 
 @Component({
   selector: 'app-mes-candidatures',
@@ -18,6 +22,18 @@ export class MesCandidaturesComponent implements OnInit {
   offresMap: Record<string, Offre> = {};
   entretiensMap: Record<string, Entretien[]> = {};
   loading = true;
+
+  // Video Test
+  showVideoModal = false;
+  activeCandidatureForVideo: Candidature | null = null;
+  videoStream: MediaStream | null = null;
+  isRecording = false;
+  uploadingVideo = false;
+
+  recognition: any;
+  transcript = '';
+
+  @ViewChild('videoPlayer', { static: false }) videoElement!: ElementRef<HTMLVideoElement>;
 
   STATUT_LABELS = STATUT_LABELS;
   STATUT_COLORS = STATUT_COLORS;
@@ -108,5 +124,93 @@ export class MesCandidaturesComponent implements OnInit {
     link.download = `entretien-${entretien.id}.txt`;
     link.click();
     URL.revokeObjectURL(url);
+  }
+
+  // --- WEBCAM VIDEO TEST ---
+
+  async ouvrirTestVideo(c: Candidature) {
+    this.activeCandidatureForVideo = c;
+    this.showVideoModal = true;
+    this.transcript = '';
+    
+    // Init Speech Recognition API
+    if (webkitSpeechRecognition) {
+      this.recognition = new webkitSpeechRecognition();
+      this.recognition.lang = 'en-US'; // English validation
+      this.recognition.continuous = true;
+      this.recognition.interimResults = false;
+      this.recognition.onresult = (event: any) => {
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            this.transcript += event.results[i][0].transcript + " ";
+          }
+        }
+      };
+    }
+
+    try {
+      this.videoStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      setTimeout(() => {
+        if (this.videoElement?.nativeElement) {
+          this.videoElement.nativeElement.srcObject = this.videoStream;
+        }
+      }, 300);
+    } catch (err) {
+      alert("Impossible d'accéder à la caméra. Vérifiez vos permissions.");
+      this.fermerVideo();
+    }
+  }
+
+  startRecording() {
+    this.isRecording = true;
+    this.transcript = '';
+    if (this.recognition) {
+       this.recognition.start();
+    }
+  }
+
+  submitVideo() {
+    if (!this.activeCandidatureForVideo) return;
+    this.isRecording = false;
+    this.uploadingVideo = true;
+    
+    if (this.recognition) {
+       this.recognition.stop();
+    }
+
+    // Call Python NLP API, then Spring Boot
+    this.candidatureService.analyzeSpeechPython(this.transcript).pipe(
+      switchMap(pythonData => {
+        console.log("Résultat Machine Learning (Python):", pythonData);
+        // On renvoie le vrai score ML à SpringBoot
+        return this.candidatureService.soumettreTestLangue(this.activeCandidatureForVideo!.id, pythonData.score);
+      }),
+      catchError(err => {
+        console.error("Python API Error", err);
+        // Fallback minimal si Flask est éteint
+        return this.candidatureService.soumettreTestLangue(this.activeCandidatureForVideo!.id, 10.0);
+      })
+    ).subscribe({
+      next: (updatedCandidature) => {
+        const idx = this.candidatures.findIndex(x => x.id === updatedCandidature.id);
+        if (idx > -1) {
+          this.candidatures[idx] = updatedCandidature;
+        }
+        this.fermerVideo();
+      },
+      error: () => this.fermerVideo()
+    });
+  }
+
+  fermerVideo() {
+    if (this.recognition) this.recognition.stop();
+    if (this.videoStream) {
+      this.videoStream.getTracks().forEach(track => track.stop());
+      this.videoStream = null;
+    }
+    this.showVideoModal = false;
+    this.isRecording = false;
+    this.uploadingVideo = false;
+    this.activeCandidatureForVideo = null;
   }
 }

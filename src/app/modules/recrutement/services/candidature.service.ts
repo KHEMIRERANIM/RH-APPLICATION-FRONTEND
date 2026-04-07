@@ -56,4 +56,12 @@ export class CandidatureService {
   deleteCandidature(id: string): Observable<void> {
     return this.http.delete<void>(`${this.api}/${id}`);
   }
+
+  analyzeSpeechPython(text: string): Observable<any> {
+    return this.http.post<any>('http://localhost:5000/analyze-speech', { text });
+  }
+
+  soumettreTestLangue(id: string, scoreLangue: number): Observable<Candidature> {
+    return this.http.post<Candidature>(`${this.api}/${id}/test-langue?scoreLangue=${scoreLangue}`, {});
+  }
 }
