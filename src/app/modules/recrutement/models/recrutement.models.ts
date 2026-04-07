@@ -1,4 +1,4 @@
-﻿export type StatutOffre = 'BROUILLON' | 'PUBLIEE' | 'CLOTUREE' | 'ARCHIVEE';
+export type StatutOffre = 'BROUILLON' | 'PUBLIEE' | 'CLOTUREE' | 'ARCHIVEE';
 export type TypeContrat = 'CDI' | 'CDD' | 'STAGE' | 'ALTERNANCE' | 'FREELANCE';
 export type StatutCandidature = 'NOUVEAU' | 'EN_COURS_ANALYSE' | 'ENTRETIEN_RH' | 'ENTRETIEN_TECHNIQUE' | 'TEST_TECHNIQUE' | 'OFFRE_ENVOYEE' | 'ACCEPTE' | 'REFUSE';
 export type TypeEntretien = 'TELEPHONIQUE' | 'VISIO' | 'PRESENTIEL';
@@ -22,7 +22,7 @@ export interface Candidature {
   id: string; candidatId: string; offreId: string; cvFileId: string;
   lettreMotivationFileId: string; statut: StatutCandidature; scoreMatching: number;
   etapeActuelle: string; notesRecruteur: string; historiqueStatuts: string[];
-  competencesExtraites: string[]; anneesExperienceDetecte: number;
+  competencesExtraites: string[]; competencesManquantes: string[]; anneesExperienceDetecte: number;
   datePostulation: string; dateDerniereMAJ: string;
 }
 export interface ChangerStatutRequest { nouveauStatut: StatutCandidature; commentaire: string; }

@@ -112,9 +112,8 @@
                 <mat-icon class="icon-size-5 text-gray-400" [svgIcon]="'heroicons_outline:calendar'"></mat-icon>
                 Postulé le {{ c.datePostulation | date:'dd/MM/yyyy' }}
               </span>
-              <span *ngIf="c.scoreMatching > 0" class="flex items-center gap-2 text-indigo-700 font-bold bg-indigo-50 px-3 py-1.5 rounded-lg border border-indigo-100">
-                <mat-icon class="icon-size-5 text-indigo-500" [svgIcon]="'heroicons_outline:star'"></mat-icon>
-                Score IA : {{ c.scoreMatching | number:'1.0-0' }}%
+              <span *ngIf="c.scoreMatching > 0" class="flex items-center gap-2 text-orange-700 font-bold bg-gradient-to-r from-orange-50 to-red-50 text-sm px-4 py-1.5 rounded-xl border border-orange-200 shadow-sm transition-all duration-300 hover:shadow-md hover:scale-105">
+                🔥 Adéquation : {{ c.scoreMatching | number:'1.0-0' }}%
               </span>
             </div>
             <div class="flex items-center gap-3">

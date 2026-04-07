@@ -81,11 +81,16 @@
             </div>
           </div>
 
-          <!-- Date -->
-          <p class="text-xs text-secondary flex items-center gap-1">
-            <mat-icon class="icon-size-3" [svgIcon]="'heroicons_outline:calendar'"></mat-icon>
-            {{ c.datePostulation | date:'dd/MM/yy' }}
-          </p>
+          <!-- Date & Top Profil -->
+          <div class="flex items-center justify-between text-xs mt-1">
+            <p class="text-secondary flex items-center gap-1">
+              <mat-icon class="icon-size-3" [svgIcon]="'heroicons_outline:calendar'"></mat-icon>
+              {{ c.datePostulation | date:'dd/MM/yy' }}
+            </p>
+            <span *ngIf="c.scoreMatching >= 80" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gradient-to-r from-yellow-300 to-yellow-500 text-yellow-900 shadow-md">
+              🌟 Top Profil
+            </span>
+          </div>>
 
           <!-- Notes courtes -->
           <p *ngIf="c.notesRecruteur" class="text-xs text-secondary italic mt-1 truncate">
@@ -122,17 +127,19 @@
       </div>
 
       <!-- Score IA -->
-      <div *ngIf="selectedCandidature.scoreMatching > 0" class="bg-gradient-to-br from-gray-50 to-white border border-gray-100 dark:bg-gray-800 rounded-2xl p-5 shadow-sm">
-        <p class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">Score matching IA</p>
+      <div *ngIf="selectedCandidature.scoreMatching > 0" class="bg-gradient-to-br from-gray-50 to-white border border-gray-100 dark:bg-gray-800 rounded-3xl p-5 shadow-lg transform transition-all hover:scale-[1.02]">
+        <p class="text-sm font-black text-gray-800 uppercase tracking-wider mb-4 flex items-center gap-2">
+          🔥 Score d'Adéquation IA
+        </p>
         <div class="flex items-center gap-4">
-          <div class="flex-auto bg-gray-100 rounded-full h-3 overflow-hidden shadow-inner">
-            <div class="h-3 rounded-full transition-all duration-1000 ease-out"
+          <div class="flex-auto bg-gray-200 rounded-full h-4 overflow-hidden shadow-inner">
+            <div class="h-4 rounded-full transition-all duration-1000 ease-out"
               [style.width.%]="selectedCandidature.scoreMatching"
-              [ngClass]="selectedCandidature.scoreMatching >= 75 ? 'bg-gradient-to-r from-green-400 to-green-500' :
-                         selectedCandidature.scoreMatching >= 50 ? 'bg-gradient-to-r from-yellow-400 to-yellow-500' : 'bg-gradient-to-r from-red-400 to-red-500'">
+              [ngClass]="selectedCandidature.scoreMatching >= 75 ? 'bg-gradient-to-r from-green-400 to-emerald-500' :
+                         selectedCandidature.scoreMatching >= 50 ? 'bg-gradient-to-r from-orange-400 to-yellow-500' : 'bg-gradient-to-r from-red-500 to-rose-600'">
             </div>
           </div>
-          <span class="text-2xl font-black drop-shadow-sm" [ngClass]="scoreColor(selectedCandidature.scoreMatching)">
+          <span class="text-3xl font-black drop-shadow-sm" [ngClass]="scoreColor(selectedCandidature.scoreMatching)">
             {{ selectedCandidature.scoreMatching | number:'1.0-0' }}%
           </span>
         </div>
@@ -157,14 +164,30 @@
         </div>
       </div>
 
-      <!-- Compétences extraites -->
-      <div *ngIf="selectedCandidature.competencesExtraites?.length">
-        <p class="text-sm font-medium mb-2">Compétences extraites par IA</p>
-        <div class="flex flex-wrap gap-1.5">
-          <span *ngFor="let comp of selectedCandidature.competencesExtraites"
-            class="px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-700">
-            {{ comp }}
-          </span>
+      <!-- Explicabilité IA -->
+      <div *ngIf="selectedCandidature.competencesExtraites?.length || selectedCandidature.competencesManquantes?.length">
+        <p class="text-sm font-bold text-gray-800 mb-3 border-b pb-2">📋 Explicabilité de l'IA (Scan du CV)</p>
+        
+        <div class="flex flex-col gap-3">
+          <div *ngIf="selectedCandidature.competencesExtraites?.length" class="bg-green-50/50 p-4 rounded-xl border border-green-100 shadow-sm">
+            <p class="text-xs font-bold text-green-700 mb-2 uppercase">✅ Compétences trouvées</p>
+            <div class="flex flex-wrap gap-1.5">
+              <span *ngFor="let comp of selectedCandidature.competencesExtraites"
+                class="px-2 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-800 shadow-sm border border-green-200">
+                {{ comp }}
+              </span>
+            </div>
+          </div>
+
+          <div *ngIf="selectedCandidature.competencesManquantes?.length" class="bg-red-50/50 p-4 rounded-xl border border-red-100 shadow-sm mt-1">
+            <p class="text-xs font-bold text-red-700 mb-2 uppercase">❌ Compétences manquantes</p>
+            <div class="flex flex-wrap gap-1.5">
+              <span *ngFor="let comp of selectedCandidature.competencesManquantes"
+                class="px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-600 border border-red-100">
+                {{ comp }}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
 

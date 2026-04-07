@@ -1,4 +1,4 @@
-﻿import { Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { CandidatureService } from '../services/candidature.service';
@@ -61,7 +61,13 @@ export class PipelineComponent implements OnInit {
     if (!id) return;
     this.loading = true;
     this.candidatureService.getKanban(id).subscribe({
-      next: (data) => { this.kanban = data; this.loading = false; },
+      next: (data) => { 
+        for (const k of Object.keys(data)) {
+          data[k].sort((a, b) => (b.scoreMatching || 0) - (a.scoreMatching || 0));
+        }
+        this.kanban = data; 
+        this.loading = false; 
+      },
       error: () => this.loading = false,
     });
   }
