@@ -1,4 +1,4 @@
-﻿import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { forkJoin } from 'rxjs';
@@ -86,6 +86,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
   // Navigation
   voirPipeline(offre: Offre): void {
     this.router.navigate(['/recrutement/admin/pipeline', offre.id]);
+  }
+
+  modifierOffre(offre: Offre): void {
+    this.router.navigate(['/recrutement/admin/offres/modifier', offre.id]);
+  }
+
+  voirDetail(offre: Offre): void {
+    this.router.navigate(['/recrutement/offres', offre.id]);
   }
 
   creerOffre(): void {

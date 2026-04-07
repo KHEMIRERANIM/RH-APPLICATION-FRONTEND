@@ -1,8 +1,14 @@
 <div class="flex flex-col flex-auto min-w-0 p-6 sm:p-10">
 
-  <div class="mb-8">
-    <h2 class="text-3xl font-extrabold tracking-tight">Mes candidatures</h2>
-    <p class="text-secondary mt-1">Suivez l'avancement de vos candidatures</p>
+  <div class="mb-10 flex flex-wrap items-start justify-between gap-4">
+    <div>
+      <h2 class="text-4xl font-extrabold tracking-tight leading-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-indigo-700">Mes candidatures</h2>
+      <p class="text-secondary mt-2 text-lg font-medium">Suivez l'avancement de vos candidatures</p>
+    </div>
+    <button mat-stroked-button class="rounded-full shadow-sm hover:bg-gray-50 transition-colors font-bold border-2" routerLink="/recrutement/calendrier">
+      <mat-icon class="icon-size-5 mr-1 text-indigo-600">calendar_today</mat-icon>
+      Calendrier entretiens
+    </button>
   </div>
 
   <div *ngIf="loading" class="flex items-center justify-center h-64">
@@ -18,10 +24,10 @@
     </button>
   </div>
 
-  <div *ngIf="!loading && candidatures.length > 0" class="flex flex-col gap-4">
+  <div *ngIf="!loading && candidatures.length > 0" class="flex flex-col gap-6">
 
     <div *ngFor="let c of candidatures"
-      class="bg-card rounded-2xl shadow overflow-hidden hover:shadow-md transition-shadow">
+      class="bg-white rounded-3xl shadow-lg ring-1 ring-black/5 overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
 
       <div class="flex flex-col sm:flex-row">
 
@@ -32,30 +38,30 @@
                      c.statut === 'NOUVEAU' ? 'bg-blue-500' : 'bg-primary'">
         </div>
 
-        <div class="flex flex-col flex-auto p-6">
+        <div class="flex flex-col flex-auto p-8">
 
-          <div class="flex flex-wrap items-start justify-between gap-4 mb-4">
+          <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
             <div>
-              <h3 class="text-lg font-semibold">
+              <h3 class="text-2xl font-bold text-gray-800">
                 {{ offresMap[c.offreId]?.titre || 'Chargement...' }}
               </h3>
-              <p class="text-sm text-secondary">
+              <p class="text-sm font-medium text-secondary mt-1">
                 {{ offresMap[c.offreId]?.departement }} · {{ offresMap[c.offreId]?.localisation }}
               </p>
             </div>
-            <span class="px-3 py-1 rounded-full text-sm font-medium" [ngClass]="STATUT_COLORS[c.statut]">
+            <span class="px-4 py-1.5 rounded-full text-sm font-bold shadow-sm" [ngClass]="STATUT_COLORS[c.statut]">
               {{ STATUT_LABELS[c.statut] }}
             </span>
           </div>
 
           <!-- Barre de progression -->
-          <div class="mb-4">
-            <div class="flex items-center justify-between text-xs text-secondary mb-2">
+          <div class="mb-6 bg-gray-50 p-4 rounded-2xl border border-gray-100">
+            <div class="flex items-center justify-between text-sm font-bold text-secondary mb-3">
               <span>Étape {{ getProgressStep(c.statut) }} / {{ KANBAN_COLUMNS.length }}</span>
-              <span>{{ c.etapeActuelle }}</span>
+              <span class="text-blue-700 bg-blue-100 px-3 py-1 rounded-full">{{ c.etapeActuelle }}</span>
             </div>
-            <div class="w-full bg-gray-200 rounded-full h-2">
-              <div class="bg-primary h-2 rounded-full transition-all"
+            <div class="w-full bg-gray-200 rounded-full h-3 shadow-inner overflow-hidden">
+              <div class="bg-gradient-to-r from-blue-500 to-indigo-600 h-3 rounded-full transition-all duration-1000 ease-out"
                 [style.width.%]="(getProgressStep(c.statut) / KANBAN_COLUMNS.length) * 100">
               </div>
             </div>
@@ -95,38 +101,28 @@
                   Rejoindre Meet
                 </a>
 
-                <!-- Bouton Télécharger entretien -->
-                <button mat-stroked-button
-                  class="text-blue-600 border-blue-300 text-sm"
-                  (click)="telechargerEntretien(e)"
-                  matTooltip="Télécharger les détails de l'entretien">
-                  <mat-icon class="icon-size-4 mr-1">download</mat-icon>
-                  Télécharger
-                </button>
-
               </div>
             </div>
           </div>
 
           <!-- Infos bas -->
-          <div class="flex flex-wrap items-center justify-between gap-2 text-sm text-secondary">
-            <div class="flex items-center gap-4">
-              <span class="flex items-center gap-1">
-                <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:calendar'"></mat-icon>
+          <div class="flex flex-wrap items-center justify-between gap-4 text-sm text-secondary mt-2">
+            <div class="flex items-center gap-6">
+              <span class="flex items-center gap-2 font-medium bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
+                <mat-icon class="icon-size-5 text-gray-400" [svgIcon]="'heroicons_outline:calendar'"></mat-icon>
                 Postulé le {{ c.datePostulation | date:'dd/MM/yyyy' }}
               </span>
-              <span *ngIf="c.scoreMatching > 0" class="flex items-center gap-1 text-primary font-medium">
-                <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:star'"></mat-icon>
+              <span *ngIf="c.scoreMatching > 0" class="flex items-center gap-2 text-indigo-700 font-bold bg-indigo-50 px-3 py-1.5 rounded-lg border border-indigo-100">
+                <mat-icon class="icon-size-5 text-indigo-500" [svgIcon]="'heroicons_outline:star'"></mat-icon>
                 Score IA : {{ c.scoreMatching | number:'1.0-0' }}%
               </span>
             </div>
-            <div class="flex items-center gap-2">
-              <button mat-stroked-button (click)="voirDetail(c)">
+            <div class="flex items-center gap-3">
+              <button mat-stroked-button class="rounded-full shadow-sm hover:bg-gray-50 transition-colors" (click)="voirDetail(c)">
                 Voir l'offre
               </button>
-              <button mat-stroked-button color="warn" (click)="supprimerCandidature(c, $event)">
-                <mat-icon [svgIcon]="'heroicons_outline:trash'" class="icon-size-4 mr-1"></mat-icon>
-                Supprimer
+              <button mat-icon-button class="bg-red-50 text-red-600 hover:bg-red-100 transition-colors" (click)="supprimerCandidature(c, $event)" matTooltip="Supprimer la candidature">
+                <mat-icon [svgIcon]="'heroicons_outline:trash'" class="icon-size-5"></mat-icon>
               </button>
             </div>
           </div>

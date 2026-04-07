@@ -27,6 +27,7 @@ const routes: Routes = [
   // 🔹 ADMIN
   { path: 'admin/dashboard', component: DashboardComponent },
   { path: 'admin/offres/creer', component: CreerOffreComponent },
+  { path: 'admin/offres/modifier/:id', component: CreerOffreComponent },
   { path: 'admin/offres', component: OffresListComponent },
   { path: 'admin/pipeline/:offreId', component: PipelineComponent },
   { path: 'admin/entretiens/modifier/:id', component: PlanifierEntretienComponent },

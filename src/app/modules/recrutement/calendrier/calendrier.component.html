@@ -1,14 +1,14 @@
 <div class="flex flex-col flex-auto min-w-0 p-6 sm:p-10">
 
   <!-- Header -->
-  <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+  <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
     <div>
-      <h2 class="text-3xl font-extrabold tracking-tight">Calendrier des entretiens</h2>
-      <p class="text-secondary mt-1">Vue complète de tous vos entretiens</p>
+      <h2 class="text-4xl font-extrabold tracking-tight leading-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-indigo-700">Calendrier des entretiens</h2>
+      <p class="text-secondary mt-2 text-lg font-medium">Vue complète de tous vos entretiens</p>
     </div>
     <div class="flex gap-2">
-      <button mat-stroked-button (click)="exporterExcel()">
-        <mat-icon class="icon-size-4 mr-1">download</mat-icon>
+      <button mat-stroked-button class="rounded-full shadow-sm hover:bg-gray-50 transition-colors font-bold border-2" (click)="exporterExcel()">
+        <mat-icon class="icon-size-5 mr-1 text-green-600">file_download</mat-icon>
         Exporter Excel
       </button>
     </div>
@@ -22,38 +22,38 @@
   <ng-container *ngIf="!loading">
 
     <!-- KPIs -->
-    <div class="grid grid-cols-3 gap-4 mb-6">
-      <div class="bg-card rounded-2xl shadow p-4 text-center">
-        <div class="text-3xl font-extrabold text-indigo-600">{{ totalPlanifies }}</div>
-        <div class="text-sm text-secondary mt-1">Planifiés</div>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+      <div class="bg-white rounded-3xl shadow-lg ring-1 ring-black/5 p-6 text-center transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl border-b-4 border-indigo-500">
+        <div class="text-5xl font-black text-indigo-600 drop-shadow-sm">{{ totalPlanifies }}</div>
+        <div class="text-sm font-bold tracking-widest uppercase text-secondary mt-2">Planifiés</div>
       </div>
-      <div class="bg-card rounded-2xl shadow p-4 text-center">
-        <div class="text-3xl font-extrabold text-green-600">{{ totalRealises }}</div>
-        <div class="text-sm text-secondary mt-1">Réalisés</div>
+      <div class="bg-white rounded-3xl shadow-lg ring-1 ring-black/5 p-6 text-center transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl border-b-4 border-green-500">
+        <div class="text-5xl font-black text-green-600 drop-shadow-sm">{{ totalRealises }}</div>
+        <div class="text-sm font-bold tracking-widest uppercase text-secondary mt-2">Réalisés</div>
       </div>
-      <div class="bg-card rounded-2xl shadow p-4 text-center">
-        <div class="text-3xl font-extrabold text-red-500">{{ totalAnnules }}</div>
-        <div class="text-sm text-secondary mt-1">Annulés</div>
+      <div class="bg-white rounded-3xl shadow-lg ring-1 ring-black/5 p-6 text-center transform transition-all duration-300 hover:-translate-y-1 hover:shadow-xl border-b-4 border-red-500">
+        <div class="text-5xl font-black text-red-500 drop-shadow-sm">{{ totalAnnules }}</div>
+        <div class="text-sm font-bold tracking-widest uppercase text-secondary mt-2">Annulés</div>
       </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
       <!-- Calendrier -->
-      <div class="lg:col-span-2 bg-card rounded-2xl shadow overflow-hidden">
+      <div class="lg:col-span-2 bg-white rounded-3xl shadow-lg ring-1 ring-black/5 overflow-hidden transition-shadow hover:shadow-xl">
 
         <!-- Navigation -->
-        <div class="flex items-center justify-between px-6 py-4 border-b">
-          <button mat-icon-button (click)="moisPrecedent()">
+        <div class="flex items-center justify-between px-8 py-6 border-b border-gray-100 bg-gray-50/50">
+          <button mat-icon-button class="bg-white shadow-sm border border-gray-200 hover:bg-gray-100 transition-colors rounded-full" (click)="moisPrecedent()">
             <mat-icon [svgIcon]="'heroicons_outline:chevron-left'"></mat-icon>
           </button>
-          <div class="flex items-center gap-3">
-            <h3 class="text-lg font-semibold">{{ titreCalendrier }}</h3>
-            <button mat-stroked-button class="text-xs h-8" (click)="aujourdhui()">
+          <div class="flex items-center gap-4">
+            <h3 class="text-2xl font-extrabold text-gray-800 tracking-tight">{{ titreCalendrier }}</h3>
+            <button mat-flat-button class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full shadow-md font-bold text-xs h-8 px-4 hover:shadow-lg transition-all" (click)="aujourdhui()">
               Aujourd'hui
             </button>
           </div>
-          <button mat-icon-button (click)="moisSuivant()">
+          <button mat-icon-button class="bg-white shadow-sm border border-gray-200 hover:bg-gray-100 transition-colors rounded-full" (click)="moisSuivant()">
             <mat-icon [svgIcon]="'heroicons_outline:chevron-right'"></mat-icon>
           </button>
         </div>
@@ -126,109 +126,112 @@
       </div>
 
       <!-- Panneau droit -->
-      <div class="flex flex-col gap-4">
+      <div class="flex flex-col gap-6">
 
         <!-- Détail entretien sélectionné -->
-        <div *ngIf="selectedEntretien" class="bg-card rounded-2xl shadow p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="font-semibold">Détail entretien</h3>
-            <button mat-icon-button (click)="fermer()">
-              <mat-icon [svgIcon]="'heroicons_outline:x-mark'" class="icon-size-4"></mat-icon>
+        <div *ngIf="selectedEntretien" class="bg-white rounded-3xl shadow-xl ring-1 ring-black/5 p-8 border-t-4 border-t-blue-500">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="font-extrabold text-xl text-gray-800">Détail entretien</h3>
+            <button mat-icon-button class="bg-gray-100 hover:bg-gray-200 rounded-full transition-colors" (click)="fermer()">
+              <mat-icon [svgIcon]="'heroicons_outline:x-mark'" class="icon-size-5"></mat-icon>
             </button>
           </div>
 
-          <div class="flex flex-col gap-3">
-            <div class="flex items-center gap-2">
-              <span class="text-2xl">{{ getIconType(selectedEntretien.type) }}</span>
-              <span class="font-medium">{{ selectedEntretien.type }}</span>
+          <div class="flex flex-col gap-4">
+            <div class="flex items-center gap-3 bg-gray-50 p-4 rounded-2xl border border-gray-100">
+              <span class="text-3xl">{{ getIconType(selectedEntretien.type) }}</span>
+              <span class="font-bold text-gray-900 text-lg">{{ selectedEntretien.type }}</span>
             </div>
 
-            <span class="px-2 py-0.5 rounded-full text-xs font-medium w-fit"
+            <span class="px-3 py-1.5 rounded-full text-xs font-bold shadow-sm border w-fit"
               [ngClass]="getBadgeStatut(selectedEntretien.statut)">
               {{ selectedEntretien.statut }}
             </span>
 
-            <div class="text-sm text-secondary">
-              📅 {{ selectedEntretien.dateHeure | date:'dd/MM/yyyy à HH:mm' }}
+            <div class="flex items-center gap-3 text-sm font-medium text-secondary bg-gray-50 p-3 rounded-xl border border-gray-100">
+              <span>📅</span> {{ selectedEntretien.dateHeure | date:'dd/MM/yyyy à HH:mm' }}
             </div>
-            <div class="text-sm text-secondary">
-              ⏱️ {{ selectedEntretien.dureeMinutes }} minutes
+            <div class="flex items-center gap-3 text-sm font-medium text-secondary bg-gray-50 p-3 rounded-xl border border-gray-100">
+              <span>⏱️</span> {{ selectedEntretien.dureeMinutes }} minutes
             </div>
-            <div *ngIf="selectedEntretien.lieu" class="text-sm text-secondary">
-              📍 {{ selectedEntretien.lieu }}
+            <div *ngIf="selectedEntretien.lieu" class="flex items-center gap-3 text-sm font-medium text-secondary bg-gray-50 p-3 rounded-xl border border-gray-100">
+              <span>📍</span> {{ selectedEntretien.lieu }}
             </div>
 
             <button *ngIf="selectedEntretien.lienVisio"
-              mat-flat-button class="bg-green-500 text-white mt-2"
+              mat-flat-button class="bg-green-500 hover:bg-green-600 text-white mt-4 rounded-full py-6 font-bold shadow-md hover:shadow-lg transition-all w-full"
               (click)="rejoindreMeet(selectedEntretien.lienVisio)">
-              <mat-icon class="mr-1">videocam</mat-icon>
+              <mat-icon class="mr-2 text-white">videocam</mat-icon>
               Rejoindre Meet
             </button>
 
-            <mat-divider></mat-divider>
+            <mat-divider class="my-2"></mat-divider>
 
-            <button mat-stroked-button
+            <button mat-stroked-button class="w-full rounded-full py-6 font-bold hover:bg-gray-50 transition-colors shadow-sm"
               (click)="exporterGoogleCalendar(selectedEntretien)">
-              <mat-icon class="icon-size-4 mr-1">event</mat-icon>
+              <mat-icon class="icon-size-5 mr-2 text-blue-600">event</mat-icon>
               Ajouter à Google Calendar
             </button>
           </div>
         </div>
 
         <!-- Entretiens du jour sélectionné -->
-        <div *ngIf="selectedJour && !selectedEntretien" class="bg-card rounded-2xl shadow p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="font-semibold">
+        <div *ngIf="selectedJour && !selectedEntretien" class="bg-white rounded-3xl shadow-lg ring-1 ring-black/5 p-8">
+          <div class="flex items-center justify-between mb-6 border-b pb-4">
+            <h3 class="font-extrabold text-xl text-gray-800">
               {{ selectedJour.date | date:'dd MMMM yyyy' }}
             </h3>
-            <button mat-icon-button (click)="fermer()">
-              <mat-icon [svgIcon]="'heroicons_outline:x-mark'" class="icon-size-4"></mat-icon>
+            <button mat-icon-button class="bg-gray-100 hover:bg-gray-200 rounded-full transition-colors" (click)="fermer()">
+              <mat-icon [svgIcon]="'heroicons_outline:x-mark'" class="icon-size-5"></mat-icon>
             </button>
           </div>
 
           <div *ngIf="selectedJour.entretiens.length === 0"
-            class="text-secondary text-sm text-center py-4">
+            class="text-secondary text-sm font-medium text-center py-6 bg-gray-50 rounded-2xl border border-dashed">
             Aucun entretien ce jour
           </div>
 
-          <div class="flex flex-col gap-2">
+          <div class="flex flex-col gap-3">
             <div *ngFor="let e of selectedJour.entretiens"
-              class="p-3 rounded-xl border cursor-pointer hover:bg-hover"
+              class="p-4 rounded-2xl border border-gray-200 shadow-sm cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
               (click)="selectionnerEntretien(e)">
-              <div class="flex items-center gap-2 mb-1">
-                <span>{{ getIconType(e.type) }}</span>
-                <span class="text-sm font-medium">{{ e.dateHeure | date:'HH:mm' }}</span>
-                <span class="px-2 py-0.5 rounded-full text-xs"
+              <div class="flex items-center flex-wrap gap-2 mb-2">
+                <span class="text-lg">{{ getIconType(e.type) }}</span>
+                <span class="text-sm font-bold text-gray-800">{{ e.dateHeure | date:'HH:mm' }}</span>
+                <span class="px-2 py-0.5 rounded-full text-xs font-bold border ml-auto"
                   [ngClass]="getBadgeStatut(e.statut)">
                   {{ e.statut }}
                 </span>
               </div>
-              <div class="text-xs text-secondary">{{ e.dureeMinutes }} min</div>
+              <div class="text-xs font-medium text-secondary bg-gray-50 w-fit px-2 py-1 rounded-md">{{ e.dureeMinutes }} min</div>
             </div>
           </div>
         </div>
 
         <!-- Prochains entretiens -->
-        <div class="bg-card rounded-2xl shadow p-6">
-          <h3 class="font-semibold mb-4">Prochains entretiens</h3>
+        <div class="bg-white rounded-3xl shadow-lg ring-1 ring-black/5 p-8 transition-all hover:shadow-xl">
+          <h3 class="font-extrabold text-xl text-gray-800 mb-6 flex items-center gap-2">
+            <mat-icon [svgIcon]="'heroicons_outline:calendar'" class="text-indigo-500"></mat-icon>
+            Prochains entretiens
+          </h3>
 
           <div *ngIf="entretiensAVenir.length === 0"
-            class="text-secondary text-sm text-center py-4">
+            class="text-secondary text-sm font-medium text-center py-6 bg-gray-50 rounded-2xl border border-dashed">
             Aucun entretien à venir
           </div>
 
-          <div class="flex flex-col gap-3">
+          <div class="flex flex-col gap-4">
             <div *ngFor="let e of entretiensAVenir"
-              class="flex items-center gap-3 p-3 rounded-xl bg-indigo-50 border border-indigo-200 cursor-pointer"
+              class="flex items-center gap-4 p-4 rounded-2xl shadow-sm bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-100 cursor-pointer hover:shadow-md hover:border-indigo-300 transition-all duration-300"
               (click)="selectionnerEntretien(e)">
-              <span class="text-xl">{{ getIconType(e.type) }}</span>
+              <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm text-xl">{{ getIconType(e.type) }}</div>
               <div class="flex flex-col flex-auto">
-                <span class="text-sm font-medium">
-                  {{ e.dateHeure | date:'dd/MM à HH:mm' }}
+                <span class="text-sm font-bold text-gray-900">
+                  {{ e.dateHeure | date:'dd/MM' }} – {{ e.dateHeure | date:'HH:mm' }}
                 </span>
-                <span class="text-xs text-secondary">{{ e.dureeMinutes }} min</span>
+                <span class="text-xs font-medium text-secondary mt-0.5">{{ e.dureeMinutes }} min</span>
               </div>
-              <button *ngIf="e.lienVisio" mat-icon-button class="text-green-600"
+              <button *ngIf="e.lienVisio" mat-mini-fab class="bg-green-500 text-white shadow-md hover:shadow-lg transition-all transform hover:scale-110"
                 (click)="rejoindreMeet(e.lienVisio); $event.stopPropagation()"
                 matTooltip="Rejoindre">
                 <mat-icon>videocam</mat-icon>

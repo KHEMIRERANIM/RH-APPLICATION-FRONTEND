@@ -1,19 +1,19 @@
 <div class="flex flex-col flex-auto min-w-0 p-6 sm:p-10">
 
-  <div class="flex items-center gap-2 text-sm text-secondary mb-6 cursor-pointer" (click)="retour()">
-    <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:arrow-left'"></mat-icon>
+  <div class="inline-flex items-center gap-2 text-sm font-semibold text-secondary mb-8 cursor-pointer hover:text-blue-600 transition-colors px-4 py-2 rounded-full hover:bg-blue-50/50 w-max" (click)="retour()">
+    <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:arrow-left'"></mat-icon>
     Retour
   </div>
 
-  <div class="max-w-3xl mx-auto w-full">
-    <h2 class="text-2xl font-bold mb-8">Créer une offre d'emploi</h2>
+  <div class="max-w-4xl mx-auto w-full">
+    <h2 class="text-4xl font-extrabold mb-10 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-indigo-700">Créer une offre d'emploi</h2>
 
     <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-6">
 
       <!-- Section 1 -->
-      <div class="bg-card rounded-2xl shadow p-6">
-        <h3 class="font-semibold text-lg mb-5 flex items-center gap-2">
-          <span class="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-white text-xs font-bold">1</span>
+      <div class="bg-white rounded-3xl shadow-lg ring-1 ring-black/5 p-8 transition-shadow hover:shadow-xl">
+        <h3 class="font-bold text-xl mb-6 flex items-center gap-3 text-gray-800">
+          <span class="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold shadow-md">1</span>
           Informations générales
         </h3>
         <div class="flex flex-col gap-4">
@@ -58,9 +58,9 @@
       </div>
 
       <!-- Section 2 -->
-      <div class="bg-card rounded-2xl shadow p-6">
-        <h3 class="font-semibold text-lg mb-5 flex items-center gap-2">
-          <span class="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-white text-xs font-bold">2</span>
+      <div class="bg-white rounded-3xl shadow-lg ring-1 ring-black/5 p-8 transition-shadow hover:shadow-xl">
+        <h3 class="font-bold text-xl mb-6 flex items-center gap-3 text-gray-800">
+          <span class="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold shadow-md">2</span>
           Description
         </h3>
         <mat-form-field class="w-full">
@@ -73,9 +73,9 @@
       </div>
 
       <!-- Section 3 -->
-      <div class="bg-card rounded-2xl shadow p-6">
-        <h3 class="font-semibold text-lg mb-5 flex items-center gap-2">
-          <span class="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-white text-xs font-bold">3</span>
+      <div class="bg-white rounded-3xl shadow-lg ring-1 ring-black/5 p-8 transition-shadow hover:shadow-xl">
+        <h3 class="font-bold text-xl mb-6 flex items-center gap-3 text-gray-800">
+          <span class="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold shadow-md">3</span>
           Compétences & avantages
         </h3>
         <div class="mb-5">
@@ -109,9 +109,9 @@
       </div>
 
       <!-- Section 4 -->
-      <div class="bg-card rounded-2xl shadow p-6">
-        <h3 class="font-semibold text-lg mb-5 flex items-center gap-2">
-          <span class="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-white text-xs font-bold">4</span>
+      <div class="bg-white rounded-3xl shadow-lg ring-1 ring-black/5 p-8 transition-shadow hover:shadow-xl">
+        <h3 class="font-bold text-xl mb-6 flex items-center gap-3 text-gray-800">
+          <span class="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold shadow-md">4</span>
           Conditions & publication
         </h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -134,13 +134,13 @@
         </div>
       </div>
 
-      <fuse-alert *ngIf="errorMsg" type="error" [appearance]="'outline'">{{ errorMsg }}</fuse-alert>
+      <fuse-alert *ngIf="errorMsg" type="error" [appearance]="'outline'" class="rounded-xl">{{ errorMsg }}</fuse-alert>
 
-      <div class="flex gap-4">
-        <button mat-stroked-button type="button" class="flex-1" (click)="retour()">Annuler</button>
-        <button mat-flat-button [color]="'primary'" type="submit" class="flex-1"
-          [disabled]="loading || form.invalid">
-          {{ loading ? 'Création...' : "Créer l'offre" }}
+      <div class="flex gap-4 mt-4">
+        <button mat-stroked-button type="button" class="flex-1 rounded-full py-6 text-lg font-bold border-2 hover:bg-gray-50 transition-colors" (click)="retour()">Annuler</button>
+        <button mat-flat-button type="submit" class="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full py-6 text-lg font-bold shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
+          [disabled]="loading || form.invalid" [class.opacity-50]="loading || form.invalid">
+          {{ loading ? 'Création en cours...' : "Créer l'offre" }}
         </button>
       </div>
 

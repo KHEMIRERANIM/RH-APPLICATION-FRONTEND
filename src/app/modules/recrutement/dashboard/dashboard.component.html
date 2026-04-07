@@ -3,13 +3,19 @@
   <!-- Header -->
   <div class="flex items-center justify-between mb-8">
     <div>
-      <h2 class="text-3xl font-extrabold tracking-tight">Dashboard Recrutement</h2>
-      <p class="text-secondary mt-1">Vue d'ensemble de vos activités RH</p>
+      <h2 class="text-4xl font-extrabold tracking-tight leading-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-indigo-700">Dashboard Recrutement</h2>
+      <p class="text-secondary mt-1 text-lg font-medium">Vue d'ensemble de vos activités RH</p>
     </div>
-    <button mat-flat-button [color]="'primary'" (click)="creerOffre()">
-      <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
-      <span class="ml-2">Créer une offre</span>
-    </button>
+    <div class="flex gap-3">
+      <button mat-stroked-button class="rounded-full shadow-sm hover:bg-gray-50 transition-colors font-bold border-2" routerLink="/recrutement/calendrier">
+        <mat-icon [svgIcon]="'heroicons_outline:calendar'" class="text-indigo-600 icon-size-5"></mat-icon>
+        <span class="ml-2">Calendrier entretiens</span>
+      </button>
+      <button mat-flat-button class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 px-6" (click)="creerOffre()">
+        <mat-icon [svgIcon]="'heroicons_outline:plus'" class="text-white"></mat-icon>
+        <span class="ml-2 font-semibold">Créer une offre</span>
+      </button>
+    </div>
   </div>
 
   <!-- Loading -->
@@ -20,43 +26,51 @@
   <ng-container *ngIf="!loading">
 
     <!-- KPIs -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-      <div class="bg-card rounded-2xl shadow p-6 flex flex-col items-center gap-2">
-        <mat-icon class="icon-size-10 text-primary" [svgIcon]="'heroicons_outline:briefcase'"></mat-icon>
-        <span class="text-4xl font-extrabold text-primary">{{ totalOffres }}</span>
-        <span class="text-sm text-secondary text-center">Total offres</span>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 mb-10">
+      <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg ring-1 ring-black/5 p-6 flex flex-col items-center gap-3 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl">
+        <div class="p-3 bg-blue-50 rounded-2xl">
+          <mat-icon class="icon-size-8 text-blue-600" [svgIcon]="'heroicons_outline:briefcase'"></mat-icon>
+        </div>
+        <span class="text-5xl font-black text-blue-900 tracking-tight">{{ totalOffres }}</span>
+        <span class="text-sm font-semibold uppercase tracking-wider text-secondary text-center">Total offres</span>
       </div>
-      <div class="bg-card rounded-2xl shadow p-6 flex flex-col items-center gap-2">
-        <mat-icon class="icon-size-10 text-green-500" [svgIcon]="'heroicons_outline:check-circle'"></mat-icon>
-        <span class="text-4xl font-extrabold text-green-500">{{ offresPubliees }}</span>
-        <span class="text-sm text-secondary text-center">Offres publiées</span>
+      <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg ring-1 ring-black/5 p-6 flex flex-col items-center gap-3 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl">
+        <div class="p-3 bg-green-50 rounded-2xl">
+          <mat-icon class="icon-size-8 text-green-500" [svgIcon]="'heroicons_outline:check-circle'"></mat-icon>
+        </div>
+        <span class="text-5xl font-black text-green-600 tracking-tight">{{ offresPubliees }}</span>
+        <span class="text-sm font-semibold uppercase tracking-wider text-secondary text-center">Offres publiées</span>
       </div>
-      <div class="bg-card rounded-2xl shadow p-6 flex flex-col items-center gap-2">
-        <mat-icon class="icon-size-10 text-blue-500" [svgIcon]="'heroicons_outline:users'"></mat-icon>
-        <span class="text-4xl font-extrabold text-blue-500">{{ totalCandidatures }}</span>
-        <span class="text-sm text-secondary text-center">Total candidatures</span>
+      <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg ring-1 ring-black/5 p-6 flex flex-col items-center gap-3 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl">
+        <div class="p-3 bg-indigo-50 rounded-2xl">
+          <mat-icon class="icon-size-8 text-indigo-500" [svgIcon]="'heroicons_outline:users'"></mat-icon>
+        </div>
+        <span class="text-5xl font-black text-indigo-600 tracking-tight">{{ totalCandidatures }}</span>
+        <span class="text-sm font-semibold uppercase tracking-wider text-secondary text-center">Total candidatures</span>
       </div>
-      <div class="bg-card rounded-2xl shadow p-6 flex flex-col items-center gap-2">
-        <mat-icon class="icon-size-10 text-orange-500" [svgIcon]="'heroicons_outline:calendar'"></mat-icon>
-        <span class="text-4xl font-extrabold text-orange-500">{{ entretiensAVenir.length }}</span>
-        <span class="text-sm text-secondary text-center">Entretiens à venir</span>
+      <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg ring-1 ring-black/5 p-6 flex flex-col items-center gap-3 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl">
+        <div class="p-3 bg-orange-50 rounded-2xl">
+          <mat-icon class="icon-size-8 text-orange-500" [svgIcon]="'heroicons_outline:calendar'"></mat-icon>
+        </div>
+        <span class="text-5xl font-black text-orange-500 tracking-tight">{{ entretiensAVenir.length }}</span>
+        <span class="text-sm font-semibold uppercase tracking-wider text-secondary text-center">Entretiens à venir</span>
       </div>
     </div>
 
     <!-- MES OFFRES -->
-    <div class="bg-card rounded-2xl shadow p-6 mb-6">
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-semibold">Mes offres</h3>
-        <span class="text-sm text-secondary">{{ offres.length }} offre(s)</span>
+    <div class="bg-white rounded-3xl shadow-lg ring-1 ring-black/5 p-8 mb-8 transition-all duration-300 hover:shadow-xl">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-2xl font-bold text-gray-800">Mes offres</h3>
+        <span class="px-4 py-1.5 rounded-full text-sm font-bold bg-blue-100 text-blue-800">{{ offres.length }} offre(s)</span>
       </div>
 
-      <div *ngIf="offres.length === 0" class="text-secondary text-center py-8">
-        Aucune offre créée
+      <div *ngIf="offres.length === 0" class="text-secondary text-lg font-medium text-center py-10 bg-gray-50 rounded-2xl border border-dashed">
+        Aucune offre créée pour le moment.
       </div>
 
-      <div class="flex flex-col gap-3">
+      <div class="flex flex-col gap-4">
         <div *ngFor="let offre of offres"
-          class="flex items-center justify-between p-4 rounded-xl border hover:bg-hover">
+          class="flex items-center justify-between p-5 rounded-2xl border border-gray-100 bg-gray-50/50 hover:bg-white hover:shadow-md transition-all duration-300 group">
 
           <div class="flex flex-col gap-1 flex-auto cursor-pointer" (click)="voirPipeline(offre)">
             <span class="font-medium">{{ offre.titre }}</span>
@@ -80,28 +94,38 @@
           </div>
 
           <!-- Boutons offre -->
-          <div class="flex items-center gap-2 ml-4">
+          <div class="flex items-center gap-3 ml-4 opacity-70 group-hover:opacity-100 transition-opacity">
             <!-- Publier si BROUILLON -->
             <button *ngIf="offre.statut === 'BROUILLON'"
-              mat-stroked-button
-              class="text-green-600 border-green-300"
+              mat-flat-button
+              class="bg-green-50 text-green-700 hover:bg-green-100 rounded-full px-4"
               (click)="publierOffre(offre, $event)"
               matTooltip="Publier l'offre">
               <mat-icon [svgIcon]="'heroicons_outline:eye'" class="icon-size-4 mr-1"></mat-icon>
               Publier
             </button>
 
-            <!-- Pipeline -->
-            <button mat-stroked-button
-              (click)="voirPipeline(offre); $event.stopPropagation()"
-              matTooltip="Voir le pipeline">
-              <mat-icon [svgIcon]="'heroicons_outline:view-columns'" class="icon-size-4 mr-1"></mat-icon>
-              Pipeline
+            <!-- Modifier -->
+            <button mat-flat-button
+              class="bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-full px-4"
+              (click)="modifierOffre(offre); $event.stopPropagation()"
+              matTooltip="Modifier l'offre">
+              <mat-icon [svgIcon]="'heroicons_outline:pencil'" class="icon-size-4 mr-1"></mat-icon>
+              Modifier
+            </button>
+
+            <!-- Voir -->
+            <button mat-flat-button
+              class="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-full px-4"
+              (click)="voirDetail(offre); $event.stopPropagation()"
+              matTooltip="Voir les détails de l'offre">
+              <mat-icon [svgIcon]="'heroicons_outline:eye'" class="icon-size-4 mr-1"></mat-icon>
+              Voir
             </button>
 
             <!-- Supprimer -->
             <button mat-icon-button
-              class="text-red-500"
+              class="bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 transition-colors"
               (click)="supprimerOffre(offre, $event)"
               matTooltip="Supprimer l'offre">
               <mat-icon [svgIcon]="'heroicons_outline:trash'"></mat-icon>
@@ -113,31 +137,24 @@
     </div>
 
     <!-- ENTRETIENS À VENIR -->
-    <div class="bg-card rounded-2xl shadow p-6 mb-6">
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-semibold">
+    <div class="bg-white rounded-3xl shadow-lg ring-1 ring-black/5 p-8 mb-8 transition-all duration-300 hover:shadow-xl">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-2xl font-bold text-gray-800 flex items-center">
           Entretiens à venir
-          <span class="ml-2 px-2 py-0.5 rounded-full text-sm bg-orange-100 text-orange-800">
+          <span class="ml-3 px-3 py-1 rounded-full text-sm font-bold bg-orange-100 text-orange-800 shadow-sm">
             {{ entretiensAVenir.length }}
           </span>
         </h3>
-        <button *ngIf="entretiensAVenir.length > 0" mat-stroked-button
-          class="text-blue-600 border-blue-300"
-          (click)="telechargerTousEntretiensAVenir()"
-          matTooltip="Télécharger tous les entretiens à venir">
-          <mat-icon [svgIcon]="'heroicons_outline:arrow-down-circle'" class="icon-size-4 mr-1"></mat-icon>
-          Télécharger tout
-        </button>
       </div>
 
       <div *ngIf="entretiensAVenir.length === 0"
-        class="text-secondary text-center py-6">
+        class="text-secondary text-lg font-medium text-center py-10 bg-gray-50 rounded-2xl border border-dashed">
         Aucun entretien à venir
       </div>
 
-      <div class="flex flex-col gap-3">
+      <div class="flex flex-col gap-4">
         <div *ngFor="let e of entretiensAVenir"
-          class="flex items-center justify-between p-4 rounded-xl border border-orange-200 bg-orange-50">
+          class="flex items-center justify-between p-5 rounded-2xl border border-orange-100 bg-orange-50/50 hover:bg-orange-50 transition-colors shadow-sm">
 
           <div class="flex flex-col gap-1">
             <div class="flex items-center gap-2">
@@ -257,11 +274,11 @@
     </div>
 
     <!-- ENTRETIENS RÉALISÉS -->
-    <div *ngIf="entretiensRealises.length > 0" class="bg-card rounded-2xl shadow p-6">
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-semibold text-green-600">
+    <div *ngIf="entretiensRealises.length > 0" class="bg-white rounded-3xl shadow-lg ring-1 ring-black/5 p-8 transition-all duration-300 hover:shadow-xl">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-2xl font-bold text-green-700 flex items-center">
           Entretiens réalisés
-          <span class="ml-2 px-2 py-0.5 rounded-full text-sm bg-green-100 text-green-800">
+          <span class="ml-3 px-3 py-1 rounded-full text-sm font-bold bg-green-100 text-green-800 shadow-sm">
             {{ entretiensRealises.length }}
           </span>
         </h3>
