@@ -168,6 +168,12 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
   activeSection: 'utilises' | 'proposes' | 'recompenses' = 'utilises';
   showGiftModal = false;
 
+  // Reward state
+  userLevel: string = 'OR';
+  pointsToNextLevel: number = 150;
+  nextLevel: string = 'PLATINE';
+  progressPercentage: number = 85;
+
   // Tracking Modal State
   isTrackingModalOpen: boolean = false;
   trackingVehiculeId: string = '';

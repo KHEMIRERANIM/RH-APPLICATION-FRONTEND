@@ -1,35 +1,64 @@
 <div class="w-full flex-auto p-6 sm:p-10 space-y-6">
-  <div class="flex items-center justify-end pb-2">
-    <button [routerLink]="['/apps/covoiturage/user/recompense']"
-      class="relative p-5 bg-white rounded-xl shadow-md hover:shadow-lg transition-all group z-[90] mt-2 border border-gray-100">
-      <img src="cadeau.png" alt="Cadeaux" class="w-8 h-8 object-contain drop-shadow-sm" />
-      <span
-        class="absolute -top-1 -right-1 w-5 h-5 bg-[#E94560] shadow-sm text-white text-sm font-bold rounded-full flex items-center justify-center">3</span>
+  <!-- Navigation Sections -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Card 1: Mes transports utilisés -->
+    <div (click)="switchSection('utilises')"
+      [class]="'cursor-pointer p-6 rounded-2xl border bg-white transition-all duration-300 hover:shadow-lg ' + (activeSection === 'utilises' ? 'border-[#1D9E75] ring-2 ring-[#1D9E75]/10' : 'border-gray-100 hover:border-[#1D9E75]/30')">
+      <h3 class="text-lg font-bold text-[#0F3460] mb-2">Mes transports utilisés</h3>
+      <p class="text-gray-500 text-sm mb-6 leading-relaxed">Consultez vos trajets en tant que passager et vos
+        réservations actives.</p>
       <div
-        class="absolute -bottom-10 right-0 bg-gray-900 text-white text-sm px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg">
-        Mes récompenses</div>
-    </button>
-  </div>
+        [class]="'font-semibold text-sm flex items-center gap-1 transition-all ' + (activeSection === 'utilises' ? 'text-[#1D9E75]' : 'text-indigo-600')">
+        Ouvrir mes trajets
+        <mat-icon class="icon-size-4" svgIcon="heroicons_solid:arrow-narrow-right"></mat-icon>
+      </div>
+    </div>
 
-  <div class="bg-white rounded-xl p-5 shadow-sm flex flex-wrap gap-2">
-    <button (click)="switchSection('utilises')"
-      [class]="'flex-1 min-w-[180px] py-3 px-4 rounded-lg font-medium transition-all ' + (activeSection === 'utilises' ? 'bg-[#0F3460] text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100')">Mes
-      transports utilisés</button>
-    <button (click)="switchSection('proposes')"
-      [class]="'flex-1 min-w-[180px] py-3 px-4 rounded-lg font-medium transition-all ' + (activeSection === 'proposes' ? 'bg-[#0F3460] text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100')">Mes
-      transports proposés</button>
-    <button [routerLink]="['/apps/covoiturage/user/recompense']"
-      class="flex-1 min-w-[180px] py-3 px-4 rounded-lg font-medium transition-all text-gray-600 hover:bg-gray-100">Mes
-      récompenses</button>
+    <!-- Card 2: Mes transports proposés -->
+    <div (click)="switchSection('proposes')"
+      [class]="'cursor-pointer p-6 rounded-2xl border bg-white transition-all duration-300 hover:shadow-lg ' + (activeSection === 'proposes' ? 'border-[#1D9E75] ring-2 ring-[#1D9E75]/10' : 'border-gray-100 hover:border-[#1D9E75]/30')">
+      <h3 class="text-lg font-bold text-[#0F3460] mb-2">Mes transports proposés</h3>
+      <p class="text-gray-500 text-sm mb-6 leading-relaxed">Gérez vos offres de covoiturage, vos passagers et vos
+        véhicules.</p>
+      <div
+        [class]="'font-semibold text-sm flex items-center gap-1 transition-all ' + (activeSection === 'proposes' ? 'text-[#1D9E75]' : 'text-indigo-600')">
+        Gérer mes offres
+        <mat-icon class="icon-size-4" svgIcon="heroicons_solid:arrow-narrow-right"></mat-icon>
+      </div>
+    </div>
+
+    <!-- Card 3: Mes récompenses -->
+    <div (click)="switchSection('recompenses')"
+      [class]="'cursor-pointer p-6 rounded-2xl border bg-white transition-all duration-300 hover:shadow-lg ' + (activeSection === 'recompenses' ? 'border-[#1D9E75] ring-2 ring-[#1D9E75]/10' : 'border-gray-100 hover:border-[#1D9E75]/30 group')">
+      <h3 class="text-lg font-bold text-[#0F3460] mb-2">Mes récompenses</h3>
+      <p class="text-gray-500 text-sm mb-6 leading-relaxed">Suivez votre impact environnemental et débloquez vos
+        récompenses.</p>
+      <div
+        [class]="'font-semibold text-sm flex items-center gap-1 transition-all ' + (activeSection === 'recompenses' ? 'text-[#1D9E75]' : 'text-indigo-600 group-hover:text-[#1D9E75]')">
+        Voir mes gains
+        <mat-icon class="icon-size-4" svgIcon="heroicons_solid:arrow-narrow-right"></mat-icon>
+      </div>
+    </div>
   </div>
 
   <!-- ===================== SECTION UTILISES ===================== -->
   <div [hidden]="activeSection !== 'utilises'" class="space-y-6">
-    <div class="bg-white rounded-xl p-5 shadow-sm flex gap-2">
-      <button (click)="selectedTab = 'covoiturage'"
-        [class]="'flex-1 py-3 px-4 rounded-lg font-medium transition-all ' + (selectedTab === 'covoiturage' ? 'bg-[#1D9E75] text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100')">Covoiturage</button>
-      <button (click)="selectedTab = 'navette'"
-        [class]="'flex-1 py-3 px-4 rounded-lg font-medium transition-all ' + (selectedTab === 'navette' ? 'bg-[#1D9E75] text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100')">Navette</button>
+    <!-- Segmented Control for Tabs -->
+    <div class="flex justify-start mt-16">
+      <div class="bg-gray-100 p-1.5 rounded-2xl flex w-full max-w-xl border border-gray-200/50">
+        <button (click)="selectedTab = 'covoiturage'"
+          [class]="'flex-1 py-3 px-6 rounded-xl font-bold transition-all duration-300 flex items-center justify-center gap-2 ' + (selectedTab === 'covoiturage' ? 'bg-white text-[#1D9E75] shadow-sm' : 'text-gray-500')">
+          <mat-icon [class]="selectedTab === 'covoiturage' ? 'text-[#1D9E75]' : 'text-gray-400'"
+            svgIcon="heroicons_solid:user-group" class="icon-size-5"></mat-icon>
+          Covoiturage
+        </button>
+        <button (click)="selectedTab = 'navette'"
+          [class]="'flex-1 py-3 px-6 rounded-xl font-bold transition-all duration-300 flex items-center justify-center gap-2 ' + (selectedTab === 'navette' ? 'bg-white text-[#1D9E75] shadow-sm' : 'text-gray-500')">
+          <mat-icon [class]="selectedTab === 'navette' ? 'text-[#1D9E75]' : 'text-gray-400'"
+            svgIcon="heroicons_solid:truck" class="icon-size-5"></mat-icon>
+          Navette
+        </button>
+      </div>
     </div>
 
     <!-- ===== COVOITURAGE TAB ===== -->
@@ -143,7 +172,8 @@
                     <div class="flex-1">
                       <label class="block text-sm font-bold text-gray-700 mb-1">Point de départ</label>
                       <div class="relative">
-                        <mat-icon svgIcon="feather:map-pin" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 icon-size-5"></mat-icon>
+                        <mat-icon svgIcon="feather:map-pin"
+                          class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 icon-size-5"></mat-icon>
                         <input type="text" [(ngModel)]="manualDeparture" (input)="onManualInputChange()"
                           placeholder="Ex: Siège Social, Tunis..."
                           class="w-full h-11 pl-10 pr-4 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#1D9E75]/20 focus:border-[#1D9E75] bg-white font-medium text-gray-700 transition-all shadow-sm" />
@@ -159,7 +189,8 @@
                     <div class="flex-1">
                       <label class="block text-sm font-bold text-gray-700 mb-1">Tous les points de départ</label>
                       <div class="relative">
-                        <mat-icon svgIcon="feather:search" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 icon-size-5"></mat-icon>
+                        <mat-icon svgIcon="feather:search"
+                          class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 icon-size-5"></mat-icon>
                         <input type="text" [(ngModel)]="manualAllStartPoints" (input)="onManualInputChange()"
                           placeholder="Rechercher parmis tous les points..."
                           class="w-full h-11 pl-10 pr-4 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 bg-white font-medium text-gray-700 transition-all shadow-sm" />
@@ -175,7 +206,8 @@
                     <div class="flex-1">
                       <label class="block text-sm font-bold text-gray-700 mb-1">Destination</label>
                       <div class="relative">
-                        <mat-icon svgIcon="feather:flag" class="absolute left-3 top-3.5 text-gray-400 icon-size-5"></mat-icon>
+                        <mat-icon svgIcon="feather:flag"
+                          class="absolute left-3 top-3.5 text-gray-400 icon-size-5"></mat-icon>
                         <textarea [(ngModel)]="manualDestination" (input)="onManualInputChange()"
                           placeholder="Où voulez-vous aller ?" rows="2"
                           class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#E94560]/20 focus:border-[#E94560] bg-white font-medium text-gray-700 transition-all shadow-sm resize-none"></textarea>
@@ -361,14 +393,12 @@
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Point de départ</label>
-              <input type="text" [(ngModel)]="shuttleFilterDepart"
-                placeholder="Entrez le lieu de départ..."
+              <input type="text" [(ngModel)]="shuttleFilterDepart" placeholder="Entrez le lieu de départ..."
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1D9E75] focus:border-transparent outline-none bg-white">
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">Destination</label>
-              <input type="text" [(ngModel)]="shuttleFilterArrivee"
-                placeholder="Entrez la destination..."
+              <input type="text" [(ngModel)]="shuttleFilterArrivee" placeholder="Entrez la destination..."
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1D9E75] focus:border-transparent outline-none bg-white">
             </div>
             <div>
@@ -419,8 +449,7 @@
                 <p class="text-xs text-gray-500 mb-2">Jours disponibles</p>
                 <div class="flex flex-wrap gap-1">
                   <span *ngFor="let jour of shuttle.joursDisponibles?.split(',')"
-                    class="px-2 py-0.5 bg-[#1D9E75]/10 text-[#1D9E75] rounded text-xs font-medium">{{ jour.trim()
-                    }}</span>
+                    class="px-2 py-0.5 bg-[#1D9E75]/10 text-[#1D9E75] rounded text-xs font-medium">{{ (jour + '').trim() }}</span>
                 </div>
               </div>
               <div>
@@ -438,13 +467,12 @@
               <div class="border-t border-gray-100 pt-3 mt-2">
                 <div class="flex items-center justify-between mb-2">
                   <p class="text-xs font-bold text-[#0F3460] uppercase tracking-wider">Dates de la semaine</p>
-                  <button *ngIf="shuttle.packDates?.length > 0" 
-                    (click)="selectAllWeek(shuttle.id, shuttle.packDates)"
+                  <button *ngIf="shuttle.packDates?.length > 0" (click)="selectAllWeek(shuttle.id, shuttle.packDates)"
                     class="text-[10px] text-[#1D9E75] font-bold hover:underline">
                     Tout sélectionner
                   </button>
                 </div>
-                
+
                 <div class="flex flex-wrap gap-2">
                   <!-- Cas standard (si pas de packDates) -->
                   <ng-container *ngIf="!shuttle.packDates">
@@ -452,7 +480,7 @@
                       (click)="toggleNavetteDay(shuttle.id, jour.trim())"
                       [ngClass]="(selectedNavetteDays[shuttle.id] || []).includes(jour.trim()) ? 'bg-[#1D9E75] text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
                       class="px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all min-w-[3.5rem]">
-                      {{ jour.trim() }}
+                      {{ (jour + '').trim() }}
                     </button>
                   </ng-container>
 
@@ -467,17 +495,18 @@
                         'border-gray-100 bg-white text-gray-700 hover:border-[#1D9E75]/30': !(selectedNavetteDays[shuttle.id] || []).includes(date),
                         'opacity-50 grayscale cursor-not-allowed': disponibiliteParJour(shuttle, date) === 0 && !estDansUnPack(shuttle)
                       }">
-                      
+
                       <!-- Indicateur de disponibilité (Petit point) -->
                       <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full border border-white shadow-sm"
-                            [class.bg-green-500]="disponibiliteParJour(shuttle, date) > 0"
-                            [class.bg-red-500]="disponibiliteParJour(shuttle, date) === 0"></span>
-                      
+                        [class.bg-green-500]="disponibiliteParJour(shuttle, date) > 0"
+                        [class.bg-red-500]="disponibiliteParJour(shuttle, date) === 0"></span>
+
                       <span class="text-[9px] font-bold uppercase opacity-60">{{ date | date:'EEE' }}</span>
                       <span class="text-xs font-bold">{{ date | date:'dd' }}</span>
-                      
+
                       <!-- Overlay info au survol -->
-                      <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-24 bg-gray-900 text-white text-[9px] p-1.5 rounded text-center z-50 shadow-lg font-medium">
+                      <div
+                        class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-24 bg-gray-900 text-white text-[9px] p-1.5 rounded text-center z-50 shadow-lg font-medium">
                         {{ disponibiliteParJour(shuttle, date) }} places restantes
                       </div>
                     </button>
@@ -485,17 +514,14 @@
                 </div>
               </div>
 
-             <button 
-    (click)="reserverNavette(shuttle)"
-    [disabled]="navetteReserveDisabled(shuttle)"
-    class="w-full py-2.5 rounded-lg font-semibold transition-all"
-    [ngClass]="{
+              <button (click)="reserverNavette(shuttle)" [disabled]="navetteReserveDisabled(shuttle)"
+                class="w-full py-2.5 rounded-lg font-semibold transition-all" [ngClass]="{
         'bg-gray-200 text-gray-400 cursor-not-allowed': navetteReserveDisabled(shuttle),
         'bg-[#F5A623] text-white hover:bg-[#e09615]': !navetteReserveDisabled(shuttle) && shuttle.placesRestantes === 0 && shuttle.packId,
         'bg-[#1D9E75] text-white hover:bg-[#178a66]': !navetteReserveDisabled(shuttle) && !(shuttle.placesRestantes === 0 && shuttle.packId)
     }">
-    {{ navetteReserveLabel(shuttle) }}
-</button>
+                {{ navetteReserveLabel(shuttle) }}
+              </button>
             </div>
           </div>
         </div>
@@ -521,7 +547,9 @@
                     <p class="text-[#1A1A2E] font-medium">{{ reservation.shuttleName }}</p>
                     <span class="text-xs px-2 py-0.5 rounded-full font-medium"
                       [ngClass]="getDisplayStatus(reservation) === 'CONFIRME' ? 'bg-[#1D9E75] text-white' : (getDisplayStatus(reservation) === 'EN_ATTENTE_ACTIVATION' ? 'bg-orange-500 text-white' : (getDisplayStatus(reservation) === 'EN_ATTENTE' ? 'bg-yellow-500 text-white' : 'bg-red-500 text-white'))">
-                      {{ getDisplayStatus(reservation) === 'CONFIRME' ? 'Confirmée' : (getDisplayStatus(reservation) === 'EN_ATTENTE_ACTIVATION' ? 'Attente activation bus' : (getDisplayStatus(reservation) === 'EN_ATTENTE' ? 'En attente' : 'Annulée')) }}
+                      {{ getDisplayStatus(reservation) === 'CONFIRME' ? 'Confirmée' : (getDisplayStatus(reservation) ===
+                      'EN_ATTENTE_ACTIVATION' ? 'Attente activation bus' : (getDisplayStatus(reservation) ===
+                      'EN_ATTENTE' ? 'En attente' : 'Annulée')) }}
                     </span>
                   </div>
                   <div class="flex items-center gap-2 text-base text-gray-600 mt-1">
@@ -536,8 +564,7 @@
               </div>
               <div class="flex items-center gap-3">
                 <div class="flex gap-1.5 flex-wrap">
-                  <span *ngFor="let day of reservation.days"
-                    [ngClass]="{
+                  <span *ngFor="let day of reservation.days" [ngClass]="{
                       'bg-green-600 text-white': getDayStatus(reservation, day) === 'confirmed',
                       'bg-orange-500 text-white': getDayStatus(reservation, day) === 'waiting',
                       'bg-gray-400 text-white': getDayStatus(reservation, day) === 'none'
@@ -546,7 +573,8 @@
                     {{ day }}
                   </span>
                 </div>
-                <button *ngIf="reservation.statut !== 'EN_ATTENTE_ACTIVATION'" (click)="openTracking(reservation.busId, false)" class="flex items-center gap-2 px-4 py-2 bg-[#0F3460] 
+                <button *ngIf="reservation.statut !== 'EN_ATTENTE_ACTIVATION'"
+                  (click)="openTracking(reservation.busId, false)" class="flex items-center gap-2 px-4 py-2 bg-[#0F3460] 
                text-white rounded-lg hover:bg-[#0a2442] transition font-medium">
                   📍 Suivre en direct
                 </button>
@@ -718,8 +746,10 @@
                   <button (click)="openConduiteModal(transport.vehiculeId)"
                     class="px-3 py-1.5 bg-[#1D9E75] text-white text-sm font-semibold rounded-lg hover:bg-[#168567] transition-colors shadow-sm">🚀
                     Démarrer trajet</button>
-<button (click)="annulerEtNotifierPassagers(transport.id)"
-  class="px-4 py-1.5 bg-[#E94560] text-white text-base font-semibold rounded-lg hover:bg-red-600 transition-colors shadow-sm">Annuler trajet</button>                </div>
+                  <button (click)="annulerEtNotifierPassagers(transport.id)"
+                    class="px-4 py-1.5 bg-[#E94560] text-white text-base font-semibold rounded-lg hover:bg-red-600 transition-colors shadow-sm">Annuler
+                    trajet</button>
+                </div>
               </div>
               <div class="space-y-2.5 mb-4">
                 <div class="flex items-center gap-2 text-[#0F3460]"><mat-icon svgIcon="feather:map-pin"
@@ -734,10 +764,10 @@
                       }}/{{ transport.placesDisponibles }} places</span></div>
                 </div>
               </div>
-              <div class="flex flex-wrap gap-2 mb-4"><span
+                  <span
                   *ngFor="let day of (transport.joursDisponibles || '').split(',')"
-                  class="px-2.5 py-1 bg-[#1D9E75]/10 text-[#1D9E75] text-sm font-semibold rounded">{{ day | slice:0:3 |
-                  titlecase }}</span></div>
+                  class="px-2.5 py-1 bg-[#1D9E75]/10 text-[#1D9E75] text-sm font-semibold rounded">{{ (day + '').trim() | slice:0:3 |
+                  titlecase }}</span>
               <div class="border-t border-gray-100 pt-4 mt-2">
                 <p class="text-base text-[#0F3460] font-semibold mb-3">Réservations ({{ transport.reservations?.length
                   || 0 }})</p>
@@ -788,6 +818,182 @@
   </div>
   <!-- ===================== FIN SECTION PROPOSES ===================== -->
 
+  <!-- ===================== SECTION RECOMPENSES ===================== -->
+  <div [hidden]="activeSection !== 'recompenses'" class="space-y-10 py-6">
+    <div class="max-w-4xl mx-auto space-y-10">
+
+      <!-- 1. Profil de l'employé -->
+      <div
+        class="bg-white rounded-[2.5rem] p-8 shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-slate-100 relative overflow-hidden group">
+        <div
+          class="absolute top-0 right-0 w-32 h-32 bg-amber-50 rounded-bl-[5rem] -mr-10 -mt-10 transition-transform group-hover:scale-110 duration-700">
+        </div>
+
+        <div class="relative flex flex-col sm:flex-row items-center gap-8">
+          <!-- Avatar Icon with Level Badge -->
+          <div class="relative">
+            <div
+              class="w-32 h-32 bg-slate-100 rounded-3xl flex items-center justify-center text-5xl shadow-inner border-4 border-white">
+              👤
+            </div>
+            <div
+              class="absolute -bottom-3 -right-3 w-12 h-12 bg-amber-400 rounded-2xl flex items-center justify-center shadow-lg border-4 border-white animate-bounce-subtle">
+              <mat-icon svgIcon="feather:award" class="text-white icon-size-6"></mat-icon>
+            </div>
+          </div>
+
+          <!-- Profile Details -->
+          <div class="flex-1 text-center sm:text-left space-y-4">
+            <div>
+              <h1 class="text-4xl font-black text-slate-800 tracking-tight">{{ getEmployeeName(employeId) }}</h1>
+              <div class="flex flex-wrap justify-center sm:justify-start gap-2 mt-2">
+                <span
+                  class="inline-flex items-center px-4 py-1.5 rounded-full bg-emerald-50 text-emerald-600 text-sm font-bold border border-emerald-100">
+                  <mat-icon svgIcon="feather:shield" class="icon-size-4 mr-2"></mat-icon>
+                  🏅 Conducteur actif
+                </span>
+                <span
+                  class="inline-flex items-center px-4 py-1.5 rounded-full bg-amber-50 text-amber-600 text-sm font-bold border border-amber-100">
+                  <mat-icon svgIcon="feather:star" class="icon-size-4 mr-2"></mat-icon>
+                  ⭐ {{ totalPointsEco }} points éco
+                </span>
+              </div>
+            </div>
+
+            <div class="inline-block px-6 py-2 bg-slate-900 text-white rounded-2xl shadow-xl shadow-slate-200">
+              <span class="text-xs font-black uppercase tracking-[0.2em] opacity-70 block mb-0.5">Statut Actuel</span>
+              <div class="flex items-center gap-2">
+                <span class="text-2xl font-black tracking-tighter">📊 NIVEAU {{ userLevel }}</span>
+                <div class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Barre de progression -->
+      <div class="bg-white rounded-[2.5rem] p-10 shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-slate-100">
+        <div class="flex flex-col space-y-6">
+          <div class="flex items-end justify-between">
+            <div class="space-y-1">
+              <span class="text-sm font-black text-slate-400 uppercase tracking-widest">Votre Progression</span>
+              <h3 class="text-2xl font-black text-slate-800">Niveau {{ userLevel }} <span class="text-amber-500 ml-2">{{
+                  totalPointsEco }}/{{ totalPointsEco + pointsToNextLevel }}</span></h3>
+            </div>
+            <div class="text-right">
+              <span class="text-5xl font-black text-slate-900 tracking-tighter">{{ progressPercentage }}%</span>
+            </div>
+          </div>
+
+          <!-- Custom Premium Progress Bar -->
+          <div class="relative h-6 w-full bg-slate-100 rounded-3xl p-1.5 shadow-inner overflow-hidden">
+            <div
+              class="h-full bg-gradient-to-r from-amber-300 via-amber-500 to-amber-600 rounded-2xl shadow-[0_0_20px_rgba(245,158,11,0.3)] transition-all duration-1000 ease-out relative group"
+              [style.width.%]="progressPercentage">
+              <div class="absolute inset-0 bg-white/20 skew-x-[-20deg] animate-shimmer"></div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+            <div class="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-xl">🚀</div>
+            <p class="text-slate-600 font-bold">
+              Plus que <span class="text-slate-900 font-black">{{ pointsToNextLevel }} points</span> pour atteindre
+              <span class="text-indigo-600 font-black uppercase tracking-wider">{{ nextLevel }}</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Avantages débloqués -->
+      <div class="bg-slate-900 rounded-[2.5rem] p-10 shadow-2xl relative overflow-hidden">
+        <!-- Decoration background -->
+        <div class="absolute -left-20 -bottom-20 w-64 h-64 bg-indigo-500/10 rounded-full blur-[100px]"></div>
+        <div class="absolute -right-20 -top-20 w-64 h-64 bg-emerald-500/10 rounded-full blur-[100px]"></div>
+
+        <div class="relative space-y-8">
+          <div class="flex items-center gap-4">
+            <div
+              class="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center text-3xl backdrop-blur-sm border border-white/10 shadow-xl">
+              🎁
+            </div>
+            <h2 class="text-3xl font-black text-white tracking-tight uppercase tracking-widest">Vos Avantages</h2>
+          </div>
+
+          <div class="grid grid-cols-1 gap-4">
+            <div
+              class="flex items-center gap-5 p-6 bg-white/5 hover:bg-white/10 rounded-3xl border border-white/5 transition-all duration-300 group cursor-default">
+              <div
+                class="w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.4)] group-hover:scale-110 transition-transform">
+                <mat-icon svgIcon="feather:check" class="text-white icon-size-6"></mat-icon>
+              </div>
+              <div class="flex-1">
+                <h4 class="text-lg font-black text-white">Badge OR</h4>
+                <p class="text-slate-400 font-medium">Visible par tous les membres du réseau.</p>
+              </div>
+            </div>
+
+            <div
+              class="flex items-center gap-5 p-6 bg-white/5 hover:bg-white/10 rounded-3xl border border-white/5 transition-all duration-300 group cursor-default">
+              <div
+                class="w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.4)] group-hover:scale-110 transition-transform">
+                <mat-icon svgIcon="feather:check" class="text-white icon-size-6"></mat-icon>
+              </div>
+              <div class="flex-1">
+                <h4 class="text-lg font-black text-white">Priorité en liste d'attente</h4>
+                <p class="text-slate-400 font-medium">Accès prioritaire sur tous les trajets complets.</p>
+              </div>
+            </div>
+
+            <div
+              class="flex items-center gap-5 p-6 bg-white/[0.02] rounded-3xl border border-white/[0.05] grayscale opacity-60">
+              <div class="w-12 h-12 bg-slate-700 rounded-2xl flex items-center justify-center">
+                <mat-icon svgIcon="feather:lock" class="text-slate-400 icon-size-6"></mat-icon>
+              </div>
+              <div class="flex-1 text-slate-500">
+                <h4 class="text-lg font-bold">Réservation gratuite</h4>
+                <p class="text-xs font-black uppercase tracking-[0.1em] text-amber-500/80 mt-1">⏳ 1000 points requis</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    @keyframes shimmer {
+      0% {
+        transform: translateX(-100%) skewX(-20deg);
+      }
+
+      100% {
+        transform: translateX(200%) skewX(-20deg);
+      }
+    }
+
+    .animate-shimmer {
+      animation: shimmer 2.5s infinite linear;
+    }
+
+    @keyframes bounce-subtle {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-5px);
+      }
+    }
+
+    .animate-bounce-subtle {
+      animation: bounce-subtle 3s infinite ease-in-out;
+    }
+  </style>
+
+  <!-- ===================== FIN SECTION RECOMPENSES ===================== -->
+
   <!-- TRACKING MODAL -->
 
   <!-- TRACKING MODAL -->
@@ -804,7 +1010,9 @@
         </button>
       </div>
       <div class="p-0 overflow-y-auto w-full h-full bg-white relative">
-<app-navette-tracking [vehiculeId]="trackingVehiculeId" [isVoiture]="isVoitureTracking" [adresseDepart]="getAdresseDepartPourTracking()" [adresseArrivee]="getAdresseArriveePourTracking()"></app-navette-tracking>
+        <app-navette-tracking [vehiculeId]="trackingVehiculeId" [isVoiture]="isVoitureTracking"
+          [adresseDepart]="getAdresseDepartPourTracking()"
+          [adresseArrivee]="getAdresseArriveePourTracking()"></app-navette-tracking>
       </div>
     </div>
   </div>
@@ -830,158 +1038,160 @@
 
   <app-vehicle-modal [isOpen]="showVehicleModal" [employeId]="employeId" (closeModal)="closeVehicleModal()"
     (vehiclesChanged)="loadVehicules()"></app-vehicle-modal>
-    <!-- NOTIFICATION ANNULATION -->
-<div *ngIf="showNotificationAnnulation"
-  class="fixed top-4 right-4 z-[9999] w-96 bg-white rounded-2xl shadow-2xl border-l-4 border-[#E94560] p-4 animate-pulse">
-  <div class="flex items-start gap-3">
-    <span class="text-3xl">⚠️</span>
-    <div class="flex-1">
-      <p class="font-bold text-[#E94560]">{{ notificationAnnulation?.titre }}</p>
-      <p class="text-sm text-gray-600 mt-1">{{ notificationAnnulation?.message }}</p>
-      <button (click)="chercherAlternatives(trajetAnnuleId); showNotificationAnnulation = false"
-        class="mt-3 w-full py-2 bg-[#1D9E75] text-white rounded-lg font-semibold text-sm hover:bg-[#168567] transition">
-        Voir les alternatives →
-      </button>
+  <!-- NOTIFICATION ANNULATION -->
+  <div *ngIf="showNotificationAnnulation"
+    class="fixed top-4 right-4 z-[9999] w-96 bg-white rounded-2xl shadow-2xl border-l-4 border-[#E94560] p-4 animate-pulse">
+    <div class="flex items-start gap-3">
+      <span class="text-3xl">⚠️</span>
+      <div class="flex-1">
+        <p class="font-bold text-[#E94560]">{{ notificationAnnulation?.titre }}</p>
+        <p class="text-sm text-gray-600 mt-1">{{ notificationAnnulation?.message }}</p>
+        <button (click)="chercherAlternatives(trajetAnnuleId); showNotificationAnnulation = false"
+          class="mt-3 w-full py-2 bg-[#1D9E75] text-white rounded-lg font-semibold text-sm hover:bg-[#168567] transition">
+          Voir les alternatives →
+        </button>
+      </div>
+      <button (click)="showNotificationAnnulation = false" class="text-gray-400 hover:text-gray-700">✕</button>
     </div>
-    <button (click)="showNotificationAnnulation = false" class="text-gray-400 hover:text-gray-700">✕</button>
   </div>
-</div>
 
-<!-- MODAL ALTERNATIVES -->
-<div *ngIf="showAlternativesModal"
-  class="fixed inset-0 bg-black/60 z-[9999] flex items-center justify-center p-4">
-  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+  <!-- MODAL ALTERNATIVES -->
+  <div *ngIf="showAlternativesModal" class="fixed inset-0 bg-black/60 z-[9999] flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
 
-    <div class="flex items-center justify-between p-5 border-b border-gray-100 bg-gray-50 shrink-0">
-      <div>
-        <h2 class="text-xl font-bold text-[#0F3460]">🔄 Alternatives disponibles</h2>
-        <p *ngIf="trajetAnnuleRef" class="text-sm text-gray-600 mt-1">
-          Sélection automatique selon votre réservation annulée :
-          <span class="font-medium text-[#1A1A2E]">{{ trajetAnnuleRef.adresseDepart }}</span>
-          →
-          <span class="font-medium text-[#1A1A2E]">{{ trajetAnnuleRef.adresseArrivee }}</span>
-          <span *ngIf="trajetAnnuleRef.heureDepart" class="text-gray-500"> · {{ trajetAnnuleRef.heureDepart | slice:0:5 }}</span>
-        </p>
-        <p *ngIf="!trajetAnnuleRef && !isLoadingAlternatives" class="text-xs text-gray-500 mt-1">
-          Propositions triées par priorité et proximité d’horaire.
-        </p>
+      <div class="flex items-center justify-between p-5 border-b border-gray-100 bg-gray-50 shrink-0">
+        <div>
+          <h2 class="text-xl font-bold text-[#0F3460]">🔄 Alternatives disponibles</h2>
+          <p *ngIf="trajetAnnuleRef" class="text-sm text-gray-600 mt-1">
+            Sélection automatique selon votre réservation annulée :
+            <span class="font-medium text-[#1A1A2E]">{{ trajetAnnuleRef.adresseDepart }}</span>
+            →
+            <span class="font-medium text-[#1A1A2E]">{{ trajetAnnuleRef.adresseArrivee }}</span>
+            <span *ngIf="trajetAnnuleRef.heureDepart" class="text-gray-500"> · {{ trajetAnnuleRef.heureDepart |
+              slice:0:5 }}</span>
+          </p>
+          <p *ngIf="!trajetAnnuleRef && !isLoadingAlternatives" class="text-xs text-gray-500 mt-1">
+            Propositions triées par priorité et proximité d’horaire.
+          </p>
+        </div>
+        <button type="button" (click)="showAlternativesModal = false"
+          class="text-gray-400 hover:text-gray-700 w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 shrink-0">✕</button>
       </div>
-      <button type="button" (click)="showAlternativesModal = false"
-        class="text-gray-400 hover:text-gray-700 w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 shrink-0">✕</button>
-    </div>
 
-    <div class="p-5 space-y-6 overflow-y-auto flex-1 min-h-0">
+      <div class="p-5 space-y-6 overflow-y-auto flex-1 min-h-0">
 
-      <div *ngIf="isLoadingAlternatives" class="py-8 space-y-4">
-        <div class="flex items-center gap-3" [class.opacity-50]="loadingStep !== 'covoiturage'">
+        <div *ngIf="isLoadingAlternatives" class="py-8 space-y-4">
+          <div class="flex items-center gap-3" [class.opacity-50]="loadingStep !== 'covoiturage'">
             <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold"
-                 [ngClass]="loadingStep === 'covoiturage' ? 'bg-[#1D9E75] text-white animate-pulse' : 'bg-gray-200 text-gray-500'">
-                 1
+              [ngClass]="loadingStep === 'covoiturage' ? 'bg-[#1D9E75] text-white animate-pulse' : 'bg-gray-200 text-gray-500'">
+              1
             </div>
             <div class="flex-1">
-                <p class="font-semibold" [ngClass]="loadingStep === 'covoiturage' ? 'text-[#1D9E75]' : 'text-gray-500'">
-                    Covoiturages (priorité 1)
-                </p>
-                <p class="text-xs text-gray-400">Recherche des trajets disponibles…</p>
+              <p class="font-semibold" [ngClass]="loadingStep === 'covoiturage' ? 'text-[#1D9E75]' : 'text-gray-500'">
+                Covoiturages (priorité 1)
+              </p>
+              <p class="text-xs text-gray-400">Recherche des trajets disponibles…</p>
             </div>
-        </div>
-        <div *ngIf="loadingStep === 'bus'" class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold bg-[#0F3460] text-white animate-pulse">
-                 2
-            </div>
-            <div class="flex-1">
-                <p class="font-semibold text-[#0F3460]">Bus / navettes (priorité 2)</p>
-                <p class="text-xs text-gray-400">Aucun covoiturage : recherche des lignes bus…</p>
-            </div>
-        </div>
-      </div>
-
-      <!-- Bloc Covoiturage -->
-      <div *ngIf="!isLoadingAlternatives && alternativesCovoit.length > 0">
-        <div class="mb-3 pb-2 border-b border-[#1D9E75]/20">
-          <div class="flex items-center gap-2">
-            <span class="text-lg">🚗</span>
-            <h3 class="font-bold text-[#1A1A2E] m-0">Covoiturage <span class="text-sm font-normal text-gray-500">(priorité 1)</span></h3>
           </div>
-          <p class="text-xs text-gray-500 mt-1 ml-8">Une demande est envoyée au conducteur ; l’ancienne réservation est remplacée après acceptation.</p>
+          <div *ngIf="loadingStep === 'bus'" class="flex items-center gap-3">
+            <div
+              class="w-8 h-8 rounded-full flex items-center justify-center font-bold bg-[#0F3460] text-white animate-pulse">
+              2
+            </div>
+            <div class="flex-1">
+              <p class="font-semibold text-[#0F3460]">Bus / navettes (priorité 2)</p>
+              <p class="text-xs text-gray-400">Aucun covoiturage : recherche des lignes bus…</p>
+            </div>
+          </div>
         </div>
-        <div class="space-y-3">
-          <div *ngFor="let alt of alternativesCovoit"
-            class="border-2 border-gray-200 rounded-xl p-4 hover:border-[#1D9E75] hover:shadow-sm transition-all bg-white">
-            <div class="flex flex-wrap items-start justify-between gap-2">
-              <div class="flex-1 min-w-0">
-                <div class="flex flex-wrap items-center gap-2 mb-1">
-                  <p class="font-semibold text-[#1A1A2E] text-base m-0">
+
+        <!-- Bloc Covoiturage -->
+        <div *ngIf="!isLoadingAlternatives && alternativesCovoit.length > 0">
+          <div class="mb-3 pb-2 border-b border-[#1D9E75]/20">
+            <div class="flex items-center gap-2">
+              <span class="text-lg">🚗</span>
+              <h3 class="font-bold text-[#1A1A2E] m-0">Covoiturage <span
+                  class="text-sm font-normal text-gray-500">(priorité 1)</span></h3>
+            </div>
+            <p class="text-xs text-gray-500 mt-1 ml-8">Une demande est envoyée au conducteur ; l’ancienne réservation
+              est remplacée après acceptation.</p>
+          </div>
+          <div class="space-y-3">
+            <div *ngFor="let alt of alternativesCovoit"
+              class="border-2 border-gray-200 rounded-xl p-4 hover:border-[#1D9E75] hover:shadow-sm transition-all bg-white">
+              <div class="flex flex-wrap items-start justify-between gap-2">
+                <div class="flex-1 min-w-0">
+                  <div class="flex flex-wrap items-center gap-2 mb-1">
+                    <p class="font-semibold text-[#1A1A2E] text-base m-0">
+                      {{ alt.adresseDepart }}<span *ngIf="alt.adresseArrivee"> → {{ alt.adresseArrivee }}</span>
+                    </p>
+                    <span *ngIf="alt._memeConducteur"
+                      class="text-xs font-semibold text-[#1D9E75] bg-[#1D9E75]/10 px-2 py-0.5 rounded-full shrink-0">
+                      Même conducteur
+                    </span>
+                  </div>
+                  <p class="text-sm text-gray-600 mt-1">
+                    🕐 {{ alt.heureDepart | slice:0:5 }}
+                    <span *ngIf="alt.conducteurNom"> • {{ alt.conducteurNom }}</span>
+                    <span *ngIf="alt.placesRestantes != null"> • {{ alt.placesRestantes }} place(s)</span>
+                  </p>
+                </div>
+                <button type="button" (click)="choisirAlternative(alt, $event)" [disabled]="remplacerEnCours"
+                  class="shrink-0 px-4 py-2 rounded-lg bg-[#1D9E75] text-white text-sm font-semibold hover:bg-[#168567] disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">
+                  {{ remplacerEnCours ? '…' : 'CHOISIR' }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bloc Bus -->
+        <div *ngIf="!isLoadingAlternatives && alternativesBus.length > 0">
+          <div class="mb-3 pb-2 border-b border-[#0F3460]/20">
+            <div class="flex items-center gap-2">
+              <span class="text-lg">🚌</span>
+              <h3 class="font-bold text-[#1A1A2E] m-0">Bus / navette <span
+                  class="text-sm font-normal text-gray-500">(priorité 2)</span></h3>
+            </div>
+            <p class="text-xs text-gray-500 mt-1 ml-8">Remplacement immédiat : votre réservation annulée est échangée
+              contre la navette.</p>
+          </div>
+          <div class="space-y-3">
+            <div *ngFor="let alt of alternativesBus"
+              class="border-2 border-gray-200 rounded-xl p-4 hover:border-[#0F3460] hover:shadow-sm transition-all bg-white">
+              <div class="flex flex-wrap items-start justify-between gap-2">
+                <div class="flex-1 min-w-0">
+                  <p class="font-semibold text-[#1A1A2E] text-base">
                     {{ alt.adresseDepart }}<span *ngIf="alt.adresseArrivee"> → {{ alt.adresseArrivee }}</span>
                   </p>
-                  <span *ngIf="alt._memeConducteur"
-                    class="text-xs font-semibold text-[#1D9E75] bg-[#1D9E75]/10 px-2 py-0.5 rounded-full shrink-0">
-                    Même conducteur
-                  </span>
+                  <p class="text-sm text-gray-600 mt-1">
+                    🕐 {{ alt.heureDepart | slice:0:5 }}
+                    <span *ngIf="alt.placesRestantes != null"> • {{ alt.placesRestantes }} place(s)</span>
+                  </p>
                 </div>
-                <p class="text-sm text-gray-600 mt-1">
-                  🕐 {{ alt.heureDepart | slice:0:5 }}
-                  <span *ngIf="alt.conducteurNom"> • {{ alt.conducteurNom }}</span>
-                  <span *ngIf="alt.placesRestantes != null"> • {{ alt.placesRestantes }} place(s)</span>
-                </p>
+                <button type="button" (click)="choisirAlternative(alt, $event)" [disabled]="remplacerEnCours"
+                  class="shrink-0 px-4 py-2 rounded-lg bg-[#0F3460] text-white text-sm font-semibold hover:bg-[#0a2442] disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">
+                  {{ remplacerEnCours ? '…' : 'CHOISIR' }}
+                </button>
               </div>
-              <button type="button" (click)="choisirAlternative(alt, $event)"
-                [disabled]="remplacerEnCours"
-                class="shrink-0 px-4 py-2 rounded-lg bg-[#1D9E75] text-white text-sm font-semibold hover:bg-[#168567] disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">
-                {{ remplacerEnCours ? '…' : 'CHOISIR' }}
-              </button>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Bloc Bus -->
-      <div *ngIf="!isLoadingAlternatives && alternativesBus.length > 0">
-        <div class="mb-3 pb-2 border-b border-[#0F3460]/20">
-          <div class="flex items-center gap-2">
-            <span class="text-lg">🚌</span>
-            <h3 class="font-bold text-[#1A1A2E] m-0">Bus / navette <span class="text-sm font-normal text-gray-500">(priorité 2)</span></h3>
-          </div>
-          <p class="text-xs text-gray-500 mt-1 ml-8">Remplacement immédiat : votre réservation annulée est échangée contre la navette.</p>
+        <div *ngIf="alternatives.length === 0 && !isLoadingAlternatives" class="text-center py-8 text-gray-500">
+          <p class="text-4xl mb-3">😔</p>
+          <p class="font-semibold">Aucune alternative disponible</p>
+          <p class="text-sm mt-1">Contactez l'administration</p>
         </div>
-        <div class="space-y-3">
-          <div *ngFor="let alt of alternativesBus"
-            class="border-2 border-gray-200 rounded-xl p-4 hover:border-[#0F3460] hover:shadow-sm transition-all bg-white">
-            <div class="flex flex-wrap items-start justify-between gap-2">
-              <div class="flex-1 min-w-0">
-                <p class="font-semibold text-[#1A1A2E] text-base">
-                  {{ alt.adresseDepart }}<span *ngIf="alt.adresseArrivee"> → {{ alt.adresseArrivee }}</span>
-                </p>
-                <p class="text-sm text-gray-600 mt-1">
-                  🕐 {{ alt.heureDepart | slice:0:5 }}
-                  <span *ngIf="alt.placesRestantes != null"> • {{ alt.placesRestantes }} place(s)</span>
-                </p>
-              </div>
-              <button type="button" (click)="choisirAlternative(alt, $event)"
-                [disabled]="remplacerEnCours"
-                class="shrink-0 px-4 py-2 rounded-lg bg-[#0F3460] text-white text-sm font-semibold hover:bg-[#0a2442] disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">
-                {{ remplacerEnCours ? '…' : 'CHOISIR' }}
-              </button>
-            </div>
-          </div>
-        </div>
+
       </div>
 
-      <div *ngIf="alternatives.length === 0 && !isLoadingAlternatives"
-        class="text-center py-8 text-gray-500">
-        <p class="text-4xl mb-3">😔</p>
-        <p class="font-semibold">Aucune alternative disponible</p>
-        <p class="text-sm mt-1">Contactez l'administration</p>
+      <div class="p-4 border-t border-gray-100 shrink-0">
+        <button type="button" (click)="showAlternativesModal = false"
+          class="w-full py-2.5 bg-gray-100 text-gray-600 rounded-xl font-semibold hover:bg-gray-200 transition">
+          Fermer
+        </button>
       </div>
-
-    </div>
-
-    <div class="p-4 border-t border-gray-100 shrink-0">
-      <button type="button" (click)="showAlternativesModal = false"
-        class="w-full py-2.5 bg-gray-100 text-gray-600 rounded-xl font-semibold hover:bg-gray-200 transition">
-        Fermer
-      </button>
     </div>
   </div>
-</div>
 </div>
