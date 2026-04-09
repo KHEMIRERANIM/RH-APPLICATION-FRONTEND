@@ -37,7 +37,7 @@ export class NavetteTrackingComponent implements OnInit, AfterViewInit, OnDestro
   private notifId: number = 0;
   private notifEnvoyees: Set<string> = new Set();
 
-  tempsRestant: string = 'Calcul...';
+  tempsRestant: string = 'Calcul en cours...';
   distance: string = '-';
   statut: string = 'En attente';
   progression: number = 0;
@@ -57,6 +57,7 @@ export class NavetteTrackingComponent implements OnInit, AfterViewInit, OnDestro
 
 public etapeActuelle: number = 0;
   private enRetard: boolean = false;
+  private totalDistance: number = 0;
 
   constructor(private cdr: ChangeDetectorRef) { }
 
@@ -186,6 +187,7 @@ async demarrerSimulation() {     if (this.trajets.length === 0) {
     this.interval = setInterval(async () => {
       if (this.etapeActuelle >= this.trajets.length) {
         clearInterval(this.interval);
+        this.interval = undefined;
         return;
       }
 
@@ -267,7 +269,16 @@ async demarrerSimulation() {     if (this.trajets.length === 0) {
       );
     }
 
-    if (this.etapeActuelle >= this.trajets.length) {
+    // Gestion de la fin de trajet
+    // Si c'est une simulation, on se base sur l'étape
+    const isSimulationActive = this.interval !== undefined;
+    const isFinishedByStep = isSimulationActive && this.etapeActuelle >= this.trajets.length;
+    
+    // Si c'est du temps réel, on se base sur la distance OSRM ou le statut
+    // On considère arrivé si distance < 0.1km (100m) et durée < 1min
+    const isNearArrival = duree === 0 || (duree <= 1 && parseFloat(this.distance) < 0.2);
+
+    if (isFinishedByStep || (isNearArrival && !isSimulationActive)) {
       this.statut = '✅ Arrivée';
       this.tempsRestant = 'Arrivée !';
       this.progression = 100;
@@ -277,6 +288,11 @@ async demarrerSimulation() {     if (this.trajets.length === 0) {
           'success', '🎉 Navette arrivée !',
           'Votre navette est à votre arrêt', '✅'
         );
+      }
+      
+      if (isSimulationActive) {
+          clearInterval(this.interval);
+          this.interval = undefined;
       }
     }
 
@@ -405,10 +421,40 @@ async demarrerSimulation() {     if (this.trajets.length === 0) {
 
         this.tempsRestant = duree <= 1 ? 'Arrivée imminente !' : `${duree} min`;
         this.distance = `${dist} km`;
+        if (this.totalDistance <= 0) {
+          this.totalDistance = parseFloat(dist);
+        }
+
+        // Calcul progression réelle
+        const isSimulationActive = this.interval !== undefined;
+        if (this.totalDistance > 0 && !isSimulationActive) {
+            const currentDist = parseFloat(dist);
+            this.progression = Math.round(((this.totalDistance - currentDist) / this.totalDistance) * 100);
+            this.progression = Math.min(100, Math.max(0, this.progression));
+        }
+
         return duree;
       }
-    } catch (e) { }
+    } catch (e) {
+      console.error('[navette-tracking] Erreur OSRM calculerTemps:', e);
+      // Fallback: Distance à vol d'oiseau si OSRM échoue
+      const d = this.calculerDistanceHaversine(navLat, navLng, this.arretLat, this.arretLng);
+      this.distance = `${d.toFixed(1)} km`;
+      this.tempsRestant = 'Calcul (GPS uniquement)';
+    }
     return 99;
+  }
+
+  private calculerDistanceHaversine(lat1: number, lon1: number, lat2: number, lon2: number): number {
+    const R = 6371; // Rayon de la Terre en km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
   }
 
   // ===== NOTIFICATIONS =====
