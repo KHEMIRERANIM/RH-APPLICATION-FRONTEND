@@ -82,13 +82,16 @@
         <div class="relative z-10">
           <div class="flex items-center justify-between mb-8">
             <div class="flex flex-col">
-              <span class="text-emerald-100 text-xs font-bold uppercase tracking-widest opacity-80">Aujourd'hui</span>
+              <div class="flex items-center gap-2">
+                <span class="text-emerald-100 text-xs font-bold uppercase tracking-widest opacity-80">Aujourd'hui</span>
+                <span class="text-emerald-50/60 text-[10px] uppercase font-bold tracking-wider">• {{ currentWeather.date }}</span>
+              </div>
               <span class="text-2xl font-bold">{{ currentWeather.location }}</span>
             </div>
             <mat-icon class="icon-size-10 text-yellow-300 drop-shadow-lg" [svgIcon]="currentWeather.icon"></mat-icon>
           </div>
           <div class="flex items-baseline gap-2 mb-2">
-            <span class="text-7xl font-black tracking-tighter">{{ currentWeather.temp }}°</span>
+            <span class="text-7xl font-black tracking-tighter">{{ (currentWeather.temp <= 0 && weeklyPredictions.length > 0) ? Math.round(weeklyPredictions[0].temp) : currentWeather.temp }}°</span>
             <span class="text-xl font-medium opacity-90">{{ currentWeather.condition }}</span>
           </div>
         </div>
@@ -119,63 +122,69 @@
       </div>
 
       <!-- Weekly Forecast avec PRÉDICTIONS IA -->
-      <div class="lg:col-span-8 bg-white/80 backdrop-blur rounded-[2.5rem] p-8 border border-gray-100 shadow-sm flex flex-col">
-        <div class="flex items-center justify-between mb-8">
-          <h3 class="text-lg font-bold text-[#1A1A2E]">
-            🔮 Prédictions IA - {{ (weeklyPredictions && weeklyPredictions.length > 0) ? 'Semaine Actuelle' : 'Analyse en cours' }}
-          </h3>
-          <div class="px-4 py-1.5 bg-emerald-50 rounded-full text-xs font-bold text-emerald-600">
-            IA - {{ predictionAverage }} employés/jour
-          </div>
-        </div>
-        
-        <!-- Loading state -->
-        <div *ngIf="isLoadingPrediction" class="flex justify-center py-8">
-          <div class="animate-pulse text-emerald-600 font-bold">Chargement des prédictions IA...</div>
-        </div>
-        
-        <!-- Prédictions réelles -->
-        <div *ngIf="!isLoadingPrediction && weeklyPredictions.length > 0" class="grid grid-cols-7 gap-4 h-full">
-          <div *ngFor="let p of weeklyPredictions" 
-               class="flex flex-col items-center justify-between p-4 rounded-2xl transition-all duration-300"
-[class.bg-emerald-50]="p.predicted > 100"
-               [class.border]="p.predicted  > 100"
-               [class.border-emerald-200]="p.predicted > 100">
-            
-            <span class="text-xs font-bold" 
-                  [class.text-emerald-600]="p.predicted > 100" 
-                  [class.text-gray-400]="p.predicted <= 100">
-              {{ p.jour }}
-            </span>
-            
-            <mat-icon class="icon-size-8 my-4" 
-              [class.text-amber-400]="p.meteo === 'Soleil' || p.meteo === 'Ensoleillé'"
-              [class.text-blue-400]="p.meteo?.includes('Pluie')"
-              [class.text-gray-400]="p.meteo === 'Nuageux'"
-              [svgIcon]="(p.meteo === 'Soleil' || p.meteo === 'Ensoleillé') ? 'feather:sun' : (p.meteo?.includes('Pluie') ? 'feather:cloud-rain' : 'feather:cloud')">
-            </mat-icon>
-            
-            <div class="flex flex-col items-center">
-              <span class="text-xl font-black" 
-                    [class.text-emerald-600]="p.predicted > 100" 
-                    [class.text-[#1A1A2E]]="p.predicted <= 100">
-                {{ p.predicted }}
-              </span>
-              <span class="text-[8px] font-bold uppercase text-gray-400 opacity-60">employés</span>
-            </div>
-            
-            <!-- Alerte si saturation -->
-            <div *ngIf="p.predicted > 120" class="mt-2 text-[10px] font-bold text-red-500 animate-pulse">
-              ⚠️ SATURATION
-            </div>
-          </div>
-        </div>
-        
-        <!-- Fallback si pas de prédictions -->
-        <div *ngIf="!isLoadingPrediction && weeklyPredictions.length === 0" class="text-center py-8 text-gray-400 italic">
-          Aucune prédiction disponible pour le moment.
-        </div>
+<div class="lg:col-span-8 bg-slate-50/40 backdrop-blur-2xl rounded-[2.5rem] p-8 border border-slate-200/50 shadow-inner flex flex-col relative overflow-hidden group/container">
+  <!-- Subtle Mesh Gradient / Glow -->
+  <div class="absolute -top-12 -left-12 w-64 h-64 bg-indigo-500/5 rounded-full blur-[100px] pointer-events-none"></div>
+  <div class="absolute -bottom-12 -right-12 w-64 h-64 bg-emerald-500/5 rounded-full blur-[100px] pointer-events-none"></div>
+  <div class="flex items-center justify-between mb-8 bg-slate-50/80 p-6 -mx-8 -mt-8 rounded-t-[2.5rem] border-b border-gray-100 shadow-sm">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 bg-indigo-500 rounded-xl flex items-center justify-center shadow-indigo-200 shadow-lg">
+        <span class="text-xl">🔮</span>
       </div>
+      <h3 class="text-xl font-black text-[#1A1A2E] tracking-tight">
+        Prédictions IA 
+      </h3>
+    </div>
+    <div class="px-5 py-2 bg-white rounded-2xl text-xs font-black text-indigo-600 shadow-sm border border-indigo-100 flex items-center gap-2">
+      <mat-icon class="icon-size-4 text-indigo-400" svgIcon="heroicons_solid:chart-bar"></mat-icon>
+      {{ predictionAverage }} employés/jour
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoadingPrediction" class="text-center py-8 text-gray-400">
+    Chargement des prédictions...
+  </div>
+
+  <!-- Prédictions -->
+  <div *ngIf="!isLoadingPrediction && weeklyPredictions.length > 0" class="grid grid-cols-7 gap-3">
+  <div *ngFor="let p of weeklyPredictions" 
+    class="text-center p-4 rounded-3xl border backdrop-blur-sm transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 group"
+    [ngClass]="{
+      'bg-red-50/40 border-red-200/50 shadow-red-50': p.predicted >= 120,
+      'bg-emerald-50/40 border-emerald-200/50 shadow-emerald-50': p.predicted >= 100 && p.predicted < 120,
+      'bg-sky-50/30 border-sky-200/40 shadow-sky-50': p.predicted < 50,
+      'bg-white/60 border-white shadow-sm': p.predicted >= 50 && p.predicted < 100
+    }">
+  <!-- Jour + Date -->
+  <div class="text-xs font-bold text-gray-500 uppercase tracking-wider">
+    {{ p.jour }} 
+    <span class="font-normal normal-case text-gray-400">• {{ p.date }}</span>
+  </div>
+  
+  <div class="text-3xl font-black text-[#1A1A2E] my-2">{{ p.predicted }}</div>
+  <div class="text-[10px] text-gray-400">employés</div>
+  
+  <div class="flex items-center justify-center gap-1 mt-2">
+    <mat-icon class="icon-size-3" 
+      [svgIcon]="getWeatherIcon(p.meteo)">
+    </mat-icon>
+    <span class="text-[10px] text-gray-500">{{ p.temp }}°</span>
+  </div>
+  
+  <div *ngIf="p.predicted > 120" class="mt-1 text-[9px] font-bold text-red-500">⚠️ SATURATION</div>
+</div>
+  </div>
+
+  <div *ngIf="!isLoadingPrediction && weeklyPredictions.length === 0" class="text-center py-8 text-gray-400">
+    Aucune prédiction disponible
+  </div>
+
+  <!-- Debug temporaire -->
+  <div *ngIf="!isLoadingPrediction && weeklyPredictions.length > 0" class="mt-4 text-center text-xs text-gray-400">
+    ✅ {{ weeklyPredictions.length }} jours chargés | Moyenne: {{ predictionAverage }}
+  </div>
+</div>
     </div>
 
     <!-- Summary Cards (Premium Design - Driven by Real Data) -->
@@ -471,10 +480,17 @@
               <p class="text-[10px] font-bold text-gray-400 uppercase mb-2">Planning des dates</p>
               <div class="space-y-2 max-h-40 overflow-y-auto">
                 <div *ngFor="let date of bus.packDates" class="bg-blue-50/30 rounded-lg p-2 border border-blue-100/50">
-                  <div class="flex items-center justify-between mb-1.5"><span
-                      class="text-[9px] font-bold text-[#0F3460]">{{ date | date:'EEEE dd/MM' | uppercase }}</span><span
-                      class="text-[9px] font-bold text-[#1D9E75]">{{ countConfirmesParJour(bus.id, date) }}/{{
-                      bus.capacite }}</span></div>
+                  <div class="flex items-center justify-between mb-1.5">
+                    <span class="text-[9px] font-bold text-[#0F3460]">{{ date | date:'EEEE dd/MM' | uppercase }}</span>
+                    <div class="flex items-center gap-1.5">
+                      <span class="text-[9px] font-extrabold text-[#1D9E75]">{{ countConfirmesParJour(bus.id, date) }}/{{ bus.capacite }}</span>
+                      <button *ngIf="bus.statut === 'INACTIF' || bus.statut === 'RESERVE'" 
+                        (click)="activateForDay(bus.id, date)"
+                        class="text-[8px] h-4 px-1.5 bg-indigo-600 text-white rounded flex items-center justify-center hover:bg-indigo-700 transition font-bold uppercase tracking-tighter shadow-sm active:scale-95">
+                        Activer
+                      </button>
+                    </div>
+                  </div>
                   <div class="flex flex-wrap gap-1">
                     <div *ngFor="let r of reservantsParJour(bus.id, date)"
                       class="group relative flex items-center gap-1.5 px-2 py-1 bg-white border border-gray-100 rounded-md shadow-sm">

@@ -1,7 +1,7 @@
 //export const environment = { production: false };
 export const environment = {
   production: false,
-  apiUrl: 'http://10.188.81.174:8081/api',
+  apiUrl: 'http://localhost:8081/api',
   /**
    * URL SockJS optionnelle pour le suivi.
    * Si vide, on calcule automatiquement à partir de l'API (ou de l'origine navigateur en dev).

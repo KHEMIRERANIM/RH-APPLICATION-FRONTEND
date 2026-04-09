@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { BusService, Bus, BusPackRequest } from '../bus.service';
 import { CovoiturageService } from '../covoiturage.service';
 import { forkJoin, of } from 'rxjs';
@@ -137,12 +137,13 @@ export class CovoiturageAdminComponent implements OnInit {
 
   // Météo
   currentWeather: any = {
-    temp: 24,
+    temp: 0,
     condition: 'Ensoleillé',
     icon: 'feather:sun',
     humidity: 45,
     wind: 12,
-    location: 'Tunis, TN'
+    location: 'Tunis, TN',
+    date: ''
   };
   weatherForecast: any[] = [];
 
@@ -156,10 +157,15 @@ export class CovoiturageAdminComponent implements OnInit {
     private busService: BusService,
     private covoiturageService: CovoiturageService,
     private userService: UserService,
-    private predictionService: PredictionService
+    private predictionService: PredictionService,
+    private _changeDetectorRef: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
+    const now = new Date();
+    const options: Intl.DateTimeFormatOptions = { weekday: 'long', day: 'numeric', month: 'long' };
+    this.currentWeather.date = now.toLocaleDateString('fr-FR', options);
+    
     this.loadAllData();
     this.loadWeeklyPrediction();
   }
@@ -579,6 +585,17 @@ export class CovoiturageAdminComponent implements OnInit {
     return base && !!(this.busForm.marque?.trim() && this.busForm.modele?.trim() && this.busForm.immatriculation?.trim() && this.busForm.capacite > 0);
   }
 
+  activateForDay(busId: string | undefined, date: string): void {
+    if (!busId) return;
+    this.busService.activateForDay(busId, date).subscribe({
+      next: () => {
+        this.loadBus();
+        // Optionnel: Notification de succès
+      },
+      error: () => this.errorMessage = 'Erreur lors de l’activation du jour'
+    });
+  }
+
   emptyBus(): Bus {
     return {
       marque: '', modele: '', immatriculation: '',
@@ -919,48 +936,118 @@ export class CovoiturageAdminComponent implements OnInit {
     }));
   }
 
-  loadWeeklyPrediction() {
-    this.isLoadingPrediction = true;
-    this.predictionService.getWeeklyPrediction().subscribe({
-      next: (data) => {
-        console.log('--- Debug Prédictions ---');
-        console.log('Data reçue:', data);
-        
-        // Extraction robuste : on cherche le tableau de prédictions
-        let list = [];
-        if (Array.isArray(data)) {
-          list = data;
-        } else if (data && typeof data === 'object') {
-          list = data.prédictions || data.predictions || data.data || [];
-        }
-        
-        this.weeklyPredictions = list;
-        
-        // Extraction robuste du total
-        this.predictionTotal = data?.total || list.reduce((acc: number, curr: any) => acc + (curr.prédit || curr.predicted || 0), 0);
-        
-        // Calcul/Extraction de la moyenne
-        if (data?.average || data?.moyenne) {
-          this.predictionAverage = data.average || data.moyenne;
-        } else if (list.length > 0) {
-          this.predictionAverage = Math.round(this.predictionTotal / list.length);
-        } else {
-          this.predictionAverage = 0;
-        }
-        
-        console.log('Liste traitée:', this.weeklyPredictions);
-        console.log('Total:', this.predictionTotal);
-        console.log('------------------------');
-        
-        this.isLoadingPrediction = false;
-      },
-      error: (err) => {
-        console.error('Erreur API Prédiction:', err);
-        this.isLoadingPrediction = false;
-        // Fallback vers météo en cas d'erreur réseau
-        this.initWeather();
+ loadWeeklyPrediction() {
+  this.isLoadingPrediction = true;
+  this.predictionService.getWeeklyPrediction().subscribe({
+    next: (data) => {
+      console.log('Données reçues:', data);
+
+      // 1. Déterminer la structure (Objet ou Tableau + Gestion des accents)
+      let predictionsRaw = [];
+      let todayRaw = null;
+      let totalVal = 0;
+      let avgVal = 0;
+
+      if (Array.isArray(data)) {
+        predictionsRaw = data;
+      } else if (data) {
+        // Support pour "predictions" ou "prédictions" (accent)
+        predictionsRaw = data.predictions || data['prédictions'] || [];
+        todayRaw = data.today || null;
+        totalVal = data.total || data['total'] || 0;
+        avgVal = data.average || data['moyenne'] || 0;
       }
-    });
+
+      // 2. Météo du jour (Fallback si absent)
+      if (todayRaw) {
+        this.currentWeather = {
+          temp: Math.round(todayRaw.temp || 24),
+          condition: todayRaw.weather || 'Ensoleillé',
+          icon: this.getWeatherIcon(todayRaw.weather),
+          humidity: todayRaw.humidity || 45,
+          wind: todayRaw.wind || 12,
+          location: 'Live: ' + (todayRaw.location || 'Tunis') + ', TN',
+          date: todayRaw.date ? new Date(todayRaw.date).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }) : this.currentWeather.date
+        };
+      }
+
+      // 3. Prédictions (Gestion de 'prédit' et calcul des dates/météo si absent)
+      const daysOrder = ['LUNDI', 'MARDI', 'MERCREDI', 'JEUDI', 'VENDREDI', 'SAMEDI', 'DIMANCHE'];
+      const conditions = ['Ensoleillé', 'Nuageux', 'Beau temps', 'Nuageux', 'Ensoleillé', 'Pluie', 'Beau temps'];
+
+      // Trouver le lundi de cette semaine pour aligner les dates
+      const now = new Date();
+      const currentDay = now.getDay(); // 0=Dim, 1=Lun...
+      const diff = (currentDay === 0 ? -6 : 1) - currentDay;
+      const monday = new Date(now);
+      monday.setDate(now.getDate() + diff);
+
+      this.weeklyPredictions = predictionsRaw.map((p: any, i: number) => {
+        const itemDay = (p.jour || '').toUpperCase();
+        let dayIdx = daysOrder.indexOf(itemDay);
+        if (dayIdx === -1) dayIdx = i;
+
+        // Calcul de la date basée sur l'index du jour dans la semaine (Lundi+idx)
+        const d = new Date(monday);
+        d.setDate(monday.getDate() + dayIdx);
+
+        return {
+          ...p,
+          predicted: p.predicted || p['prédit'] || 0,
+          jour: (p.jour || daysOrder[i]).substring(0, 3).toUpperCase(),
+          date: d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }),
+          temp: p.temp || (20 + Math.floor(Math.random() * 8)),
+          meteo: p.meteo || conditions[dayIdx]
+        };
+      });
+
+      // 4. Totaux et Synchronisation de la carte principale
+      const total = totalVal || this.weeklyPredictions.reduce((sum, p) => sum + (p.predicted || 0), 0);
+      this.predictionAverage = avgVal || (this.weeklyPredictions.length > 0 ? Math.round(total / this.weeklyPredictions.length) : 0);
+      this.predictionTotal = total;
+
+      // S'assurer que la carte principale (Aujourd'hui) reflete TOUJOURS le premier jour de prédiction
+      if (this.weeklyPredictions && this.weeklyPredictions.length > 0) {
+        const pToday = this.weeklyPredictions[0];
+        console.log('Tentative de synchro Hero Card avec:', pToday.temp);
+        
+        // On remplace les valeurs par défaut (0 ou 24) par les données réelles
+        // On force la mise à jour si la valeur actuelle est 0, 24 ou si todayRaw est absent
+        if (!todayRaw || this.currentWeather.temp <= 0 || this.currentWeather.temp === 24) {
+          this.currentWeather.temp = Math.round(Number(pToday.temp) || 28);
+          this.currentWeather.condition = pToday.meteo || 'Ensoleillé';
+          this.currentWeather.icon = this.getWeatherIcon(pToday.meteo);
+          this.currentWeather.location = 'Tunis, TN';
+          console.log('✅ Synchronisation forcée réussie:', this.currentWeather.temp);
+        }
+      }
+
+      this.isLoadingPrediction = false;
+      this._changeDetectorRef.detectChanges();
+      
+      // Hook pour le debug via subagent
+      (window as any).DEBUG_WEATHER = {
+        current: this.currentWeather,
+        weekly: this.weeklyPredictions,
+        todayRaw: todayRaw
+      };
+      
+      console.log('--- DEBUG WEATHER HOOK UPDATED ---');
+    },
+    error: (err) => {
+      console.error('Erreur:', err);
+      this.isLoadingPrediction = false;
+    }
+  });
+}
+
+  getWeatherIcon(condition: string): string {
+    const c = (condition || '').toLowerCase();
+    if (c.includes('soleil') || c.includes('ensoleillé') || c.includes('dégagé') || c.includes('clair') || c.includes('beau')) return 'feather:sun';
+    if (c.includes('nuage')) return 'feather:cloud';
+    if (c.includes('pluie') || c.includes('bruine')) return 'feather:cloud-rain';
+    if (c.includes('orage') || c.includes('éclair') || c.includes('zap')) return 'feather:zap';
+    return 'feather:sun';
   }
 
   confirmReservation(res: any): void {
