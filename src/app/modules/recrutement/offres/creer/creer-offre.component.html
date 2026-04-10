@@ -58,18 +58,59 @@
       </div>
 
       <!-- Section 2 -->
-      <div class="bg-white rounded-3xl shadow-lg ring-1 ring-black/5 p-8 transition-shadow hover:shadow-xl">
+      <div class="bg-white rounded-3xl shadow-lg ring-1 ring-black/5 p-8 transition-shadow hover:shadow-xl relative overflow-hidden">
         <h3 class="font-bold text-xl mb-6 flex items-center gap-3 text-gray-800">
           <span class="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold shadow-md">2</span>
-          Description
+          Description & Coach Inclusivité (RSE)
         </h3>
-        <mat-form-field class="w-full">
-          <mat-label>Description détaillée</mat-label>
-          <textarea matInput formControlName="description" rows="6"
-            placeholder="Décrivez les missions, le contexte..."></textarea>
-          <mat-hint>Minimum 50 caractères</mat-hint>
-          <mat-error>La description doit faire au moins 50 caractères</mat-error>
-        </mat-form-field>
+        
+        <div class="flex flex-col lg:flex-row gap-6">
+          <div class="flex-auto">
+            <mat-form-field class="w-full">
+              <mat-label>Description détaillée</mat-label>
+              <textarea matInput formControlName="description" rows="7"
+                placeholder="Décrivez les missions (Attention aux biais !)..."></textarea>
+              <mat-hint>Le texte sera analysé par notre Coach RSE.</mat-hint>
+              <mat-error>Requis, au moins 50 caractères.</mat-error>
+            </mat-form-field>
+          </div>
+
+          <!-- Coach RSE Panel -->
+          <div class="w-full lg:w-80 bg-gray-50 rounded-2xl p-5 shadow-inner border-2 transition-colors duration-500" 
+               [ngClass]="inclusionScore >= 70 ? 'border-green-200' : 'border-red-400'">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="p-1.5 rounded-lg" [ngClass]="inclusionScore >= 70 ? 'bg-green-100' : 'bg-red-100'">
+                 <mat-icon [class.text-green-600]="inclusionScore >= 70" [class.text-red-600]="inclusionScore < 70" class="icon-size-5">gavel</mat-icon>
+              </div>
+              <h4 class="font-black text-gray-800 tracking-tight text-sm">Détecteur de Biais Cognitifs</h4>
+            </div>
+            
+            <div class="mb-5">
+              <div class="flex justify-between text-xs font-black mb-1.5 uppercase tracking-wider">
+                <span class="text-gray-500">Score Législatif</span>
+                <span [class.text-red-600]="inclusionScore < 70" [class.text-green-600]="inclusionScore >= 70">{{ inclusionScore }}%</span>
+              </div>
+              <div class="h-2.5 w-full bg-gray-200 rounded-full overflow-hidden shadow-inner">
+                <div class="h-full transition-all duration-300" [style.width.%]="inclusionScore" [ngClass]="inclusionScore >= 70 ? 'bg-gradient-to-r from-green-400 to-green-500' : 'bg-gradient-to-r from-orange-500 to-red-600'"></div>
+              </div>
+            </div>
+
+            <div *ngIf="biasedWordsFound.length > 0" class="flex flex-col gap-2">
+               <p class="text-xs text-red-700 font-bold uppercase">⚠️ Mots toxiques trouvés :</p>
+               <div class="flex flex-wrap gap-1">
+                 <span *ngFor="let w of biasedWordsFound" class="px-2 py-1 bg-white text-red-600 text-[10px] font-black uppercase tracking-widest rounded shadow-sm border border-red-200">
+                   {{ w }}
+                 </span>
+               </div>
+               <p class="text-[10px] text-gray-500 mt-2 font-medium">Conformément aux lois RSE, retirez ces discriminants pour débloquer le bouton "Créer".</p>
+            </div>
+            
+            <div *ngIf="biasedWordsFound.length === 0 && form.get('description')?.value" class="flex flex-col items-center justify-center p-3 text-center border border-green-200 rounded-xl bg-white mt-4">
+              <mat-icon class="text-green-500 mb-1 icon-size-6">verified_user</mat-icon>
+              <span class="text-xs font-extrabold text-green-700 uppercase">Texte parfaitement neutre</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Section 3 -->

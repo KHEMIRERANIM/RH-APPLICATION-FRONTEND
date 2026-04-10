@@ -26,6 +26,11 @@ export class CreerOffreComponent implements OnInit {
   avantages: string[]   = [];
   readonly separatorKeysCodes = [ENTER, COMMA];
 
+  // ANTI-BIAIS RSE
+  inclusionScore = 100;
+  biasedWordsFound: string[] = [];
+  readonly BIASED_WORDS = ['jeune diplômé', 'ninja', 'viril', 'résistance à la pression', 'digital native', 'rockstar', 'jeune et dynamique', 'homme', 'femme', 'sans attache'];
+
   constructor(
     private fb: FormBuilder,
     private router: Router,
@@ -50,6 +55,20 @@ export class CreerOffreComponent implements OnInit {
       nombrePostes:     [1, [Validators.required, Validators.min(1)]],
       dateExpiration:   ['', Validators.required],
     });
+
+    // ÉCOUTEUR TEMPS-RÉEL RSE
+    this.form.get('description')?.valueChanges.subscribe(val => this.analyzeBias(val));
+  }
+
+  analyzeBias(text: string) {
+     if (!text) { 
+        this.inclusionScore = 100; 
+        this.biasedWordsFound= []; 
+        return; 
+     }
+     const lower = text.toLowerCase();
+     this.biasedWordsFound = this.BIASED_WORDS.filter(w => lower.includes(w));
+     this.inclusionScore = Math.max(0, 100 - (this.biasedWordsFound.length * 20));
   }
 
   addCompetence(event: MatChipInputEvent): void {
@@ -73,7 +92,12 @@ export class CreerOffreComponent implements OnInit {
   }
 
   submit(): void {
-    if (this.form.invalid) return;
+    if (this.form.invalid || this.inclusionScore < 70) {
+      if (this.inclusionScore < 70) {
+        this.errorMsg = 'Bloqué par la politique RSE ⛔ : Veuillez retirer les expressions discriminatoires pour atteindre au moins 70% d\'inclusion.';
+      }
+      return;
+    }
 
     this.loading = true;
     this.errorMsg = '';

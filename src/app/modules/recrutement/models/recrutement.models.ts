@@ -24,6 +24,8 @@ export interface Candidature {
   etapeActuelle: string; notesRecruteur: string; historiqueStatuts: string[];
   competencesExtraites: string[]; competencesManquantes: string[]; anneesExperienceDetecte: number;
   testLanguePasse: boolean; scoreLangue: number; formationRequise: boolean;
+  scoreLeadership: number; scoreEmpathie: number; scoreAdaptabilite: number;
+  scoreCommunication: number; scoreInnovation: number;
   datePostulation: string; dateDerniereMAJ: string;
 }
 export interface ChangerStatutRequest { nouveauStatut: StatutCandidature; commentaire: string; }
