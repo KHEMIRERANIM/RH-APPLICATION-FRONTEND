@@ -9,6 +9,7 @@ import { NotificationsService } from 'app/layout/common/notifications/notificati
 import { HttpClient } from '@angular/common/http';
 import { UserService } from 'app/services/user.service';
 import { Router } from '@angular/router';
+import { CovoiturageService } from 'app/modules/admin/apps/covoiturage/covoiturage.service';
 
 @Component({
     selector: 'notifications',
@@ -37,7 +38,8 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         private _viewContainerRef: ViewContainerRef,
         private _httpClient: HttpClient,
         private _userService: UserService,
-        private _router: Router
+        private _router: Router,
+        private _covoiturageService: CovoiturageService
     ) {
     }
 
@@ -180,28 +182,26 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     /**
      * Répond à une demande de covoiturage depuis la notification
      */
-    repondreReservation(notification: Notification, statut: 'CONFIRME' | 'ANNULE', event: Event): void {
-        event.stopPropagation(); // Évite de déclencher le toggleRead paren
+    repondreReservation(notification: Notification, statut: 'EN_ATTENTE_PAIEMENT' | 'ANNULE', event: Event): void {
+        event.stopPropagation(); // Évite de déclencher le toggleRead parent
 
         if (!notification.reservationId) {
             alert("Cette ancienne notification ne possède pas d'identifiant de réservation. Vous devez créer une nouvelle demande de covoiturage pour tester ce bouton !");
             return;
         }
 
-        // Appel d'API pour update le statut a CONFIRME ou ANNULE
-        // On renvoie aussi l'employeId et trajetId au cas où le backend l'exigerait
-        const payload = {
-            statut: statut,
-            trajetId: notification.trajetId,
-            employeId: notification.expediteurId
-        };
+        // Appel via CovoiturageService pour update le statut
+        const update = { statut: statut };
 
-        this._httpClient.put(`http://10.188.81.174:8081/api/reservations/${notification.reservationId}`, payload)
+        this._covoiturageService.updateReservationStatus(notification.reservationId, update)
             .subscribe({
                 next: () => {
                     // Supprimer la notification ou la marquer comme lue
                     this.delete(notification);
-                    alert(`Demande de réservation ${statut === 'CONFIRME' ? 'Acceptée ✅' : 'Refusée ❌'}`);
+                    const msg = statut === 'EN_ATTENTE_PAIEMENT' 
+                        ? 'Acceptée ✅. Le passager a 15 min pour payer.' 
+                        : 'Refusée ❌';
+                    alert(`Demande de réservation ${msg}`);
                 },
                 error: (err) => {
                     console.error(`Erreur ${statut} de la notification`, err);

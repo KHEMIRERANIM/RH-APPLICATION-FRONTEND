@@ -28,6 +28,7 @@ export interface Trajet {
   joursDisponibles: string; // ex: "Lundi, Mardi"
   placesDisponibles: number;
   placesRestantes: number;
+  prix?: number;
   statut: 'ACTIF' | 'COMPLET' | 'ANNULE';
   dateCreation?: string;
   reservations?: ReservationResponse[];
@@ -46,8 +47,9 @@ export interface ReservationResponse {
   id: string;
   trajetId: string;
   employeId: string;
-  statut: 'EN_ATTENTE' | 'CONFIRME' | 'ANNULE';
+  statut: 'EN_ATTENTE' | 'EN_ATTENTE_PAIEMENT' | 'CONFIRME' | 'ANNULE';
   dateReservation: string;
+  dateAcceptation?: string;
   co2AvecCovoit?: number;
   co2EconomiseKg?: number;
   pointsEco?: number;

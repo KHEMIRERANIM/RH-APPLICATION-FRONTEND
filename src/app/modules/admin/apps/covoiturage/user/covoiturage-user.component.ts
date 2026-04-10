@@ -10,6 +10,8 @@ import SockJS from 'sockjs-client';
 import { getWsTrackingSockJsUrl as getWsTrackingSockJsUrlFromEnv } from '../../../../../../environments/environment';
 import { forkJoin, of, firstValueFrom } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { PaiementService } from '../services/paiement.service';
+import { loadStripe } from '@stripe/stripe-js';
 
 // Leaflet loaded via CDN
 declare var L: any;
@@ -353,7 +355,9 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     private covoiturageService: CovoiturageService,
     private userService: UserService,
     private emailService: EmailService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+      private paiementService: PaiementService   // ← AJOUTE ICI
+
   ) {
     this.trajetForm = this.fb.group({
       vehiculeId: ['', Validators.required],
@@ -362,6 +366,7 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
       adresseArrivee: ['', Validators.required],
       heureDepart: ['', Validators.required],
       placesDisponibles: ['', Validators.required],
+      prix: [0, [Validators.required, Validators.min(0)]],
     });
   }
 
@@ -382,12 +387,21 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
         this.loadShuttles();
         this.loadMyShuttleReservations();
 
+        // Vérification périodique des paiements expirés
+        setInterval(() => this.checkPaiementsExpire(), 60000);
+
         this.route.queryParams.subscribe(params => {
           const tid = params['annulationTrajetId'];
           if (tid) {
             this.trajetAnnuleId = tid;
             this.reservationAnnuleeId = params['reservationId'] || '';
             this.chercherAlternatives(this.trajetAnnuleId);
+          }
+          if (params['paymentSuccess']) {
+            this.showToast('✅ Paiement réussi !', 'Votre réservation a été confirmée avec succès.');
+          }
+          if (params['paymentError']) {
+            this.showToast('❌ Erreur de paiement', 'Une erreur est survenue lors de la confirmation du paiement.');
           }
         });
       } catch (e) {
@@ -440,7 +454,6 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
               this.loadMesReservations();
               this.cdr.detectChanges();
             } else if (notifType === 'BUS_ACTIVE') {
-              console.log('📢 Bus activé !', notif);
               this.showToast('✅ Bus activé !', notif.message || 'Votre réservation est maintenant confirmée');
               this.loadMyShuttleReservations();
               this.loadShuttles();
@@ -910,6 +923,7 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
       joursDisponibles: jours,
       placesDisponibles: formValues.placesDisponibles,
       placesRestantes: formValues.placesDisponibles,
+      prix: formValues.prix,
       statut: 'ACTIF'
     };
 
@@ -943,10 +957,8 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
   loadAllTrajets(): void {
     this.covoiturageService.getAllTrajets().subscribe({
       next: (res) => {
-        this.allTrajets = res.filter(t => t.statut === 'ACTIF');
+        this.allTrajets = res.filter(t => t.statut === 'ACTIF' || t.statut === 'COMPLET');
         this.displayedTrajets = [...this.allTrajets];
-        console.log('TRAJET employeId:', this.allTrajets[0]?.employeId);
-        console.log('MAP complète:', JSON.stringify([...this.employesMap]));
         this.cdr.detectChanges();
       },
       error: (err) => console.error('Erreur chargement tous les trajets', err)
@@ -1039,6 +1051,84 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
       error: (err) => console.error('Erreur annulation', err)
     });
   }
+
+ accepterReservation(reservationId: string): void {
+  // Enlève dateAcceptation si le champ n'existe pas
+  const update = { statut: 'EN_ATTENTE_PAIEMENT' };  // ← Sans dateAcceptation
+  this.covoiturageService.updateReservationStatus(reservationId, update as any).subscribe({
+    next: () => {
+      this.loadTrajets();
+      alert('Réservation acceptée. Le passager a 15 minutes pour payer.');
+    },
+    error: (err) => console.error('Erreur acceptation', err)
+  });
+}
+
+  refuserReservation(reservationId: string): void {
+    if (!confirm('Refuser cette réservation ?')) return;
+    const update = { statut: 'ANNULE' };
+    this.covoiturageService.updateReservationStatus(reservationId, update as any).subscribe({
+      next: () => {
+        this.loadTrajets();
+        alert('Réservation refusée.');
+      },
+      error: (err) => console.error('Erreur refus', err)
+    });
+  }
+
+  getTempsRestantPaiement(dateAcceptation?: string): string {
+    if (!dateAcceptation) return '15:00';
+    const acceptTime = new Date(dateAcceptation).getTime();
+    const now = new Date().getTime();
+    const diff = 15 * 60 * 1000 - (now - acceptTime);
+    
+    if (diff <= 0) return 'Expiré';
+    
+    const minutes = Math.floor(diff / 60000);
+    const seconds = Math.floor((diff % 60000) / 1000);
+    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+  }
+
+  // Vérification périodique des expirations
+  checkPaiementsExpire() {
+    this.mesReservations.forEach(res => {
+      if (res.statut === 'EN_ATTENTE_PAIEMENT' && res.dateAcceptation) {
+        const acceptTime = new Date(res.dateAcceptation).getTime();
+        const now = new Date().getTime();
+        const diff = 15 * 60 * 1000 - (now - acceptTime);
+        if (diff <= 0) {
+          this.annulerReservationAutomatique(res.id);
+        }
+      }
+    });
+  }
+
+  annulerReservationAutomatique(id: string) {
+    this.covoiturageService.updateReservationStatus(id, { statut: 'ANNULE' } as any).subscribe({
+      next: () => {
+        this.loadMesReservations();
+        this.showToast('ℹ️ Réservation expirée', 'Le délai de paiement de 15 minutes est dépassé.');
+      }
+    });
+  }
+
+ payerReservation(reservation: any): void {
+  const trajet = this.getTrajetInfo(reservation.trajetId);
+  if (!trajet || (trajet.prix === undefined || trajet.prix === null)) {
+    alert("Erreur: Le prix de ce trajet n'est pas défini.");
+    return;
+  }
+
+  this.paiementService.createStripePayment(reservation.id, trajet.prix).subscribe({
+    next: (response) => {
+      window.location.href = response.redirectUrl;
+    },
+    error: (err) => {
+      console.error('Erreur création paiement:', err);
+      alert('Erreur lors de la création du paiement PayPal');
+    }
+  });
+}
 
   estDejaReserve(trajetId: string): boolean {
     return this.mesReservations.some(r => r.trajetId === trajetId && r.statut !== 'ANNULE');
@@ -1440,7 +1530,7 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
               const occ = currentBus.dailyOccupancy ? (currentBus.dailyOccupancy[day] || 0) : 0;
               if (occ === (currentBus.capacite || 0) / 2) {
                 this.emailService.sendThresholdNotification(currentBus.ligne || 'Navette', day, occ, currentBus.capacite).subscribe({
-                  next: () => console.log('✓ Email de notification envoyé'),
+                  next: () => {},
                   error: (err) => console.error('✗ Erreur envoi email notification', err)
                 });
               }
