@@ -41,4 +41,20 @@ export class AllergieIaService {
       { allergies, plats }
     );
   }
+
+  analyserAvis(commentaire: string, note: number): Observable<any> {
+    return this.http.post<any>(
+      this.iaUrl + '/analyser-avis',
+      { commentaire, note }
+    );
+  }
+
+  analyserNutrition(ingredients: string, nom: string): Observable<any> {
+    return this.http.post<any>(
+      this.iaUrl + '/analyser-nutrition',
+      { ingredients, nom }
+    );
+  }
 }
+
+

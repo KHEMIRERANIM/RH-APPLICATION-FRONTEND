@@ -133,8 +133,10 @@
 
 @media (min-width: 640px) {
   .restaurant-main {
-    padding: 1.5rem 1.5rem 3rem;
-  }
+  max-width: 88rem;
+  margin: 0 auto;
+  padding: 1.25rem 1rem 2.5rem;
+}
 }
 
 /* Panneau léger derrière le contenu des pages enfants */
@@ -142,15 +144,22 @@
   background: rgba(255, 255, 255, 0.78);
   border: 1px solid rgba(191, 219, 254, 0.55);
   border-radius: 1.25rem;
-  box-shadow:
-    0 4px 6px -1px rgba(30, 64, 175, 0.06),
-    0 12px 40px -8px rgba(30, 64, 175, 0.12);
+  box-shadow: 0 4px 6px -1px rgba(30, 64, 175, 0.06), 0 12px 40px -8px rgba(30, 64, 175, 0.12);
   min-height: min(70vh, calc(100vh - 9rem));
-  padding: 1.25rem;
+  padding: 0;
+  width: 100%;
 }
 
 @media (min-width: 640px) {
   .restaurant-content {
-    padding: 1.5rem;
-  }
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(191, 219, 254, 0.55);
+  border-radius: 1.25rem;
+  box-shadow: 0 4px 6px -1px rgba(30, 64, 175, 0.06), 0 12px 40px -8px rgba(30, 64, 175, 0.12);
+  min-height: min(70vh, calc(100vh - 9rem));
+  padding: 0;
+  width: 100%;
 }
+}
+
+

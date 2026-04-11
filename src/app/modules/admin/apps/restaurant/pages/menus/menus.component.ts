@@ -40,6 +40,8 @@ export class MenusComponent implements OnInit, OnDestroy {
   analyseEnCours = false;
   analyseResultat: AnalyseAllergene | null = null;
   analyseEditResultat: AnalyseAllergene | null = null;
+  nutritionResultat: any = null;
+  nutritionEditResultat: any = null;
 
   constructor(
     private menuService: MenuService,
@@ -95,6 +97,15 @@ export class MenusComponent implements OnInit, OnDestroy {
       },
       error: () => { this.analyseEnCours = false; this.errorMsg = 'Erreur connexion IA. Verifiez que le serveur Python tourne.'; }
     });
+    this.allergieIa.analyserNutrition(
+      this.newPlat.ingredients || '',
+      this.newPlat.nom || ''
+    ).subscribe({
+      next: (res) => {
+        this.nutritionResultat = res;
+      },
+      error: () => {}
+    });
   }
 
   analyserEditPlat(): void {
@@ -102,6 +113,7 @@ export class MenusComponent implements OnInit, OnDestroy {
     if (!texte.trim()) return;
     this.analyseEnCours = true;
     this.analyseEditResultat = null;
+    this.nutritionEditResultat = null;
     this.allergieIa.analyserIngredients(texte).subscribe({
       next: (res) => {
         this.analyseEditResultat = res;
@@ -113,6 +125,27 @@ export class MenusComponent implements OnInit, OnDestroy {
             this.editPlatTags = [...existants, ...nouveaux].filter(t => t).join(', ');
           }
         }
+        this.allergieIa.analyserNutrition(
+          this.editPlat.ingredients || '',
+          this.editPlat.nom || ''
+        ).subscribe({
+          next: (nutrition) => {
+            this.nutritionEditResultat = nutrition;
+            this.editPlat.calories = nutrition.calories;
+            this.editPlat.proteines = nutrition.proteines;
+            this.editPlat.glucides = nutrition.glucides;
+            this.editPlat.lipides = nutrition.lipides;
+            this.editPlat.sucres = nutrition.sucres;
+            this.editPlat.fibres = nutrition.fibres;
+            this.editPlat.pctProteines = nutrition.pct_proteines;
+            this.editPlat.pctGlucides = nutrition.pct_glucides;
+            this.editPlat.pctLipides = nutrition.pct_lipides;
+            this.editPlat.pmrAdapte = nutrition.pmr_adapte;
+            this.editPlat.pmrRaison = nutrition.pmr_raison;
+            this.editPlat.niveauCalories = nutrition.niveau_calories;
+          },
+          error: () => {}
+        });
       },
       error: () => { this.analyseEnCours = false; this.errorMsg = 'Erreur connexion IA.'; }
     });
@@ -243,12 +276,27 @@ export class MenusComponent implements OnInit, OnDestroy {
     this.newPlat = { nom: '', description: '', prix: 0, tags: [], quantite: 1, disponible: true, ingredients: '' };
     this.newPlatTags = '';
     this.analyseResultat = null;
+    this.nutritionResultat = null;
   }
 
   addPlat(): void {
     if (!this.selectedMenuId || !this.newPlat.nom) { this.errorMsg = 'Nom obligatoire.'; return; }
     this.newPlat.tags = this.newPlatTags.split(',').map(t => t.trim()).filter(t => t);
     this.newPlat.image = this.getImageForPlat(this.newPlat.nom!);
+    if (this.nutritionResultat) {
+      this.newPlat.calories = this.nutritionResultat.calories;
+      this.newPlat.proteines = this.nutritionResultat.proteines;
+      this.newPlat.glucides = this.nutritionResultat.glucides;
+      this.newPlat.lipides = this.nutritionResultat.lipides;
+      this.newPlat.sucres = this.nutritionResultat.sucres;
+      this.newPlat.fibres = this.nutritionResultat.fibres;
+      this.newPlat.pctProteines = this.nutritionResultat.pct_proteines;
+      this.newPlat.pctGlucides = this.nutritionResultat.pct_glucides;
+      this.newPlat.pctLipides = this.nutritionResultat.pct_lipides;
+      this.newPlat.pmrAdapte = this.nutritionResultat.pmr_adapte;
+      this.newPlat.pmrRaison = this.nutritionResultat.pmr_raison;
+      this.newPlat.niveauCalories = this.nutritionResultat.niveau_calories;
+    }
     this.menuService.addPlat(this.selectedMenuId!, this.newPlat).subscribe({
       next: () => { this.loadMenus(); this.showAddPlatForm = false; this.expandedMenu = this.selectedMenuId; this.successMsg = 'Plat ajoute !'; setTimeout(() => this.successMsg = '', 3000); },
       error: () => { this.errorMsg = 'Erreur ajout plat.'; }
@@ -272,6 +320,20 @@ export class MenusComponent implements OnInit, OnDestroy {
   saveEditPlat(): void {
     if (!this.selectedMenuId || !this.selectedPlatId) return;
     this.editPlat.tags = this.editPlatTags.split(',').map(t => t.trim()).filter(t => t);
+    if (this.nutritionEditResultat) {
+      this.editPlat.calories = this.nutritionEditResultat.calories;
+      this.editPlat.proteines = this.nutritionEditResultat.proteines;
+      this.editPlat.glucides = this.nutritionEditResultat.glucides;
+      this.editPlat.lipides = this.nutritionEditResultat.lipides;
+      this.editPlat.sucres = this.nutritionEditResultat.sucres;
+      this.editPlat.fibres = this.nutritionEditResultat.fibres;
+      this.editPlat.pctProteines = this.nutritionEditResultat.pct_proteines;
+      this.editPlat.pctGlucides = this.nutritionEditResultat.pct_glucides;
+      this.editPlat.pctLipides = this.nutritionEditResultat.pct_lipides;
+      this.editPlat.pmrAdapte = this.nutritionEditResultat.pmr_adapte;
+      this.editPlat.pmrRaison = this.nutritionEditResultat.pmr_raison;
+      this.editPlat.niveauCalories = this.nutritionEditResultat.niveau_calories;
+    }
     this.menuService.updatePlat(this.selectedMenuId, this.selectedPlatId, this.editPlat).subscribe({
       next: () => { this.loadMenus(); this.showEditPlatForm = false; this.successMsg = 'Plat modifie !'; setTimeout(() => this.successMsg = '', 3000); },
       error: () => { this.errorMsg = 'Erreur modification plat.'; }
@@ -286,4 +348,15 @@ export class MenusComponent implements OnInit, OnDestroy {
     });
   }
 }
+
+
+
+
+
+
+
+
+
+
+
 

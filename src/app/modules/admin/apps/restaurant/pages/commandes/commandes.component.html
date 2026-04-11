@@ -1,4 +1,4 @@
-﻿<div class="p-6">
+﻿<div class="w-full"><div class="max-w-5xl mx-auto px-4">
 
   <div class="flex items-center justify-between mb-6">
     <div>
@@ -15,7 +15,7 @@
     </button>
   </div>
 
-  <div *ngIf="successMsg" class="mb-4 p-3 bg-green-100 text-green-700 rounded-xl flex justify-between">
+  <div *ngIf="successMsg" class="mb-4 p-3 bg-blue-50 text-blue-700 rounded-xl flex justify-between">
     <span>{{ successMsg }}</span>
     <button (click)="successMsg=''" class="font-bold">X</button>
   </div>
@@ -26,15 +26,15 @@
 
   <!-- FORMULAIRE EMPLOYE -->
   <div *ngIf="showForm && roleService.isEmploye()"
-    class="mb-6 bg-blue-50 border border-blue-200 rounded-2xl shadow-sm overflow-hidden">
-    <div class="flex border-b border-blue-200">
+    class="mb-6 bg-white border border-blue-200 rounded-2xl shadow-sm overflow-hidden">
+    <div class="flex border-b border-blue-100">
       <div class="flex-1 py-3 text-center text-sm font-bold"
-        [ngClass]="step === 1 ? 'bg-blue-700 text-white' : 'bg-white text-gray-400'">
-        1 - Choisir un menu
+        [ngClass]="step === 1 ? 'bg-blue-700 text-white' : 'bg-gray-50 text-gray-400'">
+        1 — Choisir un menu
       </div>
       <div class="flex-1 py-3 text-center text-sm font-bold"
-        [ngClass]="step === 2 ? 'bg-blue-700 text-white' : 'bg-white text-gray-400'">
-        2 - Choisir les plats
+        [ngClass]="step === 2 ? 'bg-blue-700 text-white' : 'bg-gray-50 text-gray-400'">
+        2 — Choisir les plats
       </div>
     </div>
     <div class="p-5">
@@ -49,177 +49,122 @@
               'hover:border-blue-300 cursor-pointer': !isMenuDejaCommande(m.id!)
             }"
             class="border-2 border-gray-200 rounded-2xl p-4 transition-all bg-white">
-            <h4 class="font-bold text-gray-900">{{ m.titre }}</h4>
+            <div class="flex items-center justify-between mb-2">
+              <h4 class="font-bold text-gray-900">{{ m.titre }}</h4>
+              <span *ngIf="isMenuDejaCommande(m.id!)" class="text-xs px-2 py-1 bg-gray-200 text-gray-500 rounded-full">Deja commande</span>
+              <span *ngIf="!isMenuDejaCommande(m.id!) && newCommande.menuId === m.id" class="text-xs px-2 py-1 bg-blue-600 text-white rounded-full">Selectionne</span>
+            </div>
             <p class="text-xs text-gray-400">{{ m.date }}</p>
             <p class="text-xs text-blue-600 font-semibold mt-1">{{ m.plats?.length || 0 }} plat(s)</p>
-            <span *ngIf="isMenuDejaCommande(m.id!)"
-              class="text-xs px-2 py-1 bg-gray-200 text-gray-500 rounded-full mt-2 inline-block">Deja commande</span>
           </div>
         </div>
-        <button (click)="showForm = false"
-          class="mt-4 px-5 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50">
-          Annuler
-        </button>
+        <button (click)="showForm = false" class="mt-4 px-5 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50">Annuler</button>
       </div>
       <div *ngIf="step === 2">
         <div class="flex items-center gap-3 mb-4">
-          <button (click)="step = 1; platsSelectionnes = []"
-            class="text-blue-600 text-sm font-semibold hover:underline">Changer de menu</button>
+          <button (click)="step = 1; platsSelectionnes = []" class="text-blue-600 text-sm font-semibold hover:underline">Changer de menu</button>
           <span class="text-gray-300">|</span>
-          <span class="text-sm text-gray-600">Menu : <strong class="text-blue-700">{{ getMenuTitre(newCommande.menuId) }}</strong></span>
+          <p class="text-sm text-gray-600">Menu : <span class="text-blue-700 font-bold">{{ getMenuTitre(newCommande.menuId) }}</span></p>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
           <div *ngFor="let plat of platsDisponibles"
             (click)="togglePlat(plat.platId!)"
-            [ngClass]="isPlatSelected(plat.platId!) ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-300'"
+            [ngClass]="{
+              'border-blue-500 bg-blue-50 shadow-md': isPlatSelected(plat.platId!),
+              'border-gray-200 hover:border-blue-300': !isPlatSelected(plat.platId!)
+            }"
             class="flex items-center gap-3 p-3 border-2 rounded-2xl cursor-pointer transition-all bg-white">
             <img [src]="plat.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'"
-              class="w-14 h-14 rounded-xl object-cover flex-shrink-0" />
+              class="w-16 h-16 rounded-xl object-cover flex-shrink-0" />
             <div class="flex-1 min-w-0">
               <p class="font-bold text-sm text-gray-900 truncate">{{ plat.nom }}</p>
+              <p class="text-xs text-gray-400 truncate">{{ plat.description }}</p>
+              <div *ngIf="plat.calories" class="flex items-center gap-1 mt-1">
+                <span class="text-xs px-1.5 py-0.5 bg-indigo-50 text-indigo-600 rounded-full border border-indigo-100 font-semibold">{{ plat.calories }} kcal</span>
+                <span *ngIf="plat.pmrAdapte" class="text-xs px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded-full">♿</span>
+              </div>
               <p class="text-blue-700 font-extrabold text-sm mt-1">{{ plat.prix }} TND</p>
             </div>
             <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0"
               [ngClass]="isPlatSelected(plat.platId!) ? 'bg-blue-600 border-blue-600 text-white' : 'border-gray-300'">
-              <span *ngIf="isPlatSelected(plat.platId!)" class="text-xs font-bold">v</span>
+              <span *ngIf="isPlatSelected(plat.platId!)" class="text-xs font-bold">✓</span>
             </div>
           </div>
         </div>
-        <div *ngIf="platsSelectionnes.length > 0"
-          class="flex justify-between items-center p-3 bg-white border border-blue-200 rounded-xl mb-4">
-          <span class="text-sm text-gray-600">{{ platsSelectionnes.length }} plat(s)</span>
-          <span class="font-extrabold text-blue-700">{{ getMontantPreview() | number:'1.2-2' }} TND</span>
+        <div *ngIf="platsSelectionnes.length > 0" class="p-4 bg-blue-50 border border-blue-200 rounded-2xl mb-4 flex justify-between items-center">
+          <span class="font-bold text-gray-700">{{ platsSelectionnes.length }} plat(s)</span>
+          <span class="text-xl font-extrabold text-blue-700">{{ getMontantPreview() | number:'1.2-2' }} TND</span>
         </div>
         <div class="flex gap-3">
           <button (click)="submitCommande()" [disabled]="platsSelectionnes.length === 0"
-            class="px-6 py-2 bg-blue-700 text-white rounded-xl font-bold hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed">
+            [ngClass]="platsSelectionnes.length === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-800'"
+            class="px-6 py-2 bg-blue-700 text-white rounded-xl font-bold">
             Confirmer ({{ platsSelectionnes.length }} plat(s))
           </button>
-          <button (click)="showForm = false"
-            class="px-5 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50">
-            Annuler
-          </button>
+          <button (click)="showForm = false" class="px-5 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl">Annuler</button>
         </div>
       </div>
     </div>
   </div>
 
   <!-- STATS ADMIN -->
-  <div *ngIf="roleService.isAdmin()" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+  <div *ngIf="roleService.isAdmin()" class="grid grid-cols-4 gap-4 mb-6">
     <div *ngFor="let s of statuts"
       (click)="selectedStatut = selectedStatut === s ? '' : s"
-      class="bg-white rounded-2xl border-2 p-4 shadow-sm cursor-pointer hover:shadow-md transition-all"
-      [ngClass]="selectedStatut === s ? 'border-blue-400' : 'border-gray-200'">
-      <p class="text-2xl font-extrabold"
+      class="bg-white rounded-2xl border-2 p-5 shadow-sm cursor-pointer transition-all hover:shadow-md"
+      [ngClass]="selectedStatut === s ? 'border-blue-400 bg-blue-50' : 'border-gray-200'">
+      <p class="text-3xl font-extrabold mb-1"
         [ngClass]="{
-          'text-yellow-600': s==='en_attente',
-          'text-blue-600': s==='confirmee',
-          'text-purple-600': s==='prete',
-          'text-green-600': s==='livree'
+          'text-yellow-500': s === 'en_attente',
+          'text-blue-600': s === 'confirmee',
+          'text-indigo-600': s === 'prete',
+          'text-green-600': s === 'livree'
         }">{{ getCountByStatut(s) }}</p>
-      <p class="text-xs text-gray-400 mt-1">{{ s }}</p>
+      <p class="text-xs text-gray-400 font-medium uppercase tracking-wide">{{ s }}</p>
     </div>
-  </div>
-
-  <!-- VALIDATION PAR CODE — ADMIN -->
-  <div *ngIf="roleService.isAdmin()"
-    class="mb-6 p-5 bg-blue-50 border border-blue-200 rounded-2xl">
-    <p class="text-sm font-bold text-blue-800 mb-3">Valider une livraison par code de retrait</p>
-    <div class="flex gap-3">
-      <input type="text" placeholder="Saisir le code (ex: B7F2)"
-        [(ngModel)]="codeRetrait"
-        (ngModelChange)="codeRetrait = codeRetrait.toUpperCase()"
-        maxlength="4"
-        class="flex-1 px-4 py-2 border border-blue-300 rounded-xl text-sm font-mono font-bold tracking-widest text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
-      <button (click)="validerParCode()"
-        class="px-6 py-2 bg-blue-700 text-white rounded-xl font-bold hover:bg-blue-800 text-sm">
-        Valider la livraison
-      </button>
-    </div>
-    <p *ngIf="codeErreur" class="text-xs text-red-500 mt-2">{{ codeErreur }}</p>
   </div>
 
   <!-- STATS EMPLOYE -->
   <div *ngIf="roleService.isEmploye()" class="grid grid-cols-3 gap-4 mb-6">
-    <div class="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm text-center">
+    <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm text-center">
       <p class="text-3xl font-extrabold text-blue-700">{{ commandes.length }}</p>
-      <p class="text-xs text-gray-400 mt-1">Mes commandes</p>
+      <p class="text-xs text-gray-400 mt-1 uppercase tracking-wide">Mes commandes</p>
     </div>
-    <div class="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm text-center">
+    <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm text-center">
       <p class="text-3xl font-extrabold text-blue-500">{{ getCountByStatut('en_attente') }}</p>
-      <p class="text-xs text-gray-400 mt-1">En attente</p>
+      <p class="text-xs text-gray-400 mt-1 uppercase tracking-wide">En attente</p>
     </div>
-    <div class="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm text-center">
-      <p class="text-3xl font-extrabold text-blue-700">{{ getTotalMontant() | number:'1.2-2' }} TND</p>
-      <p class="text-xs text-gray-400 mt-1">Total depense</p>
-    </div>
-  </div>
-
-  <!-- TICKET DE RETRAIT — EMPLOYE (commandes pretes) -->
-  <div *ngIf="roleService.isEmploye() && getCommandesPretes().length > 0" class="mb-6">
-    <p class="text-sm font-bold text-blue-700 mb-3">Votre repas est pret ! Montrez ce ticket au comptoir :</p>
-    <div *ngFor="let c of getCommandesPretes()"
-      class="mb-3 p-5 bg-white border-2 border-purple-400 rounded-2xl shadow-lg relative overflow-hidden">
-      <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-blue-500 to-indigo-500"></div>
-      <div class="flex items-center justify-between mt-2">
-        <div>
-          <p class="text-xs text-gray-400 font-semibold mb-1">TICKET DE RETRAIT</p>
-          <p class="text-sm text-gray-600">Menu : <strong>{{ getMenuTitre(c.menuId) }}</strong></p>
-          <p class="text-sm text-gray-600">Date : {{ c.dateCommande }}</p>
-          <div class="flex flex-wrap gap-1 mt-2">
-            <span *ngFor="let platId of c.plats"
-              class="text-xs px-2 py-1 bg-blue-50 text-blue-700 rounded-full border border-blue-200">
-              {{ getPlatNom(platId) }}
-            </span>
-          </div>
-          <p class="text-sm font-bold text-blue-700 mt-2">{{ c.montantTotal | number:'1.2-2' }} TND</p>
-        </div>
-        <div class="text-center ml-4">
-          <div class="w-24 h-24 bg-blue-700 rounded-2xl flex items-center justify-center shadow-lg">
-            <span class="text-white font-black text-3xl tracking-widest">{{ getCodeRetrait(c) }}</span>
-          </div>
-          <p class="text-xs text-gray-400 mt-2">Code de retrait</p>
-        </div>
-      </div>
+    <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm text-center">
+      <p class="text-3xl font-extrabold text-indigo-600">{{ getTotalMontant() | number:'1.2-2' }} TND</p>
+      <p class="text-xs text-gray-400 mt-1 uppercase tracking-wide">Total depense</p>
     </div>
   </div>
 
-      <!-- BLOC ALLERGIE EMPLOYE -->
+  <!-- BLOC ALLERGIE EMPLOYE -->
   <div *ngIf="roleService.isEmploye()" class="mb-6 p-5 bg-blue-50 border border-blue-200 rounded-2xl">
-    <div class="flex items-center gap-2 mb-3">
-      <p class="text-sm font-bold text-blue-800">Mes allergies — Verification IA</p>
-    </div>
+    <p class="text-sm font-bold text-blue-800 mb-3">Mes allergies — Verification IA</p>
     <div class="flex gap-2 mb-3">
       <input type="text" placeholder="Ajouter une allergie (ex: gluten, lactose...)"
-        [(ngModel)]="nouvelleAllergie"
-        (keyup.enter)="ajouterAllergie()"
+        [(ngModel)]="nouvelleAllergie" (keyup.enter)="ajouterAllergie()"
         class="flex-1 px-4 py-2 border border-blue-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
-      <button (click)="ajouterAllergie()"
-        class="px-4 py-2 bg-blue-700 text-white rounded-xl text-sm font-bold hover:bg-blue-800">
-        Ajouter
-      </button>
+      <button (click)="ajouterAllergie()" class="px-4 py-2 bg-blue-700 text-white rounded-xl text-sm font-bold hover:bg-blue-800">Ajouter</button>
     </div>
     <div *ngIf="allergiesEmploye.length > 0" class="flex flex-wrap gap-2 mb-3">
       <span *ngFor="let a of allergiesEmploye"
         class="flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 border border-blue-300 rounded-full text-xs font-semibold">
-        {{ a }}
-        <button (click)="supprimerAllergie(a)" class="ml-1 font-bold hover:text-blue-900">x</button>
+        {{ a }}<button (click)="supprimerAllergie(a)" class="ml-1 font-bold hover:text-blue-900">x</button>
       </span>
     </div>
-    <button *ngIf="allergiesEmploye.length > 0"
-      (click)="verifierAllergies()"
-      [disabled]="analyseEnCours"
+    <button *ngIf="allergiesEmploye.length > 0" (click)="verifierAllergies()" [disabled]="analyseEnCours"
       class="px-5 py-2 bg-blue-700 text-white rounded-xl text-sm font-bold hover:bg-blue-800 disabled:opacity-50">
-      {{ analyseEnCours ? 'Analyse en cours...' : 'Verifier les plats disponibles' }}
+      {{ analyseEnCours ? 'Analyse...' : 'Verifier les plats disponibles' }}
     </button>
     <div *ngIf="alertesAllergie.length > 0" class="mt-4 space-y-2">
       <p class="text-sm font-bold text-blue-700">Plats a eviter :</p>
-      <div *ngFor="let alerte of alertesAllergie"
-        class="p-3 bg-white border border-blue-200 rounded-xl flex items-start gap-3">
+      <div *ngFor="let alerte of alertesAllergie" class="p-3 bg-white border border-blue-200 rounded-xl flex items-start gap-3">
         <div class="flex-1">
           <p class="font-semibold text-sm text-gray-900">{{ alerte.nom }}</p>
           <p class="text-xs text-blue-600 mt-1">Conflits : {{ alerte.conflits.join(', ') }}</p>
-          <p class="text-xs text-gray-400">Allergenes : {{ alerte.allergenes_presents.join(', ') }}</p>
         </div>
         <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs font-bold">A eviter</span>
       </div>
@@ -229,7 +174,8 @@
   <!-- TICKET EMPLOYE -->
   <div *ngIf="roleService.isEmploye() && getCommandesPretes().length > 0" class="mb-6">
     <p class="text-sm font-bold text-blue-700 mb-3">Votre repas est pret ! Montrez ce ticket au comptoir :</p>
-    <div *ngFor="let c of getCommandesPretes()" class="mb-3 p-5 bg-white border-2 border-purple-400 rounded-2xl shadow-lg relative overflow-hidden">
+    <div *ngFor="let c of getCommandesPretes()"
+      class="mb-3 p-5 bg-white border-2 border-blue-400 rounded-2xl shadow-lg relative overflow-hidden">
       <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-blue-500 to-indigo-500"></div>
       <div class="flex items-center justify-between mt-2">
         <div>
@@ -251,28 +197,37 @@
     </div>
   </div>
 
+  <!-- VALIDATION CODE ADMIN -->
+  <div *ngIf="roleService.isAdmin()" class="mb-6 p-5 bg-blue-50 border border-blue-200 rounded-2xl">
+    <p class="text-sm font-bold text-blue-800 mb-3">Valider une livraison par code</p>
+    <div class="flex gap-3">
+      <input type="text" placeholder="Code (ex: B7F2)"
+        [(ngModel)]="codeRetrait" (ngModelChange)="codeRetrait = codeRetrait.toUpperCase()" maxlength="4"
+        class="flex-1 px-4 py-2 border border-blue-300 rounded-xl text-sm font-mono font-bold tracking-widest text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
+      <button (click)="validerParCode()" class="px-6 py-2 bg-blue-700 text-white rounded-xl font-bold hover:bg-blue-800 text-sm">Valider</button>
+    </div>
+    <p *ngIf="codeErreur" class="text-xs text-red-500 mt-2">{{ codeErreur }}</p>
+  </div>
+
   <!-- BARRE ADMIN -->
-  <div *ngIf="roleService.isAdmin()"
-    class="bg-white border border-gray-200 rounded-2xl p-4 mb-6 shadow-sm flex flex-wrap gap-3 items-center">
+  <div *ngIf="roleService.isAdmin()" class="bg-white border border-gray-200 rounded-2xl p-4 mb-6 shadow-sm flex flex-wrap gap-3 items-center justify-between">
     <input type="text" placeholder="Rechercher par nom employe..."
       [(ngModel)]="searchUserId"
       class="flex-1 min-w-48 px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-    <span class="text-sm text-gray-500">{{ getFiltered().length }} commande(s)</span>
-    <span class="text-sm font-bold text-purple-600">{{ getTotalMontant() | number:'1.2-2' }} TND</span>
-    <button *ngIf="selectedStatut || searchUserId" (click)="selectedStatut=''; searchUserId=''"
-      class="px-3 py-1 bg-gray-100 text-gray-500 rounded-xl text-sm">Reset</button>
+    <div class="flex items-center gap-3">
+      <span class="text-sm text-gray-500">{{ getFiltered().length }} commande(s)</span>
+      <span class="text-sm font-bold text-blue-700">{{ getTotalMontant() | number:'1.2-2' }} TND</span>
+      <button *ngIf="selectedStatut || searchUserId" (click)="selectedStatut=''; searchUserId=''" class="px-3 py-1 bg-gray-100 text-gray-500 rounded-xl text-sm">Reset</button>
+    </div>
   </div>
 
-  <!-- FILTRE EMPLOYE -->
+  <!-- FILTRES EMPLOYE -->
   <div *ngIf="roleService.isEmploye()" class="flex gap-2 flex-wrap mb-4">
     <button *ngFor="let s of statuts"
       (click)="selectedStatut = selectedStatut === s ? '' : s"
       [ngClass]="selectedStatut === s ? 'bg-blue-700 text-white' : 'bg-white text-gray-600 border border-gray-200'"
-      class="px-4 py-2 rounded-xl text-sm font-semibold transition-all">
-      {{ s }}
-    </button>
-    <button *ngIf="selectedStatut" (click)="selectedStatut=''"
-      class="px-4 py-2 bg-gray-100 text-gray-500 rounded-xl text-sm">Reset</button>
+      class="px-4 py-2 rounded-xl text-sm font-semibold transition-all">{{ s }}</button>
+    <button *ngIf="selectedStatut" (click)="selectedStatut=''" class="px-4 py-2 bg-gray-100 text-gray-500 rounded-xl text-sm">Reset</button>
   </div>
 
   <div *ngIf="loading" class="text-center py-12">
@@ -281,90 +236,89 @@
   </div>
 
   <!-- LISTE COMMANDES -->
-  <div class="space-y-3" *ngIf="!loading">
+  <div class="space-y-4" *ngIf="!loading">
     <div *ngFor="let c of getFiltered()"
-      class="bg-white rounded-2xl border shadow-sm hover:shadow-md transition-all p-5"
-      [ngClass]="c.statut === 'prete' && roleService.isEmploye() ? 'border-purple-300 bg-purple-50' : 'border-gray-200'">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      class="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-all overflow-hidden">
+      <div class="h-1 w-full"
+        [ngClass]="{
+          'bg-yellow-400': c.statut === 'en_attente',
+          'bg-blue-500': c.statut === 'confirmee',
+          'bg-indigo-500': c.statut === 'prete',
+          'bg-green-500': c.statut === 'livree'
+        }"></div>
+      <div class="p-5 flex flex-col md:flex-row md:items-start justify-between gap-4">
         <div class="flex-1">
-          <div class="flex items-center gap-3 mb-3">
-            <span class="text-lg font-bold text-gray-900 font-mono">#{{ c.id?.slice(-8) | uppercase }}</span>
-            <span class="px-3 py-1 rounded-full text-xs font-bold" [ngClass]="getStatutClass(c.statut)">
-              {{ c.statut }}
-            </span>
-            <span *ngIf="c.statut === 'prete' && roleService.isEmploye()"
-              class="px-3 py-1 rounded-full text-xs font-bold bg-purple-600 text-white animate-pulse">
-              Pret a retirer !
-            </span>
+          <div class="flex items-center gap-3 mb-4">
+            <span class="text-base font-bold text-gray-900 font-mono bg-gray-100 px-3 py-1 rounded-lg">#{{ c.id?.slice(-8) | uppercase }}</span>
+            <span class="px-3 py-1 rounded-full text-xs font-bold" [ngClass]="getStatutClass(c.statut)">{{ c.statut }}</span>
           </div>
-          <div class="grid grid-cols-2 gap-x-6 gap-y-1 text-sm text-gray-500">
-            <p *ngIf="roleService.isAdmin()">Employe : <span class="font-semibold text-gray-800">{{ getUserNom(c.userId) }}</span></p>
-            <p>Date : <span class="font-semibold text-gray-800">{{ c.dateCommande }}</span></p>
-            <p>Menu : <span class="font-semibold text-gray-800">{{ getMenuTitre(c.menuId) }}</span></p>
-            <p>Montant : <span class="font-bold text-blue-700 text-base">{{ c.montantTotal | number:'1.2-2' }} TND</span></p>
-          </div>
-          <div *ngIf="c.plats?.length" class="mt-3">
-            <p class="text-xs font-semibold text-gray-400 mb-1">Plats commandes :</p>
-            <div class="flex flex-wrap gap-1">
-              <span *ngFor="let platId of c.plats"
-                class="text-xs px-2 py-1 bg-blue-50 text-blue-700 rounded-full border border-blue-100 font-medium">
-                {{ getPlatNom(platId) }}
-              </span>
+          <div class="grid grid-cols-2 gap-3 mb-3">
+            <div *ngIf="roleService.isAdmin()" class="bg-gray-50 rounded-xl p-3">
+              <p class="text-xs text-gray-400 uppercase tracking-wide mb-1">Employe</p>
+              <p class="font-semibold text-gray-800 text-sm">{{ getUserNom(c.userId) }}</p>
+            </div>
+            <div class="bg-gray-50 rounded-xl p-3">
+              <p class="text-xs text-gray-400 uppercase tracking-wide mb-1">Date</p>
+              <p class="font-semibold text-gray-800 text-sm">{{ c.dateCommande }}</p>
+            </div>
+            <div class="bg-gray-50 rounded-xl p-3">
+              <p class="text-xs text-gray-400 uppercase tracking-wide mb-1">Menu</p>
+              <p class="font-semibold text-gray-800 text-sm">{{ getMenuTitre(c.menuId) }}</p>
+            </div>
+            <div class="bg-blue-50 rounded-xl p-3">
+              <p class="text-xs text-blue-400 uppercase tracking-wide mb-1">Montant</p>
+              <p class="font-extrabold text-blue-700 text-lg">{{ c.montantTotal | number:'1.2-2' }} TND</p>
             </div>
           </div>
-          <!-- Code visible pour l'admin sur les commandes pretes -->
-          <div *ngIf="roleService.isAdmin() && c.statut === 'prete'"
-            class="mt-3 flex items-center gap-3 p-3 bg-purple-50 border border-purple-200 rounded-xl">
-            <span class="text-xs text-purple-600 font-semibold">Code de retrait de l'employe :</span>
-            <span class="font-black text-purple-800 text-xl tracking-widest font-mono">{{ getCodeRetrait(c) }}</span>
+          <div *ngIf="c.plats?.length" class="flex flex-wrap gap-1">
+            <span *ngFor="let platId of c.plats" class="text-xs px-2 py-1 bg-blue-50 text-blue-700 rounded-full border border-blue-100 font-medium">
+              {{ getPlatNom(platId) }}
+            </span>
+          </div>
+          <div *ngIf="roleService.isAdmin() && c.statut === 'prete'" class="mt-3 flex items-center gap-3 p-3 bg-indigo-50 border border-indigo-200 rounded-xl">
+            <span class="text-xs text-indigo-600 font-semibold">Code retrait :</span>
+            <span class="font-black text-indigo-800 text-xl tracking-widest font-mono">{{ getCodeRetrait(c) }}</span>
           </div>
         </div>
 
         <!-- ACTIONS ADMIN -->
-        <div *ngIf="roleService.isAdmin()" class="flex flex-col gap-2 min-w-56">
+        <div *ngIf="roleService.isAdmin()" class="flex flex-col gap-2 min-w-52">
           <button *ngIf="getNextStatut(c.statut)"
             (click)="updateStatut(c.id!, getNextStatut(c.statut)!)"
-            class="w-full px-4 py-2 bg-blue-700 text-white rounded-xl text-sm font-bold hover:bg-blue-800">
+            class="w-full px-4 py-2.5 bg-blue-700 text-white rounded-xl text-sm font-bold hover:bg-blue-800 transition-all">
             {{ getNextStatutLabel(c.statut) }}
           </button>
-          <div *ngIf="!getNextStatut(c.statut)"
-            class="w-full px-4 py-2 bg-green-50 text-green-700 border border-green-200 rounded-xl text-sm font-bold text-center">
-            Completee
+          <div *ngIf="!getNextStatut(c.statut)" class="w-full px-4 py-2.5 bg-green-50 text-green-700 border border-green-200 rounded-xl text-sm font-bold text-center">
+            Completee ✓
           </div>
-          <div class="flex gap-1">
+          <div class="grid grid-cols-5 gap-1">
             <button *ngFor="let s of statuts"
               (click)="updateStatut(c.id!, s)"
               [disabled]="c.statut === s"
-              [ngClass]="c.statut === s ? 'opacity-30 cursor-not-allowed' : 'hover:bg-gray-100'"
-              class="flex-1 px-2 py-1 border border-gray-200 rounded-lg text-xs transition-all text-center">
+              [ngClass]="c.statut === s ? 'opacity-30 cursor-not-allowed bg-gray-100' : 'hover:bg-gray-50 bg-white'"
+              class="py-1.5 border border-gray-200 rounded-lg text-xs transition-all text-center font-medium">
               {{ s | slice:0:3 }}
             </button>
-            <button (click)="deleteCommande(c.id!)"
-              class="px-3 py-1 bg-red-50 text-red-500 border border-red-200 rounded-lg text-xs hover:bg-red-100">
+            <button (click)="deleteCommande(c.id!)" class="py-1.5 bg-red-50 text-red-500 border border-red-200 rounded-lg text-xs hover:bg-red-100 font-medium">
               Sup
             </button>
           </div>
         </div>
 
         <!-- ACTIONS EMPLOYE -->
-        <div *ngIf="roleService.isEmploye()" class="flex flex-col gap-2 items-end">
-          <div class="px-4 py-2 rounded-xl text-sm font-bold" [ngClass]="getStatutClass(c.statut)">
-            {{ c.statut }}
-          </div>
+        <div *ngIf="roleService.isEmploye()" class="flex flex-col gap-2 items-end min-w-36">
+          <div class="px-4 py-2 rounded-xl text-sm font-bold" [ngClass]="getStatutClass(c.statut)">{{ c.statut }}</div>
           <button *ngIf="canDelete(c)" (click)="deleteCommande(c.id!)"
             class="px-4 py-1.5 bg-red-50 text-red-500 border border-red-200 rounded-xl text-xs hover:bg-red-100">
-            Annuler la commande
+            Annuler
           </button>
           <p *ngIf="!canDelete(c) && c.statut !== 'livree'" class="text-xs text-gray-400 italic">Non annulable</p>
         </div>
       </div>
     </div>
 
-    <div *ngIf="getFiltered().length === 0"
-      class="text-center py-16 bg-white rounded-2xl border border-gray-200">
-      <p class="text-gray-400 font-medium">
-        {{ roleService.isEmploye() ? 'Vous n avez pas encore de commandes.' : 'Aucune commande.' }}
-      </p>
+    <div *ngIf="getFiltered().length === 0" class="text-center py-16 bg-white rounded-2xl border border-gray-200">
+      <p class="text-gray-400 font-medium">{{ roleService.isEmploye() ? 'Pas encore de commandes.' : 'Aucune commande.' }}</p>
       <button *ngIf="roleService.isEmploye()" (click)="ouvrirFormulaire()"
         class="mt-4 px-5 py-2 bg-blue-700 text-white rounded-xl text-sm font-semibold hover:bg-blue-800">
         Passer ma premiere commande
@@ -373,7 +327,4 @@
   </div>
 
 </div>
-
-
-
-
+</div>

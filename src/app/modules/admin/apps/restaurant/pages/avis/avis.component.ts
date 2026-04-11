@@ -6,6 +6,7 @@ import { MenuService } from 'src/app/services/menu.service';
 import { HttpClient } from '@angular/common/http';
 import { RoleService } from 'app/core/auth/role.service';
 import { Plat } from 'src/app/models/menu';
+import { AllergieIaService } from 'src/app/services/allergie-ia.service';
 
 @Component({
   selector: 'app-avis',
@@ -21,6 +22,9 @@ export class AvisComponent implements OnInit {
   showForm = false;
   filterNote = 0;
   usersCache: { [id: string]: string } = {};
+  sentimentsCache: { [id: string]: any } = {};
+  reponseIa: any = null;
+  analyseEnCours = false;
 
   newAvis: Partial<Avis> = { note: 5, commentaire: '', platId: '' };
 
@@ -29,7 +33,8 @@ export class AvisComponent implements OnInit {
     private commandeService: CommandeService,
     private menuService: MenuService,
     private http: HttpClient,
-    public roleService: RoleService
+    public roleService: RoleService,
+    private allergieIa: AllergieIaService
   ) {}
 
   ngOnInit(): void {
@@ -61,6 +66,11 @@ export class AvisComponent implements OnInit {
         if (this.roleService.isAdmin()) {
           const ids = [...new Set(data.map(a => a.userId))];
           ids.forEach(id => this.loadUserNom(id));
+          data.forEach(a => {
+            if (a.commentaire && a.id && !this.sentimentsCache[a.id]) {
+              this.analyserPourAdmin(a);
+            }
+          });
         }
         this.avisList = filtered.sort((a, b) =>
           new Date(b.date).getTime() - new Date(a.date).getTime()
@@ -69,6 +79,33 @@ export class AvisComponent implements OnInit {
       },
       error: () => { this.errorMsg = 'Erreur chargement.'; this.loading = false; }
     });
+  }
+
+  analyserPourAdmin(avis: Avis): void {
+    if (!avis.commentaire || !avis.id) return;
+    this.allergieIa.analyserAvis(avis.commentaire, avis.note).subscribe({
+      next: (res) => { this.sentimentsCache[avis.id!] = res; },
+      error: () => {}
+    });
+  }
+
+  getSentiment(avisId: string): any {
+    return this.sentimentsCache[avisId] || null;
+  }
+
+  getSentimentClass(sentiment: string): string {
+    switch (sentiment) {
+      case 'positif': return 'bg-blue-100 text-blue-700 border border-blue-300';
+      case 'negatif': return 'bg-red-100 text-red-700 border border-red-300';
+      default: return 'bg-gray-100 text-gray-600 border border-gray-300';
+    }
+  }
+
+  getPourcentagePositifs(): number {
+    const avecCommentaire = this.avisList.filter(a => a.commentaire && a.id && this.sentimentsCache[a.id]);
+    if (!avecCommentaire.length) return 0;
+    const positifs = avecCommentaire.filter(a => this.sentimentsCache[a.id!]?.sentiment === 'positif');
+    return Math.round((positifs.length / avecCommentaire.length) * 100);
   }
 
   loadPlatsCommandes(): void {
@@ -124,15 +161,31 @@ export class AvisComponent implements OnInit {
       commentaire: this.newAvis.commentaire || '',
       date: new Date().toISOString().split('T')[0]
     };
+    this.analyseEnCours = true;
     this.avisService.createAvis(avis).subscribe({
       next: () => {
-        this.successMsg = 'Avis envoye !';
-        setTimeout(() => this.successMsg = '', 3000);
-        this.showForm = false;
-        this.newAvis = { note: 5, commentaire: '', platId: '' };
-        this.loadAvis();
+        this.allergieIa.analyserAvis(avis.commentaire, avis.note).subscribe({
+          next: (res) => {
+            this.reponseIa = res;
+            this.analyseEnCours = false;
+            this.showForm = false;
+            this.newAvis = { note: 5, commentaire: '', platId: '' };
+            this.loadAvis();
+            setTimeout(() => this.reponseIa = null, 6000);
+          },
+          error: () => {
+            this.analyseEnCours = false;
+            this.successMsg = 'Avis envoye !';
+            setTimeout(() => this.successMsg = '', 3000);
+            this.showForm = false;
+            this.loadAvis();
+          }
+        });
       },
-      error: (err) => { this.errorMsg = err.error?.message || 'Erreur ajout avis.'; }
+      error: (err) => {
+        this.analyseEnCours = false;
+        this.errorMsg = err.error?.message || 'Erreur ajout avis.';
+      }
     });
   }
 

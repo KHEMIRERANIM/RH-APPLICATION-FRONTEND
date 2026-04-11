@@ -300,4 +300,13 @@ export class CommandesComponent implements OnInit {
     const menu = this.menus.find(m => m.id === menuId);
     return menu ? menu.titre : '-';
   }
+  getStatutIcon(statut: string): string {
+    switch (statut) {
+      case 'en_attente': return '';
+      case 'confirmee':  return '';
+      case 'prete':      return '';
+      case 'livree':     return '';
+      default:           return '';
+    }
+  }
 }

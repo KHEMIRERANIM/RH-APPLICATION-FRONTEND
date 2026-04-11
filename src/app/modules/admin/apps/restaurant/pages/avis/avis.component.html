@@ -1,4 +1,4 @@
-﻿<div>
+﻿<div class="p-6">
 
   <div class="flex items-center justify-between mb-6">
     <div>
@@ -15,23 +15,56 @@
     </button>
   </div>
 
-  <div *ngIf="successMsg" class="mb-4 p-3 bg-green-100 text-green-700 rounded-xl flex justify-between">
-    <span>✅ {{ successMsg }}</span><button (click)="successMsg=''" class="font-bold">X</button>
+  <div *ngIf="successMsg" class="mb-4 p-3 bg-blue-100 text-blue-700 rounded-xl flex justify-between">
+    <span>{{ successMsg }}</span><button (click)="successMsg=''" class="font-bold">X</button>
   </div>
   <div *ngIf="errorMsg" class="mb-4 p-3 bg-red-100 text-red-700 rounded-xl flex justify-between">
-    <span>❌ {{ errorMsg }}</span><button (click)="errorMsg=''" class="font-bold">X</button>
+    <span>{{ errorMsg }}</span><button (click)="errorMsg=''" class="font-bold">X</button>
+  </div>
+
+  <!-- REPONSE IA APRES ENVOI AVIS -->
+  <div *ngIf="reponseIa" class="mb-6 p-5 bg-blue-50 border-2 border-blue-300 rounded-2xl flex items-center gap-4">
+    <span class="text-4xl">{{ reponseIa.emoji }}</span>
+    <div class="flex-1">
+      <p class="font-bold text-blue-800 mb-1">Analyse IA de votre avis</p>
+      <p class="text-sm text-blue-700">{{ reponseIa.message }}</p>
+      <div *ngIf="reponseIa.points_cles?.length > 0" class="flex flex-wrap gap-1 mt-2">
+        <span *ngFor="let p of reponseIa.points_cles"
+          class="px-2 py-0.5 bg-blue-100 text-blue-600 border border-blue-200 rounded-full text-xs font-semibold">
+          {{ p }}
+        </span>
+      </div>
+    </div>
+    <span class="px-3 py-1 rounded-full text-xs font-bold border"
+      [ngClass]="reponseIa.sentiment === 'positif' ? 'bg-blue-100 text-blue-700 border-blue-300' :
+                 reponseIa.sentiment === 'negatif' ? 'bg-red-100 text-red-700 border-red-300' :
+                 'bg-gray-100 text-gray-600 border-gray-300'">
+      {{ reponseIa.sentiment }}
+    </span>
+  </div>
+
+  <!-- RESUME IA ADMIN -->
+  <div *ngIf="roleService.isAdmin() && avisList.length > 0"
+    class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-2xl flex items-center gap-4">
+    <div class="w-10 h-10 bg-blue-700 rounded-xl flex items-center justify-center flex-shrink-0">
+      <span class="text-white font-bold text-sm">IA</span>
+    </div>
+    <div class="flex-1">
+      <p class="text-sm font-bold text-blue-800">Analyse IA des avis</p>
+      <p class="text-xs text-blue-600 mt-0.5">
+        {{ getPourcentagePositifs() }}% d avis positifs sur {{ avisList.length }} avis
+      </p>
+    </div>
+    <div class="text-2xl font-extrabold text-blue-700">{{ getPourcentagePositifs() }}%</div>
   </div>
 
   <!-- FORMULAIRE EMPLOYE -->
   <div *ngIf="showForm && roleService.isEmploye()"
     class="mb-6 p-5 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl shadow-sm">
     <h3 class="text-lg font-bold mb-4 text-blue-800">Donner un avis sur un plat</h3>
-
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-      <!-- Choix du plat -->
       <div class="sm:col-span-2">
-        <label class="text-xs font-semibold text-gray-500 mb-1 block">Choisir un plat que vous avez commande *</label>
+        <label class="text-xs font-semibold text-gray-500 mb-1 block">Choisir un plat *</label>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
           <div *ngFor="let plat of platsCommandes"
             (click)="!dejaAvis(plat.platId!) && (newAvis.platId = plat.platId)"
@@ -53,27 +86,18 @@
             </div>
           </div>
         </div>
-        <p *ngIf="platsCommandes.length === 0" class="text-sm text-gray-400 italic mt-2">
-          Vous n'avez pas encore commande de plats.
-        </p>
       </div>
-
-      <!-- Note -->
       <div>
         <label class="text-xs font-semibold text-gray-500 mb-2 block">Note *</label>
         <div class="flex gap-2">
           <button *ngFor="let i of [1,2,3,4,5]" (click)="newAvis.note = i"
             class="text-3xl transition-all hover:scale-125"
-            [ngClass]="i <= newAvis.note! ? 'text-yellow-400' : 'text-gray-300'">
-            ★
-          </button>
+            [ngClass]="i <= newAvis.note! ? 'text-yellow-400' : 'text-gray-300'">★</button>
         </div>
         <p class="text-xs text-gray-400 mt-1">
           {{ newAvis.note === 1 ? 'Tres mauvais' : newAvis.note === 2 ? 'Mauvais' : newAvis.note === 3 ? 'Moyen' : newAvis.note === 4 ? 'Bon' : 'Excellent' }}
         </p>
       </div>
-
-      <!-- Commentaire -->
       <div>
         <label class="text-xs font-semibold text-gray-500 mb-1 block">Commentaire (optionnel)</label>
         <textarea placeholder="Partagez votre experience..." [(ngModel)]="newAvis.commentaire"
@@ -81,12 +105,11 @@
         </textarea>
       </div>
     </div>
-
     <div class="flex gap-3 mt-4">
-      <button (click)="createAvis()" [disabled]="!newAvis.platId"
-        [ngClass]="!newAvis.platId ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-800'"
+      <button (click)="createAvis()" [disabled]="!newAvis.platId || analyseEnCours"
+        [ngClass]="(!newAvis.platId || analyseEnCours) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-800'"
         class="px-5 py-2 bg-blue-700 text-white rounded-xl font-semibold">
-        Envoyer l'avis
+        {{ analyseEnCours ? 'Analyse IA...' : 'Envoyer l avis' }}
       </button>
       <button (click)="showForm = false"
         class="px-5 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50">
@@ -102,7 +125,7 @@
       <p class="text-xs text-gray-400 mt-1">{{ roleService.isAdmin() ? 'Total avis' : 'Mes avis' }}</p>
     </div>
     <div class="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm text-center">
-      <p class="text-3xl font-extrabold text-yellow-500">{{ getMoyenne() | number:'1.1-1' }} / 5</p>
+      <p class="text-3xl font-extrabold text-blue-500">{{ getMoyenne() | number:'1.1-1' }} / 5</p>
       <p class="text-xs text-gray-400 mt-1">Note moyenne</p>
     </div>
     <div class="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm text-center col-span-2 md:col-span-1">
@@ -116,7 +139,6 @@
     </div>
   </div>
 
-  <!-- Loading -->
   <div *ngIf="loading" class="text-center py-12">
     <div class="inline-block w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
     <p class="mt-3 text-gray-500">Chargement...</p>
@@ -128,25 +150,34 @@
       class="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-all p-5">
       <div class="flex items-start justify-between mb-3">
         <div>
-          <p class="font-bold text-gray-900" *ngIf="roleService.isAdmin()">👤 {{ getUserNom(a.userId) }}</p>
-          <p class="text-sm font-semibold text-blue-700">
-            🍽️ {{ getPlatNom(a.platId) }}
-          </p>
+          <p class="font-bold text-gray-900" *ngIf="roleService.isAdmin()">{{ getUserNom(a.userId) }}</p>
+          <p class="text-sm font-semibold text-blue-700">{{ getPlatNom(a.platId) }}</p>
           <p class="text-xs text-gray-400 mt-1">{{ a.date }}</p>
         </div>
-        <button (click)="deleteAvis(a.id!)"
-          class="text-red-400 hover:text-red-600 text-lg transition-all">🗑️</button>
+        <div class="flex flex-col items-end gap-1">
+          <button (click)="deleteAvis(a.id!)" class="text-gray-300 hover:text-red-400 text-lg">🗑️</button>
+          <span *ngIf="roleService.isAdmin() && getSentiment(a.id!)"
+            class="px-2 py-0.5 rounded-full text-xs font-bold border"
+            [ngClass]="getSentimentClass(getSentiment(a.id!).sentiment)">
+            {{ getSentiment(a.id!).emoji }} {{ getSentiment(a.id!).sentiment }}
+          </span>
+        </div>
       </div>
       <div class="text-xl mb-2">{{ getStars(a.note) }}</div>
       <p *ngIf="a.commentaire" class="text-sm text-gray-600 italic bg-gray-50 rounded-xl p-3">
         "{{ a.commentaire }}"
       </p>
       <p *ngIf="!a.commentaire" class="text-xs text-gray-300 italic">Aucun commentaire</p>
+      <div *ngIf="roleService.isAdmin() && getSentiment(a.id!)?.points_cles?.length > 0"
+        class="flex flex-wrap gap-1 mt-2">
+        <span *ngFor="let p of getSentiment(a.id!).points_cles"
+          class="px-2 py-0.5 bg-blue-50 text-blue-600 border border-blue-100 rounded-full text-xs">
+          {{ p }}
+        </span>
+      </div>
     </div>
-
     <div *ngIf="getFiltered().length === 0"
       class="col-span-3 text-center py-16 bg-white rounded-2xl border border-gray-200">
-      <p class="text-4xl mb-3">💬</p>
       <p class="text-gray-400">{{ roleService.isEmploye() ? 'Pas encore d avis.' : 'Aucun avis.' }}</p>
       <button *ngIf="roleService.isEmploye() && platsCommandes.length > 0" (click)="showForm = true"
         class="mt-4 px-5 py-2 bg-blue-700 text-white rounded-xl text-sm hover:bg-blue-800">
@@ -155,6 +186,3 @@
     </div>
   </div>
 </div>
-
-
-

@@ -188,4 +188,46 @@ export class PlatsComponent implements OnInit, OnDestroy {
     if (!this.allPlats.length) return 0;
     return this.allPlats.reduce((s, p) => s + (p.prix || 0), 0) / this.allPlats.length;
   }
+
+  supprimerPlat(plat: PlatVue): void {
+    if (!confirm('Supprimer "' + plat.nom + '" ?')) return;
+    this.menuService.deletePlat(plat.menuId, plat.platId!).subscribe({
+      next: () => {
+        this.successMsg = '"' + plat.nom + '" supprime avec succes.';
+        setTimeout(() => this.successMsg = '', 4000);
+        this.loadPlats();
+      },
+      error: () => { this.errorMsg = 'Erreur lors de la suppression.'; }
+    });
+  }
+  showEditModal = false;
+  platEnEdition: Partial<PlatVue> = {};
+
+  ouvrirEditionPlat(plat: PlatVue): void {
+    this.platEnEdition = { ...plat };
+    this.showEditModal = true;
+  }
+
+  fermerModal(): void {
+    this.showEditModal = false;
+    this.platEnEdition = {};
+  }
+
+  sauvegarderPlat(): void {
+    if (!this.platEnEdition.menuId || !this.platEnEdition.platId) return;
+    this.menuService.updatePlat(
+      this.platEnEdition.menuId,
+      this.platEnEdition.platId,
+      this.platEnEdition
+    ).subscribe({
+      next: () => {
+        this.successMsg = '"' + this.platEnEdition.nom + '" mis a jour avec succes.';
+        setTimeout(() => this.successMsg = '', 4000);
+        this.showEditModal = false;
+        this.platEnEdition = {};
+        this.loadPlats();
+      },
+      error: () => { this.errorMsg = 'Erreur lors de la mise a jour.'; }
+    });
+  }
 }
