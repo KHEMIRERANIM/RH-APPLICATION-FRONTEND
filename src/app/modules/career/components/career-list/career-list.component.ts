@@ -25,69 +25,72 @@ export class CareerListComponent implements OnInit, AfterViewInit {
   activeTab = 0;
   tabs: { icon: string; label: string }[] = [];
 
-  total = 0;
-  totalRemote = 0;
-  totalDisabled = 0;
+  total          = 0;
+  totalRemote    = 0;
+  totalDisabled  = 0;
   totalSeniorPlus = 0;
 
+  // ✅ Stocker tous les careers pour les passer au formulaire de mobilité
+  allCareers: Career[] = [];
+
   @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild(MatSort)      sort!:      MatSort;
 
   domainLabels: Record<CareerDomain, string> = {
-    [CareerDomain.IT]: 'Informatique',
-    [CareerDomain.FINANCE]: 'Finance',
-    [CareerDomain.RH]: 'Ressources Humaines',
-    [CareerDomain.MARKETING]: 'Marketing',
-    [CareerDomain.LEGAL]: 'Juridique',
-    [CareerDomain.OPERATIONS]: 'Opérations',
-    [CareerDomain.SALES]: 'Commercial',
+    [CareerDomain.IT]:          'Informatique',
+    [CareerDomain.FINANCE]:     'Finance',
+    [CareerDomain.RH]:          'Ressources Humaines',
+    [CareerDomain.MARKETING]:   'Marketing',
+    [CareerDomain.LEGAL]:       'Juridique',
+    [CareerDomain.OPERATIONS]:  'Opérations',
+    [CareerDomain.SALES]:       'Commercial',
     [CareerDomain.ENGINEERING]: 'Ingénierie',
-    [CareerDomain.HEALTH]: 'Santé',
-    [CareerDomain.EDUCATION]: 'Éducation'
+    [CareerDomain.HEALTH]:      'Santé',
+    [CareerDomain.EDUCATION]:   'Éducation'
   };
 
   domainColors: Record<CareerDomain, string> = {
-    [CareerDomain.IT]: 'bg-blue-100 text-blue-700',
-    [CareerDomain.FINANCE]: 'bg-green-100 text-green-700',
-    [CareerDomain.RH]: 'bg-pink-100 text-pink-700',
-    [CareerDomain.MARKETING]: 'bg-purple-100 text-purple-700',
-    [CareerDomain.LEGAL]: 'bg-yellow-100 text-yellow-700',
-    [CareerDomain.OPERATIONS]: 'bg-orange-100 text-orange-700',
-    [CareerDomain.SALES]: 'bg-teal-100 text-teal-700',
+    [CareerDomain.IT]:          'bg-blue-100 text-blue-700',
+    [CareerDomain.FINANCE]:     'bg-green-100 text-green-700',
+    [CareerDomain.RH]:          'bg-pink-100 text-pink-700',
+    [CareerDomain.MARKETING]:   'bg-purple-100 text-purple-700',
+    [CareerDomain.LEGAL]:       'bg-yellow-100 text-yellow-700',
+    [CareerDomain.OPERATIONS]:  'bg-orange-100 text-orange-700',
+    [CareerDomain.SALES]:       'bg-teal-100 text-teal-700',
     [CareerDomain.ENGINEERING]: 'bg-indigo-100 text-indigo-700',
-    [CareerDomain.HEALTH]: 'bg-red-100 text-red-700',
-    [CareerDomain.EDUCATION]: 'bg-cyan-100 text-cyan-700'
+    [CareerDomain.HEALTH]:      'bg-red-100 text-red-700',
+    [CareerDomain.EDUCATION]:   'bg-cyan-100 text-cyan-700'
   };
 
   levelColors: Record<CareerLevel, string> = {
-    [CareerLevel.INTERN]: 'text-gray-400',
-    [CareerLevel.JUNIOR]: 'text-gray-500',
-    [CareerLevel.MID]: 'text-blue-500',
-    [CareerLevel.SENIOR]: 'text-indigo-600',
-    [CareerLevel.LEAD]: 'text-purple-600',
-    [CareerLevel.MANAGER]: 'text-orange-600',
-    [CareerLevel.DIRECTOR]: 'text-red-600',
+    [CareerLevel.INTERN]:    'text-gray-400',
+    [CareerLevel.JUNIOR]:    'text-gray-500',
+    [CareerLevel.MID]:       'text-blue-500',
+    [CareerLevel.SENIOR]:    'text-indigo-600',
+    [CareerLevel.LEAD]:      'text-purple-600',
+    [CareerLevel.MANAGER]:   'text-orange-600',
+    [CareerLevel.DIRECTOR]:  'text-red-600',
     [CareerLevel.EXECUTIVE]: 'text-rose-700'
   };
 
   levelIcons: Record<CareerLevel, string> = {
-    [CareerLevel.INTERN]: '○',
-    [CareerLevel.JUNIOR]: '◔',
-    [CareerLevel.MID]: '◑',
-    [CareerLevel.SENIOR]: '◕',
-    [CareerLevel.LEAD]: '★',
-    [CareerLevel.MANAGER]: '▲',
-    [CareerLevel.DIRECTOR]: '◆',
+    [CareerLevel.INTERN]:    '○',
+    [CareerLevel.JUNIOR]:    '◔',
+    [CareerLevel.MID]:       '◑',
+    [CareerLevel.SENIOR]:    '◕',
+    [CareerLevel.LEAD]:      '★',
+    [CareerLevel.MANAGER]:   '▲',
+    [CareerLevel.DIRECTOR]:  '◆',
     [CareerLevel.EXECUTIVE]: '♛'
   };
 
   constructor(
     private careerService: CareerService,
-    private dialog: MatDialog,
-    private snackBar: MatSnackBar,
-    private cdr: ChangeDetectorRef,
-    private ngZone: NgZone,
-    public authRole: AuthRoleService  // ✅ public pour l'utiliser dans le HTML
+    private dialog:        MatDialog,
+    private snackBar:      MatSnackBar,
+    private cdr:           ChangeDetectorRef,
+    private ngZone:        NgZone,
+    public  authRole:      AuthRoleService
   ) {}
 
   ngOnInit(): void {
@@ -98,33 +101,29 @@ export class CareerListComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
+    this.dataSource.sort      = this.sort;
   }
 
-  // ✅ Onglets selon le rôle
   buildTabs(): void {
     if (this.authRole.isAdminOrRH()) {
       this.tabs = [
         { icon: '💼', label: 'Positions' },
-        { icon: '🔄', label: 'Mobilité Interne' },
-        { icon: '📈', label: "Plans d'Évolution" }
+        { icon: '🔄', label: 'Mobilité'  },
+        { icon: '📈', label: 'Plans'     }
       ];
     } else {
-      // Employé : seulement Postes + ses demandes + son plan
       this.tabs = [
         { icon: '💼', label: 'Postes Disponibles' },
-        { icon: '🔄', label: 'Mes Demandes' },
-        { icon: '📈', label: 'Mon Plan' }
+        { icon: '🔄', label: 'Mes Demandes'       },
+        { icon: '📈', label: 'Mon Plan'            }
       ];
     }
   }
 
-  // ✅ Colonnes selon le rôle
   buildColumns(): void {
     if (this.authRole.isAdminOrRH()) {
       this.displayedColumns = ['title', 'domain', 'level', 'salary', 'options', 'actions'];
     } else {
-      // Employé : pas de colonne actions admin
       this.displayedColumns = ['title', 'domain', 'level', 'salary', 'options', 'employee-actions'];
     }
   }
@@ -134,13 +133,15 @@ export class CareerListComponent implements OnInit, AfterViewInit {
     this.careerService.getAll().subscribe({
       next: (data) => {
         this.ngZone.run(() => {
-          this.dataSource.data = data;
+          this.allCareers        = data;     // ✅ stocker tous les careers
+          this.dataSource.data   = data;
+          this.dataSource._updateChangeSubscription();
           this.computeStats(data);
           this.isLoading = false;
           this.cdr.detectChanges();
           Promise.resolve().then(() => {
             this.dataSource.paginator = this.paginator;
-            this.dataSource.sort = this.sort;
+            this.dataSource.sort      = this.sort;
             this.cdr.detectChanges();
           });
         });
@@ -156,13 +157,13 @@ export class CareerListComponent implements OnInit, AfterViewInit {
   }
 
   computeStats(data: Career[]): void {
-    this.total = data.length;
-    this.totalRemote = data.filter(c => c.isRemoteFriendly).length;
+    this.total         = data.length;
+    this.totalRemote   = data.filter(c => c.isRemoteFriendly).length;
     this.totalDisabled = data.filter(c => c.isAccessibleForDisabled).length;
     this.totalSeniorPlus = data.filter(c =>
-      c.level === CareerLevel.SENIOR ||
-      c.level === CareerLevel.LEAD ||
-      c.level === CareerLevel.MANAGER ||
+      c.level === CareerLevel.SENIOR   ||
+      c.level === CareerLevel.LEAD     ||
+      c.level === CareerLevel.MANAGER  ||
       c.level === CareerLevel.DIRECTOR ||
       c.level === CareerLevel.EXECUTIVE
     ).length;
@@ -183,9 +184,9 @@ export class CareerListComponent implements OnInit, AfterViewInit {
 
   openForm(career?: Career): void {
     const dialogRef = this.dialog.open(CareerFormComponent, {
-      width: '700px',
-      maxWidth: '95vw',
-      data: career ? { ...career } : null,
+      width:      '700px',
+      maxWidth:   '95vw',
+      data:       career ? { ...career } : null,
       panelClass: 'career-dialog'
     });
     dialogRef.afterClosed().subscribe(result => {
@@ -195,9 +196,9 @@ export class CareerListComponent implements OnInit, AfterViewInit {
 
   viewEmployees(career: Career): void {
     this.dialog.open(CareerEmployeesDialogComponent, {
-      width: '560px',
-      maxWidth: '95vw',
-      data: career,
+      width:      '560px',
+      maxWidth:   '95vw',
+      data:       career,
       panelClass: 'career-dialog'
     });
   }
@@ -205,13 +206,11 @@ export class CareerListComponent implements OnInit, AfterViewInit {
   deleteCareer(career: Career): void {
     if (!confirm(`Delete position "${career.title}"?`)) return;
     this.careerService.delete(career.id!).subscribe({
-      next: () => {
+      next:  () => {
         this.snackBar.open('Position deleted', 'OK', { duration: 3000 });
         this.loadCareers();
       },
-      error: () => {
-        this.snackBar.open('Error deleting position', 'Close', { duration: 3000 });
-      }
+      error: () => this.snackBar.open('Error deleting position', 'Close', { duration: 3000 })
     });
   }
 
@@ -222,19 +221,20 @@ export class CareerListComponent implements OnInit, AfterViewInit {
     if (career.salaryMin) return `From ${career.salaryMin.toLocaleString()} TND`;
     return `Up to ${career.salaryMax!.toLocaleString()} TND`;
   }
+
   openMobilityForm(career: Career): void {
-  const ref = this.dialog.open(MobilityRequestFormComponent, {
-    width: '600px',
-    maxWidth: '95vw',
-    data: {
-      careers: [career],
-      preselectedCareerId: career.id,
-      employeeId: this.authRole.getCurrentUserId()
-    },
-    panelClass: 'career-dialog'
-  });
-  ref.afterClosed().subscribe(result => {
-    if (result) this.snackBar.open('Demande soumise !', 'OK', { duration: 3000 });
-  });
-}
+    const ref = this.dialog.open(MobilityRequestFormComponent, {
+      width:      '600px',
+      maxWidth:   '95vw',
+      data: {
+        careers:             this.allCareers,   // ✅ tous les careers avec certifRequises
+        preselectedCareerId: career.id,
+        employeeId:          this.authRole.getCurrentUserId()
+      },
+      panelClass: 'career-dialog'
+    });
+    ref.afterClosed().subscribe(result => {
+      if (result) this.snackBar.open('Demande soumise !', 'OK', { duration: 3000 });
+    });
+  }
 }

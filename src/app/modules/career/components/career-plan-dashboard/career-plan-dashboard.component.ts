@@ -195,13 +195,42 @@ export class CareerPlanDashboardComponent implements OnInit {
     });
   }
 
-  saveCertifAdmin(certif: EmployeeCertification): void {
-    if (!this.selectedPlan?.id || !certif.id) return;
-    this.evolutionPlanService.updateCertification(
-      this.selectedPlan.id, certif.id,
-      { valideParAdmin: certif.valideParAdmin, commentaireAdmin: certif.commentaireAdmin }
-    ).subscribe();
+  validateCertif(certif: EmployeeCertification, valide: boolean): void {
+  certif.valideParAdmin = valide;
+  this.saveCertifAdmin(certif);
+}
+
+toggleObligatoire(certif: EmployeeCertification): void {
+  certif.obligatoire = !certif.obligatoire;
+  this.saveCertifAdmin(certif);
+}
+
+saveCertifAdmin(certif: EmployeeCertification): void {
+  if (!this.selectedPlan?.id || !certif.id) return;
+  const payload: any = {
+    valideParAdmin:   certif.valideParAdmin,
+    commentaireAdmin: certif.commentaireAdmin,
+    obligatoire:      certif.obligatoire
+  };
+  // ✅ validation admin = statut OBTENU automatiquement
+  if (certif.valideParAdmin === true) {
+    payload.statut = 'OBTENU';
+    certif.statut  = 'OBTENU' as any;
   }
+  this.evolutionPlanService.updateCertification(
+    this.selectedPlan.id, certif.id, payload
+  ).subscribe({
+    next: updatedPlan => {
+      this.selectedPlan = {
+        ...updatedPlan,
+        employeeName:       this.getUserName(updatedPlan.employeeId),
+        currentCareerTitle: this.getCareerTitle(updatedPlan.currentCareerId ?? ''),
+        targetCareerTitle:  this.getCareerTitle(updatedPlan.targetCareerId)
+      };
+      this.snackBar.open('Certif validée — score mis à jour ✓', 'OK', { duration: 2500 });
+    }
+  });
+}
 
   evolutionStatusLabel(s: string): string {
     return ({ DRAFT: 'Brouillon', SUBMITTED: 'Soumis', REVIEWED: 'Examiné',
@@ -229,4 +258,5 @@ export class CareerPlanDashboardComponent implements OnInit {
       OBTENU:       'background:#dcfce7;color:#166534;'
     } as any)[s] ?? '';
   }
+  
 }

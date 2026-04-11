@@ -2,13 +2,11 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { EvolutionPlan, computeScores } from '../models/evolution-plan.model';
-import { EmployeeCertification } from '../models/certification.model';
-
+import { EvolutionPlan, computeScores, Competence } from '../models/evolution-plan.model';import { EmployeeCertification } from '../models/certification.model';
 @Injectable({ providedIn: 'root' })
 export class EvolutionPlanService {
 
-  private apiUrl = 'http://localhost:8081/api/evolution-plans';
+  private apiUrl = 'http://localhost:8081/api/evolution_plans';
 
   constructor(private http: HttpClient) {}
 
@@ -36,11 +34,12 @@ export class EvolutionPlanService {
       .pipe(map(p => computeScores(p)));
   }
 
-  saveCompetences(planId: string, competences: any[]): Observable<EvolutionPlan> {
-    return this.http.put<EvolutionPlan>(
-      `${this.apiUrl}/${planId}/competences`, competences, this.opts()
-    ).pipe(map(p => computeScores(p)));
-  }
+saveCompetences(planId: string, competences: Competence[]): Observable<EvolutionPlan> {  return this.http.put<EvolutionPlan>(
+    `${this.apiUrl}/${planId}/competences`,
+    competences,
+    this.opts()
+  ).pipe(map(p => computeScores(p)));
+}
 
   addCertification(planId: string, certif: Partial<EmployeeCertification>): Observable<EvolutionPlan> {
     return this.http.post<EvolutionPlan>(

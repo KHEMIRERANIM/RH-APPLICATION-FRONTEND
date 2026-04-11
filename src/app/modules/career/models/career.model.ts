@@ -1,3 +1,5 @@
+import { EmployeeCertification } from './certification.model';
+
 export enum CareerDomain {
   IT = 'IT',
   FINANCE = 'FINANCE',
@@ -46,4 +48,5 @@ export interface Career {
 
   createdAt?: string;
   updatedAt?: string;
+  certifRequises?: EmployeeCertification[];
 }

@@ -40,7 +40,8 @@ import { MotivationPreviewDialogComponent } from './components/motivation-previe
     CareerEmployeesDialogComponent,
     EmployeeMobilityComponent,
     EmployeePlanComponent,
-    MotivationPreviewDialogComponent
+    MotivationPreviewDialogComponent,
+    
   ],
   imports: [
     CommonModule,
