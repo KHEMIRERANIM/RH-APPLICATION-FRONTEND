@@ -10,7 +10,7 @@ import { catchError, switchMap } from 'rxjs/operators';
 import { ElementRef, ViewChild } from '@angular/core';
 
 interface IWindow extends Window { webkitSpeechRecognition: any; }
-const { webkitSpeechRecognition } : IWindow = <IWindow><unknown>window;
+const { webkitSpeechRecognition }: IWindow = <IWindow><unknown>window;
 
 @Component({
   selector: 'app-mes-candidatures',
@@ -45,7 +45,7 @@ export class MesCandidaturesComponent implements OnInit {
     private entretienService: EntretienService,
     private authService: AuthService,
     private router: Router,
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     const user = this.authService.currentUser;
@@ -128,11 +128,28 @@ export class MesCandidaturesComponent implements OnInit {
 
   // --- WEBCAM VIDEO TEST ---
 
+  telechargerContrat(candidature: Candidature): void {
+    if (!candidature) return;
+    this.candidatureService.telechargerContratPdf(candidature.id).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `contrat_${candidature.candidatId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        a.remove();
+      },
+      error: (err) => console.error("Erreur téléchargement contrat", err)
+    });
+  }
+
   async ouvrirTestVideo(c: Candidature) {
     this.activeCandidatureForVideo = c;
     this.showVideoModal = true;
     this.transcript = '';
-    
+
     // Init Speech Recognition API
     if (webkitSpeechRecognition) {
       this.recognition = new webkitSpeechRecognition();
@@ -165,7 +182,7 @@ export class MesCandidaturesComponent implements OnInit {
     this.isRecording = true;
     this.transcript = '';
     if (this.recognition) {
-       this.recognition.start();
+      this.recognition.start();
     }
   }
 
@@ -173,9 +190,9 @@ export class MesCandidaturesComponent implements OnInit {
     if (!this.activeCandidatureForVideo) return;
     this.isRecording = false;
     this.uploadingVideo = true;
-    
+
     if (this.recognition) {
-       this.recognition.stop();
+      this.recognition.stop();
     }
 
     // Call Python NLP API, then Spring Boot

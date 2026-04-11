@@ -134,6 +134,23 @@ export class PipelineComponent implements OnInit {
     return 'bg-red-100';
   }
 
+  telechargerContrat(): void {
+    if (!this.selectedCandidature) return;
+    this.candidatureService.telechargerContratPdf(this.selectedCandidature.id).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `contrat_${this.selectedCandidature?.candidatId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        a.remove();
+      },
+      error: (err) => console.error("Erreur téléchargement contrat", err)
+    });
+  }
+
   retour(): void {
     this.router.navigate(['/recrutement/admin/offres']);
   }

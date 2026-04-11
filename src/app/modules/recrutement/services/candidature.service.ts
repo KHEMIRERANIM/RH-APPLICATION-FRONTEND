@@ -64,4 +64,18 @@ export class CandidatureService {
   soumettreTestLangue(id: string, scoreLangue: number): Observable<Candidature> {
     return this.http.post<Candidature>(`${this.api}/${id}/test-langue?scoreLangue=${scoreLangue}`, {});
   }
+
+  telechargerContratPdf(id: string): Observable<Blob> {
+    return this.http.get(`${this.api}/${id}/contrat/pdf`, { responseType: 'blob' });
+  }
+
+  chatCoach(message: string, fullname: string, offreTitle: string, missingSkills: string[], history: any[] = [], isInterviewMode: boolean = false): Observable<any> {
+    return this.http.post<any>('http://localhost:5000/chat-coach', {
+      message, fullname, offreTitle, missingSkills, history, isInterviewMode
+    });
+  }
+
+  telechargerCoachTipsPdf(id: string, tips: string): Observable<Blob> {
+    return this.http.post(`${this.api}/${id}/coach-tips/pdf`, { tips }, { responseType: 'blob' });
+  }
 }

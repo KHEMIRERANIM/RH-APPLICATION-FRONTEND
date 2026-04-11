@@ -39,10 +39,7 @@ import { PlanifierEntretienComponent } from './entretiens/planifier-entretien.co
 import { FeedbackEntretienComponent } from './entretiens/feedback-entretien.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { CalendrierComponent } from './calendrier/calendrier.component';
-
-// ❌ SUPPRIMÉ ICI (IMPORTANT)
-// import { CharteComponent } from './charte/charte.component';
-
+import { ChatCoachComponent } from './candidatures/chat-coach/chat-coach.component';
 // Pipe
 import { FilterByStatutPipe } from './pipes/filter-by-statut.pipe';
 
@@ -61,7 +58,7 @@ import { CharteModule } from './charte/charte.module';
     FeedbackEntretienComponent,
     DashboardComponent,
     CalendrierComponent,
-    // ❌ SUPPRIMÉ : CharteComponent
+    ChatCoachComponent,
     FilterByStatutPipe,
   ],
   imports: [
@@ -97,4 +94,4 @@ import { CharteModule } from './charte/charte.module';
     CharteModule
   ]
 })
-export class RecrutementModule {}
+export class RecrutementModule { }

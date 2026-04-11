@@ -2,10 +2,13 @@
 
   <div class="mb-10 flex flex-wrap items-start justify-between gap-4">
     <div>
-      <h2 class="text-4xl font-extrabold tracking-tight leading-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-indigo-700">Mes candidatures</h2>
+      <h2
+        class="text-4xl font-extrabold tracking-tight leading-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-indigo-700">
+        Mes candidatures</h2>
       <p class="text-secondary mt-2 text-lg font-medium">Suivez l'avancement de vos candidatures</p>
     </div>
-    <button mat-stroked-button class="rounded-full shadow-sm hover:bg-gray-50 transition-colors font-bold border-2" routerLink="/recrutement/calendrier">
+    <button mat-stroked-button class="rounded-full shadow-sm hover:bg-gray-50 transition-colors font-bold border-2"
+      routerLink="/recrutement/calendrier">
       <mat-icon class="icon-size-5 mr-1 text-indigo-600">calendar_today</mat-icon>
       Calendrier entretiens
     </button>
@@ -15,8 +18,7 @@
     <mat-progress-spinner [diameter]="40" [mode]="'indeterminate'"></mat-progress-spinner>
   </div>
 
-  <div *ngIf="!loading && candidatures.length === 0"
-    class="flex flex-col items-center justify-center h-64 gap-4">
+  <div *ngIf="!loading && candidatures.length === 0" class="flex flex-col items-center justify-center h-64 gap-4">
     <mat-icon class="icon-size-24 text-hint" [svgIcon]="'heroicons_outline:inbox'"></mat-icon>
     <p class="text-xl font-medium text-secondary">Aucune candidature pour le moment</p>
     <button mat-flat-button [color]="'primary'" routerLink="/recrutement/offres">
@@ -32,8 +34,7 @@
       <div class="flex flex-col sm:flex-row">
 
         <!-- Couleur de statut à gauche -->
-        <div class="w-full sm:w-1.5 h-1.5 sm:h-auto"
-          [ngClass]="c.statut === 'ACCEPTE' ? 'bg-green-500' :
+        <div class="w-full sm:w-1.5 h-1.5 sm:h-auto" [ngClass]="c.statut === 'ACCEPTE' ? 'bg-green-500' :
                      c.statut === 'REFUSE' ? 'bg-red-500' :
                      c.statut === 'NOUVEAU' ? 'bg-blue-500' : 'bg-primary'">
         </div>
@@ -61,7 +62,8 @@
               <span class="text-blue-700 bg-blue-100 px-3 py-1 rounded-full">{{ c.etapeActuelle }}</span>
             </div>
             <div class="w-full bg-gray-200 rounded-full h-3 shadow-inner overflow-hidden">
-              <div class="bg-gradient-to-r from-blue-500 to-indigo-600 h-3 rounded-full transition-all duration-1000 ease-out"
+              <div
+                class="bg-gradient-to-r from-blue-500 to-indigo-600 h-3 rounded-full transition-all duration-1000 ease-out"
                 [style.width.%]="(getProgressStep(c.statut) / KANBAN_COLUMNS.length) * 100">
               </div>
             </div>
@@ -90,12 +92,8 @@
                 </div>
 
                 <!-- Bouton Rejoindre Meet -->
-                <a *ngIf="e.type === 'VISIO' && e.lienVisio && e.statut === 'PLANIFIE'"
-                  mat-flat-button
-                  class="bg-green-500 text-white text-sm"
-                  [href]="e.lienVisio"
-                  target="_blank"
-                  rel="noopener"
+                <a *ngIf="e.type === 'VISIO' && e.lienVisio && e.statut === 'PLANIFIE'" mat-flat-button
+                  class="bg-green-500 text-white text-sm" [href]="e.lienVisio" target="_blank" rel="noopener"
                   matTooltip="Rejoindre Google Meet">
                   <mat-icon class="icon-size-4 mr-1">videocam</mat-icon>
                   Rejoindre Meet
@@ -108,19 +106,23 @@
           <!-- Infos bas -->
           <div class="flex flex-wrap items-center justify-between gap-4 text-sm text-secondary mt-2">
             <div class="flex items-center gap-6">
-              <span class="flex items-center gap-2 font-medium bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
+              <span
+                class="flex items-center gap-2 font-medium bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
                 <mat-icon class="icon-size-5 text-gray-400" [svgIcon]="'heroicons_outline:calendar'"></mat-icon>
                 Postulé le {{ c.datePostulation | date:'dd/MM/yyyy' }}
               </span>
-              <span *ngIf="c.scoreMatching > 0" class="flex items-center gap-2 text-orange-700 font-bold bg-gradient-to-r from-orange-50 to-red-50 text-sm px-4 py-1.5 rounded-xl border border-orange-200 shadow-sm transition-all duration-300 hover:shadow-md hover:scale-105">
+              <span *ngIf="c.scoreMatching > 0"
+                class="flex items-center gap-2 text-orange-700 font-bold bg-gradient-to-r from-orange-50 to-red-50 text-sm px-4 py-1.5 rounded-xl border border-orange-200 shadow-sm transition-all duration-300 hover:shadow-md hover:scale-105">
                 🔥 Adéquation : {{ c.scoreMatching | number:'1.0-0' }}%
               </span>
             </div>
             <div class="flex items-center gap-3">
-              <button mat-stroked-button class="rounded-full shadow-sm hover:bg-gray-50 transition-colors" (click)="voirDetail(c)">
+              <button mat-stroked-button class="rounded-full shadow-sm hover:bg-gray-50 transition-colors"
+                (click)="voirDetail(c)">
                 Voir l'offre
               </button>
-              <button mat-icon-button class="bg-red-50 text-red-600 hover:bg-red-100 transition-colors" (click)="supprimerCandidature(c, $event)" matTooltip="Supprimer la candidature">
+              <button mat-icon-button class="bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
+                (click)="supprimerCandidature(c, $event)" matTooltip="Supprimer la candidature">
                 <mat-icon [svgIcon]="'heroicons_outline:trash'" class="icon-size-5"></mat-icon>
               </button>
             </div>
@@ -141,31 +143,37 @@
 
         </div>
       </div>
-      
+
       <!-- LIGNE RSE LANGUAGE TEST -->
       <div class="px-8 pb-8 pt-0">
         <!-- Action Requise si test ignoré -->
-        <div *ngIf="c.statut === 'ACCEPTE' && !c.testLanguePasse" class="bg-gradient-to-r from-red-50 to-orange-50 border-l-4 border-red-500 p-5 mt-4 rounded-r-xl shadow-sm">
+        <div *ngIf="c.statut === 'ACCEPTE' && !c.testLanguePasse"
+          class="bg-gradient-to-r from-red-50 to-orange-50 border-l-4 border-red-500 p-5 mt-4 rounded-r-xl shadow-sm">
           <p class="font-extrabold text-red-800 text-lg flex items-center gap-2">
             <mat-icon [svgIcon]="'heroicons_outline:video-camera'"></mat-icon>
             Action Requise : Test Linguistique Supplémentaire
           </p>
-          <p class="text-sm text-red-700 mb-4 mt-1">Vous devez valider votre niveau d'anglais par vidéo (Test IA court) afin d'officialiser votre recrutement par notre entreprise.</p>
-          <button mat-flat-button color="warn" (click)="ouvrirTestVideo(c)" class="rounded-full font-bold shadow-md hover:shadow-lg transition-shadow">
+          <p class="text-sm text-red-700 mb-4 mt-1">Vous devez valider votre niveau d'anglais par vidéo (Test IA court)
+            afin d'officialiser votre recrutement par notre entreprise.</p>
+          <button mat-flat-button color="warn" (click)="ouvrirTestVideo(c)"
+            class="rounded-full font-bold shadow-md hover:shadow-lg transition-shadow">
             Démarrer la vérification vidéo (Lancer la Caméra)
           </button>
         </div>
 
         <!-- Confirmé -->
-        <div *ngIf="c.testLanguePasse" class="bg-green-50/80 p-4 mt-4 text-green-900 border border-green-200 rounded-xl shadow-sm flex items-center gap-3">
-          <mat-icon class="text-green-500 bg-white rounded-full p-1 shadow-sm" [svgIcon]="'heroicons_outline:check-badge'"></mat-icon>
+        <div *ngIf="c.testLanguePasse"
+          class="bg-green-50/80 p-4 mt-4 text-green-900 border border-green-200 rounded-xl shadow-sm flex items-center gap-3">
+          <mat-icon class="text-green-500 bg-white rounded-full p-1 shadow-sm"
+            [svgIcon]="'heroicons_outline:check-badge'"></mat-icon>
           <div>
             <p class="font-bold text-sm">Test Vidéo IA Analysé (Score : {{c.scoreLangue | number:'1.0-0'}}%)</p>
           </div>
         </div>
 
         <!-- E-learning RSE si score fail -->
-        <div *ngIf="c.formationRequise" class="bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-200 p-6 mt-4 rounded-2xl shadow-md transform hover:-translate-y-1 transition-all">
+        <div *ngIf="c.formationRequise"
+          class="bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-200 p-6 mt-4 rounded-2xl shadow-md transform hover:-translate-y-1 transition-all">
           <div class="flex items-start gap-4">
             <div class="p-3 bg-indigo-100 rounded-lg text-indigo-600 shadow-inner">
               <mat-icon [svgIcon]="'heroicons_outline:academic-cap'" class="icon-size-8"></mat-icon>
@@ -173,35 +181,52 @@
             <div>
               <p class="font-black text-indigo-900 text-lg">🎓 Mise à niveau Linguistique Offerte (RSE)</p>
               <p class="text-sm text-indigo-700 mt-1 mb-4 leading-relaxed">
-                Votre test oral révèle l'opportunité de progresser en anglais. RH_RSE met en avant le développement de ses talents et vous offre ce parcours E-Learning Obligatoire.
+                Votre test oral révèle l'opportunité de progresser en anglais. RH_RSE met en avant le développement de
+                ses talents et vous offre ce parcours E-Learning Obligatoire.
               </p>
               <div class="flex gap-3">
-                <a mat-flat-button class="bg-indigo-600 text-white rounded-full font-bold" href="https://www.coursera.org/learn/business-english" target="_blank">
+                <a mat-flat-button class="bg-indigo-600 text-white rounded-full font-bold"
+                  href="https://www.coursera.org/learn/business-english" target="_blank">
                   Accéder à Coursera B2
                 </a>
-                <a mat-stroked-button class="border-indigo-300 text-indigo-700 bg-white rounded-full font-bold shadow-sm" href="https://www.udemy.com/course/english-for-it-software-engineers/" target="_blank">
+                <a mat-stroked-button
+                  class="border-indigo-300 text-indigo-700 bg-white rounded-full font-bold shadow-sm"
+                  href="https://www.udemy.com/course/english-for-it-software-engineers/" target="_blank">
                   Accéder à Udemy Start
                 </a>
               </div>
             </div>
           </div>
         </div>
+
+        <!-- Bouton Télécharger Contrat si Accepté -->
+        <div *ngIf="c.statut === 'ACCEPTE'" class="mt-4 flex">
+          <button mat-flat-button
+            class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg hover:shadow-xl transition-all font-bold px-6 py-2"
+            (click)="telechargerContrat(c)">
+            <mat-icon [svgIcon]="'heroicons_outline:document-arrow-down'" class="mr-2 text-white"></mat-icon>
+            Télécharger mon Contrat
+          </button>
+        </div>
+
       </div>
-      
+
     </div>
 
   </div>
 
   <!-- WEBCAM MOCK MODAL -->
-  <div *ngIf="showVideoModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+  <div *ngIf="showVideoModal"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
     <div class="bg-white rounded-3xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col [@slideInUp]">
-      
+
       <div class="p-6 border-b flex justify-between items-center bg-gray-50">
         <h3 class="text-2xl font-black text-gray-800 flex items-center gap-2">
           <mat-icon [svgIcon]="'heroicons_outline:viewfinder-circle'" class="text-indigo-600"></mat-icon>
           Test Vidéo IA Officiel
         </h3>
-        <button mat-icon-button (click)="fermerVideo()"><mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon></button>
+        <button mat-icon-button (click)="fermerVideo()"><mat-icon
+            [svgIcon]="'heroicons_outline:x-mark'"></mat-icon></button>
       </div>
 
       <div class="p-8 flex flex-col items-center">
@@ -209,15 +234,18 @@
         <div class="text-center bg-blue-50 text-blue-900 p-5 rounded-xl border border-blue-200 mb-6 w-full max-w-xl">
           <p class="text-xs font-bold uppercase tracking-widest text-blue-500 mb-2">Instructions d'enregistrement</p>
           <p class="font-medium text-lg leading-snug">
-            🎥 Présentez-vous librement en anglais! Parlez-nous de vous, de vos <b>passions</b>, de vos <b>hobbies</b>, et de vos <b>motivations</b> pour rejoindre notre entreprise. Soyez naturel(le) !
+            🎥 Présentez-vous librement en anglais! Parlez-nous de vous, de vos <b>passions</b>, de vos <b>hobbies</b>,
+            et de vos <b>motivations</b> pour rejoindre notre entreprise. Soyez naturel(le) !
           </p>
         </div>
 
         <!-- Video stream -->
-        <div class="relative w-full max-w-lg aspect-video bg-gray-900 rounded-2xl overflow-hidden shadow-inner border-4 border-gray-800">
+        <div
+          class="relative w-full max-w-lg aspect-video bg-gray-900 rounded-2xl overflow-hidden shadow-inner border-4 border-gray-800">
           <video #videoPlayer autoplay playsinline muted class="w-full h-full object-cover"></video>
-          
-          <div *ngIf="isRecording" class="absolute top-4 right-4 flex items-center gap-2 bg-black/60 px-3 py-1 rounded-full text-white text-xs font-bold font-mono blink-animation">
+
+          <div *ngIf="isRecording"
+            class="absolute top-4 right-4 flex items-center gap-2 bg-black/60 px-3 py-1 rounded-full text-white text-xs font-bold font-mono blink-animation">
             <div class="w-2.5 h-2.5 rounded-full bg-red-500"></div> REC
           </div>
         </div>
@@ -225,10 +253,12 @@
       </div>
 
       <div class="p-6 bg-gray-50 border-t flex justify-center gap-4">
-        <button *ngIf="!isRecording && !uploadingVideo" mat-flat-button color="primary" class="rounded-full px-8 py-2 text-lg" (click)="startRecording()">
+        <button *ngIf="!isRecording && !uploadingVideo" mat-flat-button color="primary"
+          class="rounded-full px-8 py-2 text-lg" (click)="startRecording()">
           Démarrer l'enregistrement
         </button>
-        <button *ngIf="isRecording && !uploadingVideo" mat-flat-button color="warn" class="rounded-full px-8 py-2 text-lg" (click)="submitVideo()">
+        <button *ngIf="isRecording && !uploadingVideo" mat-flat-button color="warn"
+          class="rounded-full px-8 py-2 text-lg" (click)="submitVideo()">
           Soumettre la vidéo à l'IA
         </button>
         <div *ngIf="uploadingVideo" class="flex items-center gap-3 font-medium text-indigo-600">
@@ -236,13 +266,23 @@
           Analyse NLP et Transcription en cours...
         </div>
       </div>
-      
+
     </div>
   </div>
+
+  <!-- NOUVEAU : Chat Coach IA Flottant -->
+  <app-chat-coach *ngIf="candidatures.length > 0" [candidatureActive]="candidatures[0]"></app-chat-coach>
 
 </div>
 
 <style>
-.blink-animation { animation: blinker 1.5s linear infinite; }
-@keyframes blinker { 50% { opacity: 0; } }
+  .blink-animation {
+    animation: blinker 1.5s linear infinite;
+  }
+
+  @keyframes blinker {
+    50% {
+      opacity: 0;
+    }
+  }
 </style>

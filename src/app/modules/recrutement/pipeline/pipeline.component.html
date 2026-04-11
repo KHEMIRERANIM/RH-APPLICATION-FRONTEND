@@ -316,6 +316,11 @@
           <mat-icon [svgIcon]="'heroicons_outline:calendar-days'" class="mr-2"></mat-icon>
           Planifier un entretien
         </button>
+        <!-- NEW: Contrat Download -->
+        <button mat-flat-button class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg hover:shadow-xl transition-all font-bold" (click)="telechargerContrat()">
+          <mat-icon [svgIcon]="'heroicons_outline:document-arrow-down'" class="mr-2 text-white"></mat-icon>
+          Télécharger Contrat final
+        </button>
         <button mat-stroked-button [color]="'warn'" (click)="changerStatut('REFUSE')">
           <mat-icon [svgIcon]="'heroicons_outline:x-circle'" class="mr-2"></mat-icon>
           Refuser la candidature
