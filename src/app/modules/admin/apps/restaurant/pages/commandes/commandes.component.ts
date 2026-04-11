@@ -6,6 +6,8 @@ import { MenuService } from 'src/app/services/menu.service';
 import { Menu, Plat } from 'src/app/models/menu';
 import { RoleService } from 'app/core/auth/role.service';
 import { AllergieIaService, ResultatVerification } from 'src/app/services/allergie-ia.service';
+import { FideliteService } from 'src/app/services/fidelite.service';
+import { Fidelite } from 'src/app/models/fidelite';
 
 @Component({
   selector: 'app-commandes',
@@ -37,12 +39,18 @@ export class CommandesComponent implements OnInit {
   alertesAllergie: ResultatVerification[] = [];
   analyseEnCours = false;
 
+  fidelite: Fidelite | null = null;
+  showHistorique = false;
+  reductionEnCours = false;
+  readonly SEUIL_REDUCTION = 500;
+
   constructor(
     private commandeService: CommandeService,
     private menuService: MenuService,
     private http: HttpClient,
     public roleService: RoleService,
-    private allergieIa: AllergieIaService
+    private allergieIa: AllergieIaService,
+    private fideliteService: FideliteService
   ) {}
 
   ngOnInit(): void {
@@ -50,6 +58,7 @@ export class CommandesComponent implements OnInit {
     this.loadCommandes();
     const saved = localStorage.getItem('allergies_' + this.roleService.userId);
     if (saved) this.allergiesEmploye = JSON.parse(saved);
+    if (this.roleService.isEmploye()) { this.loadFidelite(); }
   }
 
   loadCommandes(): void {
@@ -224,6 +233,7 @@ export class CommandesComponent implements OnInit {
         setTimeout(() => this.successMsg = '', 4000);
         this.showForm = false;
         this.loadCommandes();
+        this.loadFidelite();
       },
       error: (err) => { this.errorMsg = err.error?.message || 'Erreur creation commande.'; }
     });
@@ -308,5 +318,37 @@ export class CommandesComponent implements OnInit {
       case 'livree':     return '';
       default:           return '';
     }
+  }
+
+  loadFidelite(): void {
+    this.fideliteService.getFidelite(this.roleService.userId).subscribe({
+      next: (f) => { this.fidelite = f; },
+      error: () => {}
+    });
+  }
+
+  utiliserReduction(): void {
+    if (!this.fidelite || !this.fidelite.reductionDisponible) return;
+    if (!confirm('Utiliser votre reduction de ' + this.fidelite.montantReduction + ' TND ?')) return;
+    this.reductionEnCours = true;
+    this.fideliteService.utiliserReduction(this.roleService.userId).subscribe({
+      next: (f) => {
+        this.fidelite = f;
+        this.reductionEnCours = false;
+        this.successMsg = 'Reduction de ' + f.montantReduction + ' TND appliquee !';
+        setTimeout(() => this.successMsg = '', 4000);
+      },
+      error: () => { this.reductionEnCours = false; this.errorMsg = 'Erreur reduction.'; }
+    });
+  }
+
+  getPointsProgression(): number {
+    if (!this.fidelite) return 0;
+    return Math.min(100, Math.round((this.fidelite.points % this.SEUIL_REDUCTION) / this.SEUIL_REDUCTION * 100));
+  }
+
+  getPointsVersProchain(): number {
+    if (!this.fidelite) return this.SEUIL_REDUCTION;
+    return this.SEUIL_REDUCTION - (this.fidelite.points % this.SEUIL_REDUCTION);
   }
 }
