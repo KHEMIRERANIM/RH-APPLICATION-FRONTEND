@@ -69,9 +69,9 @@ export class CandidatureService {
     return this.http.get(`${this.api}/${id}/contrat/pdf`, { responseType: 'blob' });
   }
 
-  chatCoach(message: string, fullname: string, offreTitle: string, missingSkills: string[], history: any[] = [], isInterviewMode: boolean = false): Observable<any> {
+  chatCoach(message: string, fullname: string, offreTitle: string, missingSkills: string[], history: any[] = [], isInterviewMode: boolean = false, extractedSkills: string[] = []): Observable<any> {
     return this.http.post<any>('http://localhost:5000/chat-coach', {
-      message, fullname, offreTitle, missingSkills, history, isInterviewMode
+      message, fullname, offreTitle, missingSkills, history, isInterviewMode, extractedSkills
     });
   }
 

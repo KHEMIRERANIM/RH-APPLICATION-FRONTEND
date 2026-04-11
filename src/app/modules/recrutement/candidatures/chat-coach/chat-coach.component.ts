@@ -173,6 +173,9 @@ export class ChatCoachComponent implements OnInit, AfterViewChecked, OnDestroy {
 
     // Garder seulement les 5 derniers messages pour le contexte JSON
     const history = this.messages.slice(-5);
+    
+    // Récupérer les compétences de CV scannées par le backend
+    const extractedSkills = this.candidatureActive?.competencesExtraites || [];
 
     this.candidatureService.chatCoach(
       messageToSend,
@@ -180,7 +183,8 @@ export class ChatCoachComponent implements OnInit, AfterViewChecked, OnDestroy {
       offreTitle,
       missingSkills,
       history,
-      this.isInterviewMode
+      this.isInterviewMode,
+      extractedSkills
     ).subscribe({
       next: (res) => {
         setTimeout(() => {
