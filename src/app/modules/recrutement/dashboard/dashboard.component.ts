@@ -10,11 +10,47 @@ import { AuthService } from 'app/core/auth/auth.service';
 import { Notification } from 'app/layout/common/notifications/notifications.types';
 import { Offre, Entretien, STATUT_LABELS } from '../models/recrutement.models';
 
+import {
+  ApexAxisChartSeries,
+  ApexChart,
+  ApexXAxis,
+  ApexDataLabels,
+  ApexTooltip,
+  ApexStroke,
+  ApexTitleSubtitle,
+  ApexYAxis,
+  ApexFill,
+  ApexLegend,
+  ApexPlotOptions
+} from "ng-apexcharts";
+
+export type ChartOptions = {
+  series: ApexAxisChartSeries | any;
+  chart: ApexChart;
+  xaxis?: ApexXAxis;
+  stroke?: ApexStroke;
+  dataLabels?: ApexDataLabels;
+  plotOptions?: ApexPlotOptions;
+  yaxis?: ApexYAxis;
+  fill?: ApexFill;
+  tooltip?: ApexTooltip;
+  colors?: string[];
+  labels?: string[];
+  legend?: ApexLegend;
+  title?: ApexTitleSubtitle;
+};
+
 @Component({
   selector: 'app-recrutement-dashboard',
   templateUrl: './dashboard.component.html',
+  styleUrl: './dashboard.component.scss',
 })
 export class DashboardComponent implements OnInit, OnDestroy {
+
+  funnelChartOptions: Partial<ChartOptions>;
+  departementChartOptions: Partial<ChartOptions>;
+  topCandidats: any[] = [];
+  aiInsight: string = "";
 
   loading = true;
   offres: Offre[] = [];
@@ -58,6 +94,38 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private router: Router,
   ) {}
 
+  exporterRapportIA(): void {
+    const contenu = [
+      'RAPPORT ANALYTIQUE RECRUTEMENT IA',
+      '==================================',
+      `Date du rapport : ${new Date().toLocaleString()}`,
+      '',
+      'STATISTIQUES GLOBALES',
+      `Total Offres : ${this.totalOffres}`,
+      `Offres Publiées : ${this.offresPubliees}`,
+      `Total Candidatures : ${this.totalCandidatures}`,
+      `Entretiens à venir : ${this.entretiensAVenir.length}`,
+      '',
+      'ANALYSE IA (INSIGHT)',
+      this.aiInsight,
+      '',
+      'RECOMMANDATIONS',
+      '1. Prioriser les entretiens pour les candidats avec un score > 80%.',
+      '2. Renforcer la visibilité des offres peu consultées.',
+      '3. Valider les tests linguistiques pour les candidats acceptés.',
+      '',
+      'Généré automatiquement par RH-RSE Dashboard Admin'
+    ].join('\r\n');
+
+    const blob = new Blob([contenu], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `rapport-ia-${new Date().getTime()}.txt`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
   ngOnInit(): void {
     const user = this.authService.currentUser;
     const userId = user?.id || user?.['_id'];
@@ -69,12 +137,89 @@ export class DashboardComponent implements OnInit, OnDestroy {
       next: ({ offres, entretiens }) => {
         this.offres = offres;
         this.tousEntretiens = entretiens;
+        this.initCharts();
+        this.generateAiInsight();
         this.loading = false;
         this.checkEntretienAlerts();
         this._alertInterval = setInterval(() => this.checkEntretienAlerts(), 60000);
       },
       error: () => this.loading = false,
     });
+  }
+
+  private initCharts(): void {
+    // 1. RECRUITMENT FUNNEL
+    // On agrège les données : Candidats -> Entretiens (Planifiés/Réalisés) -> Acceptés
+    const statsCandidats = this.totalCandidatures;
+    const statsEntretiens = this.tousEntretiens.length;
+    const statsAcceptes = this.offres.reduce((acc, o) => acc + (o.nombreCandidatures > 0 ? Math.floor(o.nombreCandidatures * 0.2) : 0), 0); // Simulation
+
+    this.funnelChartOptions = {
+      series: [
+        {
+          name: "Nombre de personnes",
+          data: [statsCandidats, statsEntretiens, statsAcceptes]
+        }
+      ],
+      chart: {
+        type: "bar",
+        height: 350,
+        toolbar: { show: false }
+      },
+      plotOptions: {
+        bar: {
+          borderRadius: 10,
+          horizontal: true,
+          distributed: true,
+          barHeight: '60%',
+        }
+      },
+      colors: ['#4F46E5', '#F59E0B', '#10B981'],
+      dataLabels: {
+        enabled: true,
+        formatter: (val: any, opt: any) => opt.w.globals.labels[opt.dataPointIndex] + ": " + val,
+        dropShadow: { enabled: true }
+      },
+      xaxis: {
+        categories: ["Candidatures", "Entretiens", "Embauches"],
+      },
+      legend: { show: false }
+    };
+
+    // 2. DEPARTMENT DISTRIBUTION
+    const depts = [...new Set(this.offres.map(o => o.departement))];
+    const deptCounts = depts.map(d => this.offres.filter(o => o.departement === d).length);
+
+    this.departementChartOptions = {
+      series: deptCounts,
+      chart: {
+        type: "donut",
+        height: 350
+      },
+      labels: depts,
+      colors: ['#4F46E5', '#818CF8', '#C7D2FE', '#312E81'],
+      legend: {
+        position: 'bottom'
+      },
+      plotOptions: {
+        pie: {
+          donut: {
+            size: '70%'
+          }
+        }
+      }
+    };
+  }
+
+  private generateAiInsight(): void {
+    const activeOffres = this.offresPubliees;
+    if (activeOffres === 0) {
+      this.aiInsight = "Vous n'avez aucune offre publiée. La visibilité de votre entreprise est faible actuellement.";
+    } else if (this.totalCandidatures / activeOffres < 2) {
+      this.aiInsight = "Le volume de candidatures est faible par rapport à vos besoins. Pensez à réviser vos descriptions de postes ou à les promouvoir.";
+    } else {
+      this.aiInsight = "Votre pipeline de recrutement est sain. Focus recommandé : la phase d'entretiens pour les offres 'High-Match'.";
+    }
   }
 
   ngOnDestroy(): void {

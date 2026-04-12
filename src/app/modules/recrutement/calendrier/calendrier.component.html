@@ -8,7 +8,7 @@
     </div>
     <div class="flex gap-2">
       <button mat-stroked-button class="rounded-full shadow-sm hover:bg-gray-50 transition-colors font-bold border-2" (click)="exporterExcel()">
-        <mat-icon class="icon-size-5 mr-1 text-green-600">file_download</mat-icon>
+        <mat-icon [svgIcon]="'heroicons_outline:arrow-down-tray'" class="icon-size-5 mr-1 text-green-600"></mat-icon>
         Exporter Excel
       </button>
     </div>
@@ -161,7 +161,7 @@
             <button *ngIf="selectedEntretien.lienVisio"
               mat-flat-button class="bg-green-500 hover:bg-green-600 text-white mt-4 rounded-full py-6 font-bold shadow-md hover:shadow-lg transition-all w-full"
               (click)="rejoindreMeet(selectedEntretien.lienVisio)">
-              <mat-icon class="mr-2 text-white">videocam</mat-icon>
+              <mat-icon [svgIcon]="'heroicons_outline:video-camera'" class="mr-2 text-white"></mat-icon>
               Rejoindre Meet
             </button>
 
@@ -169,7 +169,7 @@
 
             <button mat-stroked-button class="w-full rounded-full py-6 font-bold hover:bg-gray-50 transition-colors shadow-sm"
               (click)="exporterGoogleCalendar(selectedEntretien)">
-              <mat-icon class="icon-size-5 mr-2 text-blue-600">event</mat-icon>
+              <mat-icon [svgIcon]="'heroicons_outline:calendar'" class="icon-size-5 mr-2 text-blue-600"></mat-icon>
               Ajouter à Google Calendar
             </button>
           </div>
@@ -234,7 +234,7 @@
               <button *ngIf="e.lienVisio" mat-mini-fab class="bg-green-500 text-white shadow-md hover:shadow-lg transition-all transform hover:scale-110"
                 (click)="rejoindreMeet(e.lienVisio); $event.stopPropagation()"
                 matTooltip="Rejoindre">
-                <mat-icon>videocam</mat-icon>
+                <mat-icon [svgIcon]="'heroicons_outline:video-camera'"></mat-icon>
               </button>
             </div>
           </div>

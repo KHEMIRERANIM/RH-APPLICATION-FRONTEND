@@ -80,7 +80,7 @@
                [ngClass]="inclusionScore >= 70 ? 'border-green-200' : 'border-red-400'">
             <div class="flex items-center gap-2 mb-4">
               <div class="p-1.5 rounded-lg" [ngClass]="inclusionScore >= 70 ? 'bg-green-100' : 'bg-red-100'">
-                 <mat-icon [class.text-green-600]="inclusionScore >= 70" [class.text-red-600]="inclusionScore < 70" class="icon-size-5">gavel</mat-icon>
+                 <mat-icon [class.text-green-600]="inclusionScore >= 70" [class.text-red-600]="inclusionScore < 70" class="icon-size-5" [svgIcon]="'heroicons_outline:scale'"></mat-icon>
               </div>
               <h4 class="font-black text-gray-800 tracking-tight text-sm">Détecteur de Biais Cognitifs</h4>
             </div>
@@ -106,7 +106,7 @@
             </div>
             
             <div *ngIf="biasedWordsFound.length === 0 && form.get('description')?.value" class="flex flex-col items-center justify-center p-3 text-center border border-green-200 rounded-xl bg-white mt-4">
-              <mat-icon class="text-green-500 mb-1 icon-size-6">verified_user</mat-icon>
+              <mat-icon [svgIcon]="'heroicons_outline:check-badge'" class="text-green-500 mb-1 icon-size-6"></mat-icon>
               <span class="text-xs font-extrabold text-green-700 uppercase">Texte parfaitement neutre</span>
             </div>
           </div>
@@ -124,7 +124,7 @@
           <mat-form-field class="w-full">
             <mat-chip-grid #chipComp>
               <mat-chip-row *ngFor="let c of competences" (removed)="removeCompetence(c)">
-                {{ c }}<button matChipRemove><mat-icon>cancel</mat-icon></button>
+                {{ c }}<button matChipRemove><mat-icon [svgIcon]="'heroicons_outline:x-circle'"></mat-icon></button>
               </mat-chip-row>
             </mat-chip-grid>
             <input placeholder="Appuyez sur Entrée..."
@@ -138,7 +138,7 @@
           <mat-form-field class="w-full">
             <mat-chip-grid #chipAv>
               <mat-chip-row *ngFor="let a of avantages" (removed)="removeAvantage(a)">
-                {{ a }}<button matChipRemove><mat-icon>cancel</mat-icon></button>
+                {{ a }}<button matChipRemove><mat-icon [svgIcon]="'heroicons_outline:x-circle'"></mat-icon></button>
               </mat-chip-row>
             </mat-chip-grid>
             <input placeholder="Ex: Télétravail, Tickets repas..."

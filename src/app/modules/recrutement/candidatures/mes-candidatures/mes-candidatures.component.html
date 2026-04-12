@@ -8,13 +8,13 @@
           Tableau de <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">Bord Candidat</span>
         </h2>
         <p class="text-gray-500 mt-2 text-lg font-medium flex items-center gap-2">
-          <mat-icon class="icon-size-5 text-blue-500">auto_awesome</mat-icon>
+          <mat-icon [svgIcon]="'heroicons_outline:sparkles'" class="icon-size-5 text-blue-500"></mat-icon>
           Suivez l'évolution de votre carrière avec l'assistance IA
         </p>
       </div>
       <button mat-flat-button class="bg-indigo-600 text-white rounded-2xl px-6 py-6 shadow-lg hover:shadow-indigo-200 transition-all font-bold"
         routerLink="/recrutement/calendrier">
-        <mat-icon class="icon-size-5 mr-2">calendar_today</mat-icon>
+        <mat-icon [svgIcon]="'heroicons_outline:calendar'" class="icon-size-5 mr-2"></mat-icon>
         Mon Calendrier
       </button>
     </div>
@@ -23,7 +23,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-10">
       <div class="bg-white/80 backdrop-blur-md border border-white p-6 rounded-3xl shadow-sm flex items-center gap-4">
         <div class="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center text-blue-600">
-          <mat-icon>assignment</mat-icon>
+          <mat-icon [svgIcon]="'heroicons_outline:clipboard-document-list'"></mat-icon>
         </div>
         <div>
           <p class="text-sm font-bold text-gray-400 uppercase tracking-wider">Total Candidatures</p>
@@ -32,7 +32,7 @@
       </div>
       <div class="bg-white/80 backdrop-blur-md border border-white p-6 rounded-3xl shadow-sm flex items-center gap-4">
         <div class="w-12 h-12 rounded-2xl bg-orange-100 flex items-center justify-center text-orange-600">
-          <mat-icon>pending_actions</mat-icon>
+          <mat-icon [svgIcon]="'heroicons_outline:clock'"></mat-icon>
         </div>
         <div>
           <p class="text-sm font-bold text-gray-400 uppercase tracking-wider">En cours</p>
@@ -41,7 +41,7 @@
       </div>
       <div class="bg-white/80 backdrop-blur-md border border-white p-6 rounded-3xl shadow-sm flex items-center gap-4">
         <div class="w-12 h-12 rounded-2xl bg-green-100 flex items-center justify-center text-green-600">
-          <mat-icon>verified</mat-icon>
+          <mat-icon [svgIcon]="'heroicons_outline:check-badge'"></mat-icon>
         </div>
         <div>
           <p class="text-sm font-bold text-gray-400 uppercase tracking-wider">Acceptées</p>
@@ -113,11 +113,11 @@
                 </h3>
                 <div class="flex items-center gap-4 mt-3 text-gray-500 font-medium">
                   <span class="flex items-center gap-1.5">
-                    <mat-icon class="icon-size-4">business</mat-icon>
+                    <mat-icon [svgIcon]="'heroicons_outline:briefcase'" class="icon-size-4"></mat-icon>
                     {{ offresMap[c.offreId]?.departement }}
                   </span>
                   <span class="flex items-center gap-1.5">
-                    <mat-icon class="icon-size-4">place</mat-icon>
+                    <mat-icon [svgIcon]="'heroicons_outline:map-pin'" class="icon-size-4"></mat-icon>
                     {{ offresMap[c.offreId]?.localisation }}
                   </span>
                 </div>
@@ -126,15 +126,15 @@
               <!-- Action Menu (Three Dots) -->
               <div>
                 <button mat-icon-button [matMenuTriggerFor]="cardMenu" class="text-gray-400 hover:text-gray-600 transition-colors">
-                  <mat-icon>more_vert</mat-icon>
+                  <mat-icon [svgIcon]="'heroicons_outline:ellipsis-vertical'"></mat-icon>
                 </button>
                 <mat-menu #cardMenu="matMenu">
                   <button mat-menu-item (click)="voirDetail(c)">
-                    <mat-icon class="text-blue-500">visibility</mat-icon>
+                    <mat-icon [svgIcon]="'heroicons_outline:eye'" class="text-blue-500"></mat-icon>
                     <span>Voir l'offre</span>
                   </button>
                   <button mat-menu-item (click)="supprimerCandidature(c, $event)" class="text-red-600">
-                    <mat-icon class="text-red-600">delete_outline</mat-icon>
+                    <mat-icon [svgIcon]="'heroicons_outline:trash'" class="text-red-600"></mat-icon>
                     <span>Supprimer la candidature</span>
                   </button>
                 </mat-menu>
@@ -167,7 +167,7 @@
             <!-- SUB-INFOS -->
             <div class="flex flex-wrap gap-4 items-center">
               <div class="flex items-center gap-2 bg-gray-50/50 px-4 py-2 rounded-2xl border border-gray-100">
-                <mat-icon class="text-gray-400 icon-size-5">event</mat-icon>
+                <mat-icon [svgIcon]="'heroicons_outline:calendar'" class="text-gray-400 icon-size-5"></mat-icon>
                 <span class="text-sm font-bold text-gray-600">Postulé le {{ c.datePostulation | date:'dd MMM yyyy' }}</span>
               </div>
               <div *ngIf="c.scoreMatching > 0"
@@ -186,11 +186,11 @@
               class="mt-8 relative p-6 bg-gradient-to-br from-indigo-600 to-blue-700 rounded-[2rem] shadow-xl overflow-hidden group/ia transition-all hover:scale-[1.01]">
               <!-- Décoration IA -->
               <div class="absolute top-0 right-0 p-4 opacity-10 group-hover/ia:rotate-12 transition-transform">
-                <mat-icon class="icon-size-20">psychology</mat-icon>
+                <mat-icon [svgIcon]="'heroicons_outline:academic-cap'" class="icon-size-20"></mat-icon>
               </div>
               <div class="relative z-10 flex items-start gap-4">
                 <div class="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white shrink-0">
-                  <mat-icon class="icon-size-6 animate-pulse">auto_awesome</mat-icon>
+                  <mat-icon [svgIcon]="'heroicons_outline:sparkles'" class="icon-size-6 animate-pulse"></mat-icon>
                 </div>
                 <div class="space-y-1">
                   <p class="text-[10px] font-black text-white/60 uppercase tracking-widest leading-none">💡 L'Analyse de l'expert IA</p>
@@ -212,7 +212,7 @@
                 <!-- Compétences Trouvées -->
                 <div class="space-y-3">
                   <div class="flex items-center gap-2 text-green-600">
-                    <mat-icon class="icon-size-4">check_circle</mat-icon>
+                    <mat-icon [svgIcon]="'heroicons_outline:check-circle'" class="icon-size-4"></mat-icon>
                     <span class="text-xs font-black uppercase tracking-tight">Forces Détectées (CV)</span>
                   </div>
                   <div class="flex flex-wrap gap-2">
@@ -227,7 +227,7 @@
                 <!-- Compétences Manquantes -->
                 <div class="space-y-3">
                   <div class="flex items-center gap-2 text-orange-600">
-                    <mat-icon class="icon-size-4">info</mat-icon>
+                    <mat-icon [svgIcon]="'heroicons_outline:information-circle'" class="icon-size-4"></mat-icon>
                     <span class="text-xs font-black uppercase tracking-tight">Manquants pour l'offre</span>
                   </div>
                   <div class="flex flex-wrap gap-2">
@@ -245,7 +245,7 @@
           <!-- Right: AI Insights (Soft Skills) -->
           <div class="lg:w-80 flex flex-col gap-6 py-2 border-l border-gray-100 pl-10">
             <h4 class="text-sm font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
-              <mat-icon class="icon-size-4 text-indigo-500">psychology</mat-icon>
+              <mat-icon [svgIcon]="'heroicons_outline:academic-cap'" class="icon-size-4 text-indigo-500"></mat-icon>
               Soft Skills IA
             </h4>
             
@@ -289,7 +289,7 @@
                 <div *ngFor="let e of entretiensMap[c.id] | slice:0:1" 
                   class="bg-blue-50/50 p-3 rounded-2xl border border-blue-100 flex items-center gap-3">
                   <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-blue-600 shadow-sm">
-                    <mat-icon>{{ e.type === 'VISIO' ? 'videocam' : 'groups' }}</mat-icon>
+                    <mat-icon [svgIcon]="e.type === 'VISIO' ? 'heroicons_outline:video-camera' : 'heroicons_outline:user-group'"></mat-icon>
                   </div>
                   <div class="flex flex-col">
                     <span class="text-xs font-black text-blue-900 leading-tight">{{ e.dateHeure | date:'dd/MM à HH:mm' }}</span>
@@ -309,7 +309,7 @@
           <div *ngIf="c.statut === 'ACCEPTE' && !c.testLanguePasse"
             class="bg-gradient-to-r from-red-500 to-rose-600 p-8 rounded-[2rem] shadow-xl text-white flex flex-col md:flex-row items-center gap-6 transform transition-transform hover:scale-[1.01]">
             <div class="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center">
-              <mat-icon class="icon-size-10">videocam</mat-icon>
+              <mat-icon [svgIcon]="'heroicons_outline:video-camera'" class="icon-size-10"></mat-icon>
             </div>
             <div class="flex-auto text-center md:text-left">
               <h5 class="text-xl font-black mb-1">Test Linguistique Obligatoire</h5>
@@ -326,7 +326,7 @@
             class="bg-gradient-to-br from-indigo-900 to-blue-900 p-8 rounded-[2rem] shadow-xl text-white">
             <div class="flex flex-col md:flex-row items-start gap-6">
               <div class="w-16 h-16 rounded-2xl bg-indigo-500 flex items-center justify-center shadow-lg">
-                <mat-icon class="icon-size-10">school</mat-icon>
+                <mat-icon [svgIcon]="'heroicons_outline:academic-cap'" class="icon-size-10"></mat-icon>
               </div>
               <div class="flex-auto">
                 <h5 class="text-xl font-black mb-2 tracking-tight">🎓 Programme RSE : Mise à niveau Linguistique</h5>
@@ -348,7 +348,7 @@
             <button mat-flat-button
               class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xl hover:shadow-indigo-200 transition-all font-black rounded-2xl px-10 py-6"
               (click)="telechargerContrat(c)">
-              <mat-icon class="mr-3">file_download</mat-icon>
+              <mat-icon [svgIcon]="'heroicons_outline:arrow-down-tray'" class="mr-3"></mat-icon>
               Télécharger mon Contrat
             </button>
           </div>

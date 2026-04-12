@@ -41,6 +41,7 @@ import { FeedbackEntretienComponent } from './entretiens/feedback-entretien.comp
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { CalendrierComponent } from './calendrier/calendrier.component';
 import { ChatCoachComponent } from './candidatures/chat-coach/chat-coach.component';
+import { NgApexchartsModule } from 'ng-apexcharts';
 // Pipe
 import { FilterByStatutPipe } from './pipes/filter-by-statut.pipe';
 
@@ -91,6 +92,7 @@ import { CharteModule } from './charte/charte.module';
     MatMenuModule,
 
     FuseAlertModule,
+    NgApexchartsModule,
 
     // ✅ AJOUT IMPORTANT
     CharteModule

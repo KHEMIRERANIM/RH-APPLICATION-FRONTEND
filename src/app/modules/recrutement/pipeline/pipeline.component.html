@@ -29,22 +29,36 @@
 
     <!-- Colonne par statut -->
     <div *ngFor="let statut of allStatuts"
-      class="flex flex-col flex-shrink-0 w-80 bg-gray-50/80 backdrop-blur-sm dark:bg-gray-800/80 rounded-3xl overflow-hidden border border-gray-200/50 dark:border-gray-700 shadow-inner">
+      class="flex flex-col flex-shrink-0 w-80 bg-gray-50 dark:bg-gray-800 rounded-3xl overflow-hidden border border-gray-200 dark:border-gray-700 shadow-inner">
 
       <!-- Header colonne -->
-      <div class="flex items-center justify-between p-4 border-b border-gray-200/60 dark:border-gray-700 bg-white/50 dark:bg-gray-800/50">
-        <div class="flex items-center gap-3">
-          <span class="font-bold text-sm uppercase tracking-wider text-gray-700 dark:text-gray-200">{{ STATUT_LABELS[statut] }}</span>
-          <span class="flex items-center justify-center min-w-6 h-6 px-2 rounded-full text-xs font-black bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 shadow-sm border border-gray-100">
-            {{ getCandidaturesForStatut(statut).length }}
-          </span>
+      <div class="flex flex-col p-5 pb-3 border-b border-gray-200 dark:border-gray-700 bg-white/50 dark:bg-gray-800/50">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-3">
+            <span class="font-black text-sm uppercase tracking-widest text-gray-800 dark:text-gray-200">{{ STATUT_LABELS[statut] }}</span>
+            <span class="flex items-center justify-center min-w-7 h-7 px-2 rounded-xl text-xs font-black bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-300 shadow-sm border border-gray-100">
+              {{ getCandidaturesForStatut(statut).length }}
+            </span>
+          </div>
+          <button mat-icon-button (click)="toggleSort(statut)" class="scale-75" [matTooltip]="'Trier par ' + (columnSortMap[statut] === 'SCORE' ? 'Score IA' : 'Date')">
+            <mat-icon [svgIcon]="columnSortMap[statut] === 'SCORE' ? 'heroicons_outline:bars-arrow-down' : 'heroicons_outline:clock'" class="text-gray-400"></mat-icon>
+          </button>
         </div>
-        <!-- Indicateur couleur -->
-        <div class="w-3 h-3 rounded-full"
-          [ngClass]="statut === 'ACCEPTE' ? 'bg-green-500' :
-                     statut === 'REFUSE' ? 'bg-red-500' :
-                     statut === 'NOUVEAU' ? 'bg-blue-500' :
-                     statut === 'OFFRE_ENVOYEE' ? 'bg-teal-500' : 'bg-primary'">
+        
+        <!-- Stats Colonne -->
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-1.5 overflow-hidden">
+             <div class="w-1.5 h-1.5 rounded-full"
+                [ngClass]="statut === 'ACCEPTE' ? 'bg-green-500' :
+                           statut === 'REFUSE' ? 'bg-red-500' :
+                           statut === 'NOUVEAU' ? 'bg-blue-500' : 'bg-primary'">
+             </div>
+             <span class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Moy. Match :</span>
+             <span class="text-xs font-black text-gray-600 dark:text-gray-300">{{ getColumnAverageScore(statut) }}%</span>
+          </div>
+          <div class="h-1 flex-auto mx-3 bg-gray-200/50 rounded-full">
+            <div class="h-full bg-blue-500/30 rounded-full" [style.width.%]="getColumnAverageScore(statut)"></div>
+          </div>
         </div>
       </div>
 
@@ -56,54 +70,79 @@
           Aucun candidat
         </div>
 
-        <div *ngFor="let c of getCandidaturesForStatut(statut)"
-          class="bg-white dark:bg-gray-700 rounded-2xl p-4 shadow-sm cursor-pointer hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 border border-transparent hover:border-blue-300"
-          [class.ring-2]="selectedCandidature?.id === c.id"
-          [class.ring-blue-500]="selectedCandidature?.id === c.id"
-          (click)="selectCandidature(c)">
+        <div *ngFor="let c of getCandidaturesForStatut(statut)" class="group bg-white dark:bg-gray-700 rounded-3xl p-4 shadow-sm cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-2 border-transparent hover:border-blue-400 relative overflow-hidden" [class.ring-4]="selectedCandidature?.id === c.id" [class.border-blue-500]="selectedCandidature?.id === c.id" (click)="selectCandidature(c)">
 
-          <!-- Nom candidat (ID tronqué pour démo) -->
-          <div class="flex items-center justify-between mb-2">
-            <div class="flex items-center gap-2">
-              <div class="flex items-center justify-center w-8 h-8 rounded-full bg-primary-100 text-primary-700 font-bold text-xs">
-                {{ c.candidatId | slice:0:2 | uppercase }}
+          <!-- Nom candidat & Bague matching -->
+          <div class="flex items-center justify-between mb-4 relative z-10">
+            <div class="flex items-center gap-3">
+              <div class="flex items-center justify-center w-10 h-10 rounded-2xl bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-white font-black text-xs shadow-sm uppercase">
+                {{ c.candidatId | slice:0:2 }}
               </div>
               <div>
-                <p class="text-sm font-medium leading-none">Candidat</p>
-                <p class="text-xs text-secondary">{{ c.candidatId | slice:0:8 }}...</p>
+                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Candidat</p>
+                <p class="text-sm font-bold text-gray-800 dark:text-gray-100">#{{ c.candidatId | slice:0:6 }}</p>
               </div>
             </div>
-            <!-- Score IA -->
-            <div *ngIf="c.scoreMatching > 0"
-              class="flex items-center justify-center w-10 h-10 rounded-full text-xs font-bold"
-              [ngClass]="scoreBg(c.scoreMatching)">
-              <span [ngClass]="scoreColor(c.scoreMatching)">{{ c.scoreMatching | number:'1.0-0' }}%</span>
+            
+            <!-- Circular Matching SVG -->
+            <div class="relative flex items-center justify-center w-12 h-12" *ngIf="c.scoreMatching > 0">
+              <svg class="w-full h-full transform -rotate-90">
+                <circle cx="24" cy="24" r="18" stroke="currentColor" stroke-width="3" fill="transparent" class="text-gray-100 dark:text-gray-600"></circle>
+                <circle cx="24" cy="24" r="18" stroke="currentColor" stroke-width="4" fill="transparent"
+                  [attr.stroke-dasharray]="113"
+                  [attr.stroke-dashoffset]="113 - (113 * (c.scoreMatching || 0) / 100)"
+                  [ngClass]="c.scoreMatching >= 80 ? 'text-green-500' : c.scoreMatching >= 50 ? 'text-yellow-500' : 'text-red-500'" 
+                  stroke-linecap="round"></circle>
+              </svg>
+              <span class="absolute text-[10px] font-black" [ngClass]="scoreColor(c.scoreMatching)">{{ c.scoreMatching | number:'1.0-0' }}%</span>
             </div>
           </div>
 
-          <!-- Date & Top Profil -->
-          <div class="flex items-center justify-between text-xs mt-1">
-            <p class="text-secondary flex items-center gap-1">
-              <mat-icon class="icon-size-3" [svgIcon]="'heroicons_outline:calendar'"></mat-icon>
-              {{ c.datePostulation | date:'dd/MM/yy' }}
-            </p>
-            <span *ngIf="c.scoreMatching >= 80" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gradient-to-r from-yellow-300 to-yellow-500 text-yellow-900 shadow-md">
-              🌟 Top Profil
+          <!-- Info row: Aging & Top Profil -->
+          <div class="flex items-center justify-between relative z-10">
+            <div class="flex items-center gap-2">
+              <div class="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-600 scale-90 origin-left"
+                   [matTooltip]="'Dans cette étape depuis ' + getDaysInStage(c.dateDerniereMAJ) + ' jour(s)'">
+                <mat-icon class="icon-size-3.5" 
+                          [ngClass]="getDaysInStage(c.dateDerniereMAJ) >= 3 ? 'text-orange-500 animate-pulse' : 'text-gray-400'"
+                          [svgIcon]="getDaysInStage(c.dateDerniereMAJ) >= 3 ? 'heroicons_outline:fire' : 'heroicons_outline:clock'"></mat-icon>
+                <span class="text-[10px] font-bold" [class.text-orange-600]="getDaysInStage(c.dateDerniereMAJ) >= 3">
+                  {{ getDaysInStage(c.dateDerniereMAJ) }}j
+                </span>
+              </div>
+            </div>
+            <span *ngIf="c.scoreMatching >= 85" class="flex items-center gap-1 text-[10px] font-black px-2 py-1 rounded-full bg-yellow-400 text-yellow-900 shadow-sm uppercase tracking-tighter">
+              <mat-icon class="icon-size-3" [svgIcon]="'heroicons_solid:sparkles'"></mat-icon>
+              Top Profil
             </span>
-          </div>>
+          </div>
 
-          <!-- Notes courtes -->
-          <p *ngIf="c.notesRecruteur" class="text-xs text-secondary italic mt-1 truncate">
-            "{{ c.notesRecruteur }}"
-          </p>
+          <!-- Quick-Move Workflow Track -->
+          <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-600">
+             <div class="flex items-center gap-1 h-1.5 mb-3">
+                <div *ngFor="let s of allStatuts; let i = index"
+                     class="flex-auto h-full rounded-full transition-all duration-300 cursor-pointer relative group/step"
+                     [ngClass]="i <= allStatuts.indexOf(c.statut) ? (STATUT_COLORS[c.statut] || 'bg-blue-500') : 'bg-gray-200 dark:bg-gray-700'"
+                     [matTooltip]="STATUT_LABELS[s]"
+                     (click)="directMove(c, s); $event.stopPropagation()">
+                     <!-- Hover highlight -->
+                     <div class="absolute inset-0 rounded-full bg-white/20 opacity-0 group-hover/step:opacity-100 transition-opacity"></div>
+                </div>
+             </div>
+          </div>
 
+          <!-- Quick Move (Visible on hover) -->
+          <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 relative z-10">
+             <button mat-flat-button class="h-8 min-w-0 px-3 bg-blue-50 text-blue-600 rounded-lg text-[10px] font-black shadow-none hover:bg-blue-600 hover:text-white transition-all flex-auto uppercase tracking-tighter"
+                     matTooltip="Voir Détails & Analyse IA" (click)="selectCandidature(c); $event.stopPropagation()">
+               DÉTAILS IA
+             </button>
+          </div>
         </div>
 
       </div>
     </div>
   </div>
-
-  <!-- Panel latéral candidature sélectionnée -->
   <div *ngIf="selectedCandidature"
     class="fixed inset-y-0 right-0 z-50 w-full sm:w-[450px] bg-white dark:bg-gray-900 shadow-2xl flex flex-col border-l border-gray-200"
     [@slideInRight]>
@@ -117,6 +156,28 @@
     </div>
 
     <div class="flex flex-col flex-auto overflow-y-auto p-6 gap-6">
+
+      <!-- AI ADVISOR WIDGET -->
+      <div class="bg-indigo-900 rounded-3xl p-6 text-white relative overflow-hidden shadow-2xl border-b-8 border-indigo-700">
+        <div class="absolute top-0 right-0 p-4 opacity-10">
+           <mat-icon [svgIcon]="'heroicons_outline:cpu-chip'" class="icon-size-24"></mat-icon>
+        </div>
+        <div class="relative z-10">
+          <p class="text-[10px] font-black text-indigo-300 uppercase tracking-widest mb-2">Conseiller Stratégique IA</p>
+          <div class="flex items-center gap-3 mb-4">
+             <div class="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20">
+                <mat-icon class="text-white icon-size-6" [svgIcon]="'heroicons_outline:light-bulb'"></mat-icon>
+             </div>
+             <div>
+               <h4 class="text-lg font-black leading-tight">Recommandation : <span [ngClass]="getAiRecommendation(selectedCandidature).color">{{ getAiRecommendation(selectedCandidature).action }}</span></h4>
+               <p class="text-indigo-100 text-xs font-medium">{{ getAiRecommendation(selectedCandidature).reason }}</p>
+             </div>
+          </div>
+          <div class="bg-white/5 rounded-xl p-3 border border-white/10 text-[11px] leading-relaxed italic">
+            "Ce candidat présente un profil équilibré. L'analyse du CV suggère que le passage en entretien technique permettrait de confirmer ses forces en leadership."
+          </div>
+        </div>
+      </div>
 
       <!-- Statut actuel -->
       <div class="flex items-center gap-4 bg-gray-50 p-4 rounded-2xl border border-gray-100">
@@ -146,21 +207,17 @@
       </div>
 
       <!-- Infos -->
-      <div class="flex flex-col gap-2 text-sm">
-        <div class="flex justify-between">
-          <span class="text-secondary">Date de postulation</span>
-          <span class="font-medium">{{ selectedCandidature.datePostulation | date:'dd/MM/yyyy HH:mm' }}</span>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100">
+          <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-2">Postulation</span>
+          <span class="text-sm font-bold text-gray-800">{{ selectedCandidature.datePostulation | date:'dd MMM yyyy' }}</span>
         </div>
-        <div class="flex justify-between">
-          <span class="text-secondary">Dernière mise à jour</span>
-          <span class="font-medium">{{ selectedCandidature.dateDerniereMAJ | date:'dd/MM/yyyy' }}</span>
-        </div>
-        <div *ngIf="selectedCandidature.cvFileId" class="flex justify-between">
-          <span class="text-secondary">CV</span>
-          <span class="text-primary flex items-center gap-1 cursor-pointer">
-            <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:document'"></mat-icon>
-            CV uploadé
-          </span>
+        <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100">
+          <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Dernier Mouvement</span>
+          <div class="flex items-center gap-1">
+             <span class="text-sm font-bold text-gray-800">{{ selectedCandidature.dateDerniereMAJ | date:'dd MMM' }}</span>
+             <span class="text-[10px] text-orange-500 font-bold">({{ getDaysInStage(selectedCandidature.dateDerniereMAJ) }}j)</span>
+          </div>
         </div>
       </div>
 
@@ -326,7 +383,6 @@
           Refuser la candidature
         </button>
       </div>
-
     </div>
   </div>
 
