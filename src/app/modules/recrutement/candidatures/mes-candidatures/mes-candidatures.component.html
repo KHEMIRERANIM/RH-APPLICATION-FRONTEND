@@ -1,17 +1,78 @@
 <div class="flex flex-col flex-auto min-w-0 p-6 sm:p-10">
 
-  <div class="mb-10 flex flex-wrap items-start justify-between gap-4">
-    <div>
-      <h2
-        class="text-4xl font-extrabold tracking-tight leading-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-indigo-700">
-        Mes candidatures</h2>
-      <p class="text-secondary mt-2 text-lg font-medium">Suivez l'avancement de vos candidatures</p>
+  <!-- HEADER SECTION -->
+  <div class="mb-8">
+    <div class="flex flex-wrap items-center justify-between gap-6">
+      <div>
+        <h2 class="text-4xl font-black tracking-tight leading-tight text-gray-900 drop-shadow-sm">
+          Tableau de <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">Bord Candidat</span>
+        </h2>
+        <p class="text-gray-500 mt-2 text-lg font-medium flex items-center gap-2">
+          <mat-icon class="icon-size-5 text-blue-500">auto_awesome</mat-icon>
+          Suivez l'évolution de votre carrière avec l'assistance IA
+        </p>
+      </div>
+      <button mat-flat-button class="bg-indigo-600 text-white rounded-2xl px-6 py-6 shadow-lg hover:shadow-indigo-200 transition-all font-bold"
+        routerLink="/recrutement/calendrier">
+        <mat-icon class="icon-size-5 mr-2">calendar_today</mat-icon>
+        Mon Calendrier
+      </button>
     </div>
-    <button mat-stroked-button class="rounded-full shadow-sm hover:bg-gray-50 transition-colors font-bold border-2"
-      routerLink="/recrutement/calendrier">
-      <mat-icon class="icon-size-5 mr-1 text-indigo-600">calendar_today</mat-icon>
-      Calendrier entretiens
-    </button>
+
+    <!-- STATS CARDS -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-10">
+      <div class="bg-white/80 backdrop-blur-md border border-white p-6 rounded-3xl shadow-sm flex items-center gap-4">
+        <div class="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center text-blue-600">
+          <mat-icon>assignment</mat-icon>
+        </div>
+        <div>
+          <p class="text-sm font-bold text-gray-400 uppercase tracking-wider">Total Candidatures</p>
+          <p class="text-2xl font-black text-gray-800">{{ stats.total }}</p>
+        </div>
+      </div>
+      <div class="bg-white/80 backdrop-blur-md border border-white p-6 rounded-3xl shadow-sm flex items-center gap-4">
+        <div class="w-12 h-12 rounded-2xl bg-orange-100 flex items-center justify-center text-orange-600">
+          <mat-icon>pending_actions</mat-icon>
+        </div>
+        <div>
+          <p class="text-sm font-bold text-gray-400 uppercase tracking-wider">En cours</p>
+          <p class="text-2xl font-black text-gray-800">{{ stats.enCours }}</p>
+        </div>
+      </div>
+      <div class="bg-white/80 backdrop-blur-md border border-white p-6 rounded-3xl shadow-sm flex items-center gap-4">
+        <div class="w-12 h-12 rounded-2xl bg-green-100 flex items-center justify-center text-green-600">
+          <mat-icon>verified</mat-icon>
+        </div>
+        <div>
+          <p class="text-sm font-bold text-gray-400 uppercase tracking-wider">Acceptées</p>
+          <p class="text-2xl font-black text-gray-800 text-green-600">{{ stats.acceptes }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="flex flex-wrap gap-3 mt-8">
+      <button (click)="applyFilter('TOUS')"
+        [class]="activeFilter === 'TOUS' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'"
+        class="px-6 py-2 rounded-full font-bold text-sm shadow-sm transition-all border border-transparent">
+        Toutes ({{ stats.total }})
+      </button>
+      <button (click)="applyFilter('EN_COURS')"
+        [class]="activeFilter === 'EN_COURS' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'"
+        class="px-6 py-2 rounded-full font-bold text-sm shadow-sm transition-all border border-transparent">
+        En cours ({{ stats.enCours }})
+      </button>
+      <button (click)="applyFilter('ACCEPTE')"
+        [class]="activeFilter === 'ACCEPTE' ? 'bg-green-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'"
+        class="px-6 py-2 rounded-full font-bold text-sm shadow-sm transition-all border border-transparent">
+        Acceptées ({{ stats.acceptes }})
+      </button>
+      <button (click)="applyFilter('REFUSE')"
+        [class]="activeFilter === 'REFUSE' ? 'bg-red-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'"
+        class="px-6 py-2 rounded-full font-bold text-sm shadow-sm transition-all border border-transparent">
+        Refusées
+      </button>
+    </div>
   </div>
 
   <div *ngIf="loading" class="flex items-center justify-center h-64">
@@ -26,193 +87,274 @@
     </button>
   </div>
 
-  <div *ngIf="!loading && candidatures.length > 0" class="flex flex-col gap-6">
+  <div *ngIf="!loading && filteredCandidatures.length > 0" class="flex flex-col gap-10">
 
-    <div *ngFor="let c of candidatures"
-      class="bg-white rounded-3xl shadow-lg ring-1 ring-black/5 overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
+    <div *ngFor="let c of filteredCandidatures"
+      class="relative group bg-white/70 backdrop-blur-xl rounded-[2.5rem] border border-white/50 shadow-[0_20px_50px_rgba(0,0,0,0.05)] overflow-hidden transition-all duration-500 hover:shadow-[0_40px_80px_rgba(0,0,0,0.1)] hover:-translate-y-2">
 
-      <div class="flex flex-col sm:flex-row">
+      <!-- Gradient Top Overlay (Subtle) -->
+      <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r" [ngClass]="c.statut === 'ACCEPTE' ? 'from-green-400 to-emerald-600' :
+                   c.statut === 'REFUSE' ? 'from-red-400 to-rose-600' :
+                   'from-blue-400 to-indigo-600'"></div>
 
-        <!-- Couleur de statut à gauche -->
-        <div class="w-full sm:w-1.5 h-1.5 sm:h-auto" [ngClass]="c.statut === 'ACCEPTE' ? 'bg-green-500' :
-                     c.statut === 'REFUSE' ? 'bg-red-500' :
-                     c.statut === 'NOUVEAU' ? 'bg-blue-500' : 'bg-primary'">
-        </div>
+      <div class="p-8 sm:p-10">
+        <div class="flex flex-col lg:flex-row gap-10">
 
-        <div class="flex flex-col flex-auto p-8">
-
-          <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
-            <div>
-              <h3 class="text-2xl font-bold text-gray-800">
-                {{ offresMap[c.offreId]?.titre || 'Chargement...' }}
-              </h3>
-              <p class="text-sm font-medium text-secondary mt-1">
-                {{ offresMap[c.offreId]?.departement }} · {{ offresMap[c.offreId]?.localisation }}
-              </p>
-            </div>
-            <span class="px-4 py-1.5 rounded-full text-sm font-bold shadow-sm" [ngClass]="STATUT_COLORS[c.statut]">
-              {{ STATUT_LABELS[c.statut] }}
-            </span>
-          </div>
-
-          <!-- Barre de progression -->
-          <div class="mb-6 bg-gray-50 p-4 rounded-2xl border border-gray-100">
-            <div class="flex items-center justify-between text-sm font-bold text-secondary mb-3">
-              <span>Étape {{ getProgressStep(c.statut) }} / {{ KANBAN_COLUMNS.length }}</span>
-              <span class="text-blue-700 bg-blue-100 px-3 py-1 rounded-full">{{ c.etapeActuelle }}</span>
-            </div>
-            <div class="w-full bg-gray-200 rounded-full h-3 shadow-inner overflow-hidden">
-              <div
-                class="bg-gradient-to-r from-blue-500 to-indigo-600 h-3 rounded-full transition-all duration-1000 ease-out"
-                [style.width.%]="(getProgressStep(c.statut) / KANBAN_COLUMNS.length) * 100">
-              </div>
-            </div>
-          </div>
-
-          <!-- ENTRETIENS -->
-          <div *ngIf="entretiensMap[c.id]?.length > 0" class="mb-4">
-            <h4 class="text-sm font-medium text-secondary mb-2">Entretiens programmés</h4>
-            <div class="flex flex-col gap-2">
-              <div *ngFor="let e of entretiensMap[c.id]"
-                class="flex items-center justify-between p-3 rounded-lg border bg-blue-50 border-blue-200">
-
-                <div class="flex flex-col gap-1">
-                  <div class="flex items-center gap-2">
-                    <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      {{ e.type }}
-                    </span>
-                    <span class="font-medium text-sm">
-                      {{ e.dateHeure | date:'dd/MM/yyyy à HH:mm' }}
-                    </span>
-                  </div>
-                  <span class="text-xs text-secondary">
-                    Durée : {{ e.dureeMinutes }} min
-                    <span *ngIf="e.lieu"> • {{ e.lieu }}</span>
+          <!-- Left Info: Job & Company -->
+          <div class="flex-auto max-w-xl">
+            <div class="flex items-start justify-between mb-4">
+              <div>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase mb-3"
+                  [ngClass]="STATUT_COLORS[c.statut]">
+                  {{ STATUT_LABELS[c.statut] }}
+                </span>
+                <h3 class="text-3xl font-black text-gray-900 leading-tight">
+                  {{ offresMap[c.offreId]?.titre || 'Chargement...' }}
+                </h3>
+                <div class="flex items-center gap-4 mt-3 text-gray-500 font-medium">
+                  <span class="flex items-center gap-1.5">
+                    <mat-icon class="icon-size-4">business</mat-icon>
+                    {{ offresMap[c.offreId]?.departement }}
+                  </span>
+                  <span class="flex items-center gap-1.5">
+                    <mat-icon class="icon-size-4">place</mat-icon>
+                    {{ offresMap[c.offreId]?.localisation }}
                   </span>
                 </div>
+              </div>
 
-                <!-- Bouton Rejoindre Meet -->
-                <a *ngIf="e.type === 'VISIO' && e.lienVisio && e.statut === 'PLANIFIE'" mat-flat-button
-                  class="bg-green-500 text-white text-sm" [href]="e.lienVisio" target="_blank" rel="noopener"
-                  matTooltip="Rejoindre Google Meet">
-                  <mat-icon class="icon-size-4 mr-1">videocam</mat-icon>
-                  Rejoindre Meet
-                </a>
+              <!-- Action Menu (Three Dots) -->
+              <div>
+                <button mat-icon-button [matMenuTriggerFor]="cardMenu" class="text-gray-400 hover:text-gray-600 transition-colors">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+                <mat-menu #cardMenu="matMenu">
+                  <button mat-menu-item (click)="voirDetail(c)">
+                    <mat-icon class="text-blue-500">visibility</mat-icon>
+                    <span>Voir l'offre</span>
+                  </button>
+                  <button mat-menu-item (click)="supprimerCandidature(c, $event)" class="text-red-600">
+                    <mat-icon class="text-red-600">delete_outline</mat-icon>
+                    <span>Supprimer la candidature</span>
+                  </button>
+                </mat-menu>
+              </div>
+            </div>
 
+            <!-- TIMELINE SECTION -->
+            <div class="mt-10 mb-8">
+              <div class="flex items-center justify-between mb-4">
+                <span class="text-sm font-black text-gray-400 uppercase tracking-widest">Processus de recrutement</span>
+                <span class="text-sm font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-lg">
+                  Étape {{ getProgressStep(c.statut) }} / {{ KANBAN_COLUMNS.length }}
+                </span>
+              </div>
+              <div class="flex items-center gap-2">
+                <ng-container *ngFor="let col of KANBAN_COLUMNS; let i = index">
+                  <div class="flex-auto h-2 rounded-full transition-all duration-700"
+                    [ngClass]="i < getProgressStep(c.statut) ? 'bg-indigo-600 shadow-[0_0_10px_rgba(79,70,229,0.3)]' : 'bg-gray-100'">
+                  </div>
+                  <div *ngIf="i < KANBAN_COLUMNS.length - 1" class="w-1"></div>
+                </ng-container>
+              </div>
+              <div class="mt-3 text-sm font-bold text-gray-600 flex justify-between">
+                <span>Postulation</span>
+                <span class="text-indigo-600">{{ c.etapeActuelle }}</span>
+                <span>Offre</span>
+              </div>
+            </div>
+
+            <!-- SUB-INFOS -->
+            <div class="flex flex-wrap gap-4 items-center">
+              <div class="flex items-center gap-2 bg-gray-50/50 px-4 py-2 rounded-2xl border border-gray-100">
+                <mat-icon class="text-gray-400 icon-size-5">event</mat-icon>
+                <span class="text-sm font-bold text-gray-600">Postulé le {{ c.datePostulation | date:'dd MMM yyyy' }}</span>
+              </div>
+              <div *ngIf="c.scoreMatching > 0"
+                class="group/score flex items-center gap-3 bg-gradient-to-r from-orange-50 to-amber-50 px-5 py-2.5 rounded-2xl border border-orange-100 shadow-sm transition-all hover:shadow-md">
+                <div class="flex flex-col">
+                  <span class="text-[10px] font-black text-orange-400 uppercase tracking-widest leading-none mb-1">Score IA</span>
+                  <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-full border-4 border-orange-200 border-t-orange-500 animate-spin-slow"></div>
+                    <span class="text-lg font-black text-orange-700">{{ c.scoreMatching | number:'1.0-0' }}%</span>
+                  </div>
+                </div>
+            </div>
+
+            <!-- L'AVIS DE L'IA (XAI) -->
+            <div *ngIf="c.comparaisonExplication" 
+              class="mt-8 relative p-6 bg-gradient-to-br from-indigo-600 to-blue-700 rounded-[2rem] shadow-xl overflow-hidden group/ia transition-all hover:scale-[1.01]">
+              <!-- Décoration IA -->
+              <div class="absolute top-0 right-0 p-4 opacity-10 group-hover/ia:rotate-12 transition-transform">
+                <mat-icon class="icon-size-20">psychology</mat-icon>
+              </div>
+              <div class="relative z-10 flex items-start gap-4">
+                <div class="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white shrink-0">
+                  <mat-icon class="icon-size-6 animate-pulse">auto_awesome</mat-icon>
+                </div>
+                <div class="space-y-1">
+                  <p class="text-[10px] font-black text-white/60 uppercase tracking-widest leading-none">💡 L'Analyse de l'expert IA</p>
+                  <p class="text-white font-medium italic leading-relaxed">{{ c.comparaisonExplication }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- COMPÉTENCES BREAKDOWN -->
+            <div class="mt-6 p-6 bg-gray-50/50 rounded-[2rem] border border-gray-100">
+              <div class="flex items-center justify-between mb-4">
+                <h4 class="text-xs font-black text-gray-400 uppercase tracking-widest">Détails du Matching</h4>
+                <div class="text-[10px] font-bold text-indigo-600 bg-white px-2 py-1 rounded-md border border-indigo-100 shadow-sm">
+                  Analyse d'impact
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Compétences Trouvées -->
+                <div class="space-y-3">
+                  <div class="flex items-center gap-2 text-green-600">
+                    <mat-icon class="icon-size-4">check_circle</mat-icon>
+                    <span class="text-xs font-black uppercase tracking-tight">Forces Détectées (CV)</span>
+                  </div>
+                  <div class="flex flex-wrap gap-2">
+                    <span *ngFor="let s of c.competencesExtraites" 
+                      class="px-3 py-1 bg-green-50 text-green-700 text-[11px] font-bold rounded-lg border border-green-100 transition-all hover:bg-green-100">
+                      {{ s }}
+                    </span>
+                    <span *ngIf="!c.competencesExtraites?.length" class="text-xs text-gray-400 italic">Aucune extraite pour le moment</span>
+                  </div>
+                </div>
+
+                <!-- Compétences Manquantes -->
+                <div class="space-y-3">
+                  <div class="flex items-center gap-2 text-orange-600">
+                    <mat-icon class="icon-size-4">info</mat-icon>
+                    <span class="text-xs font-black uppercase tracking-tight">Manquants pour l'offre</span>
+                  </div>
+                  <div class="flex flex-wrap gap-2">
+                    <span *ngFor="let s of c.competencesManquantes" 
+                      class="px-3 py-1 bg-orange-50 text-orange-700 text-[11px] font-bold rounded-lg border border-orange-100">
+                      {{ s }}
+                    </span>
+                    <span *ngIf="!c.competencesManquantes?.length" class="text-xs text-green-600 font-bold italic">Score de matching parfait !</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Infos bas -->
-          <div class="flex flex-wrap items-center justify-between gap-4 text-sm text-secondary mt-2">
-            <div class="flex items-center gap-6">
-              <span
-                class="flex items-center gap-2 font-medium bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
-                <mat-icon class="icon-size-5 text-gray-400" [svgIcon]="'heroicons_outline:calendar'"></mat-icon>
-                Postulé le {{ c.datePostulation | date:'dd/MM/yyyy' }}
-              </span>
-              <span *ngIf="c.scoreMatching > 0"
-                class="flex items-center gap-2 text-orange-700 font-bold bg-gradient-to-r from-orange-50 to-red-50 text-sm px-4 py-1.5 rounded-xl border border-orange-200 shadow-sm transition-all duration-300 hover:shadow-md hover:scale-105">
-                🔥 Adéquation : {{ c.scoreMatching | number:'1.0-0' }}%
-              </span>
+          <!-- Right: AI Insights (Soft Skills) -->
+          <div class="lg:w-80 flex flex-col gap-6 py-2 border-l border-gray-100 pl-10">
+            <h4 class="text-sm font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
+              <mat-icon class="icon-size-4 text-indigo-500">psychology</mat-icon>
+              Soft Skills IA
+            </h4>
+            
+            <div class="space-y-5">
+              <!-- Skill: Empathie -->
+              <div class="space-y-1.5">
+                <div class="flex justify-between text-xs font-bold text-gray-600">
+                  <span>Empathie</span>
+                  <span class="text-indigo-600">{{ c.scoreEmpathie }}%</span>
+                </div>
+                <div class="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                  <div class="h-full bg-indigo-500 rounded-full transition-all duration-1000" [style.width.%]="c.scoreEmpathie"></div>
+                </div>
+              </div>
+              <!-- Skill: Leadership -->
+              <div class="space-y-1.5">
+                <div class="flex justify-between text-xs font-bold text-gray-600">
+                  <span>Leadership</span>
+                  <span class="text-blue-600">{{ c.scoreLeadership }}%</span>
+                </div>
+                <div class="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                  <div class="h-full bg-blue-500 rounded-full transition-all duration-1000" [style.width.%]="c.scoreLeadership"></div>
+                </div>
+              </div>
+              <!-- Skill: Adaptabilité -->
+              <div class="space-y-1.5">
+                <div class="flex justify-between text-xs font-bold text-gray-600">
+                  <span>Adaptabilité</span>
+                  <span class="text-emerald-600">{{ c.scoreAdaptabilite }}%</span>
+                </div>
+                <div class="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                  <div class="h-full bg-emerald-500 rounded-full transition-all duration-1000" [style.width.%]="c.scoreAdaptabilite"></div>
+                </div>
+              </div>
             </div>
-            <div class="flex items-center gap-3">
-              <button mat-stroked-button class="rounded-full shadow-sm hover:bg-gray-50 transition-colors"
-                (click)="voirDetail(c)">
-                Voir l'offre
-              </button>
-              <button mat-icon-button class="bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
-                (click)="supprimerCandidature(c, $event)" matTooltip="Supprimer la candidature">
-                <mat-icon [svgIcon]="'heroicons_outline:trash'" class="icon-size-5"></mat-icon>
-              </button>
+
+            <!-- ENTRETIENS RÉCENTS -->
+            <div *ngIf="entretiensMap[c.id]?.length > 0" class="mt-4">
+              <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Prochains RDV</p>
+              <div class="flex flex-col gap-3">
+                <div *ngFor="let e of entretiensMap[c.id] | slice:0:1" 
+                  class="bg-blue-50/50 p-3 rounded-2xl border border-blue-100 flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-blue-600 shadow-sm">
+                    <mat-icon>{{ e.type === 'VISIO' ? 'videocam' : 'groups' }}</mat-icon>
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="text-xs font-black text-blue-900 leading-tight">{{ e.dateHeure | date:'dd/MM à HH:mm' }}</span>
+                    <span class="text-[10px] font-bold text-blue-600 uppercase">{{ e.type }}</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- Historique -->
-          <mat-expansion-panel *ngIf="c.historiqueStatuts?.length" class="mt-4 shadow-none border rounded-xl">
-            <mat-expansion-panel-header>
-              <mat-panel-title class="text-sm">Historique des étapes</mat-panel-title>
-            </mat-expansion-panel-header>
-            <div class="flex flex-col gap-1.5 py-2">
-              <div *ngFor="let h of c.historiqueStatuts" class="text-xs text-secondary flex items-center gap-2">
-                <mat-icon class="icon-size-3" [svgIcon]="'heroicons_outline:check'"></mat-icon>
-                {{ h }}
+        </div>
+
+        <!-- SPECIAL ACTIONS (RSE, Video Test, Contract) -->
+        <div class="mt-10 space-y-4">
+          
+          <!-- Test Linguistique -->
+          <div *ngIf="c.statut === 'ACCEPTE' && !c.testLanguePasse"
+            class="bg-gradient-to-r from-red-500 to-rose-600 p-8 rounded-[2rem] shadow-xl text-white flex flex-col md:flex-row items-center gap-6 transform transition-transform hover:scale-[1.01]">
+            <div class="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center">
+              <mat-icon class="icon-size-10">videocam</mat-icon>
+            </div>
+            <div class="flex-auto text-center md:text-left">
+              <h5 class="text-xl font-black mb-1">Test Linguistique Obligatoire</h5>
+              <p class="text-white/80 font-medium">Validez votre niveau d'anglais par vidéo IA pour finaliser votre embauche.</p>
+            </div>
+            <button mat-flat-button (click)="ouvrirTestVideo(c)"
+              class="bg-white text-rose-600 rounded-2xl px-8 py-6 font-black shadow-lg">
+              Lancer le test maintenant
+            </button>
+          </div>
+
+          <!-- E-Learning -->
+          <div *ngIf="c.formationRequise"
+            class="bg-gradient-to-br from-indigo-900 to-blue-900 p-8 rounded-[2rem] shadow-xl text-white">
+            <div class="flex flex-col md:flex-row items-start gap-6">
+              <div class="w-16 h-16 rounded-2xl bg-indigo-500 flex items-center justify-center shadow-lg">
+                <mat-icon class="icon-size-10">school</mat-icon>
+              </div>
+              <div class="flex-auto">
+                <h5 class="text-xl font-black mb-2 tracking-tight">🎓 Programme RSE : Mise à niveau Linguistique</h5>
+                <p class="text-indigo-200 font-medium mb-6 leading-relaxed max-w-2xl">
+                  Notre engagement RSE favorise le développement des talents. Nous vous offrons ce parcours de formation obligatoire pour renforcer votre anglais professionnel.
+                </p>
+                <div class="flex flex-wrap gap-4">
+                  <a mat-flat-button class="bg-indigo-500 text-white rounded-xl px-6 font-bold"
+                    href="https://www.coursera.org/learn/business-english" target="_blank">Coursera B2</a>
+                  <a mat-flat-button class="bg-white/10 backdrop-blur-sm text-white rounded-xl px-6 font-bold"
+                    href="https://www.udemy.com/course/english-for-it-software-engineers/" target="_blank">Udemy Start</a>
+                </div>
               </div>
             </div>
-          </mat-expansion-panel>
+          </div>
 
+          <!-- Contrat -->
+          <div *ngIf="c.statut === 'ACCEPTE'" class="flex justify-end pt-4">
+            <button mat-flat-button
+              class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xl hover:shadow-indigo-200 transition-all font-black rounded-2xl px-10 py-6"
+              (click)="telechargerContrat(c)">
+              <mat-icon class="mr-3">file_download</mat-icon>
+              Télécharger mon Contrat
+            </button>
+          </div>
         </div>
       </div>
-
-      <!-- LIGNE RSE LANGUAGE TEST -->
-      <div class="px-8 pb-8 pt-0">
-        <!-- Action Requise si test ignoré -->
-        <div *ngIf="c.statut === 'ACCEPTE' && !c.testLanguePasse"
-          class="bg-gradient-to-r from-red-50 to-orange-50 border-l-4 border-red-500 p-5 mt-4 rounded-r-xl shadow-sm">
-          <p class="font-extrabold text-red-800 text-lg flex items-center gap-2">
-            <mat-icon [svgIcon]="'heroicons_outline:video-camera'"></mat-icon>
-            Action Requise : Test Linguistique Supplémentaire
-          </p>
-          <p class="text-sm text-red-700 mb-4 mt-1">Vous devez valider votre niveau d'anglais par vidéo (Test IA court)
-            afin d'officialiser votre recrutement par notre entreprise.</p>
-          <button mat-flat-button color="warn" (click)="ouvrirTestVideo(c)"
-            class="rounded-full font-bold shadow-md hover:shadow-lg transition-shadow">
-            Démarrer la vérification vidéo (Lancer la Caméra)
-          </button>
-        </div>
-
-        <!-- Confirmé -->
-        <div *ngIf="c.testLanguePasse"
-          class="bg-green-50/80 p-4 mt-4 text-green-900 border border-green-200 rounded-xl shadow-sm flex items-center gap-3">
-          <mat-icon class="text-green-500 bg-white rounded-full p-1 shadow-sm"
-            [svgIcon]="'heroicons_outline:check-badge'"></mat-icon>
-          <div>
-            <p class="font-bold text-sm">Test Vidéo IA Analysé (Score : {{c.scoreLangue | number:'1.0-0'}}%)</p>
-          </div>
-        </div>
-
-        <!-- E-learning RSE si score fail -->
-        <div *ngIf="c.formationRequise"
-          class="bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-200 p-6 mt-4 rounded-2xl shadow-md transform hover:-translate-y-1 transition-all">
-          <div class="flex items-start gap-4">
-            <div class="p-3 bg-indigo-100 rounded-lg text-indigo-600 shadow-inner">
-              <mat-icon [svgIcon]="'heroicons_outline:academic-cap'" class="icon-size-8"></mat-icon>
-            </div>
-            <div>
-              <p class="font-black text-indigo-900 text-lg">🎓 Mise à niveau Linguistique Offerte (RSE)</p>
-              <p class="text-sm text-indigo-700 mt-1 mb-4 leading-relaxed">
-                Votre test oral révèle l'opportunité de progresser en anglais. RH_RSE met en avant le développement de
-                ses talents et vous offre ce parcours E-Learning Obligatoire.
-              </p>
-              <div class="flex gap-3">
-                <a mat-flat-button class="bg-indigo-600 text-white rounded-full font-bold"
-                  href="https://www.coursera.org/learn/business-english" target="_blank">
-                  Accéder à Coursera B2
-                </a>
-                <a mat-stroked-button
-                  class="border-indigo-300 text-indigo-700 bg-white rounded-full font-bold shadow-sm"
-                  href="https://www.udemy.com/course/english-for-it-software-engineers/" target="_blank">
-                  Accéder à Udemy Start
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Bouton Télécharger Contrat si Accepté -->
-        <div *ngIf="c.statut === 'ACCEPTE'" class="mt-4 flex">
-          <button mat-flat-button
-            class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg hover:shadow-xl transition-all font-bold px-6 py-2"
-            (click)="telechargerContrat(c)">
-            <mat-icon [svgIcon]="'heroicons_outline:document-arrow-down'" class="mr-2 text-white"></mat-icon>
-            Télécharger mon Contrat
-          </button>
-        </div>
-
-      </div>
-
     </div>
-
   </div>
 
   <!-- WEBCAM MOCK MODAL -->
@@ -281,8 +423,38 @@
   }
 
   @keyframes blinker {
-    50% {
+    50% { opacity: 0; }
+  }
+
+  .animate-spin-slow {
+    animation: spin 8s linear infinite;
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .backdrop-blur-xl {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  @keyframes slideInUp {
+    from {
+      transform: translateY(30px);
       opacity: 0;
     }
+    to {
+      transform: translateY(0);
+    }
   }
+
+  .group {
+    animation: slideInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .group:nth-child(1) { animation-delay: 0.1s; }
+  .group:nth-child(2) { animation-delay: 0.2s; }
+  .group:nth-child(3) { animation-delay: 0.4s; }
 </style>

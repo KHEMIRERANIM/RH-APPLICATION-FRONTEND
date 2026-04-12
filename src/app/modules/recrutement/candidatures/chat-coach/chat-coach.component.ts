@@ -193,9 +193,13 @@ export class ChatCoachComponent implements OnInit, AfterViewChecked, OnDestroy {
           this.speakText(res.reply);
         }, 800);
       },
-      error: () => {
+      error: (err) => {
         this.isTyping = false;
-        this.messages.push({ sender: 'bot', text: 'Désolé, je rencontre des problèmes de réseau (IA injoignable).' });
+        console.error('Chatbot Error:', err);
+        this.messages.push({ 
+          sender: 'bot', 
+          text: '❌ IA Injoignable : Assurez-vous que le service AI est lancé (python app.py) sur le port 5000 et que la connexion réseau est stable.' 
+        });
       }
     });
   }

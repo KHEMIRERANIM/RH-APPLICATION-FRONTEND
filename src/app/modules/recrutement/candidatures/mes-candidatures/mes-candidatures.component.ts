@@ -19,9 +19,18 @@ const { webkitSpeechRecognition }: IWindow = <IWindow><unknown>window;
 export class MesCandidaturesComponent implements OnInit {
 
   candidatures: Candidature[] = [];
+  filteredCandidatures: Candidature[] = [];
   offresMap: Record<string, Offre> = {};
   entretiensMap: Record<string, Entretien[]> = {};
   loading = true;
+
+  stats = {
+    total: 0,
+    enCours: 0,
+    acceptes: 0
+  };
+
+  activeFilter: string = 'TOUS';
 
   // Video Test
   showVideoModal = false;
@@ -52,6 +61,9 @@ export class MesCandidaturesComponent implements OnInit {
     this.candidatureService.getMesCandidatures(user.id).subscribe({
       next: (data) => {
         this.candidatures = data;
+        this.calculateStats();
+        this.applyFilter('TOUS');
+
         // Charger les offres correspondantes
         const offresRequests = data.map(c =>
           this.offreService.getOffreById(c.offreId).pipe(catchError(() => of(null)))
@@ -75,6 +87,23 @@ export class MesCandidaturesComponent implements OnInit {
     });
   }
 
+  calculateStats(): void {
+    this.stats.total = this.candidatures.length;
+    this.stats.enCours = this.candidatures.filter(c => !['ACCEPTE', 'REFUSE'].includes(c.statut)).length;
+    this.stats.acceptes = this.candidatures.filter(c => c.statut === 'ACCEPTE').length;
+  }
+
+  applyFilter(filter: string): void {
+    this.activeFilter = filter;
+    if (filter === 'TOUS') {
+      this.filteredCandidatures = this.candidatures;
+    } else if (filter === 'EN_COURS') {
+      this.filteredCandidatures = this.candidatures.filter(c => !['ACCEPTE', 'REFUSE'].includes(c.statut));
+    } else {
+      this.filteredCandidatures = this.candidatures.filter(c => c.statut === filter);
+    }
+  }
+
   getProgressStep(statut: string): number {
     return KANBAN_COLUMNS.indexOf(statut as any) + 1;
   }
@@ -91,6 +120,8 @@ export class MesCandidaturesComponent implements OnInit {
 
     this.candidatureService.deleteCandidature(candidature.id).subscribe(() => {
       this.candidatures = this.candidatures.filter(c => c.id !== candidature.id);
+      this.calculateStats();
+      this.applyFilter(this.activeFilter);
       delete this.offresMap[candidature.offreId];
       delete this.entretiensMap[candidature.id];
     });

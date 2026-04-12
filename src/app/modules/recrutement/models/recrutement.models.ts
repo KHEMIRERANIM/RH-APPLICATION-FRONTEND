@@ -22,7 +22,7 @@ export interface Candidature {
   id: string; candidatId: string; offreId: string; cvFileId: string;
   lettreMotivationFileId: string; statut: StatutCandidature; scoreMatching: number;
   etapeActuelle: string; notesRecruteur: string; historiqueStatuts: string[];
-  competencesExtraites: string[]; competencesManquantes: string[]; anneesExperienceDetecte: number;
+  competencesExtraites: string[]; competencesManquantes: string[]; comparaisonExplication: string; anneesExperienceDetecte: number;
   testLanguePasse: boolean; scoreLangue: number; formationRequise: boolean;
   scoreLeadership: number; scoreEmpathie: number; scoreAdaptabilite: number;
   scoreCommunication: number; scoreInnovation: number;

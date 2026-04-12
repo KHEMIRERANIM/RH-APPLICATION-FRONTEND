@@ -22,6 +22,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatMenuModule } from '@angular/material/menu';
 
 import { FuseAlertModule } from '@fuse/components/alert';
 
@@ -87,6 +88,7 @@ import { CharteModule } from './charte/charte.module';
     MatCardModule,
     MatBadgeModule,
     MatCheckboxModule,
+    MatMenuModule,
 
     FuseAlertModule,
 
