@@ -22,25 +22,21 @@
     </div>
   </div>
 
-  <!-- Layout : liste à gauche, détail à droite -->
   <div style="display:flex;gap:20px;align-items:flex-start;">
 
     <!-- ── Liste des plans ───────────────────────────────────────────── -->
     <div style="flex:0 0 340px;display:flex;flex-direction:column;gap:10px;">
-
       <div *ngIf="!evolutionPlans.length"
            style="padding:32px;text-align:center;color:#9ca3af;font-size:13px;
                   background:white;border-radius:16px;border:1px solid #f3f4f6;">
         Aucun plan d'évolution trouvé
       </div>
-
       <div *ngFor="let p of evolutionPlans"
            (click)="openEvolutionPlan(p)"
            [style]="'border-radius:16px;padding:16px;cursor:pointer;transition:all 0.15s;' +
                     (selectedPlan?.id === p.id
                       ? 'background:#ede9fe;border:2px solid #7c3aed;'
                       : 'background:white;border:1px solid #f3f4f6;')">
-
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
           <div style="flex:1;min-width:0;">
             <p style="font-size:14px;font-weight:700;color:#111827;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
@@ -55,8 +51,6 @@
             {{ evolutionStatusLabel(p.status) }}
           </span>
         </div>
-
-        <!-- Barre de progression -->
         <div style="margin-top:10px;">
           <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
             <span style="font-size:11px;color:#6b7280;">Progression globale</span>
@@ -68,7 +62,6 @@
             <div [style]="'height:100%;border-radius:9999px;background:' + getProgressColor(p.scoreGlobal ?? 0) + ';width:' + (p.scoreGlobal ?? 0) + '%'"></div>
           </div>
         </div>
-
         <div style="display:flex;gap:8px;margin-top:8px;">
           <span style="font-size:11px;color:#6b7280;">⚙️ {{ p.certifications?.length || 0 }} certif(s)</span>
           <span style="font-size:11px;color:#6b7280;">🧠 {{ p.competencesActuelles?.length || 0 }} compétence(s)</span>
@@ -113,10 +106,62 @@
           </div>
         </div>
 
+        <!-- ✅ Certifications requises du poste cible -->
+        <div *ngIf="certifRequisesDuPoste().length"
+             style="background:white;border-radius:16px;padding:20px;border:1px solid #e9d5ff;">
+          <p style="font-size:14px;font-weight:700;color:#7c3aed;margin:0 0 4px;">
+            📋 Certifications requises pour « {{ selectedPlan.targetCareerTitle }} »
+          </p>
+          <p style="font-size:12px;color:#9ca3af;margin:0 0 12px;">
+            Définies sur le poste — copiées automatiquement dans le plan de l'employé.
+          </p>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;">
+            <div *ngFor="let c of certifRequisesDuPoste()"
+                 style="display:flex;align-items:center;gap:8px;padding:6px 12px;
+                        border-radius:8px;background:#faf5ff;border:1px solid #e9d5ff;">
+              <span [style]="c.type === 'TECHNIQUE'
+                      ? 'font-size:10px;background:#dbeafe;color:#1d4ed8;padding:2px 7px;border-radius:9999px;font-weight:600;'
+                      : 'font-size:10px;background:#fed7aa;color:#c2410c;padding:2px 7px;border-radius:9999px;font-weight:600;'">
+                {{ c.type === 'TECHNIQUE' ? '⚙️ Tech' : '🧠 Soft' }}
+              </span>
+              <span style="font-size:13px;font-weight:600;color:#111827;">{{ c.nom }}</span>
+              <span style="font-size:10px;background:#fee2e2;color:#991b1b;padding:1px 7px;border-radius:9999px;font-weight:700;">★ Requise</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ✅ Compétences déclarées par l'employé -->
+        <div *ngIf="competencesEmploye().length"
+             style="background:white;border-radius:16px;padding:20px;border:1px solid #f3f4f6;">
+          <p style="font-size:14px;font-weight:700;color:#111827;margin:0 0 12px;">
+            🧠 Compétences déclarées par l'employé ({{ competencesEmploye().length }})
+          </p>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;">
+            <div *ngFor="let c of competencesEmploye()"
+                 style="display:flex;align-items:center;gap:8px;padding:6px 12px;
+                        border-radius:8px;background:#f9fafb;border:1px solid #e5e7eb;">
+              <span style="font-size:13px;font-weight:600;color:#111827;">{{ c.nom }}</span>
+              <span [style]="c.niveau === 'EXPERT'
+                      ? 'font-size:10px;background:#dcfce7;color:#166534;padding:2px 7px;border-radius:9999px;font-weight:600;'
+                      : c.niveau === 'INTERMEDIAIRE'
+                        ? 'font-size:10px;background:#e0e7ff;color:#3730a3;padding:2px 7px;border-radius:9999px;font-weight:600;'
+                        : 'font-size:10px;background:#fef9c3;color:#854d0e;padding:2px 7px;border-radius:9999px;font-weight:600;'">
+                {{ c.niveau }}
+              </span>
+              <span *ngIf="c.annees" style="font-size:11px;color:#9ca3af;">{{ c.annees }} ans</span>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="!competencesEmploye().length"
+             style="background:white;border-radius:16px;padding:16px 20px;border:1px solid #f3f4f6;">
+          <p style="font-size:13px;color:#9ca3af;margin:0;font-style:italic;">
+            🧠 Aucune compétence déclarée par l'employé
+          </p>
+        </div>
+
         <!-- Formations recommandées + commentaire -->
         <div style="background:white;border-radius:16px;padding:20px;border:1px solid #f3f4f6;">
           <p style="font-size:15px;font-weight:700;color:#111827;margin:0 0 12px;">📚 Formations recommandées</p>
-
           <div *ngFor="let f of selectedPlan.formationsRecommandees; let i = index"
                style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #f9fafb;">
             <span style="flex:1;font-size:13px;color:#374151;">{{ f }}</span>
@@ -124,7 +169,6 @@
                     style="padding:2px 8px;border-radius:6px;border:1px solid #fee2e2;background:white;
                            color:#dc2626;cursor:pointer;font-size:12px;font-family:inherit;">✕</button>
           </div>
-
           <div style="display:flex;gap:8px;margin-top:12px;">
             <input [(ngModel)]="newFormation"
                    placeholder="Ajouter une formation..."
@@ -136,7 +180,6 @@
               + Ajouter
             </button>
           </div>
-
           <div style="margin-top:14px;">
             <p style="font-size:13px;font-weight:600;color:#374151;margin:0 0 6px;">Commentaire admin</p>
             <div style="display:flex;align-items:flex-end;gap:10px;">
@@ -155,7 +198,7 @@
           </div>
         </div>
 
-        <!-- Certifications -->
+        <!-- Certifications de l'employé -->
         <div style="background:white;border-radius:16px;padding:20px;border:1px solid #f3f4f6;">
           <p style="font-size:15px;font-weight:700;color:#111827;margin:0 0 6px;">
             Certifications de l'employé
@@ -180,12 +223,10 @@
                     style="padding:3px 10px;border-radius:9999px;font-size:11px;font-weight:700;">
                 {{ certifStatusLabel(c.statut) }}
               </span>
-              <!-- ✅ Toggle Requise/Personnelle cliquable -->
               <span (click)="toggleObligatoire(c)"
                     [style]="c.obligatoire
                       ? 'font-size:10px;background:#fee2e2;color:#991b1b;padding:3px 10px;border-radius:9999px;font-weight:700;cursor:pointer;border:1px solid #fca5a5;'
-                      : 'font-size:10px;background:#f3f4f6;color:#374151;padding:3px 10px;border-radius:9999px;cursor:pointer;border:1px solid #e5e7eb;'"
-                    title="Cliquer pour basculer Requise / Personnelle">
+                      : 'font-size:10px;background:#f3f4f6;color:#374151;padding:3px 10px;border-radius:9999px;cursor:pointer;border:1px solid #e5e7eb;'">
                 {{ c.obligatoire ? '★ Requise' : '☆ Personnelle' }}
               </span>
               <span *ngIf="c.valideParAdmin === true"
@@ -251,22 +292,16 @@
               <span style="font-size:10px;background:#f3f4f6;color:#374151;padding:2px 8px;border-radius:9999px;">
                 {{ c.methodeEval === 'AUTO_EVAL' ? 'Auto-éval' : 'Certif' }}
               </span>
-              <!-- ✅ Toggle Requise/Personnelle cliquable -->
               <span (click)="toggleObligatoire(c)"
                     [style]="c.obligatoire
                       ? 'font-size:10px;background:#fee2e2;color:#991b1b;padding:3px 10px;border-radius:9999px;font-weight:700;cursor:pointer;border:1px solid #fca5a5;'
-                      : 'font-size:10px;background:#f3f4f6;color:#374151;padding:3px 10px;border-radius:9999px;cursor:pointer;border:1px solid #e5e7eb;'"
-                    title="Cliquer pour basculer Requise / Personnelle">
+                      : 'font-size:10px;background:#f3f4f6;color:#374151;padding:3px 10px;border-radius:9999px;cursor:pointer;border:1px solid #e5e7eb;'">
                 {{ c.obligatoire ? '★ Requise' : '☆ Personnelle' }}
               </span>
               <span *ngIf="c.valideParAdmin === true"
-                    style="font-size:11px;background:#dcfce7;color:#166534;padding:3px 10px;border-radius:9999px;font-weight:700;">
-                ✓ Validé
-              </span>
+                    style="font-size:11px;background:#dcfce7;color:#166534;padding:3px 10px;border-radius:9999px;font-weight:700;">✓ Validé</span>
               <span *ngIf="c.valideParAdmin !== true"
-                    style="font-size:11px;background:#fef9c3;color:#854d0e;padding:3px 10px;border-radius:9999px;font-weight:700;">
-                ⏳ En attente
-              </span>
+                    style="font-size:11px;background:#fef9c3;color:#854d0e;padding:3px 10px;border-radius:9999px;font-weight:700;">⏳ En attente</span>
             </div>
             <div *ngIf="c.commentaireEmploye"
                  style="font-size:12px;color:#6b7280;background:#f9fafb;margin-top:8px;
@@ -307,7 +342,6 @@
               </button>
             </div>
           </div>
-
         </div>
       </div>
     </div>

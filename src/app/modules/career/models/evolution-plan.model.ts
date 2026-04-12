@@ -1,4 +1,4 @@
-import { CertificationType, EmployeeCertification } from './certification.model';
+﻿import { CertificationType, EmployeeCertification } from './certification.model';
 
 export enum EvolutionPlanStatus {
   DRAFT     = 'DRAFT',
@@ -46,7 +46,7 @@ export interface EvolutionPlan {
 export function computeScores(plan: EvolutionPlan): EvolutionPlan {
   const certifs = plan.certifications ?? [];
   
-  // ✅ Si pas de certifications du tout → 0%
+  // âœ… Si pas de certifications du tout â†’ 0%
   if (!certifs.length) {
     plan.scoreTechnique = 0;
     plan.scoreSoftSkill = 0;
@@ -59,7 +59,7 @@ export function computeScores(plan: EvolutionPlan): EvolutionPlan {
 
   const score = (list: EmployeeCertification[]) => {
     const req = list.filter(c => c.obligatoire);
-    if (!req.length) return 0; // ✅ 0% si pas de certifs requises
+    if (!req.length) return 0; // âœ… 0% si pas de certifs requises
     return Math.round(
       list.filter(c => c.obligatoire && c.statut === 'OBTENU').length / req.length * 100
     );
@@ -73,4 +73,13 @@ export function computeScores(plan: EvolutionPlan): EvolutionPlan {
     (plan.scoreTechnique * wT + plan.scoreSoftSkill * wS) / 100
   );
   return plan;
+}
+export function parseCompetences(plan: EvolutionPlan): Competence[] {
+  const raw = (plan as any).competencesJson ?? plan.competencesActuelles ?? [];
+  return raw.map((c: any) => {
+    if (typeof c === 'string') {
+      try { return JSON.parse(c); } catch { return { nom: c, niveau: 'INTERMEDIAIRE' }; }
+    }
+    return c as Competence;
+  });
 }

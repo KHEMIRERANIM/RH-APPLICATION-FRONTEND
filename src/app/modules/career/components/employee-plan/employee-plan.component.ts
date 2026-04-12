@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CareerService } from '../../services/career.service';
 import { EvolutionPlanService } from '../../services/evolution-plan.service';
-import { EvolutionPlan, EvolutionPlanStatus, Competence } from '../../models/evolution-plan.model';
+import { EvolutionPlan, EvolutionPlanStatus, Competence, parseCompetences } from '../../models/evolution-plan.model';
 import {
   EmployeeCertification, CertificationType,
   CertificationStatus, EvaluationMethod
@@ -23,18 +23,17 @@ export class EmployeePlanComponent implements OnInit {
   activeTab: string = 'poste';
 
   tabs = [
-    { key: 'poste',       label: ' Poste cible'       },
+    { key: 'poste',       label: '🎯 Poste cible'       },
     { key: 'competences', label: '🧠 Mes compétences'    },
     { key: 'tech',        label: '⚙️ Certifs Techniques' },
-    { key: 'soft',        label: ' Soft Skills'        },
+    { key: 'soft',        label: '🤝 Soft Skills'        },
   ];
 
-  newComp:   Partial<Competence>            = { niveau: 'INTERMEDIAIRE' };
+  newComp: Partial<Competence> = { niveau: 'INTERMEDIAIRE' };
   newCertif: Partial<EmployeeCertification> = { statut: CertificationStatus.NON_COMMENCE };
 
   newCertifFile: File | null = null;
   newCertifFileName: string  = '';
-
   showAddTech = false;
   showAddSoft = false;
 
@@ -45,55 +44,109 @@ export class EmployeePlanComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.user = JSON.parse(localStorage.getItem('currentUser') || '{}');
 
-    this.careerService.getAll().subscribe({
-      next: careers => {
-        this.careers = careers;
+  this.user = JSON.parse(localStorage.getItem('currentUser') || '{}');
 
-        const currentCareer = careers.find((c: Career) =>
-          c.title?.toLowerCase().trim() === this.user.poste?.toLowerCase().trim()
-        );
+  console.log('📦 currentUser:', this.user);
 
-        this.planService.getMyPlan().subscribe({
-          next: plans => {
-            if (plans && plans.length > 0) {
-              this.plan = plans[0];
-              if (!this.plan.currentCareerId && currentCareer) {
-                this.plan.currentCareerId    = currentCareer.id;
-                this.plan.currentCareerTitle = currentCareer.title;
-              }
-            } else {
-              this.plan = {
-                employeeId:           this.user.id ?? '',
-                targetCareerId:       '',
-                status:               EvolutionPlanStatus.DRAFT,
-                competencesActuelles: [],
-                certifications:       [],
-                currentCareerId:      currentCareer?.id ?? '',
-                currentCareerTitle:   currentCareer?.title ?? this.user.poste ?? ''
-              };
-            }
-            this.isLoading = false;
-          },
-          error: () => {
+  this.careerService.getAll().subscribe({
+    next: careers => {
+      this.careers = careers;
+
+      // ✅ FIX : éviter undefined
+      const userPoste = this.user?.poste?.toLowerCase()?.trim() || '';
+
+      console.log('👤 user.poste:', userPoste);
+      console.log('🎯 careers titles:', careers.map(c => c.title));
+
+      // ✅ MATCH ROBUSTE + fallback
+      let currentCareer: Career | undefined;
+
+      if (userPoste) {
+        currentCareer =
+          careers.find((c: Career) =>
+            c.title?.toLowerCase().trim() === userPoste
+          )
+          || careers.find((c: Career) =>
+            c.title?.toLowerCase().includes(userPoste)
+          )
+          || careers.find((c: Career) =>
+            userPoste.includes(c.title?.toLowerCase())
+          );
+      }
+
+      // ✅ FALLBACK SI PAS DE POSTE
+      if (!currentCareer && careers.length > 0) {
+        currentCareer = careers[0]; // 🔥 premier poste par défaut
+      }
+
+      console.log('✅ currentCareer trouvé:', currentCareer);
+
+      this.planService.getMyPlan().subscribe({
+        next: plans => {
+
+          if (plans && plans.length > 0) {
+            const raw = plans[0];
+
+            this.plan = {
+              ...raw,
+              competencesActuelles: parseCompetences(raw),
+
+              currentCareerId: currentCareer?.id ?? raw.currentCareerId ?? '',
+
+              // ✅ FIX FINAL
+              currentCareerTitle:
+                currentCareer?.title
+                || this.user?.poste
+                || raw.currentCareerTitle
+                || 'Poste non défini'
+            };
+
+          } else {
+
             this.plan = {
               employeeId:           this.user.id ?? '',
               targetCareerId:       '',
               status:               EvolutionPlanStatus.DRAFT,
               competencesActuelles: [],
               certifications:       [],
-              currentCareerId:      currentCareer?.id ?? '',
-              currentCareerTitle:   currentCareer?.title ?? this.user.poste ?? ''
-            };
-            this.isLoading = false;
-          }
-        });
-      },
-      error: () => { this.isLoading = false; }
-    });
-  }
 
+              currentCareerId: currentCareer?.id ?? '',
+
+              currentCareerTitle:
+                currentCareer?.title
+                || this.user?.poste
+                || 'Poste non défini'
+            };
+          }
+
+          this.isLoading = false;
+        },
+
+        error: () => {
+          this.plan = {
+            employeeId:           this.user.id ?? '',
+            targetCareerId:       '',
+            status:               EvolutionPlanStatus.DRAFT,
+            competencesActuelles: [],
+            certifications:       [],
+
+            currentCareerId: currentCareer?.id ?? '',
+
+            currentCareerTitle:
+              currentCareer?.title
+              || this.user?.poste
+              || 'Poste non défini'
+          };
+
+          this.isLoading = false;
+        }
+      });
+    },
+
+    error: () => { this.isLoading = false; }
+  });
+}
   // ── Getters ───────────────────────────────────────────────────────────
 
   get certifsTech(): EmployeeCertification[] {
@@ -104,6 +157,12 @@ export class EmployeePlanComponent implements OnInit {
   get certifsSoft(): EmployeeCertification[] {
     return (this.plan?.certifications ?? [])
       .filter(c => c.type === CertificationType.SOFT_SKILL);
+  }
+
+  get posteActuel(): string {
+    return this.plan?.currentCareerTitle
+        || this.user?.poste
+        || 'Non défini';
   }
 
   // ── Poste ─────────────────────────────────────────────────────────────
@@ -135,15 +194,37 @@ export class EmployeePlanComponent implements OnInit {
   }
 
   saveCompetences(): void {
-    if (!this.plan.id) { this.save('Compétences enregistrées'); return; }
-    this.planService.saveCompetences(this.plan.id, this.plan.competencesActuelles)
-      .subscribe({
-        next:  p  => { this.plan = p; this.snack('Compétences enregistrées'); },
-        error: () => this.snack('Erreur', true)
-      });
+  if (!this.plan.competencesActuelles?.length) {
+    this.snack('Ajoutez au moins une compétence', true);
+    return;
   }
-
-  // ── Certifications existantes ─────────────────────────────────────────
+  if (!this.plan.id) {
+    this.save('Compétences enregistrées');
+    return;
+  }
+  this.planService.saveCompetences(this.plan.id, this.plan.competencesActuelles)
+    .subscribe({
+      next: p => {
+        console.log('📦 Réponse backend saveCompetences:', p);
+        console.log('📦 competencesJson:', (p as any).competencesJson);
+        console.log('📦 competencesActuelles:', p.competencesActuelles);
+        const parsed = parseCompetences(p);
+        console.log('✅ parsed:', parsed);
+        this.plan = {
+          ...p,
+          competencesActuelles: parsed,
+          currentCareerTitle: this.posteActuel,
+          currentCareerId:    this.plan.currentCareerId
+        };
+        this.snack('Compétences enregistrées (' + parsed.length + ')');
+      },
+      error: (err) => {
+        console.error('❌ Erreur:', err);
+        this.snack('Erreur sauvegarde', true);
+      }
+    });
+}
+  // ── Certifications ────────────────────────────────────────────────────
 
   saveCertif(c: EmployeeCertification): void {
     if (!this.plan.id) { this.save('Plan enregistré'); return; }
@@ -151,7 +232,14 @@ export class EmployeePlanComponent implements OnInit {
       ? this.planService.updateCertification(this.plan.id, c.id, c)
       : this.planService.addCertification(this.plan.id, c);
     obs.subscribe({
-      next:  p  => { this.plan = p; this.snack('Certif enregistrée'); },
+      next: p => {
+        this.plan = {
+          ...p,
+          competencesActuelles: parseCompetences(p),
+          currentCareerTitle: this.posteActuel
+        };
+        this.snack('Certif enregistrée');
+      },
       error: () => this.snack('Erreur', true)
     });
   }
@@ -168,8 +256,6 @@ export class EmployeePlanComponent implements OnInit {
       error: () => this.snack('Erreur upload', true)
     });
   }
-
-  // ── Nouvelles certifications (formulaire) ─────────────────────────────
 
   onNewCertifFileSelected(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0];
@@ -206,7 +292,11 @@ export class EmployeePlanComponent implements OnInit {
     if (this.plan.id) {
       this.planService.addCertification(this.plan.id, certif).subscribe({
         next: p => {
-          this.plan = p;
+          this.plan = {
+            ...p,
+            competencesActuelles: parseCompetences(p),
+            currentCareerTitle: this.posteActuel
+          };
           if (this.newCertifFile) {
             const created = p.certifications[p.certifications.length - 1];
             if (created?.id) {
@@ -215,13 +305,13 @@ export class EmployeePlanComponent implements OnInit {
                   next: (res: any) => {
                     created.fichierNom = res.fileName;
                     created.fichierUrl = res.fileUrl;
-                    this.snack('Certif ajoutée avec fichier');
+                    this.snack('Certif ajoutée avec fichier ✓');
                   },
-                  error: () => this.snack('Certif ajoutée — erreur upload fichier', true)
+                  error: () => this.snack('Certif ajoutée — erreur upload', true)
                 });
             }
           } else {
-            this.snack('Certif ajoutée');
+            this.snack('Certif ajoutée ✓');
           }
           this.resetNewCertifForm();
         },
@@ -229,8 +319,8 @@ export class EmployeePlanComponent implements OnInit {
       });
     } else {
       this.plan.certifications.push(certif);
+      this.save('Plan enregistré avec la certif');
       this.resetNewCertifForm();
-      this.snack('Certif ajoutée — cliquez Enregistrer pour sauvegarder');
     }
   }
 
@@ -249,7 +339,15 @@ export class EmployeePlanComponent implements OnInit {
       ? this.planService.update(this.plan.id, this.plan)
       : this.planService.create(this.plan);
     obs.subscribe({
-      next:  p  => { this.plan = p; this.snack(msg); },
+      next: p => {
+        this.plan = {
+          ...p,
+          competencesActuelles: parseCompetences(p),
+          currentCareerTitle: this.posteActuel,
+          currentCareerId:    this.plan.currentCareerId
+        };
+        this.snack(msg);
+      },
       error: () => this.snack('Erreur sauvegarde', true)
     });
   }
