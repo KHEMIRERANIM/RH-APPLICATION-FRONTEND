@@ -284,6 +284,7 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
   // Recherche
   searchQuery: string = '';
   searchTime: string = '';
+  searchPrice: number | null = null;
   searchSuggestions: any[] = [];
 
   private searchTimeout: any;
@@ -321,12 +322,14 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
   // Vehicle Modal State
   showVehicleModal: boolean = false;
   allTrajets: Trajet[] = [];
+  lookupTrajets: Trajet[] = []; // Full list for reservation details lookup
+  employesMap: Map<string, string> = new Map();
+  employesPhoneMap: Map<string, string> = new Map(); // Store employee phones
   displayedTrajets: Trajet[] = [];
   mesReservations: ReservationResponse[] = [];
   reservationEnCours: boolean = false;
 
-  // Cache employés
-  employesMap: Map<string, string> = new Map();
+  // Cache employés (already declared above)
 
   // ----- NOUVELLE PAGE RÉCOMPENSES (REWARDS) -----
   userPointsReward: number = 370;
@@ -853,8 +856,13 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
         users.forEach((user: any) => {
           this.employesMap.set(
             String(user.id),
-            `${user.prenom || ''} ${user.nom || ''}`.trim()
+            `${user.prenom || user.firstName || ''} ${user.nom || user.lastName || ''}`.trim()
           );
+          // Stocker aussi le téléphone si disponible
+          const phone = user.phone || user.telephone || user.tel || '';
+          if (phone) {
+            this.employesPhoneMap.set(String(user.id), phone);
+          }
         });
         this.cdr.detectChanges();
       },
@@ -866,9 +874,13 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     return this.employesMap.get(String(id)) || `Employé Inconnu`;
   }
 
+  getEmployeePhone(id: string): string {
+    return this.employesPhoneMap.get(String(id)) || 'N/A';
+  }
+
   getTrajetInfo(trajetId: string | undefined): Trajet | undefined {
     if (!trajetId) return undefined;
-    return this.allTrajets.find(t => t.id === trajetId);
+    return this.lookupTrajets.find(t => t.id === trajetId);
   }
 
   loadVehicules() {
@@ -967,7 +979,21 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
   loadAllTrajets(): void {
     this.covoiturageService.getAllTrajets().subscribe({
       next: (res) => {
-        this.allTrajets = res.filter(t => t.statut === 'ACTIF' || t.statut === 'COMPLET');
+        // Sauvegarde de la liste complète pour la recherche de détails (getTrajetInfo)
+        this.lookupTrajets = res || [];
+
+        // IDs pour exclusion (normalisés en string)
+        const myId = String(this.employeId || '').trim().toLowerCase();
+
+        // On récupère les trajets actifs en excluant ceux de l'utilisateur actuel et ceux qui sont complets
+        this.allTrajets = this.lookupTrajets.filter(t => {
+          const tEmpId = String(t.employeId || '').trim().toLowerCase();
+          const isMe = tEmpId === myId;
+          // Un trajet ne s'affiche que s'il est ACTIF, a des places disponibles et n'appartient pas à l'utilisateur actuel
+          const isAvailable = t.statut === 'ACTIF' && (t.placesRestantes || 0) > 0;
+          return isAvailable && !isMe;
+        });
+
         this.displayedTrajets = [...this.allTrajets];
         this.cdr.detectChanges();
       },
@@ -980,7 +1006,7 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     this.covoiturageService.getReservationsByEmploye(this.employeId).subscribe({
       next: (res) => {
         this.mesReservations = res;
-        
+
         // Calcul du CO2 total économisé
         this.totalCo2Economise = this.mesReservations
           .filter(r => r.statut === 'EFFECTUE')
@@ -1015,10 +1041,17 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
 
   async reserverTrajet(trajetId: string): Promise<void> {
     if (!this.employeId || this.reservationEnCours) return;
+
+    // Safety check: Don't allow reserving own trip
+    const trajet = this.allTrajets.find(t => t.id === trajetId);
+    if (trajet && String(trajet.employeId).trim().toLowerCase() === String(this.employeId).trim().toLowerCase()) {
+      alert("Erreur: Vous ne pouvez pas réserver votre propre trajet.");
+      return;
+    }
+
     if (this.estDejaReserve(trajetId)) return;
     this.reservationEnCours = true;
 
-    const trajet = this.allTrajets.find(t => t.id === trajetId);
     let distanceKm = 25.0;
 
     if (trajet) {
@@ -1838,12 +1871,9 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
       const data = await response.json();
       if (data && data.length > 0) {
         this.selectPubSuggestion(data[0]);
-      } else {
-        alert('Aucun lieu trouvé pour "' + this.pubSearchQuery + '"');
       }
     } catch (error) {
       console.error('Erreur recherche:', error);
-      alert('Erreur lors de la recherche');
     }
   }
 
@@ -1907,41 +1937,75 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
   }
 
   rechercherCovoitureurs() {
-    const depart = this.inputMode === 'map' ? this.departureLocation : this.manualDeparture;
-    const arrivee = this.inputMode === 'map' ? this.destinationLocation : this.manualDestination;
+    // 1. Récupération & Normalisation des inputs
+    // Priorité à manualAllStartPoints s'il est rempli en mode manuel
+    const departInput = (this.inputMode === 'manual' 
+      ? (this.manualAllStartPoints || this.manualDeparture) 
+      : this.departureLocation);
+    const arriveeInput = (this.inputMode === 'manual' ? this.manualDestination : this.destinationLocation);
+    
+    const depart = departInput?.toLowerCase().trim();
+    const arrivee = arriveeInput?.toLowerCase().trim();
+    const targetTime = this.searchTime?.trim();
+    const selectedDaysNorm = (this.selectedDays || []).map(d => d.toLowerCase().trim());
 
-    if (!depart || !arrivee) {
-      alert('Veuillez renseigner le départ et la destination pour rechercher.');
+    // 2. Validation minimale
+    const hasActiveFilters = !!(depart || arrivee || targetTime || selectedDaysNorm.length > 0 || this.searchPrice !== null);
+    
+    if (!hasActiveFilters) {
+      alert('Veuillez renseigner au moins un critère de recherche (Départ, Destination, Jours, Heure ou Prix).');
       return;
     }
 
+    console.log('--- DEBUT RECHERCHE ---');
+    console.log('Filtres:', { depart, arrivee, targetTime, selectedDaysNorm });
+
+    // 3. Filtrage dynamique
     const trajetsFiltres = this.allTrajets.filter(trajet => {
-      const joursTrajet = trajet.joursDisponibles.split(',');
-      const joursMatch = this.selectedDays.some(j => aIncludeB(joursTrajet, j));
-      const departMatch = trajet.adresseDepart.toLowerCase().includes(depart.toLowerCase()) ||
-        depart.toLowerCase().includes(trajet.adresseDepart.toLowerCase());
-      const arriveeMatch = trajet.adresseArrivee.toLowerCase().includes(arrivee.toLowerCase()) ||
-        arrivee.toLowerCase().includes(trajet.adresseArrivee.toLowerCase());
+      // Normalisation des champs du trajet
+      const trajetDep = (trajet.adresseDepart || '').toLowerCase().trim();
+      const trajetArr = (trajet.adresseArrivee || '').toLowerCase().trim();
+      const trajetJours = (trajet.joursDisponibles || '').toLowerCase();
+      const trajetHeure = (trajet.heureDepart || '').trim();
+      
+      // IDs pour exclusion (normalisés en string)
+      const tId = String(trajet.employeId || '').trim().toLowerCase();
+      const myId = String(this.employeId || '').trim().toLowerCase();
 
-      let timeMatch = true;
-      if (this.searchTime) {
-        timeMatch = trajet.heureDepart.startsWith(this.searchTime);
-      }
+      // a. Jours (OR logic: if trajet has ANY of the selected days)
+      const joursMatch = selectedDaysNorm.length === 0 || 
+                         selectedDaysNorm.some(day => trajetJours.includes(day));
 
-      return joursMatch && (departMatch || arriveeMatch) && timeMatch;
+      // b. Départ (Substring match)
+      const departMatch = !depart || trajetDep.includes(depart);
+
+      // c. Arrivée (Substring match)
+      const arriveeMatch = !arrivee || trajetArr.includes(arrivee);
+
+      // d. Heure (Prefix match)
+      const timeMatch = !targetTime || trajetHeure.startsWith(targetTime);
+
+      // e. Prix (Si renseigné)
+      const searchPriceActive = this.searchPrice !== null && this.searchPrice !== undefined && (this.searchPrice as any) !== '';
+      const prixMatch = !searchPriceActive || (trajet.prix !== undefined && (trajet.prix || 0) <= (this.searchPrice || 0));
+
+      // f. Exclusion de soi-même
+      const isNotMe = tId !== myId;
+
+      return joursMatch && departMatch && arriveeMatch && timeMatch && isNotMe && prixMatch;
     });
 
-    function aIncludeB(arr: string[], val: string) {
-      return arr.some(a => a.trim().toLowerCase() === val.trim().toLowerCase());
-    }
+    console.log(`Résultats: ${trajetsFiltres.length} trouvé(s)`);
+    console.log('--- FIN RECHERCHE ---');
 
+    // 4. Mise à jour de l'affichage
     if (trajetsFiltres.length === 0) {
       alert('Aucun covoiturage trouvé pour ces critères.');
       this.displayedTrajets = [];
     } else {
-      alert(`${trajetsFiltres.length} covoiturage(s) trouvé(s) !`);
       this.displayedTrajets = trajetsFiltres;
     }
+    
     this.cdr.detectChanges();
   }
 

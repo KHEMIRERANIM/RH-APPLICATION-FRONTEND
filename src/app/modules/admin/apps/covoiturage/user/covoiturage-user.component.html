@@ -74,6 +74,10 @@
               <ng-container *ngIf="getTrajetInfo(reservation.trajetId) as trajetInfo; else fallbackInfo">
                 <div class="flex items-center gap-2 mb-1">
                   <p class="font-semibold text-[#1A1A2E]">Trajet avec {{ getEmployeeName(trajetInfo.employeId) }}</p>
+                  <div class="flex items-center gap-1.5 px-2 py-0.5 bg-indigo-50 rounded border border-indigo-100 shadow-sm" *ngIf="getEmployeePhone(trajetInfo.employeId) !== 'N/A'">
+                    <mat-icon class="icon-size-3.5 text-indigo-600" svgIcon="feather:phone"></mat-icon>
+                    <span class="text-[10px] font-black text-indigo-700">{{ getEmployeePhone(trajetInfo.employeId) }}</span>
+                  </div>
                   <span class="text-sm px-2 py-0.5 rounded-full font-medium shadow-sm transition-colors"
                     [ngClass]="reservation.statut === 'CONFIRME' ? 'bg-[#1D9E75] text-white' : (reservation.statut === 'EFFECTUE' ? 'bg-gray-500 text-white' : (reservation.statut === 'EN_ATTENTE_PAIEMENT' ? 'bg-blue-500 text-white' : (reservation.statut === 'EN_ATTENTE' ? 'bg-yellow-500 text-white' : 'bg-red-500 text-white')))">{{
                     reservation.statut === 'CONFIRME' ? 'Confirmée' : (reservation.statut === 'EFFECTUE' ? 'Effectuée' :
@@ -120,26 +124,28 @@
                 <span>-{{ reservation.co2EconomiseKg }} kg CO2</span>
               </div>
             </div>
-              <div class="flex flex-col items-end gap-2">
-                <div *ngIf="reservation.statut === 'EN_ATTENTE_PAIEMENT'" class="mb-1">
-                   <p class="text-[10px] font-black text-blue-600 uppercase tracking-widest text-right">Paiement Requis</p>
-                   <p class="text-2xl font-black text-slate-800 leading-none">{{ getTrajetInfo(reservation.trajetId)?.prix || 0 }} <span class="text-sm font-bold">DT</span></p>
-                </div>
-                <div class="flex gap-2">
-                  <button *ngIf="reservation.statut === 'EN_ATTENTE_PAIEMENT'" (click)="payerReservation(reservation)"
-                    class="px-4 py-2 bg-gradient-to-r from-[#0070ba] to-[#003087] text-white rounded-lg text-base font-semibold hover:shadow-md transition-all shadow-sm">
-                    Payer
-                  </button>
-                  <button
-                    *ngIf="reservation.statut === 'CONFIRME' && getTrajetInfo(reservation.trajetId)?.vehiculeId as vId"
-                    (click)="openTracking(vId, true, getTrajetInfo(reservation.trajetId)?.adresseDepart || '', getTrajetInfo(reservation.trajetId)?.adresseArrivee || '')"
-                    class="px-4 py-2 bg-[#0F3460] text-white rounded-lg text-base font-medium hover:bg-[#0a2442] transition-colors shadow-sm">
-                    📍 Suivre
-                  </button>
-                  <button (click)="annulerReservation(reservation.id!)"
-                    class="px-4 py-2 bg-[#E94560] text-white rounded-lg text-base font-medium hover:bg-[#d13850] transition-colors shadow-sm">Annuler</button>
-                </div>
+            <div class="flex flex-col items-end gap-2">
+              <div *ngIf="reservation.statut === 'EN_ATTENTE_PAIEMENT'" class="mb-1">
+                <p class="text-[10px] font-black text-blue-600 uppercase tracking-widest text-right">Paiement Requis</p>
+                <p class="text-2xl font-black text-slate-800 leading-none">{{ getTrajetInfo(reservation.trajetId)?.prix
+                  || 0 }} <span class="text-sm font-bold">DT</span></p>
               </div>
+              <div class="flex gap-2">
+                <button *ngIf="reservation.statut === 'EN_ATTENTE_PAIEMENT'" (click)="payerReservation(reservation)"
+                  class="px-4 py-2 bg-gradient-to-r from-[#0070ba] to-[#003087] text-white rounded-lg text-base font-semibold hover:shadow-md transition-all shadow-sm">
+                  Payer
+                </button>
+                <button
+                  *ngIf="reservation.statut === 'CONFIRME' && getTrajetInfo(reservation.trajetId)?.vehiculeId as vId"
+                  (click)="openTracking(vId, true, getTrajetInfo(reservation.trajetId)?.adresseDepart || '', getTrajetInfo(reservation.trajetId)?.adresseArrivee || '')"
+                  class="px-4 py-2 bg-[#0F3460] text-white rounded-lg text-base font-medium hover:bg-[#0a2442] transition-colors shadow-sm">
+                  📍 Suivre
+                </button>
+                <button *ngIf="reservation.statut !== 'ANNULE' && reservation.statut !== 'EFFECTUE'"
+                  (click)="annulerReservation(reservation.id!)"
+                  class="px-4 py-2 bg-[#E94560] text-white rounded-lg text-base font-medium hover:bg-[#d13850] transition-colors shadow-sm">Annuler</button>
+              </div>
+            </div>
           </div>
           <div *ngIf="mesReservations.length === 0" class="text-center py-8 text-gray-500">Vous n'avez aucune
             réservation active.</div>
@@ -257,18 +263,13 @@
                   class="w-full h-10 px-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#1D9E75] bg-white" />
               </div>
               <div class="bg-[#1D9E75]/10 rounded-lg p-5 border-l-4 border-[#1D9E75]">
-                <div class="grid grid-cols-3 gap-4">
-                  <div>
-                    <p class="text-sm text-gray-600 mb-1">Distance (est.)</p>
-                    <p class="text-xl font-bold text-[#1A1A2E]">{{ routeDistance }}</p>
-                  </div>
-                  <div>
-                    <p class="text-sm text-gray-600 mb-1">Durée</p>
-                    <p class="text-xl font-bold text-[#1A1A2E]">{{ routeDuration }}</p>
-                  </div>
-                  <div>
-                    <p class="text-sm text-gray-600 mb-1">CO2 éco</p>
-                    <p class="text-xl font-bold text-[#1D9E75]">{{ routeCo2 }}</p>
+                <div class="flex flex-col">
+                  <p class="text-sm text-gray-700 mb-2 font-bold uppercase tracking-wider">Filtrer par Prix Maximum (DT)</p>
+                  <div class="relative">
+                    <mat-icon svgIcon="feather:tag"
+                      class="absolute left-3 top-1/2 -translate-y-1/2 text-[#1D9E75] icon-size-5"></mat-icon>
+                    <input type="number" [(ngModel)]="searchPrice" placeholder="Entrez un prix max (ex: 5)..."
+                      class="w-full h-12 pl-10 pr-4 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#1D9E75] bg-white text-lg font-bold text-[#1A1A2E] shadow-sm transition-all" />
                   </div>
                 </div>
               </div>
@@ -323,9 +324,6 @@
           <div class="bg-white rounded-xl p-6 shadow-sm">
             <div class="flex items-center justify-between mb-4">
               <h3 class="text-xl font-semibold text-[#1A1A2E]">Covoiturages disponibles</h3>
-              <button (click)="showChat = !showChat"
-                class="p-5 hover:bg-gray-100 rounded-lg transition-colors"><mat-icon class="icon-size-6 text-[#1D9E75]"
-                  svgIcon="feather:message-circle"></mat-icon></button>
             </div>
             <div class="space-y-3 max-h-96 overflow-y-auto pr-2">
               <div *ngFor="let trajet of displayedTrajets"
@@ -334,7 +332,13 @@
                   {{ (getEmployeeName(trajet.employeId).substring(0,1)) | uppercase }}</div>
                 <div class="flex-1">
                   <div class="flex items-center gap-2 mb-1">
-                    <p class="font-semibold text-[#1A1A2E] text-base">{{ getEmployeeName(trajet.employeId) }}</p>
+                    <div class="flex flex-col">
+                      <p class="font-semibold text-[#1A1A2E] text-base leading-tight">{{ getEmployeeName(trajet.employeId) }}</p>
+                      <div class="flex items-center gap-1.5 text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100 mt-0.5" *ngIf="getEmployeePhone(trajet.employeId) !== 'N/A'">
+                        <mat-icon class="icon-size-3 text-indigo-500" svgIcon="feather:phone"></mat-icon>
+                        <span>{{ getEmployeePhone(trajet.employeId) }}</span>
+                      </div>
+                    </div>
                     <div *ngIf="trajet.placesRestantes > 0"
                       class="flex items-center gap-1 bg-[#1D9E75]/10 px-2 py-0.5 rounded-full"><mat-icon
                         class="icon-size-4 text-[#1D9E75]" svgIcon="feather:check-circle"></mat-icon><span
@@ -349,8 +353,9 @@
                     <span class="flex items-center gap-1 text-[#0F3460] font-medium"><mat-icon class="icon-size-4"
                         svgIcon="feather:users"></mat-icon>{{ trajet.placesRestantes }}/{{ trajet.placesDisponibles }}
                       places</span>
-                    <span class="flex items-center gap-1 text-[#1D9E75] font-bold bg-[#1D9E75]/5 px-2 py-0.5 rounded-md"><mat-icon class="icon-size-4"
-                        svgIcon="feather:tag"></mat-icon>{{ trajet.prix }} DT</span>
+                    <span
+                      class="flex items-center gap-1 text-[#1D9E75] font-bold bg-[#1D9E75]/5 px-2 py-0.5 rounded-md"><mat-icon
+                        class="icon-size-4" svgIcon="feather:tag"></mat-icon>{{ trajet.prix }} DT</span>
                   </div>
                   <div class="flex flex-wrap gap-1 mt-2">
                     <span *ngFor="let day of trajet.joursDisponibles.split(',')"
@@ -797,7 +802,8 @@
                       class="icon-size-5 opacity-70"></mat-icon><span class="font-medium">{{ transport.placesRestantes
                       }}/{{ transport.placesDisponibles }} places</span></div>
                   <div class="flex items-center gap-1.5 text-[#1D9E75]"><mat-icon svgIcon="feather:tag"
-                      class="icon-size-5 opacity-70 text-[#1D9E75]"></mat-icon><span class="font-bold">{{ transport.prix }} DT</span></div>
+                      class="icon-size-5 opacity-70 text-[#1D9E75]"></mat-icon><span class="font-bold">{{ transport.prix
+                      }} DT</span></div>
                 </div>
               </div>
               <span *ngFor="let day of (transport.joursDisponibles || '').split(',')"
@@ -891,7 +897,8 @@
         </div>
       </div>
 
-      <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm flex items-center gap-4 border-l-4 border-l-amber-400">
+      <div
+        class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm flex items-center gap-4 border-l-4 border-l-amber-400">
         <div class="w-12 h-12 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600">
           <mat-icon svgIcon="feather:award" class="icon-size-6"></mat-icon>
         </div>
@@ -949,27 +956,33 @@
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Advantage 1 -->
-            <div class="group p-5 rounded-xl border border-gray-100 bg-gray-50/50 hover:border-[#1D9E75]/30 hover:bg-white transition-all duration-300">
+            <div
+              class="group p-5 rounded-xl border border-gray-100 bg-gray-50/50 hover:border-[#1D9E75]/30 hover:bg-white transition-all duration-300">
               <div class="flex items-start gap-4">
-                <div class="w-10 h-10 rounded-lg bg-white shadow-sm flex items-center justify-center text-emerald-500 group-hover:scale-110 transition-transform">
+                <div
+                  class="w-10 h-10 rounded-lg bg-white shadow-sm flex items-center justify-center text-emerald-500 group-hover:scale-110 transition-transform">
                   <mat-icon svgIcon="feather:check-circle" class="icon-size-5"></mat-icon>
                 </div>
                 <div>
                   <h4 class="font-bold text-[#1A1A2E] mb-1">Insigne Or</h4>
-                  <p class="text-sm text-gray-500 leading-relaxed">Affichez fièrement votre statut sur votre profil de trajet.</p>
+                  <p class="text-sm text-gray-500 leading-relaxed">Affichez fièrement votre statut sur votre profil de
+                    trajet.</p>
                 </div>
               </div>
             </div>
 
             <!-- Advantage 2 -->
-            <div class="group p-5 rounded-xl border border-gray-100 bg-gray-50/50 hover:border-[#1D9E75]/30 hover:bg-white transition-all duration-300">
+            <div
+              class="group p-5 rounded-xl border border-gray-100 bg-gray-50/50 hover:border-[#1D9E75]/30 hover:bg-white transition-all duration-300">
               <div class="flex items-start gap-4">
-                <div class="w-10 h-10 rounded-lg bg-white shadow-sm flex items-center justify-center text-emerald-500 group-hover:scale-110 transition-transform">
-                   <mat-icon svgIcon="feather:zap" class="icon-size-5"></mat-icon>
+                <div
+                  class="w-10 h-10 rounded-lg bg-white shadow-sm flex items-center justify-center text-emerald-500 group-hover:scale-110 transition-transform">
+                  <mat-icon svgIcon="feather:zap" class="icon-size-5"></mat-icon>
                 </div>
                 <div>
                   <h4 class="font-bold text-[#1A1A2E] mb-1">Priorité d'Attente</h4>
-                  <p class="text-sm text-gray-500 leading-relaxed">Vos réservations sont prioritaires lors des fortes affluences.</p>
+                  <p class="text-sm text-gray-500 leading-relaxed">Vos réservations sont prioritaires lors des fortes
+                    affluences.</p>
                 </div>
               </div>
             </div>
@@ -989,11 +1002,13 @@
           </div>
 
           <!-- Impact Illustration (Optional but looks nice) -->
-          <div class="mt-8 p-6 rounded-xl bg-gradient-to-br from-[#0F3460] to-[#1A1A2E] text-white overflow-hidden relative">
+          <div
+            class="mt-8 p-6 rounded-xl bg-gradient-to-br from-[#0F3460] to-[#1A1A2E] text-white overflow-hidden relative">
             <div class="relative z-10 flex items-center justify-between">
               <div class="max-w-[60%]">
                 <h4 class="text-lg font-bold mb-2">Continuez ainsi !</h4>
-                <p class="text-sm text-white/70">Chaque trajet partagé réduit votre empreinte carbone et renforce la communauté.</p>
+                <p class="text-sm text-white/70">Chaque trajet partagé réduit votre empreinte carbone et renforce la
+                  communauté.</p>
               </div>
               <div class="text-5xl opacity-80">🌱</div>
             </div>

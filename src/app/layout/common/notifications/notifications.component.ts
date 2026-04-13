@@ -76,25 +76,33 @@ export class NotificationsComponent implements OnInit, OnDestroy {
             }
         });
 
-        // Subscribe to notification changes
-        this._notificationsService.notifications$
-            .pipe(takeUntil(this._unsubscribeAll))
-            .subscribe((notifications: Notification[]) => {
-                // Update descriptions with names if backend notification
-                const processed = notifications.map(notif => {
-                    if (notif.type === 'DEMANDE_CONFIRMATION' || (notif.expediteurId && notif.type !== 'ALTERNATIVES_DISPONIBLES' && notif.type !== 'ANNULATION_TRAJET' && notif.type !== 'ACTIVATION_BUS')) {
-                        const nom = this._getEmployeeName(notif.expediteurId);
-                        notif.description = notif.contenu ? `${nom} : ${notif.contenu}` : `Demande de ${nom}`;
-                    }
-                    if (notif.type === 'ALTERNATIVES_DISPONIBLES' || notif.type === 'ANNULATION_TRAJET') {
-                        const nom = this._getEmployeeName(notif.expediteurId);
-                        notif.description = notif.contenu ? `${nom} : ${notif.contenu}` : 'Des alternatives sont disponibles.';
-                    }
-                    return notif;
-                });
+                // Subscribe to notification changes
+                this._notificationsService.notifications$
+                    .pipe(takeUntil(this._unsubscribeAll))
+                    .subscribe((notifications: Notification[]) => {
+                        // Regex pour identifier les UUID (ex: 533956c0-b341-4958-...)
+                        const uuidRegex = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi;
 
-                // Load the notifications
-                this.notifications = processed;
+                        // Update descriptions with names if backend notification
+                        const processed = notifications.map(notif => {
+                            if (notif.type === 'DEMANDE_CONFIRMATION' || (notif.expediteurId && notif.type !== 'ALTERNATIVES_DISPONIBLES' && notif.type !== 'ANNULATION_TRAJET' && notif.type !== 'ACTIVATION_BUS')) {
+                                const nom = this._getEmployeeName(notif.expediteurId);
+                                notif.description = notif.contenu ? `${nom} : ${notif.contenu}` : `Demande de ${nom}`;
+                            }
+                            if (notif.type === 'ALTERNATIVES_DISPONIBLES' || notif.type === 'ANNULATION_TRAJET') {
+                                const nom = this._getEmployeeName(notif.expediteurId);
+                                notif.description = notif.contenu ? `${nom} : ${notif.contenu}` : 'Des alternatives sont disponibles.';
+                            }
+
+                            // Suppression des IDs techniques (UUID) dans les titres et descriptions
+                            if (notif.title) notif.title = notif.title.replace(uuidRegex, '');
+                            if (notif.description) notif.description = notif.description.replace(uuidRegex, '');
+                            
+                            return notif;
+                        });
+
+                        // Load the notifications
+                        this.notifications = processed;
 
                 // Calculate the unread count
                 this._calculateUnreadCount();
