@@ -170,8 +170,9 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
   activeSection: 'utilises' | 'proposes' | 'recompenses' = 'utilises';
   showGiftModal = false;
 
-  // Reward state
   userLevel: string = 'OR';
+  totalPointsEco: number = 425;
+  totalCo2Economise: number = 0;
   pointsToNextLevel: number = 150;
   nextLevel: string = 'PLATINE';
   progressPercentage: number = 85;
@@ -180,14 +181,17 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
   isTrackingModalOpen: boolean = false;
   trackingVehiculeId: string = '';
   isVoitureTracking: boolean = false;
-
-  openTracking(vehiculeId: string, isVoiture: boolean = false) {
+  trackingAdresseDepart: string = '';
+  trackingAdresseArrivee: string = '';
+  openTracking(vehiculeId: string, isVoiture: boolean = false, adresseDepart: string = '', adresseArrivee: string = '') {
     if (!vehiculeId) {
       alert("Erreur: ID de véhicule introuvable.");
       return;
     }
     this.trackingVehiculeId = vehiculeId;
     this.isVoitureTracking = isVoiture;
+    this.trackingAdresseDepart = adresseDepart;
+    this.trackingAdresseArrivee = adresseArrivee;
     this.isTrackingModalOpen = true;
   }
 
@@ -196,6 +200,10 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     this.trackingVehiculeId = '';
   }
 
+  getShuttleAdresse(busId: string, type: 'depart' | 'arrivee'): string {
+    const bus = this.shuttles.find(s => s.id === busId);
+    return type === 'depart' ? (bus?.adresseDepart || '') : (bus?.adresseArrivee || '');
+  }
   annulerEtNotifierPassagers(id?: string): void {
     if (!id) return;
     if (!confirm('Annuler ce trajet ? Tous les passagers seront notifiés !')) return;
@@ -217,16 +225,19 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
   // Conduite (Chauffeur) Modal State
   isConduiteModalOpen: boolean = false;
   conduiteVehiculeId: string = '';
+  conduiteTrajetId: string = '';
 
-  openConduiteModal(vehiculeId: string) {
+  openConduiteModal(vehiculeId: string, trajetId: string) {
     if (!vehiculeId) return;
     this.conduiteVehiculeId = vehiculeId;
+    this.conduiteTrajetId = trajetId || '';
     this.isConduiteModalOpen = true;
   }
 
   closeConduiteModal() {
     this.isConduiteModalOpen = false;
     this.conduiteVehiculeId = '';
+    this.conduiteTrajetId = '';
   }
 
   // Map États et Statistiques
@@ -312,7 +323,6 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
   allTrajets: Trajet[] = [];
   displayedTrajets: Trajet[] = [];
   mesReservations: ReservationResponse[] = [];
-  totalPointsEco: number = 0;
   reservationEnCours: boolean = false;
 
   // Cache employés
@@ -356,7 +366,7 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     private userService: UserService,
     private emailService: EmailService,
     private route: ActivatedRoute,
-      private paiementService: PaiementService   // ← AJOUTE ICI
+    private paiementService: PaiementService   // ← AJOUTE ICI
 
   ) {
     this.trajetForm = this.fb.group({
@@ -504,8 +514,8 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
       ),
       driverTrajets: driverId
         ? this.covoiturageService.getTrajetsByEmployeId(driverId).pipe(
-            catchError(() => of([] as Trajet[]))
-          )
+          catchError(() => of([] as Trajet[]))
+        )
         : of([] as Trajet[])
     }).subscribe({
       next: ({ apiAlts, driverTrajets }) => {
@@ -970,6 +980,13 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     this.covoiturageService.getReservationsByEmploye(this.employeId).subscribe({
       next: (res) => {
         this.mesReservations = res;
+        
+        // Calcul du CO2 total économisé
+        this.totalCo2Economise = this.mesReservations
+          .filter(r => r.statut === 'EFFECTUE')
+          .reduce((acc, r) => acc + (r.co2EconomiseKg || 0), 0);
+        this.totalCo2Economise = Math.round(this.totalCo2Economise * 10) / 10;
+
         if (!this.reservationAnnuleeId && this.trajetAnnuleId) {
           this.reservationAnnuleeId = this.getReservationIdByTrajetId(this.trajetAnnuleId);
         }
@@ -1052,17 +1069,17 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     });
   }
 
- accepterReservation(reservationId: string): void {
-  // Enlève dateAcceptation si le champ n'existe pas
-  const update = { statut: 'EN_ATTENTE_PAIEMENT' };  // ← Sans dateAcceptation
-  this.covoiturageService.updateReservationStatus(reservationId, update as any).subscribe({
-    next: () => {
-      this.loadTrajets();
-      alert('Réservation acceptée. Le passager a 15 minutes pour payer.');
-    },
-    error: (err) => console.error('Erreur acceptation', err)
-  });
-}
+  accepterReservation(reservationId: string): void {
+    // Enlève dateAcceptation si le champ n'existe pas
+    const update = { statut: 'EN_ATTENTE_PAIEMENT' };  // ← Sans dateAcceptation
+    this.covoiturageService.updateReservationStatus(reservationId, update as any).subscribe({
+      next: () => {
+        this.loadTrajets();
+        alert('Réservation acceptée. Le passager a 15 minutes pour payer.');
+      },
+      error: (err) => console.error('Erreur acceptation', err)
+    });
+  }
 
   refuserReservation(reservationId: string): void {
     if (!confirm('Refuser cette réservation ?')) return;
@@ -1081,9 +1098,9 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     const acceptTime = new Date(dateAcceptation).getTime();
     const now = new Date().getTime();
     const diff = 15 * 60 * 1000 - (now - acceptTime);
-    
+
     if (diff <= 0) return 'Expiré';
-    
+
     const minutes = Math.floor(diff / 60000);
     const seconds = Math.floor((diff % 60000) / 1000);
     return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
@@ -1112,23 +1129,23 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     });
   }
 
- payerReservation(reservation: any): void {
-  const trajet = this.getTrajetInfo(reservation.trajetId);
-  if (!trajet || (trajet.prix === undefined || trajet.prix === null)) {
-    alert("Erreur: Le prix de ce trajet n'est pas défini.");
-    return;
-  }
-
-  this.paiementService.createStripePayment(reservation.id, trajet.prix).subscribe({
-    next: (response) => {
-      window.location.href = response.redirectUrl;
-    },
-    error: (err) => {
-      console.error('Erreur création paiement:', err);
-      alert('Erreur lors de la création du paiement PayPal');
+  payerReservation(reservation: any): void {
+    const trajet = this.getTrajetInfo(reservation.trajetId);
+    if (!trajet || (trajet.prix === undefined || trajet.prix === null)) {
+      alert("Erreur: Le prix de ce trajet n'est pas défini.");
+      return;
     }
-  });
-}
+
+    this.paiementService.createStripePayment(reservation.id, trajet.prix).subscribe({
+      next: (response) => {
+        window.location.href = response.redirectUrl;
+      },
+      error: (err) => {
+        console.error('Erreur création paiement:', err);
+        alert('Erreur lors de la création du paiement PayPal');
+      }
+    });
+  }
 
   estDejaReserve(trajetId: string): boolean {
     return this.mesReservations.some(r => r.trajetId === trajetId && r.statut !== 'ANNULE');
@@ -1148,9 +1165,9 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
         const rBus = this.shuttles.find(b => b.id === r.busId);
         const st = String(r.statut || '').toUpperCase();
         const days = (r.joursSelectionnes || '').split(',').map((d: string) => d.trim()).filter(Boolean);
-        return rBus?.packId === packId && 
-               st !== 'ANNULE' &&
-               days.includes(day);
+        return rBus?.packId === packId &&
+          st !== 'ANNULE' &&
+          days.includes(day);
       })
       .sort((a, b) => new Date(a.dateCreation || 0).getTime() - new Date(b.dateCreation || 0).getTime());
 
@@ -1174,12 +1191,12 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
       while (currentBusIndex < packBuses.length && (busOccupancy.get(packBuses[currentBusIndex].id!) || 0) >= (packBuses[currentBusIndex].capacite || 0)) {
         currentBusIndex++;
       }
-      
+
       const targetBus = currentBusIndex < packBuses.length ? packBuses[currentBusIndex] : packBuses[packBuses.length - 1];
       if (String(r.employeId) === String(employeId)) {
         return targetBus;
       }
-      
+
       busOccupancy.set(targetBus.id!, (busOccupancy.get(targetBus.id!) || 0) + 1);
     }
 
@@ -1337,22 +1354,22 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
   /** Retourne le nombre de places restantes pour un bus à une date précise */
   disponibiliteParJour(shuttle: any, date: string): number {
     if (!shuttle || !date) return 0;
-    
+
     const capacity = shuttle.capacite || 0;
 
     // Si l'objet a une map dailyOccupancy (venant de l'API), on l'utilise directement
     if (shuttle.dailyOccupancy && shuttle.dailyOccupancy[date] !== undefined) {
       return Math.max(0, capacity - shuttle.dailyOccupancy[date]);
     }
-    
+
     // Sinon, on simule à partir des réservations locales connues
-    const occupantCount = this.myShuttleReservations.filter(r => 
-      r.busId === shuttle.id && 
-      r.statut && 
+    const occupantCount = this.myShuttleReservations.filter(r =>
+      r.busId === shuttle.id &&
+      r.statut &&
       String(r.statut).toUpperCase() !== 'ANNULE' &&
       r.days && r.days.includes(date)
     ).length;
-    
+
     return Math.max(0, capacity - occupantCount);
   }
 
@@ -1503,7 +1520,7 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     // On vérifie le statut pour CHAQUE jour.
     const isFull = daysArray.some(d => this.disponibiliteParJour(shuttle, d) <= 0);
     const hasReserve = this.aUnBusDeReserve(shuttle);
-    
+
     // On ne permet la liste d'attente "activation" QUE s'il reste un bus inactif dans le pack
     // OU si l'on réserve DIRECTEMENT sur un bus de réserve (INACTIF)
     const isInactiveBus = shuttle.statut !== 'ACTIF';
@@ -1520,7 +1537,7 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
       next: (res: any) => {
         // Recharger d'abord
         this.loadMyShuttleReservations();
-        
+
         // Vérifier le seuil de 50% sur le bus de réserve
         this.covoiturageService.getShuttles().subscribe(updatedShuttles => {
           this.shuttles = updatedShuttles;
@@ -1530,7 +1547,7 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
               const occ = currentBus.dailyOccupancy ? (currentBus.dailyOccupancy[day] || 0) : 0;
               if (occ === (currentBus.capacite || 0) / 2) {
                 this.emailService.sendThresholdNotification(currentBus.ligne || 'Navette', day, occ, currentBus.capacite).subscribe({
-                  next: () => {},
+                  next: () => { },
                   error: (err) => console.error('✗ Erreur envoi email notification', err)
                 });
               }
@@ -1541,7 +1558,7 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
 
         this.selectedNavetteDays[shuttle.id] = [];
         const st = typeof res?.statut === 'string' ? res.statut : res?.statut?.name;
-        
+
         const conf = res.joursConfirmes || [];
         const wait = res.joursEnAttente || [];
 
@@ -1551,7 +1568,7 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
         } else {
           const confStr = conf.length > 0 ? `Certains jours sont confirmés : ${conf.join(', ')}.\n` : '';
           const waitStr = `⚠️ Jours en liste d'attente : ${wait.join(', ')}.\n\n`;
-          
+
           const packBuses = this.shuttles.filter(b => b.packId === shuttle.packId);
           const reserveBus = packBuses.find(b => b.statut === 'INACTIF');
           const reserveCap = reserveBus?.capacite || 15;

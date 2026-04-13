@@ -75,11 +75,15 @@
                 <div class="flex items-center gap-2 mb-1">
                   <p class="font-semibold text-[#1A1A2E]">Trajet avec {{ getEmployeeName(trajetInfo.employeId) }}</p>
                   <span class="text-sm px-2 py-0.5 rounded-full font-medium shadow-sm transition-colors"
-                    [ngClass]="reservation.statut === 'CONFIRME' ? 'bg-[#1D9E75] text-white' : (reservation.statut === 'EN_ATTENTE_PAIEMENT' ? 'bg-blue-500 text-white' : (reservation.statut === 'EN_ATTENTE' ? 'bg-yellow-500 text-white' : 'bg-red-500 text-white'))">{{
-                    reservation.statut === 'CONFIRME' ? 'Confirmée' : (reservation.statut === 'EN_ATTENTE_PAIEMENT' ? 'Attente Paiement' : (reservation.statut === 'EN_ATTENTE' ? 'En attente' : 'Annulée')) }}</span>
-                  <div *ngIf="reservation.statut === 'EN_ATTENTE_PAIEMENT' && reservation.dateAcceptation" class="flex items-center gap-1.5 px-2 py-0.5 bg-blue-50 rounded border border-blue-100">
+                    [ngClass]="reservation.statut === 'CONFIRME' ? 'bg-[#1D9E75] text-white' : (reservation.statut === 'EFFECTUE' ? 'bg-gray-500 text-white' : (reservation.statut === 'EN_ATTENTE_PAIEMENT' ? 'bg-blue-500 text-white' : (reservation.statut === 'EN_ATTENTE' ? 'bg-yellow-500 text-white' : 'bg-red-500 text-white')))">{{
+                    reservation.statut === 'CONFIRME' ? 'Confirmée' : (reservation.statut === 'EFFECTUE' ? 'Effectuée' :
+                    (reservation.statut === 'EN_ATTENTE_PAIEMENT' ? 'Attente Paiement' : (reservation.statut ===
+                    'EN_ATTENTE' ? 'En attente' : 'Annulée'))) }}</span>
+                  <div *ngIf="reservation.statut === 'EN_ATTENTE_PAIEMENT' && reservation.dateAcceptation"
+                    class="flex items-center gap-1.5 px-2 py-0.5 bg-blue-50 rounded border border-blue-100">
                     <mat-icon class="icon-size-3.5 text-blue-600 animate-spin" svgIcon="feather:clock"></mat-icon>
-                    <span class="text-[10px] font-black text-blue-700">{{ getTempsRestantPaiement(reservation.dateAcceptation) }}</span>
+                    <span class="text-[10px] font-black text-blue-700">{{
+                      getTempsRestantPaiement(reservation.dateAcceptation) }}</span>
                   </div>
                 </div>
                 <div class="flex items-center gap-3 text-base text-gray-600">
@@ -93,11 +97,15 @@
                   <p class="font-semibold text-[#1A1A2E]">Trajet du {{ reservation.dateReservation | date:'dd/MM/yyyy'
                     }}</p>
                   <span class="text-sm px-2 py-0.5 rounded-full font-medium shadow-sm transition-colors"
-                    [ngClass]="reservation.statut === 'CONFIRME' ? 'bg-[#1D9E75] text-white' : (reservation.statut === 'EN_ATTENTE_PAIEMENT' ? 'bg-blue-500 text-white' : (reservation.statut === 'EN_ATTENTE' ? 'bg-yellow-500 text-white' : 'bg-red-500 text-white'))">{{
-                    reservation.statut === 'CONFIRME' ? 'Confirmée' : (reservation.statut === 'EN_ATTENTE_PAIEMENT' ? 'Attente Paiement' : (reservation.statut === 'EN_ATTENTE' ? 'En attente' : 'Annulée')) }}</span>
-                  <div *ngIf="reservation.statut === 'EN_ATTENTE_PAIEMENT' && reservation.dateAcceptation" class="flex items-center gap-1.5 px-2 py-0.5 bg-blue-50 rounded border border-blue-200">
+                    [ngClass]="reservation.statut === 'CONFIRME' ? 'bg-[#1D9E75] text-white' : (reservation.statut === 'EFFECTUE' ? 'bg-gray-500 text-white' : (reservation.statut === 'EN_ATTENTE_PAIEMENT' ? 'bg-blue-500 text-white' : (reservation.statut === 'EN_ATTENTE' ? 'bg-yellow-500 text-white' : 'bg-red-500 text-white')))">{{
+                    reservation.statut === 'CONFIRME' ? 'Confirmée' : (reservation.statut === 'EFFECTUE' ? 'Effectuée' :
+                    (reservation.statut === 'EN_ATTENTE_PAIEMENT' ? 'Attente Paiement' : (reservation.statut ===
+                    'EN_ATTENTE' ? 'En attente' : 'Annulée'))) }}</span>
+                  <div *ngIf="reservation.statut === 'EN_ATTENTE_PAIEMENT' && reservation.dateAcceptation"
+                    class="flex items-center gap-1.5 px-2 py-0.5 bg-blue-50 rounded border border-blue-200">
                     <mat-icon class="icon-size-3.5 text-blue-600 animate-spin" svgIcon="feather:clock"></mat-icon>
-                    <span class="text-[10px] font-black text-blue-700">{{ getTempsRestantPaiement(reservation.dateAcceptation) }}</span>
+                    <span class="text-[10px] font-black text-blue-700">{{
+                      getTempsRestantPaiement(reservation.dateAcceptation) }}</span>
                   </div>
                 </div>
                 <div class="flex items-center gap-3 text-base text-gray-600">
@@ -106,26 +114,32 @@
                 </div>
               </ng-template>
               <div class="flex items-center gap-2 mt-2 text-sm text-[#1D9E75]">
-<mat-icon class="icon-size-4" svgIcon="feather:droplet"></mat-icon>                <span>+{{ reservation.pointsEco }} points éco</span>
+                <mat-icon class="icon-size-4" svgIcon="feather:droplet"></mat-icon> <span>+{{ reservation.pointsEco }}
+                  points éco</span>
                 <span class="text-gray-400 mx-1">|</span>
                 <span>-{{ reservation.co2EconomiseKg }} kg CO2</span>
               </div>
             </div>
-            <div class="flex items-center gap-3">
-              <div *ngIf="reservation.statut === 'EN_ATTENTE_PAIEMENT'" class="flex flex-col items-end gap-1">
-                <p class="text-[10px] font-bold text-gray-400 uppercase">Prix: {{ getTrajetInfo(reservation.trajetId)?.prix || 0 }} DT</p>
-                <button (click)="payerReservation(reservation)" class="flex items-center gap-2 px-5 py-2.5 bg-[#0070ba] text-white rounded-xl text-sm font-black hover:bg-[#005ea6] transition-all shadow-lg hover:scale-105">
-                  <mat-icon svgIcon="feather:credit-card" class="icon-size-5"></mat-icon>
-                  PAYER AVEC PAYPAL
-                </button>
+              <div class="flex flex-col items-end gap-2">
+                <div *ngIf="reservation.statut === 'EN_ATTENTE_PAIEMENT'" class="mb-1">
+                   <p class="text-[10px] font-black text-blue-600 uppercase tracking-widest text-right">Paiement Requis</p>
+                   <p class="text-2xl font-black text-slate-800 leading-none">{{ getTrajetInfo(reservation.trajetId)?.prix || 0 }} <span class="text-sm font-bold">DT</span></p>
+                </div>
+                <div class="flex gap-2">
+                  <button *ngIf="reservation.statut === 'EN_ATTENTE_PAIEMENT'" (click)="payerReservation(reservation)"
+                    class="px-4 py-2 bg-gradient-to-r from-[#0070ba] to-[#003087] text-white rounded-lg text-base font-semibold hover:shadow-md transition-all shadow-sm">
+                    Payer
+                  </button>
+                  <button
+                    *ngIf="reservation.statut === 'CONFIRME' && getTrajetInfo(reservation.trajetId)?.vehiculeId as vId"
+                    (click)="openTracking(vId, true, getTrajetInfo(reservation.trajetId)?.adresseDepart || '', getTrajetInfo(reservation.trajetId)?.adresseArrivee || '')"
+                    class="px-4 py-2 bg-[#0F3460] text-white rounded-lg text-base font-medium hover:bg-[#0a2442] transition-colors shadow-sm">
+                    📍 Suivre
+                  </button>
+                  <button (click)="annulerReservation(reservation.id!)"
+                    class="px-4 py-2 bg-[#E94560] text-white rounded-lg text-base font-medium hover:bg-[#d13850] transition-colors shadow-sm">Annuler</button>
+                </div>
               </div>
-              <button *ngIf="reservation.statut === 'CONFIRME' && getTrajetInfo(reservation.trajetId)?.vehiculeId as vId" (click)="openTracking(vId, true)"
-                class="px-4 py-2 bg-[#0F3460] text-white rounded-lg text-base font-medium hover:bg-[#0a2442] transition-colors shadow-sm">
-                📍 Suivre
-              </button>
-              <button (click)="annulerReservation(reservation.id!)"
-                class="px-4 py-2 bg-[#E94560] text-white rounded-lg text-base font-medium hover:bg-[#d13850] transition-colors shadow-sm">Annuler</button>
-            </div>
           </div>
           <div *ngIf="mesReservations.length === 0" class="text-center py-8 text-gray-500">Vous n'avez aucune
             réservation active.</div>
@@ -335,6 +349,8 @@
                     <span class="flex items-center gap-1 text-[#0F3460] font-medium"><mat-icon class="icon-size-4"
                         svgIcon="feather:users"></mat-icon>{{ trajet.placesRestantes }}/{{ trajet.placesDisponibles }}
                       places</span>
+                    <span class="flex items-center gap-1 text-[#1D9E75] font-bold bg-[#1D9E75]/5 px-2 py-0.5 rounded-md"><mat-icon class="icon-size-4"
+                        svgIcon="feather:tag"></mat-icon>{{ trajet.prix }} DT</span>
                   </div>
                   <div class="flex flex-wrap gap-1 mt-2">
                     <span *ngFor="let day of trajet.joursDisponibles.split(',')"
@@ -461,7 +477,8 @@
                 <p class="text-xs text-gray-500 mb-2">Jours disponibles</p>
                 <div class="flex flex-wrap gap-1">
                   <span *ngFor="let jour of shuttle.joursDisponibles?.split(',')"
-                    class="px-2 py-0.5 bg-[#1D9E75]/10 text-[#1D9E75] rounded text-xs font-medium">{{ (jour + '').trim() }}</span>
+                    class="px-2 py-0.5 bg-[#1D9E75]/10 text-[#1D9E75] rounded text-xs font-medium">{{ (jour + '').trim()
+                    }}</span>
                 </div>
               </div>
               <div>
@@ -558,10 +575,11 @@
                   <div class="flex items-center gap-2 flex-wrap">
                     <p class="text-[#1A1A2E] font-medium">{{ reservation.shuttleName }}</p>
                     <span class="text-xs px-2 py-0.5 rounded-full font-medium"
-                      [ngClass]="getDisplayStatus(reservation) === 'CONFIRME' ? 'bg-[#1D9E75] text-white' : (getDisplayStatus(reservation) === 'EN_ATTENTE_ACTIVATION' ? 'bg-orange-500 text-white' : (getDisplayStatus(reservation) === 'EN_ATTENTE' ? 'bg-yellow-500 text-white' : 'bg-red-500 text-white'))">
+                      [ngClass]="getDisplayStatus(reservation) === 'CONFIRME' ? 'bg-[#1D9E75] text-white' : (getDisplayStatus(reservation) === 'EFFECTUE' ? 'bg-gray-500 text-white' : (getDisplayStatus(reservation) === 'EN_ATTENTE_ACTIVATION' ? 'bg-orange-500 text-white' : (getDisplayStatus(reservation) === 'EN_ATTENTE' ? 'bg-yellow-500 text-white' : 'bg-red-500 text-white')))">
                       {{ getDisplayStatus(reservation) === 'CONFIRME' ? 'Confirmée' : (getDisplayStatus(reservation) ===
+                      'EFFECTUE' ? 'Effectuée' : (getDisplayStatus(reservation) ===
                       'EN_ATTENTE_ACTIVATION' ? 'Attente activation bus' : (getDisplayStatus(reservation) ===
-                      'EN_ATTENTE' ? 'En attente' : 'Annulée')) }}
+                      'EN_ATTENTE' ? 'En attente' : 'Annulée'))) }}
                     </span>
                   </div>
                   <div class="flex items-center gap-2 text-base text-gray-600 mt-1">
@@ -681,12 +699,12 @@
                 type="time" formControlName="heureDepart"
                 class="w-full h-11 px-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#1D9E75] bg-gray-50" />
             </div>
-            <div><label class="block text-base font-medium text-gray-700 mb-1.5">Places</label><input
-                type="number" formControlName="placesDisponibles" placeholder="Ex: 3"
+            <div><label class="block text-base font-medium text-gray-700 mb-1.5">Places</label><input type="number"
+                formControlName="placesDisponibles" placeholder="Ex: 3"
                 class="w-full h-11 px-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#1D9E75] bg-gray-50" />
             </div>
-            <div><label class="block text-base font-medium text-gray-700 mb-1.5">Prix (DT)</label><input
-                type="number" formControlName="prix" placeholder="Ex: 5"
+            <div><label class="block text-base font-medium text-gray-700 mb-1.5">Prix (DT)</label><input type="number"
+                formControlName="prix" placeholder="Ex: 5"
                 class="w-full h-11 px-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#1D9E75] bg-gray-50" />
             </div>
           </div>
@@ -759,7 +777,7 @@
                   <span class="px-2 py-1 text-sm rounded-full"
                     [ngClass]="transport.statut === 'ACTIF' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'">{{
                     transport.statut }}</span>
-                  <button (click)="openConduiteModal(transport.vehiculeId)"
+                  <button (click)="openConduiteModal(transport.vehiculeId, transport.id)"
                     class="px-3 py-1.5 bg-[#1D9E75] text-white text-sm font-semibold rounded-lg hover:bg-[#168567] transition-colors shadow-sm">🚀
                     Démarrer trajet</button>
                   <button (click)="annulerEtNotifierPassagers(transport.id)"
@@ -778,12 +796,14 @@
                   <div class="flex items-center gap-1.5"><mat-icon svgIcon="feather:users"
                       class="icon-size-5 opacity-70"></mat-icon><span class="font-medium">{{ transport.placesRestantes
                       }}/{{ transport.placesDisponibles }} places</span></div>
+                  <div class="flex items-center gap-1.5 text-[#1D9E75]"><mat-icon svgIcon="feather:tag"
+                      class="icon-size-5 opacity-70 text-[#1D9E75]"></mat-icon><span class="font-bold">{{ transport.prix }} DT</span></div>
                 </div>
               </div>
-                  <span
-                  *ngFor="let day of (transport.joursDisponibles || '').split(',')"
-                  class="px-2.5 py-1 bg-[#1D9E75]/10 text-[#1D9E75] text-sm font-semibold rounded">{{ (day + '').trim() | slice:0:3 |
-                  titlecase }}</span>
+              <span *ngFor="let day of (transport.joursDisponibles || '').split(',')"
+                class="px-2.5 py-1 bg-[#1D9E75]/10 text-[#1D9E75] text-sm font-semibold rounded">{{ (day + '').trim() |
+                slice:0:3 |
+                titlecase }}</span>
               <div class="border-t border-gray-100 pt-4 mt-2">
                 <p class="text-base text-[#0F3460] font-semibold mb-3">Réservations ({{ transport.reservations?.length
                   || 0 }})</p>
@@ -797,14 +817,18 @@
                       <div>
                         <p class="text-sm font-semibold text-[#1A1A2E]">{{ getEmployeeName(res.employeId) }}</p>
                         <span class="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
-                          [ngClass]="res.statut === 'CONFIRME' ? 'bg-[#1D9E75] text-white' : (res.statut === 'EN_ATTENTE_PAIEMENT' ? 'bg-blue-500 text-white' : (res.statut === 'EN_ATTENTE' ? 'bg-yellow-500 text-white' : 'bg-red-500 text-white'))">{{
-                          res.statut === 'CONFIRME' ? 'Confirmée' : (res.statut === 'EN_ATTENTE_PAIEMENT' ? 'Attente Paiement' : (res.statut === 'EN_ATTENTE' ? 'En attente' :
-                          'Annulée')) }}</span>
+                          [ngClass]="res.statut === 'CONFIRME' ? 'bg-[#1D9E75] text-white' : (res.statut === 'EFFECTUE' ? 'bg-gray-500 text-white' : (res.statut === 'EN_ATTENTE_PAIEMENT' ? 'bg-blue-500 text-white' : (res.statut === 'EN_ATTENTE' ? 'bg-yellow-500 text-white' : 'bg-red-500 text-white')))">{{
+                          res.statut === 'CONFIRME' ? 'Confirmée' : (res.statut === 'EFFECTUE' ? 'Effectuée' :
+                          (res.statut === 'EN_ATTENTE_PAIEMENT' ? 'Attente Paiement' : (res.statut === 'EN_ATTENTE' ?
+                          'En attente' :
+                          'Annulée'))) }}</span>
                       </div>
                     </div>
                     <div class="flex gap-2" *ngIf="res.statut === 'EN_ATTENTE'">
-                      <button (click)="accepterReservation(res.id)" class="px-2 py-1 bg-green-500 text-white text-xs rounded hover:bg-green-600 transition-colors">Accepter</button>
-                      <button (click)="refuserReservation(res.id)" class="px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600 transition-colors">Refuser</button>
+                      <button (click)="accepterReservation(res.id)"
+                        class="px-2 py-1 bg-green-500 text-white text-xs rounded hover:bg-green-600 transition-colors">Accepter</button>
+                      <button (click)="refuserReservation(res.id)"
+                        class="px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600 transition-colors">Refuser</button>
                     </div>
                     <div *ngIf="res.statut === 'EN_ATTENTE_PAIEMENT'" class="text-[11px] text-blue-600 font-medium">
                       ⏳ {{ getTempsRestantPaiement(res.dateAcceptation) }}
@@ -842,141 +866,138 @@
   <!-- ===================== FIN SECTION PROPOSES ===================== -->
 
   <!-- ===================== SECTION RECOMPENSES ===================== -->
-  <div [hidden]="activeSection !== 'recompenses'" class="space-y-10 py-6">
-    <div class="max-w-4xl mx-auto space-y-10">
-
-      <!-- 1. Profil de l'employé -->
-      <div
-        class="bg-white rounded-[2.5rem] p-8 shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-slate-100 relative overflow-hidden group">
-        <div
-          class="absolute top-0 right-0 w-32 h-32 bg-amber-50 rounded-bl-[5rem] -mr-10 -mt-10 transition-transform group-hover:scale-110 duration-700">
+  <!-- ===================== SECTION RECOMPENSES ===================== -->
+  <div [hidden]="activeSection !== 'recompenses'" class="space-y-6">
+    <!-- 3-Card Summary Row -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm flex items-center gap-4">
+        <div class="w-12 h-12 rounded-lg bg-emerald-50 flex items-center justify-center text-[#1D9E75]">
+          <mat-icon svgIcon="feather:star" class="icon-size-6"></mat-icon>
         </div>
-
-        <div class="relative flex flex-col sm:flex-row items-center gap-8">
-          <!-- Avatar Icon with Level Badge -->
-          <div class="relative">
-            <div
-              class="w-32 h-32 bg-slate-100 rounded-3xl flex items-center justify-center text-5xl shadow-inner border-4 border-white">
-              👤
-            </div>
-            <div
-              class="absolute -bottom-3 -right-3 w-12 h-12 bg-amber-400 rounded-2xl flex items-center justify-center shadow-lg border-4 border-white animate-bounce-subtle">
-              <mat-icon svgIcon="feather:award" class="text-white icon-size-6"></mat-icon>
-            </div>
-          </div>
-
-          <!-- Profile Details -->
-          <div class="flex-1 text-center sm:text-left space-y-4">
-            <div>
-              <h1 class="text-4xl font-black text-slate-800 tracking-tight">{{ getEmployeeName(employeId) }}</h1>
-              <div class="flex flex-wrap justify-center sm:justify-start gap-2 mt-2">
-                <span
-                  class="inline-flex items-center px-4 py-1.5 rounded-full bg-emerald-50 text-emerald-600 text-sm font-bold border border-emerald-100">
-                  <mat-icon svgIcon="feather:shield" class="icon-size-4 mr-2"></mat-icon>
-                  🏅 Conducteur actif
-                </span>
-                <span
-                  class="inline-flex items-center px-4 py-1.5 rounded-full bg-amber-50 text-amber-600 text-sm font-bold border border-amber-100">
-                  <mat-icon svgIcon="feather:star" class="icon-size-4 mr-2"></mat-icon>
-                  ⭐ {{ totalPointsEco }} points éco
-                </span>
-              </div>
-            </div>
-
-            <div class="inline-block px-6 py-2 bg-slate-900 text-white rounded-2xl shadow-xl shadow-slate-200">
-              <span class="text-xs font-black uppercase tracking-[0.2em] opacity-70 block mb-0.5">Statut Actuel</span>
-              <div class="flex items-center gap-2">
-                <span class="text-2xl font-black tracking-tighter">📊 NIVEAU {{ userLevel }}</span>
-                <div class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></div>
-              </div>
-            </div>
-          </div>
+        <div>
+          <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">Points éco</p>
+          <p class="text-3xl font-bold text-[#1A1A2E] tracking-tight">{{ totalPointsEco }}</p>
         </div>
       </div>
 
-      <!-- 2. Barre de progression -->
-      <div class="bg-white rounded-[2.5rem] p-10 shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-slate-100">
-        <div class="flex flex-col space-y-6">
-          <div class="flex items-end justify-between">
-            <div class="space-y-1">
-              <span class="text-sm font-black text-slate-400 uppercase tracking-widest">Votre Progression</span>
-              <h3 class="text-2xl font-black text-slate-800">Niveau {{ userLevel }} <span class="text-amber-500 ml-2">{{
-                  totalPointsEco }}/{{ totalPointsEco + pointsToNextLevel }}</span></h3>
-            </div>
-            <div class="text-right">
-              <span class="text-5xl font-black text-slate-900 tracking-tighter">{{ progressPercentage }}%</span>
-            </div>
-          </div>
+      <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm flex items-center gap-4">
+        <div class="w-12 h-12 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
+          <mat-icon svgIcon="feather:droplet" class="icon-size-6"></mat-icon>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">CO2 économisé</p>
+          <p class="text-3xl font-bold text-[#1A1A2E] tracking-tight">{{ totalCo2Economise }} <span
+              class="text-lg opacity-50 font-medium">kg</span></p>
+        </div>
+      </div>
 
-          <!-- Custom Premium Progress Bar -->
-          <div class="relative h-6 w-full bg-slate-100 rounded-3xl p-1.5 shadow-inner overflow-hidden">
+      <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm flex items-center gap-4 border-l-4 border-l-amber-400">
+        <div class="w-12 h-12 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600">
+          <mat-icon svgIcon="feather:award" class="icon-size-6"></mat-icon>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">Rang actuel</p>
+          <p class="text-3xl font-bold text-[#1A1A2E] tracking-tight">{{ userLevel }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Left Column: Profile & Progress -->
+      <div class="lg:col-span-1 space-y-6">
+        <div class="bg-white rounded-xl p-8 border border-gray-200 shadow-sm flex flex-col items-center text-center">
+          <div class="relative mb-6">
             <div
-              class="h-full bg-gradient-to-r from-amber-300 via-amber-500 to-amber-600 rounded-2xl shadow-[0_0_20px_rgba(245,158,11,0.3)] transition-all duration-1000 ease-out relative group"
-              [style.width.%]="progressPercentage">
-              <div class="absolute inset-0 bg-white/20 skew-x-[-20deg] animate-shimmer"></div>
+              class="w-28 h-28 rounded-full bg-slate-100 flex items-center justify-center text-5xl border-4 border-white shadow-md">
+              👤
+            </div>
+            <div
+              class="absolute -bottom-1 -right-1 w-10 h-10 bg-amber-400 rounded-lg flex items-center justify-center shadow-lg border-2 border-white">
+              <mat-icon svgIcon="feather:shield" class="text-white icon-size-5"></mat-icon>
             </div>
           </div>
+          <h2 class="text-2xl font-bold text-[#1A1A2E] mb-1">{{ getEmployeeName(employeId) }}</h2>
+          <p class="text-gray-500 font-medium text-sm mb-6">Membre Or Certifié</p>
 
-          <div class="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100">
-            <div class="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-xl">🚀</div>
-            <p class="text-slate-600 font-bold">
-              Plus que <span class="text-slate-900 font-black">{{ pointsToNextLevel }} points</span> pour atteindre
-              <span class="text-indigo-600 font-black uppercase tracking-wider">{{ nextLevel }}</span>
+          <div class="w-full pt-6 border-t border-gray-100">
+            <div class="flex justify-between items-end mb-2">
+              <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Niveau Prochain</span>
+              <span class="text-sm font-bold text-[#1D9E75]">{{ progressPercentage }}%</span>
+            </div>
+            <div class="relative h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+              <div class="h-full bg-[#1D9E75] rounded-full transition-all duration-1000"
+                [style.width.%]="progressPercentage"></div>
+            </div>
+            <p class="text-xs text-center text-gray-400 mt-3 font-medium">
+              Plus que <span class="text-gray-900 font-bold">{{ pointsToNextLevel }} pts</span> pour atteindre <span
+                class="text-[#1D9E75] font-bold">{{ nextLevel }}</span>
             </p>
           </div>
         </div>
       </div>
 
-      <!-- 3. Avantages débloqués -->
-      <div class="bg-slate-900 rounded-[2.5rem] p-10 shadow-2xl relative overflow-hidden">
-        <!-- Decoration background -->
-        <div class="absolute -left-20 -bottom-20 w-64 h-64 bg-indigo-500/10 rounded-full blur-[100px]"></div>
-        <div class="absolute -right-20 -top-20 w-64 h-64 bg-emerald-500/10 rounded-full blur-[100px]"></div>
-
-        <div class="relative space-y-8">
-          <div class="flex items-center gap-4">
-            <div
-              class="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center text-3xl backdrop-blur-sm border border-white/10 shadow-xl">
-              🎁
+      <!-- Right Column: Avantages -->
+      <div class="lg:col-span-2 space-y-6">
+        <div class="bg-white rounded-xl p-8 border border-gray-200 shadow-sm min-h-full">
+          <div class="flex items-center gap-3 mb-8">
+            <div class="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center text-[#1D9E75]">
+              <mat-icon svgIcon="feather:gift" class="icon-size-6"></mat-icon>
             </div>
-            <h2 class="text-3xl font-black text-white tracking-tight uppercase tracking-widest">Vos Avantages</h2>
+            <h3 class="text-xl font-bold text-[#0F3460]">Mes avantages débloqués</h3>
           </div>
 
-          <div class="grid grid-cols-1 gap-4">
-            <div
-              class="flex items-center gap-5 p-6 bg-white/5 hover:bg-white/10 rounded-3xl border border-white/5 transition-all duration-300 group cursor-default">
-              <div
-                class="w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.4)] group-hover:scale-110 transition-transform">
-                <mat-icon svgIcon="feather:check" class="text-white icon-size-6"></mat-icon>
-              </div>
-              <div class="flex-1">
-                <h4 class="text-lg font-black text-white">Badge OR</h4>
-                <p class="text-slate-400 font-medium">Visible par tous les membres du réseau.</p>
-              </div>
-            </div>
-
-            <div
-              class="flex items-center gap-5 p-6 bg-white/5 hover:bg-white/10 rounded-3xl border border-white/5 transition-all duration-300 group cursor-default">
-              <div
-                class="w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.4)] group-hover:scale-110 transition-transform">
-                <mat-icon svgIcon="feather:check" class="text-white icon-size-6"></mat-icon>
-              </div>
-              <div class="flex-1">
-                <h4 class="text-lg font-black text-white">Priorité en liste d'attente</h4>
-                <p class="text-slate-400 font-medium">Accès prioritaire sur tous les trajets complets.</p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Advantage 1 -->
+            <div class="group p-5 rounded-xl border border-gray-100 bg-gray-50/50 hover:border-[#1D9E75]/30 hover:bg-white transition-all duration-300">
+              <div class="flex items-start gap-4">
+                <div class="w-10 h-10 rounded-lg bg-white shadow-sm flex items-center justify-center text-emerald-500 group-hover:scale-110 transition-transform">
+                  <mat-icon svgIcon="feather:check-circle" class="icon-size-5"></mat-icon>
+                </div>
+                <div>
+                  <h4 class="font-bold text-[#1A1A2E] mb-1">Insigne Or</h4>
+                  <p class="text-sm text-gray-500 leading-relaxed">Affichez fièrement votre statut sur votre profil de trajet.</p>
+                </div>
               </div>
             </div>
 
-            <div
-              class="flex items-center gap-5 p-6 bg-white/[0.02] rounded-3xl border border-white/[0.05] grayscale opacity-60">
-              <div class="w-12 h-12 bg-slate-700 rounded-2xl flex items-center justify-center">
-                <mat-icon svgIcon="feather:lock" class="text-slate-400 icon-size-6"></mat-icon>
-              </div>
-              <div class="flex-1 text-slate-500">
-                <h4 class="text-lg font-bold">Réservation gratuite</h4>
-                <p class="text-xs font-black uppercase tracking-[0.1em] text-amber-500/80 mt-1">⏳ 1000 points requis</p>
+            <!-- Advantage 2 -->
+            <div class="group p-5 rounded-xl border border-gray-100 bg-gray-50/50 hover:border-[#1D9E75]/30 hover:bg-white transition-all duration-300">
+              <div class="flex items-start gap-4">
+                <div class="w-10 h-10 rounded-lg bg-white shadow-sm flex items-center justify-center text-emerald-500 group-hover:scale-110 transition-transform">
+                   <mat-icon svgIcon="feather:zap" class="icon-size-5"></mat-icon>
+                </div>
+                <div>
+                  <h4 class="font-bold text-[#1A1A2E] mb-1">Priorité d'Attente</h4>
+                  <p class="text-sm text-gray-500 leading-relaxed">Vos réservations sont prioritaires lors des fortes affluences.</p>
+                </div>
               </div>
             </div>
+
+            <!-- Locked Advantage -->
+            <div class="p-5 rounded-xl border border-dashed border-gray-200 bg-gray-50/30 opacity-60">
+              <div class="flex items-start gap-4">
+                <div class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400">
+                  <mat-icon svgIcon="feather:lock" class="icon-size-5"></mat-icon>
+                </div>
+                <div>
+                  <h4 class="font-bold text-gray-400 mb-1">Trajet Gratuit</h4>
+                  <p class="text-sm text-gray-300">Débloquez cet avantage au niveau {{ nextLevel }}.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Impact Illustration (Optional but looks nice) -->
+          <div class="mt-8 p-6 rounded-xl bg-gradient-to-br from-[#0F3460] to-[#1A1A2E] text-white overflow-hidden relative">
+            <div class="relative z-10 flex items-center justify-between">
+              <div class="max-w-[60%]">
+                <h4 class="text-lg font-bold mb-2">Continuez ainsi !</h4>
+                <p class="text-sm text-white/70">Chaque trajet partagé réduit votre empreinte carbone et renforce la communauté.</p>
+              </div>
+              <div class="text-5xl opacity-80">🌱</div>
+            </div>
+            <div class="absolute -right-4 -bottom-4 w-32 h-32 bg-white/5 rounded-full blur-3xl"></div>
           </div>
         </div>
       </div>
@@ -1034,8 +1055,7 @@
       </div>
       <div class="p-0 overflow-y-auto w-full h-full bg-white relative">
         <app-navette-tracking [vehiculeId]="trackingVehiculeId" [isVoiture]="isVoitureTracking"
-          [adresseDepart]="getAdresseDepartPourTracking()"
-          [adresseArrivee]="getAdresseArriveePourTracking()"></app-navette-tracking>
+          [adresseDepart]="trackingAdresseDepart" [adresseArrivee]="trackingAdresseArrivee"></app-navette-tracking>
       </div>
     </div>
   </div>
@@ -1054,7 +1074,8 @@
         </button>
       </div>
       <div class="p-0 overflow-y-auto w-full flex-1 bg-gray-50 relative">
-        <app-chauffeur-tracking [preselectedVehiculeId]="conduiteVehiculeId"></app-chauffeur-tracking>
+        <app-chauffeur-tracking [preselectedVehiculeId]="conduiteVehiculeId"
+          [trajetId]="conduiteTrajetId"></app-chauffeur-tracking>
       </div>
     </div>
   </div>

@@ -81,8 +81,9 @@
       </div>
     </div>
     <div class="flex justify-between mt-1">
-      <span class="text-xs text-gray-400">Ariana</span>
-      <span class="text-xs text-gray-400">Votre arrêt</span>
+   <!-- ✅ Après -->
+<span class="text-xs text-gray-400">{{ adresseDepart.split(',')[0] }}</span>
+<span class="text-xs text-gray-400">Votre arrêt</span>
     </div>
   </div>
 
@@ -100,18 +101,38 @@
       <p class="font-normal text-xs opacity-80">{{ notifications[0].message }}</p>
     </div>
   </div>
-  <!-- Bouton démarrer -->
-  <div class="px-4 py-3 border-b border-gray-100 flex gap-3">
-    <button (click)="demarrerSimulation()" [disabled]="statut === 'En route' || statut === '⚠️ Retard'"
-      class="flex-1 py-2.5 bg-[#1D9E75] text-white rounded-xl font-semibold hover:bg-[#168567] transition disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed">
-      🚌 Démarrer simulation
-    </button>
-      <button
-      (click)="etapeActuelle = 0; statut = 'En attente'; progression = 0; tempsRestant = 'Calcul en cours...'; distance = '-'"
-      class="px-4 py-2.5 bg-gray-100 text-gray-600 rounded-xl font-semibold hover:bg-gray-200 transition">
-      🔄 Réinitialiser
-    </button>
+  <!-- Suivi temps réel -->
+<div class="px-4 py-3 border-b border-gray-100">
+  <div class="flex items-center gap-3 p-3 rounded-xl"
+    [ngClass]="{
+      'bg-green-50 border border-green-100': statut === 'En route' || statut === 'Connecté',
+      'bg-blue-50 border border-blue-100': statut === 'En attente',
+      'bg-yellow-50 border border-yellow-100': statut === '⚠️ Retard',
+      'bg-emerald-50 border border-emerald-100': statut === '✅ Arrivée' || statut === 'Arrivée imminente'
+    }">
+    <span class="text-xl">📡</span>
+    <div>
+      <p class="text-sm font-semibold"
+        [ngClass]="{
+          'text-green-700': statut === 'En route' || statut === 'Connecté',
+          'text-blue-700': statut === 'En attente',
+          'text-yellow-700': statut === '⚠️ Retard',
+          'text-emerald-700': statut === '✅ Arrivée' || statut === 'Arrivée imminente'
+        }">
+        Suivi en temps réel
+      </p>
+      <p class="text-xs text-gray-500">
+        {{ statut === 'En attente' || statut === 'Connecté' 
+          ? 'En attente du démarrage du conducteur...' 
+          : statut === 'En route' 
+          ? 'Le conducteur est en route vers votre arrêt.' 
+          : statut === '✅ Arrivée' 
+          ? 'Le conducteur est arrivé à votre arrêt !' 
+          : 'Mise à jour automatique en cours...' }}
+      </p>
+    </div>
   </div>
+</div>
   <!-- Carte -->
   <div #trackingMap class="mt-3 mx-0" style="height: 350px; width: 100%;"></div>
 

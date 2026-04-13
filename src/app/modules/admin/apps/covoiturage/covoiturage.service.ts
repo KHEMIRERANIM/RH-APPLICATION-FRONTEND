@@ -29,7 +29,7 @@ export interface Trajet {
   placesDisponibles: number;
   placesRestantes: number;
   prix?: number;
-  statut: 'ACTIF' | 'COMPLET' | 'ANNULE';
+  statut: 'ACTIF' | 'COMPLET' | 'ANNULE' | 'EFFECTUE' | 'EN_ROUTE';
   dateCreation?: string;
   reservations?: ReservationResponse[];
 }
@@ -47,7 +47,7 @@ export interface ReservationResponse {
   id: string;
   trajetId: string;
   employeId: string;
-  statut: 'EN_ATTENTE' | 'EN_ATTENTE_PAIEMENT' | 'CONFIRME' | 'ANNULE';
+  statut: 'EN_ATTENTE' | 'EN_ATTENTE_PAIEMENT' | 'CONFIRME' | 'ANNULE' | 'EFFECTUE';
   dateReservation: string;
   dateAcceptation?: string;
   co2AvecCovoit?: number;
@@ -203,5 +203,18 @@ remplacerReservation(request: any): Observable<any> {
 
   sendNotification(notification: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/notifications`, notification);
+  }
+
+  /** Backend : PUT /api/reservations/trajet/{trajetId}/statut/EFFECTUE (ReservationController) */
+  updateReservationsByTrajetToEffectue(trajetId: string): Observable<void> {
+    return this.http.put<void>(
+      `${this.reservationsUrl}/trajet/${trajetId}/statut/EFFECTUE`,
+      {}
+    );
+  }
+
+  /** Backend : PUT /api/trajets/{id}/statut/{statut} (TrajetController) */
+  updateTrajetStatus(id: string, statut: string): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/trajets/${id}/statut/${statut}`, {});
   }
 }
