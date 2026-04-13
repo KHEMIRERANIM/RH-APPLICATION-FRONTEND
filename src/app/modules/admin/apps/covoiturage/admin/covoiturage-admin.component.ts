@@ -96,6 +96,7 @@ export class CovoiturageAdminComponent implements OnInit {
   createBusPack = false;
   packBusList: PackBusEntry[] = [];
   packDates: string[] = [];
+  arretInput = '';
   busForm: Bus = this.emptyBus();
 
   navettes: Bus[] = [];
@@ -560,6 +561,7 @@ export class CovoiturageAdminComponent implements OnInit {
       this.busForm.arrivee = '';
     }
     this.joursSelectionnes = bus.joursDisponibles ? bus.joursDisponibles.split(',').map(j => j.trim()) : [];
+    if (!this.busForm.arrets) this.busForm.arrets = [];
     this.showModal = true;
   }
 
@@ -605,8 +607,42 @@ export class CovoiturageAdminComponent implements OnInit {
       joursDisponibles: '',
       statut: 'ACTIF',
       placesRestantes: 0,
-      photoUrl: this.defaultPhotoUrl
+      photoUrl: this.defaultPhotoUrl,
+      arrets: []
     };
+  }
+
+  expandedItineraries: Set<string> = new Set();
+
+  toggleItinerary(busId: string): void {
+    if (this.expandedItineraries.has(busId)) {
+      this.expandedItineraries.delete(busId);
+    } else {
+      this.expandedItineraries.add(busId);
+    }
+  }
+
+  addArret(): void {
+    if (this.arretInput?.trim()) {
+      if (!this.busForm.arrets) this.busForm.arrets = [];
+      this.busForm.arrets.push(this.arretInput.trim());
+      this.arretInput = '';
+    }
+  }
+
+  removeArret(index: number): void {
+    if (this.busForm.arrets) {
+      this.busForm.arrets.splice(index, 1);
+    }
+  }
+
+  moveArret(index: number, direction: 'up' | 'down'): void {
+    if (!this.busForm.arrets) return;
+    const newIdx = direction === 'up' ? index - 1 : index + 1;
+    if (newIdx < 0 || newIdx >= this.busForm.arrets.length) return;
+    const temp = this.busForm.arrets[index];
+    this.busForm.arrets[index] = this.busForm.arrets[newIdx];
+    this.busForm.arrets[newIdx] = temp;
   }
 
   saveBus(): void {
@@ -630,7 +666,8 @@ export class CovoiturageAdminComponent implements OnInit {
         joursDisponibles: this.joursSelectionnes.join(','),
         statut: this.busForm.statut,
         placesRestantes: this.busForm.capacite - occupiedCount,
-        photoUrl: photoUrlValue
+        photoUrl: photoUrlValue,
+        arrets: this.busForm.arrets || []
       };
       this.busService.update(this.busForm.id, busToUpdate).subscribe({
         next: () => {
@@ -656,7 +693,8 @@ export class CovoiturageAdminComponent implements OnInit {
           joursDisponibles: this.joursSelectionnes.join(','),
           photoUrl: photoUrlValue,
           packId: packId,
-          packDates: [...this.packDates]
+          packDates: [...this.packDates],
+          arrets: this.busForm.arrets || []
         })
       );
       forkJoin(requests).subscribe({
@@ -676,7 +714,8 @@ export class CovoiturageAdminComponent implements OnInit {
         dureeMinutes: this.busForm.dureeMinutes,
         joursDisponibles: this.joursSelectionnes.join(','),
         statut: this.busForm.statut,
-        photoUrl: photoUrlValue
+        photoUrl: photoUrlValue,
+        arrets: this.busForm.arrets || []
       };
       this.busService.create(newBus).subscribe({
         next: () => { this.loadBus(); this.closeModal(); },

@@ -325,6 +325,15 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
   lookupTrajets: Trajet[] = []; // Full list for reservation details lookup
   employesMap: Map<string, string> = new Map();
   employesPhoneMap: Map<string, string> = new Map(); // Store employee phones
+  expandedItineraries: Set<string> = new Set();
+
+  toggleItinerary(busId: string): void {
+    if (this.expandedItineraries.has(busId)) {
+      this.expandedItineraries.delete(busId);
+    } else {
+      this.expandedItineraries.add(busId);
+    }
+  }
   displayedTrajets: Trajet[] = [];
   mesReservations: ReservationResponse[] = [];
   reservationEnCours: boolean = false;

@@ -449,6 +449,17 @@
         <div *ngIf="isLoadingShuttles" class="text-center py-10 text-gray-500">Chargement des navettes...</div>
         <div *ngIf="shuttleError" class="bg-red-50 text-red-600 p-4 rounded-xl">{{ shuttleError }}</div>
 
+        <!-- Info Alert -->
+        <div *ngIf="!isLoadingShuttles && filteredShuttles.length > 0" 
+          class="bg-[#1D9E75]/5 border-l-4 border-[#1D9E75] p-4 rounded-r-2xl mb-6 shadow-sm animate-in fade-in duration-700">
+          <div class="flex items-center gap-3">
+            <mat-icon class="text-[#1D9E75] icon-size-5" svgIcon="feather:info"></mat-icon>
+            <p class="text-xs md:text-sm text-[#0F3460] font-medium">
+              <span class="font-bold">Info:</span> Réservation recommandée 24h à l'avance pour garantir votre place.
+            </p>
+          </div>
+        </div>
+
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div *ngFor="let shuttle of filteredShuttles"
             class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition">
@@ -484,6 +495,67 @@
                   <span *ngFor="let jour of shuttle.joursDisponibles?.split(',')"
                     class="px-2 py-0.5 bg-[#1D9E75]/10 text-[#1D9E75] rounded text-xs font-medium">{{ (jour + '').trim()
                     }}</span>
+                </div>
+              </div>
+
+              <!-- Bouton Toggle Itinéraire -->
+              <button *ngIf="shuttle.arrets?.length" (click)="toggleItinerary(shuttle.id!)"
+                class="w-full flex items-center justify-between px-4 py-2 bg-indigo-50 text-indigo-700 rounded-xl hover:bg-indigo-100 transition-all font-bold text-xs group">
+                <div class="flex items-center gap-2">
+                  <mat-icon class="icon-size-4" [svgIcon]="expandedItineraries.has(shuttle.id!) ? 'feather:chevron-up' : 'feather:info'"></mat-icon>
+                  <span>{{ expandedItineraries.has(shuttle.id!) ? 'Masquer les infos' : 'Plus d\'informations' }}</span>
+                </div>
+                <mat-icon class="icon-size-4 transition-transform duration-300" 
+                  [class.rotate-180]="expandedItineraries.has(shuttle.id!)"
+                  svgIcon="feather:chevron-down"></mat-icon>
+              </button>
+
+              <!-- Arrêts et horaires (Image-inspired Stepper Design) -->
+              <div class="bg-gray-50/80 rounded-2xl p-5 border border-gray-100 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300" 
+                *ngIf="shuttle.arrets?.length && expandedItineraries.has(shuttle.id!)">
+                <div class="flex items-center gap-2.5 mb-5">
+                  <mat-icon class="icon-size-5 text-[#1A1A2E]" svgIcon="feather:truck"></mat-icon>
+                  <h5 class="text-sm font-bold text-[#1A1A2E]">Arrêts et horaires</h5>
+                </div>
+                
+                <div class="relative ml-2.5">
+                  <!-- Vertical Line -->
+                  <div class="absolute left-[7px] top-2 bottom-2 w-0.5 bg-gray-200"></div>
+                  
+                  <div class="space-y-6 relative">
+                    <!-- Départ -->
+                    <div class="flex items-start gap-4">
+                      <div class="relative z-10 w-4 h-4 rounded-full bg-[#1D9E75] mt-0.5 ring-4 ring-white shadow-sm"></div>
+                      <div class="flex flex-col">
+                        <p class="text-[13px] font-bold text-gray-900 leading-none">{{ shuttle.depart || (shuttle.ligne ? shuttle.ligne.split(' - ')[0] : 'Départ') }}</p>
+                        <div class="flex items-center gap-1 text-[10px] text-gray-400 mt-1.5 font-medium">
+                          <mat-icon class="icon-size-3" svgIcon="feather:clock"></mat-icon>
+                          <span>{{ shuttle.heureDepart }} (Départ)</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <!-- Arrêts -->
+                    <div *ngFor="let arret of shuttle.arrets" class="flex items-start gap-4">
+                      <div class="relative z-10 w-4 h-4 rounded-full bg-slate-200 mt-0.5 ring-4 ring-white shadow-sm"></div>
+                      <div class="flex flex-col">
+                        <p class="text-[13px] font-semibold text-gray-700 leading-none">{{ arret }}</p>
+                        <p class="text-[10px] text-gray-400 mt-1.5 italic">Arrêt intermédiaire</p>
+                      </div>
+                    </div>
+                    
+                    <!-- Arrivée -->
+                    <div class="flex items-start gap-4">
+                      <div class="relative z-10 w-4 h-4 rounded-full bg-[#1D9E75] mt-0.5 ring-4 ring-white shadow-sm"></div>
+                      <div class="flex flex-col">
+                        <p class="text-[13px] font-bold text-gray-900 leading-none">{{ shuttle.arrivee || (shuttle.ligne ? shuttle.ligne.split(' - ')[1] : 'Arrivée') }}</p>
+                        <div class="flex items-center gap-1 text-[10px] text-gray-400 mt-1.5 font-medium">
+                          <mat-icon class="icon-size-3" svgIcon="feather:clock"></mat-icon>
+                          <span>Arrivée prévue</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div>
@@ -530,13 +602,7 @@
                         'opacity-50 grayscale cursor-not-allowed': disponibiliteParJour(shuttle, date) === 0 && !estDansUnPack(shuttle)
                       }">
 
-                      <!-- Indicateur de disponibilité (Petit point) -->
-                      <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full border border-white shadow-sm"
-                        [class.bg-green-500]="disponibiliteParJour(shuttle, date) > 0"
-                        [class.bg-red-500]="disponibiliteParJour(shuttle, date) === 0"></span>
-
-                      <span class="text-[9px] font-bold uppercase opacity-60">{{ date | date:'EEE' }}</span>
-                      <span class="text-xs font-bold">{{ date | date:'dd' }}</span>
+                      <span class="text-[10px] font-black uppercase">{{ (date | date:'EEE':'':'fr') | slice:0:3 | uppercase }}</span>
 
                       <!-- Overlay info au survol -->
                       <div

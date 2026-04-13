@@ -25,6 +25,8 @@ export interface Bus {
   dailyOccupancy?: { [date: string]: number };
   /** Dates spécifiques du pack (ex: ["2026-04-06", "2026-04-07", ...]) */
   packDates?: string[];
+  /** Arrêts intermédiaires */
+  arrets?: string[];
 }
 
 export interface BusPackRequest {
