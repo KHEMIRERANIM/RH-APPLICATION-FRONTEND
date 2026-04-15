@@ -171,9 +171,11 @@ export class ProjectComponent implements OnInit, OnDestroy
     this._http.get<any[]>('http://10.188.81.174:8081/api/users')
         .subscribe({
             next: (data) => {
+                /*
                 console.log('=== DONNÉES REÇUES ===');
                 console.log('Data brute:', data);
                 console.log('Nombre de données:', data?.length);
+                */
                 
                 this.originalData = data || [];
                 this.filteredData = data || [];
@@ -187,10 +189,11 @@ export class ProjectComponent implements OnInit, OnDestroy
                 const postes = new Set((data || []).map(u => u.poste).filter(p => p && p.trim() !== ''));
                 this.totalDepartments = depts.size;
                 this.totalPositions = postes.size;
-                
+                /*
                 console.log('Total employés:', this.totalEmployees);
                 console.log('Départements uniques:', this.totalDepartments);
                 console.log('Postes uniques:', this.totalPositions);
+                */
                 
                 this.toastr?.info(`${this.totalEmployees} utilisateurs chargés`, 'Info');
             },

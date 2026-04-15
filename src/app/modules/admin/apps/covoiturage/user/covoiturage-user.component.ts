@@ -12,6 +12,7 @@ import { forkJoin, of, firstValueFrom } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { PaiementService } from '../services/paiement.service';
 import { loadStripe } from '@stripe/stripe-js';
+import { ReclamationService, Reclamation } from '../services/reclamation.service';
 
 // Leaflet loaded via CDN
 declare var L: any;
@@ -366,6 +367,13 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     { id: 4, type: 'redeem', title: 'Bon 20 DT', points: -300, date: '15 Mars 2026', status: 'En attente', icon: '🎁', image: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=100' },
     { id: 5, type: 'earn', title: 'Covoiturage Menzah-Centre', points: 38, date: '12 Mars 2026', icon: '🚗' }
   ];
+
+  // Réclamation Form
+  reclamationBusId: string | null = null;
+  reclamationStop: string = '';
+  reclamationNeighborhood: string = '';
+  reclamationSuccess: boolean = false;
+  reclamationError: string = '';
   // ---------------------------------------------
 
   constructor(
@@ -378,8 +386,8 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     private userService: UserService,
     private emailService: EmailService,
     private route: ActivatedRoute,
-    private paiementService: PaiementService   // ← AJOUTE ICI
-
+    private paiementService: PaiementService,
+    private reclamationService: ReclamationService
   ) {
     this.trajetForm = this.fb.group({
       vehiculeId: ['', Validators.required],
@@ -1290,10 +1298,19 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
             days: (r.joursSelectionnes || '').split(',').map((d: string) => d.trim()).filter(Boolean)
           };
         });
+        this.initAutoReclamation();
         this.cdr.detectChanges();
       },
       error: (err) => console.error('Erreur chargement réservations navette:', err)
     });
+  }
+
+  initAutoReclamation(): void {
+    const assignedBus = this.getActiveShuttleInfo();
+    if (assignedBus) {
+      this.reclamationBusId = assignedBus.id;
+      this.cdr.detectChanges();
+    }
   }
 
   getDayStatus(reservation: any, day: string): 'confirmed' | 'waiting' | 'none' {
@@ -1948,11 +1965,11 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
   rechercherCovoitureurs() {
     // 1. Récupération & Normalisation des inputs
     // Priorité à manualAllStartPoints s'il est rempli en mode manuel
-    const departInput = (this.inputMode === 'manual' 
-      ? (this.manualAllStartPoints || this.manualDeparture) 
+    const departInput = (this.inputMode === 'manual'
+      ? (this.manualAllStartPoints || this.manualDeparture)
       : this.departureLocation);
     const arriveeInput = (this.inputMode === 'manual' ? this.manualDestination : this.destinationLocation);
-    
+
     const depart = departInput?.toLowerCase().trim();
     const arrivee = arriveeInput?.toLowerCase().trim();
     const targetTime = this.searchTime?.trim();
@@ -1960,7 +1977,7 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
 
     // 2. Validation minimale
     const hasActiveFilters = !!(depart || arrivee || targetTime || selectedDaysNorm.length > 0 || this.searchPrice !== null);
-    
+
     if (!hasActiveFilters) {
       alert('Veuillez renseigner au moins un critère de recherche (Départ, Destination, Jours, Heure ou Prix).');
       return;
@@ -1976,14 +1993,14 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
       const trajetArr = (trajet.adresseArrivee || '').toLowerCase().trim();
       const trajetJours = (trajet.joursDisponibles || '').toLowerCase();
       const trajetHeure = (trajet.heureDepart || '').trim();
-      
+
       // IDs pour exclusion (normalisés en string)
       const tId = String(trajet.employeId || '').trim().toLowerCase();
       const myId = String(this.employeId || '').trim().toLowerCase();
 
       // a. Jours (OR logic: if trajet has ANY of the selected days)
-      const joursMatch = selectedDaysNorm.length === 0 || 
-                         selectedDaysNorm.some(day => trajetJours.includes(day));
+      const joursMatch = selectedDaysNorm.length === 0 ||
+        selectedDaysNorm.some(day => trajetJours.includes(day));
 
       // b. Départ (Substring match)
       const departMatch = !depart || trajetDep.includes(depart);
@@ -2014,7 +2031,7 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     } else {
       this.displayedTrajets = trajetsFiltres;
     }
-    
+
     this.cdr.detectChanges();
   }
 
@@ -2339,6 +2356,7 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
 
         } else if (!this.pubDestMarker) {
           this.trajetForm.get('adresseArrivee')?.setValue("Recherche...");
+          this.cdr.detectChanges();
 
           const customIcon = L.divIcon({
             className: 'custom-icon',
@@ -2353,36 +2371,150 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
               this.trajetForm.get('adresseArrivee')?.setValue(addr);
               this.cdr.detectChanges();
             });
-          });
 
-          const group = new L.featureGroup([this.pubDepMarker, this.pubDestMarker]);
-          this.publishMap.fitBounds(group.getBounds(), { padding: [50, 50] });
+            const group = new L.featureGroup([this.pubDepMarker, this.pubDestMarker]);
+            this.publishMap.fitBounds(group.getBounds(), { padding: [50, 50] });
+          });
 
         } else {
           this.publishMap.removeLayer(this.pubDepMarker);
           this.publishMap.removeLayer(this.pubDestMarker);
-
-          this.trajetForm.get('adresseDepart')?.setValue("Recherche...");
-          this.trajetForm.get('adresseArrivee')?.setValue('');
-          this.cdr.detectChanges();
-
-          const customIcon = L.divIcon({
-            className: 'custom-icon',
-            html: `<div style="background-color: #1D9E75; width: 16px; height: 16px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.4);"></div>`,
-            iconSize: [20, 20],
-            iconAnchor: [10, 10]
-          });
-          this.pubDepMarker = L.marker([lat, lng], { icon: customIcon }).addTo(this.publishMap).bindPopup("Départ").openPopup();
+          this.pubDepMarker = null;
           this.pubDestMarker = null;
 
-          this.getAddressFromCoords(lat, lng).then(addr => {
-            this.ngZone.run(() => {
-              this.trajetForm.get('adresseDepart')?.setValue(addr);
-              this.cdr.detectChanges();
-            });
-          });
+          this.trajetForm.get('adresseDepart')?.setValue('');
+          this.trajetForm.get('adresseArrivee')?.setValue('');
+          this.cdr.detectChanges();
         }
       });
     });
+  }
+
+  getActiveShuttleInfo(): any {
+    if (this.myShuttleReservations && this.myShuttleReservations.length > 0) {
+      // Find the first confirmed or active reservation
+      const lastRes = this.myShuttleReservations.find(r =>
+        ['CONFIRME', 'EN_ATTENTE_ACTIVATION', 'EFFECTUE'].includes(this.getDisplayStatus(r))
+      ) || this.myShuttleReservations[0];
+
+      const bus = this.shuttles.find(s => s.id === lastRes.shuttleId || s.id === lastRes.busId);
+      return bus || null;
+    }
+    return null;
+  }
+
+  submitReclamation(): void {
+    const selectedBusId = this.reclamationBusId;
+    if (!selectedBusId || !this.reclamationStop || !this.reclamationNeighborhood) {
+      this.reclamationError = "Veuillez remplir tous les champs.";
+      this.cdr.detectChanges();
+      return;
+    }
+
+    // Validation des doublons : Vérifier si l'employé a déjà réclamé pour ce quartier
+    this.reclamationService.getAll().subscribe({
+      next: (reclamations) => {
+        const alreadyExists = reclamations.some(r => 
+          String(r.employeId) === String(this.employeId) && 
+          r.neighborhood?.trim().toLowerCase() === this.reclamationNeighborhood.trim().toLowerCase()
+        );
+
+        if (alreadyExists) {
+          this.reclamationError = "Vous avez déjà envoyé une réclamation pour ce quartier.";
+          this.cdr.detectChanges();
+          return;
+        }
+
+        this.proceedWithReclamation(selectedBusId);
+      },
+      error: (err) => {
+        console.error("Erreur lors de la validation des doublons", err);
+        // En cas d'erreur de validation, on tente quand même l'envoi
+        this.proceedWithReclamation(selectedBusId);
+      }
+    });
+  }
+
+  private async proceedWithReclamation(selectedBusId: string): Promise<void> {
+    try {
+      const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(this.reclamationNeighborhood + ', Tunisie')}&limit=1&countrycodes=tn`);
+      const data = await geoRes.json();
+      
+      let lat = 36.8065; 
+      let lng = 10.1815;
+      if (data && data.length > 0) {
+        lat = parseFloat(data[0].lat);
+        lng = parseFloat(data[0].lon);
+      }
+
+      // Trouver les coordonnées de l'arrêt
+      let stopLat = 0;
+      let stopLng = 0;
+      const bus = this.shuttles.find(s => s.id === selectedBusId);
+      if (bus && bus.arrets) {
+        // Recherche insensible à la casse et aux espaces
+        const stop = bus.arrets.find((a: any) => 
+          a.name.trim().toLowerCase() === this.reclamationStop.trim().toLowerCase()
+        );
+        if (stop) {
+          stopLat = stop.latitude;
+          stopLng = stop.longitude;
+        }
+      }
+
+      console.log(`[Reclamation] Calcul OSRM entre : Neighborhood(${lat},${lng}) et Stop(${stopLat},${stopLng})`);
+
+      let walkingDistance = 0;
+      let walkingTime = 0;
+
+      // Calcul OSRM si on a les coordonnées des deux points
+      if (stopLat !== 0 && stopLng !== 0) {
+        try {
+          const osrmRes = await fetch(`https://router.project-osrm.org/route/v1/foot/${lng},${lat};${stopLng},${stopLat}?overview=false`);
+          const osrmData = await osrmRes.json();
+          if (osrmData.routes && osrmData.routes[0]) {
+            walkingDistance = Math.round((osrmData.routes[0].distance / 1000) * 100) / 100; // km
+            walkingTime = Math.round(osrmData.routes[0].duration / 60); // minutes
+          }
+        } catch (e) {
+          console.warn("OSRM error", e);
+        }
+      }
+
+      const reclamation: Reclamation = {
+        employeId: this.employeId,
+        busId: selectedBusId,
+        stopName: this.reclamationStop,
+        neighborhood: this.reclamationNeighborhood,
+        latitude: lat,
+        longitude: lng,
+        walkingDistance: walkingDistance,
+        walkingTime: walkingTime,
+        date: new Date().toISOString(),
+        status: 'PENDING'
+      };
+
+      console.log("[Reclamation] Envoi de la réclamation avec metrics :", { walkingDistance, walkingTime });
+
+      this.reclamationService.submit(reclamation).subscribe({
+        next: () => {
+          this.reclamationSuccess = true;
+          this.reclamationError = '';
+          this.reclamationStop = '';
+          this.reclamationNeighborhood = '';
+          setTimeout(() => this.reclamationSuccess = false, 5000);
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.reclamationError = "Une erreur est survenue lors de l'envoi.";
+          console.error(err);
+          this.cdr.detectChanges();
+        }
+      });
+    } catch (err) {
+      console.error("Geocoding error", err);
+      this.reclamationError = "Erreur de géocodage du quartier.";
+      this.cdr.detectChanges();
+    }
   }
 }

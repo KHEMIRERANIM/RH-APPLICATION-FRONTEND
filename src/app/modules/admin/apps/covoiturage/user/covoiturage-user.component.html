@@ -694,13 +694,97 @@
           </div>
         </div>
       </div>
+
+      <!-- Section Réclamation (Besoins) - REALIGNED DESIGN -->
+      <div class="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm mt-12 relative overflow-hidden group">
+        <div class="relative z-10">
+          <div class="flex items-center gap-4 mb-8">
+            <div class="w-12 h-12 bg-emerald-50 text-[#1D9E75] rounded-xl flex items-center justify-center transition-colors group-hover:bg-[#1D9E75] group-hover:text-white">
+              <mat-icon class="icon-size-6" svgIcon="feather:alert-octagon"></mat-icon>
+            </div>
+            <div>
+              <h3 class="text-xl font-bold text-[#0F3460] mb-1">Signaler un besoin</h3>
+              <p class="text-gray-500 text-sm font-medium">Aidez-nous à optimiser nos lignes de bus</p>
+            </div>
+          </div>
+
+          <div class="grid lg:grid-cols-2 gap-10 items-start">
+            <div class="space-y-6">
+              <div class="space-y-4">
+                <!-- Dropdown: Votre ligne actuelle -->
+                <div class="group/field">
+                  <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1 group-focus-within/field:text-[#1D9E75] transition-colors">Votre ligne actuelle</label>
+                  <div class="relative">
+                    <select [(ngModel)]="reclamationBusId" (change)="reclamationStop = ''"
+                      class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-[#0F3460] font-semibold focus:ring-2 focus:ring-[#1D9E75]/20 focus:border-[#1D9E75] outline-none transition-all appearance-none cursor-pointer">
+                      <option [value]="null" disabled selected>Chargement de votre ligne...</option>
+                      <option *ngFor="let bus of shuttles" [value]="bus.id">{{ bus.ligne || bus.route }}</option>
+                    </select>
+                    <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                      <mat-icon class="icon-size-4" svgIcon="feather:chevron-down"></mat-icon>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Dropdown: Arrêt le plus proche -->
+                <div class="group/field" *ngIf="reclamationBusId">
+                  <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1 group-focus-within/field:text-[#1D9E75] transition-colors">Arrêt de votre ligne le plus proche</label>
+                  <div class="relative">
+                    <select [(ngModel)]="reclamationStop"
+                      class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-[#0F3460] font-semibold focus:ring-2 focus:ring-[#1D9E75]/20 focus:border-[#1D9E75] outline-none transition-all appearance-none cursor-pointer">
+                      <option value="" disabled selected>Sélectionnez un arrêt...</option>
+                      <ng-container *ngFor="let bus of shuttles">
+                        <ng-container *ngIf="bus.id === reclamationBusId">
+                          <option *ngFor="let stop of bus.arrets" [value]="stop.name">{{ stop.name }}</option>
+                        </ng-container>
+                      </ng-container>
+                    </select>
+                    <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                      <mat-icon class="icon-size-4" svgIcon="feather:chevron-down"></mat-icon>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="group/field">
+                  <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 ml-1 group-focus-within/field:text-[#1D9E75] transition-colors">Votre Quartier / Zone cible</label>
+                  <input type="text" [(ngModel)]="reclamationNeighborhood" placeholder="Ex: Cité El Ghazela, Ennasr 2..."
+                    class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-[#0F3460] font-semibold placeholder:text-gray-300 focus:ring-2 focus:ring-[#1D9E75]/20 focus:border-[#1D9E75] outline-none transition-all">
+                </div>
+              </div>
+
+              <div *ngIf="reclamationError" class="bg-red-50 border border-red-100 text-red-600 p-4 rounded-xl text-xs font-bold flex items-center gap-2">
+                <mat-icon class="icon-size-4" svgIcon="feather:alert-circle"></mat-icon>
+                {{ reclamationError }}
+              </div>
+
+              <div *ngIf="reclamationSuccess" class="bg-[#1D9E75] p-4 rounded-xl text-white text-sm font-bold flex items-center gap-3 shadow-lg shadow-[#1D9E75]/20 animate-in slide-in-from-top-2 duration-300">
+                <mat-icon class="icon-size-5" svgIcon="feather:check-circle"></mat-icon>
+                Signalement envoyé avec succès !
+              </div>
+
+              <button (click)="submitReclamation()"
+                class="w-full py-4 bg-[#1D9E75] hover:bg-[#168567] text-white rounded-xl font-bold text-sm uppercase tracking-wider shadow-md hover:shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                <mat-icon class="icon-size-5" svgIcon="feather:send"></mat-icon>
+                Envoyer ma demande
+              </button>
+            </div>
+
+            <div class="hidden lg:flex flex-col justify-center items-center text-center p-10 bg-slate-50 rounded-2xl border border-gray-100">
+              <div class="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mb-6">
+                <mat-icon class="icon-size-10 text-[#1D9E75]" svgIcon="feather:map-pin"></mat-icon>
+              </div>
+              <h4 class="text-lg font-bold text-[#0F3460] mb-3">Besoin d'une nouvelle ligne ?</h4>
+              <p class="text-gray-500 text-sm leading-relaxed">
+                Vos retours nous permettent de détecter les zones blanches. Si plusieurs collègues expriment des besoins similaires, nous adapterons les itinéraires existants ou créerons des lignes directes.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
-
-    <!-- ===== FIN NAVETTE TAB ===== -->
-    <!-- ===== FIN NAVETTE TAB ===== -->
-
   </div>
+
   <!-- ===================== FIN SECTION UTILISES ===================== -->
 
   <!-- ===================== SECTION PROPOSES ===================== -->

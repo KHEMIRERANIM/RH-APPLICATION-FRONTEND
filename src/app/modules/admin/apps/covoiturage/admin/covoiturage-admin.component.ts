@@ -5,6 +5,9 @@ import { forkJoin, of } from 'rxjs';
 import { UserService } from '../../../../../services/user.service';
 import { catchError } from 'rxjs/operators';
 import { PredictionService } from '../services/prediction.service';
+import { ReclamationService, Reclamation } from '../services/reclamation.service';
+
+declare var L: any;
 
 import {
   ApexAxisChartSeries,
@@ -40,7 +43,7 @@ export type ChartOptions = {
   labels: string[] | any;
 };
 
-type AdminSection = 'statistiques' | 'navettes' | 'reservations' | 'cadeaux';
+type AdminSection = 'statistiques' | 'navettes' | 'reservations' | 'cadeaux' | 'reclamations';
 type ReservationType = 'navette' | 'covoiturage';
 
 interface Reservation {
@@ -97,6 +100,9 @@ export class CovoiturageAdminComponent implements OnInit {
   packBusList: PackBusEntry[] = [];
   packDates: string[] = [];
   arretInput = '';
+  searchSuggestions: any[] = [];
+  isSearching = false;
+  private searchTimeout: any;
   busForm: Bus = this.emptyBus();
 
   navettes: Bus[] = [];
@@ -148,6 +154,20 @@ export class CovoiturageAdminComponent implements OnInit {
   };
   weatherForecast: any[] = [];
 
+  // Heatmap & Reclamations
+  reclamations: Reclamation[] = [];
+  reclamationStats: any[] = [];
+  get maxReclamations(): number {
+    if (!this.reclamationStats || this.reclamationStats.length === 0) return 1;
+    return Math.max(...this.reclamationStats.map(s => s.count));
+  }
+  private heatmapMap: any;
+  private heatmapLayer: any;
+  private stopPickerMap: any;
+  private stopPickerMarker: any;
+  selectedLat: number | null = null;
+  selectedLng: number | null = null;
+
   // Propriétés Prédiction
   weeklyPredictions: any[] = [];
   predictionTotal: number = 0;
@@ -159,6 +179,7 @@ export class CovoiturageAdminComponent implements OnInit {
     private covoiturageService: CovoiturageService,
     private userService: UserService,
     private predictionService: PredictionService,
+    private reclamationService: ReclamationService,
     private _changeDetectorRef: ChangeDetectorRef
   ) { }
 
@@ -166,7 +187,7 @@ export class CovoiturageAdminComponent implements OnInit {
     const now = new Date();
     const options: Intl.DateTimeFormatOptions = { weekday: 'long', day: 'numeric', month: 'long' };
     this.currentWeather.date = now.toLocaleDateString('fr-FR', options);
-    
+
     this.loadAllData();
     this.loadWeeklyPrediction();
   }
@@ -178,7 +199,8 @@ export class CovoiturageAdminComponent implements OnInit {
       buses: this.busService.getAll(),
       trajets: this.covoiturageService.getAllTrajets(),
       resNavette: this.covoiturageService.getAllReservationsNavette(),
-      resCovoit: this.covoiturageService.getAllReservations()
+      resCovoit: this.covoiturageService.getAllReservations(),
+      reclamations: this.reclamationService.getAll()
     }).subscribe({
       next: (results) => {
         // 1. Map Employés
@@ -193,6 +215,15 @@ export class CovoiturageAdminComponent implements OnInit {
         this.navettes = results.buses || [];
         this.trajets = results.trajets || [];
         this.reservationsNavette = results.resNavette || [];
+        this.reclamations = results.reclamations || [];
+
+        // Calculer les stats après avoir chargé navettes ET réclamations
+        this.calculateReclamationStats();
+
+        // Rafraîchir la carte si on est sur la section réclamations
+        if (this.activeSection === 'reclamations') {
+          this.initHeatmap();
+        }
 
         // Extraire les packDates existants pour checkWaitlists
         const allPackDates: string[] = [];
@@ -545,6 +576,7 @@ export class CovoiturageAdminComponent implements OnInit {
     this.packDates = [];
     this.submitted = false;
     this.showModal = true;
+    this.initStopPickerMap();
   }
 
   openEditModal(bus: Bus): void {
@@ -563,6 +595,7 @@ export class CovoiturageAdminComponent implements OnInit {
     this.joursSelectionnes = bus.joursDisponibles ? bus.joursDisponibles.split(',').map(j => j.trim()) : [];
     if (!this.busForm.arrets) this.busForm.arrets = [];
     this.showModal = true;
+    this.initStopPickerMap();
   }
 
   toggleJour(jour: string): void {
@@ -625,9 +658,398 @@ export class CovoiturageAdminComponent implements OnInit {
   addArret(): void {
     if (this.arretInput?.trim()) {
       if (!this.busForm.arrets) this.busForm.arrets = [];
-      this.busForm.arrets.push(this.arretInput.trim());
+      this.busForm.arrets.push({
+        name: this.arretInput.trim(),
+        latitude: this.selectedLat || 36.8065,
+        longitude: this.selectedLng || 10.1815
+      });
       this.arretInput = '';
+      this.selectedLat = null;
+      this.selectedLng = null;
+      this.searchSuggestions = [];
+      if (this.stopPickerMarker) {
+        this.stopPickerMap.removeLayer(this.stopPickerMarker);
+        this.stopPickerMarker = null;
+      }
     }
+  }
+
+  onArretSearch(query: string): void {
+    if (this.searchTimeout) clearTimeout(this.searchTimeout);
+
+    if (!query || query.length < 3) {
+      this.searchSuggestions = [];
+      return;
+    }
+
+    this.searchTimeout = setTimeout(() => {
+      this.fetchSuggestions(query);
+    }, 500);
+  }
+
+  private fetchSuggestions(query: string): void {
+    this.isSearching = true;
+    this.searchSuggestions = [];
+
+    // 1. Suggestions de la Heatmap (Réclamations)
+    const heatmapSuggestions = this.reclamationStats
+      .filter(s => s.stop.toLowerCase().includes(query.toLowerCase()))
+      .map(s => {
+        const original = this.reclamations.find(r => r.stopName === s.stop);
+        return {
+          name: s.stop,
+          lat: original?.latitude,
+          lng: original?.longitude,
+          type: 'heatmap'
+        };
+      });
+
+    this.searchSuggestions.push(...heatmapSuggestions);
+
+    // 2. Recherche Nominatim (Tunisie uniquement)
+    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&countrycodes=tn&accept-language=fr`)
+      .then(res => res.json())
+      .then(data => {
+        const nominatimResults = data.map((item: any) => ({
+          name: item.display_name.split(',')[0],
+          fullName: item.display_name,
+          lat: parseFloat(item.lat),
+          lng: parseFloat(item.lon),
+          type: 'address'
+        }));
+
+        // Éviter les doublons
+        const existingNames = new Set(this.searchSuggestions.map(s => s.name.toLowerCase()));
+        nominatimResults.forEach((nr: any) => {
+          if (!existingNames.has(nr.name.toLowerCase())) {
+            this.searchSuggestions.push(nr);
+          }
+        });
+
+        this.isSearching = false;
+        this._changeDetectorRef.detectChanges();
+      })
+      .catch(err => {
+        console.error('Erreur Nominatim:', err);
+        this.isSearching = false;
+        this._changeDetectorRef.detectChanges();
+      });
+  }
+
+  selectSuggestion(suggestion: any): void {
+    this.arretInput = suggestion.name;
+    this.selectedLat = suggestion.lat;
+    this.selectedLng = suggestion.lng;
+    this.searchSuggestions = [];
+
+    if (this.stopPickerMap && suggestion.lat && suggestion.lng) {
+      const latlng = [suggestion.lat, suggestion.lng];
+      this.stopPickerMap.setView(latlng, 15);
+
+      if (this.stopPickerMarker) {
+        this.stopPickerMarker.setLatLng(latlng);
+      } else {
+        this.stopPickerMarker = L.marker(latlng).addTo(this.stopPickerMap);
+      }
+    }
+    this._changeDetectorRef.detectChanges();
+  }
+
+  initStopPickerMap(): void {
+    setTimeout(() => {
+      const mapDiv = document.getElementById('stopPickerMap');
+      if (!mapDiv) return;
+
+      this.stopPickerMap = L.map('stopPickerMap').setView([36.8065, 10.1815], 11);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+      }).addTo(this.stopPickerMap);
+
+      this.stopPickerMap.on('click', (e: any) => {
+        this.selectedLat = e.latlng.lat;
+        this.selectedLng = e.latlng.lng;
+
+        if (this.stopPickerMarker) {
+          this.stopPickerMarker.setLatLng(e.latlng);
+        } else {
+          this.stopPickerMarker = L.marker(e.latlng).addTo(this.stopPickerMap);
+        }
+      });
+    }, 500);
+  }
+
+  private calculateHaversine(lat1: number, lon1: number, lat2: number, lon2: number): { distance: number, time: number } {
+    const R = 6371; // Rayon de la Terre en km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const d = R * c; // Distance en km
+    const t = Math.round((d / 4.5) * 60); // Estimation temps de marche (4.5 km/h)
+    return { distance: Math.round(d * 100) / 100, time: t };
+  }
+
+  loadReclamations(): void {
+    this.reclamationService.getAll().subscribe(data => {
+      this.reclamations = data;
+      this.calculateReclamationStats();
+      if (this.activeSection === 'reclamations') {
+        this.initHeatmap();
+      }
+    });
+  }
+
+  calculateReclamationStats(): void {
+    const statsMap = new Map<string, {
+      count: number;
+      lat: number;
+      lng: number;
+      employeeIds: Set<string>;
+      employees: Set<string>;
+      totalDistance: number;
+      totalTime: number;
+    }>();
+
+    this.reclamations.forEach(r => {
+      // Clé combinée : Arrêt + Quartier pour le graphique d'écart
+      const stopName = (r.stopName || 'Non spécifié').trim();
+      const neighborhood = (r.neighborhood || 'Inconnu').trim();
+      const key = `${stopName}|${neighborhood}`;
+
+      if (r.latitude && r.longitude) {
+        // Fallback distance/time si 0
+        let effectiveDist = r.walkingDistance || 0;
+        let effectiveTime = r.walkingTime || 0;
+
+        if (effectiveDist === 0) {
+          let stopCoords = { lat: 0, lng: 0 };
+          for (const bus of this.navettes) {
+            const s = bus.arrets?.find(a => a.name.trim().toLowerCase() === stopName.toLowerCase());
+            if (s) {
+              stopCoords = { lat: s.latitude, lng: s.longitude };
+              break;
+            }
+          }
+          if (stopCoords.lat !== 0) {
+            const h = this.calculateHaversine(r.latitude, r.longitude, stopCoords.lat, stopCoords.lng);
+            effectiveDist = h.distance;
+            effectiveTime = h.time;
+          }
+        }
+
+        if (!statsMap.has(key)) {
+          statsMap.set(key, {
+            count: 0,
+            lat: r.latitude,
+            lng: r.longitude,
+            employeeIds: new Set([r.employeId]),
+            employees: new Set([this.getNomEmploye(r.employeId)]),
+            totalDistance: effectiveDist,
+            totalTime: effectiveTime
+          });
+        } else {
+          const entry = statsMap.get(key)!;
+          entry.employeeIds.add(r.employeId);
+          entry.employees.add(this.getNomEmploye(r.employeId));
+          entry.totalDistance += effectiveDist;
+          entry.totalTime += effectiveTime;
+        }
+      }
+    });
+
+    this.reclamationStats = Array.from(statsMap.entries()).map(([key, data]) => {
+      const [stopName, neighborhood] = key.split('|');
+      const uniquePeopleCount = data.employees.size;
+      const avgTime = Math.round(data.totalTime / data.employeeIds.size);
+
+      return {
+        stopName,
+        neighborhood,
+        count: uniquePeopleCount,
+        latitude: data.lat,
+        longitude: data.lng,
+        avgDistance: Math.round((data.totalDistance / data.employeeIds.size) * 10) / 10,
+        avgTime,
+        employeeList: Array.from(data.employees).join(', '),
+        // Sévérité selon les seuils du graphique (Red > 30, Orange 15-30, Green < 15)
+        status: avgTime > 30 ? 'critical' : (avgTime >= 15 ? 'warning' : 'ok')
+      };
+    }).sort((a, b) => b.avgTime - a.avgTime);
+  }
+
+  // Calcul dynamique des métriques pour l'affichage (si 0 dans la base)
+  getMetrics(r: Reclamation): { time: number, dist: number } {
+    if (r.walkingTime && r.walkingTime > 0) {
+      return { time: r.walkingTime, dist: r.walkingDistance || 0 };
+    }
+
+    // Sinon recalcul via Haversine (Secours)
+    let stopCoords = { lat: 0, lng: 0 };
+    const stopName = (r.stopName || '').trim().toLowerCase();
+
+    for (const bus of this.navettes) {
+      const s = bus.arrets?.find(a => a.name.trim().toLowerCase() === stopName);
+      if (s) {
+        stopCoords = { lat: s.latitude, lng: s.longitude };
+        break;
+      }
+    }
+
+    if (stopCoords.lat !== 0 && r.latitude && r.longitude) {
+      const h = this.calculateHaversine(r.latitude, r.longitude, stopCoords.lat, stopCoords.lng);
+      return { time: h.time, dist: h.distance };
+    }
+
+    return { time: 0, dist: 0 };
+  }
+
+  getSeverityClass(time: number): string {
+    if (time > 30) return 'bg-red-50 text-red-600 border-red-100';
+    if (time >= 15) return 'bg-orange-50 text-orange-600 border-orange-100';
+    return 'bg-emerald-50 text-emerald-600 border-emerald-100';
+  }
+
+  deleteReclamation(id: string): void {
+    if (confirm('Voulez-vous vraiment supprimer cette réclamation ?')) {
+      this.reclamationService.delete(id).subscribe({
+        next: () => {
+          this.loadReclamations();
+          this._changeDetectorRef.detectChanges();
+        },
+        error: (err) => console.error('Erreur suppression réclamation:', err)
+      });
+    }
+  }
+
+  initHeatmap(): void {
+    setTimeout(() => {
+      const mapContainer = document.getElementById('heatmapMap');
+      if (!mapContainer || mapContainer.clientWidth === 0) {
+        console.warn('[Heatmap] Le conteneur map n\'est pas encore prêt ou est masqué.');
+        return;
+      }
+
+      if (this.heatmapMap) {
+        this.heatmapMap.remove();
+      }
+
+      this.heatmapMap = L.map('heatmapMap').setView([36.8065, 10.1815], 11);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+      }).addTo(this.heatmapMap);
+
+      // Forcer le rafraîchissement des dimensions
+      setTimeout(() => {
+        if (this.heatmapMap) this.heatmapMap.invalidateSize();
+      }, 100);
+
+      // 1. Plot Heatmap Underlay (Density)
+      const points = this.reclamations
+        .filter(r => r.latitude && r.longitude)
+        .map(r => [r.latitude, r.longitude, 0.5]);
+
+      if (points.length > 0 && L.heatLayer) {
+        L.heatLayer(points, { radius: 25, blur: 15, maxZoom: 17 }).addTo(this.heatmapMap);
+      }
+
+      // 2. Plot Fixed Bus Stops (Standard Blue Pins)
+      const stopIcon = L.divIcon({
+        html: `
+          <div class="flex flex-col items-center">
+            <div class="w-8 h-10 relative">
+              <svg viewBox="0 0 384 512" class="w-full h-full drop-shadow-lg">
+                <path fill="#3B82F6" d="M172.268 501.67C26.97 291.031 0 269.413 0 192 0 85.961 85.961 0 192 0s192 85.961 192 192c0 77.413-26.97 99.031-172.268 309.67-9.535 13.774-29.93 13.773-39.464 0z"></path>
+                <circle cx="192" cy="192" r="64" fill="white"></circle>
+              </svg>
+            </div>
+            <div class="bg-blue-600 text-white text-[8px] font-bold px-1.5 rounded-full mt-0.5 whitespace-nowrap shadow-sm border border-white">STOP</div>
+          </div>`,
+        className: 'custom-stop-icon',
+        iconSize: [32, 45],
+        iconAnchor: [16, 45]
+      });
+
+      // Collect unique stops across all buses
+      const uniqueStops = new Map<string, { lat: number, lng: number, name: string }>();
+
+      this.navettes.forEach(bus => {
+        if (bus.arrets && Array.isArray(bus.arrets)) {
+          bus.arrets.forEach((stop: any) => {
+            const lat = parseFloat(stop.latitude);
+            const lng = parseFloat(stop.longitude);
+            if (!isNaN(lat) && !isNaN(lng) && lat !== 0) {
+              const key = `${lat.toFixed(6)}|${lng.toFixed(6)}`;
+              if (!uniqueStops.has(key)) {
+                uniqueStops.set(key, { lat, lng, name: stop.name });
+              }
+            }
+          });
+        }
+      });
+
+      // console.log(`[Heatmap] Affichage de ${uniqueStops.size} arrêts uniques pour ${this.navettes.length} bus.`);
+
+      uniqueStops.forEach(stop => {
+        L.marker([stop.lat, stop.lng], { icon: stopIcon })
+          .bindPopup(`<div class="font-bold text-[#1A1A2E] uppercase text-[10px] tracking-wider mb-1 border-b pb-1">${stop.name}</div><div class="text-[9px] text-gray-500 italic">Point d'arrêt réseau RH</div>`)
+          .addTo(this.heatmapMap);
+      });
+
+      // 3. Plot Neighborhood Clusters (Green Proportional Numbered Circles)
+      this.reclamationStats.forEach(stat => {
+        if (stat.latitude && stat.longitude) {
+          const color = '#10B981'; // Vert par défaut pour les quartiers
+          const pulsingColor = 'rgba(16, 185, 129, 0.3)';
+          const size = Math.min(70, 35 + (stat.count * 3));
+
+          const neighborhoodIcon = L.divIcon({
+            html: `
+              <div class="relative flex items-center justify-center">
+                <div class="absolute w-full h-full rounded-full animate-ping" style="background-color: ${pulsingColor}"></div>
+                <div class="relative flex items-center justify-center rounded-full text-white font-bold shadow-xl border-2 border-white transition-all duration-500 hover:scale-110" 
+                     style="background-color: ${color}; width: ${size}px; height: ${size}px; font-size: ${size / 3}px">
+                  ${stat.count}
+                </div>
+              </div>`,
+            className: 'custom-neighborhood-icon',
+            iconSize: [size, size],
+            iconAnchor: [size / 2, size / 2]
+          });
+
+          L.marker([stat.latitude, stat.longitude], { icon: neighborhoodIcon })
+            .bindPopup(`
+              <div class="p-3 max-w-[220px]">
+                <div class="font-black text-[#1A1A2E] border-b pb-1.5 mb-2 uppercase text-[10px] tracking-wider flex justify-between items-center">
+                  <span>${stat.neighborhood}</span>
+                  <span class="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded text-[9px]">${stat.count} pers.</span>
+                </div>
+                
+                <!-- Marche Info -->
+                <div class="bg-blue-50/50 rounded-lg p-2 mb-3 border border-blue-100 flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm">
+                    <i class="fas fa-walking text-blue-500 text-xs"></i>
+                  </div>
+                  <div>
+                    <div class="text-[10px] font-bold text-blue-900">${stat.avgTime} min de marche</div>
+                    <div class="text-[9px] text-blue-700">${stat.avgDistance} km de distance</div>
+                  </div>
+                </div>
+
+                <div class="space-y-2">
+                  <div class="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">Profils concernés :</div>
+                  <div class="text-[10px] text-gray-600 leading-relaxed italic border-l-2 border-emerald-500 pl-2">
+                    ${stat.employeeList}
+                  </div>
+                </div>
+              </div>
+            `)
+            .addTo(this.heatmapMap);
+        }
+      });
+    }, 500);
   }
 
   removeArret(index: number): void {
@@ -774,7 +1196,12 @@ export class CovoiturageAdminComponent implements OnInit {
     this.submitted = false;
   }
 
-  setActiveSection(section: AdminSection): void { this.activeSection = section; }
+  setActiveSection(section: AdminSection): void {
+    this.activeSection = section;
+    if (section === 'reclamations') {
+      this.initHeatmap();
+    }
+  }
   setReservationType(type: ReservationType): void { this.reservationType = type; }
 
   get filteredNavettes(): Bus[] {
@@ -966,7 +1393,7 @@ export class CovoiturageAdminComponent implements OnInit {
     const days = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
     const conditions = ['Ensoleillé', 'Nuageux', 'Pluie', 'Ensoleillé', 'Nuageux', 'Orage', 'Dégagé'];
     const icons = ['feather:sun', 'feather:cloud', 'feather:cloud-rain', 'feather:sun', 'feather:cloud', 'feather:zap', 'feather:sun'];
-    
+
     this.weatherForecast = days.map((day, i) => ({
       day,
       temp: 20 + Math.floor(Math.random() * 8),
@@ -975,110 +1402,110 @@ export class CovoiturageAdminComponent implements OnInit {
     }));
   }
 
- loadWeeklyPrediction() {
-  this.isLoadingPrediction = true;
-  this.predictionService.getWeeklyPrediction().subscribe({
-    next: (data) => {
-      console.log('Données reçues:', data);
+  loadWeeklyPrediction() {
+    this.isLoadingPrediction = true;
+    this.predictionService.getWeeklyPrediction().subscribe({
+      next: (data) => {
+        // console.log('Données reçues:', data);
 
-      // 1. Déterminer la structure (Objet ou Tableau + Gestion des accents)
-      let predictionsRaw = [];
-      let todayRaw = null;
-      let totalVal = 0;
-      let avgVal = 0;
+        // 1. Déterminer la structure (Objet ou Tableau + Gestion des accents)
+        let predictionsRaw = [];
+        let todayRaw = null;
+        let totalVal = 0;
+        let avgVal = 0;
 
-      if (Array.isArray(data)) {
-        predictionsRaw = data;
-      } else if (data) {
-        // Support pour "predictions" ou "prédictions" (accent)
-        predictionsRaw = data.predictions || data['prédictions'] || [];
-        todayRaw = data.today || null;
-        totalVal = data.total || data['total'] || 0;
-        avgVal = data.average || data['moyenne'] || 0;
-      }
-
-      // 2. Météo du jour (Fallback si absent)
-      if (todayRaw) {
-        this.currentWeather = {
-          temp: Math.round(todayRaw.temp || 24),
-          condition: todayRaw.weather || 'Ensoleillé',
-          icon: this.getWeatherIcon(todayRaw.weather),
-          humidity: todayRaw.humidity || 45,
-          wind: todayRaw.wind || 12,
-          location: 'Live: ' + (todayRaw.location || 'Tunis') + ', TN',
-          date: todayRaw.date ? new Date(todayRaw.date).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }) : this.currentWeather.date
-        };
-      }
-
-      // 3. Prédictions (Gestion de 'prédit' et calcul des dates/météo si absent)
-      const daysOrder = ['LUNDI', 'MARDI', 'MERCREDI', 'JEUDI', 'VENDREDI', 'SAMEDI', 'DIMANCHE'];
-      const conditions = ['Ensoleillé', 'Nuageux', 'Beau temps', 'Nuageux', 'Ensoleillé', 'Pluie', 'Beau temps'];
-
-      // Trouver le lundi de cette semaine pour aligner les dates
-      const now = new Date();
-      const currentDay = now.getDay(); // 0=Dim, 1=Lun...
-      const diff = (currentDay === 0 ? -6 : 1) - currentDay;
-      const monday = new Date(now);
-      monday.setDate(now.getDate() + diff);
-
-      this.weeklyPredictions = predictionsRaw.map((p: any, i: number) => {
-        const itemDay = (p.jour || '').toUpperCase();
-        let dayIdx = daysOrder.indexOf(itemDay);
-        if (dayIdx === -1) dayIdx = i;
-
-        // Calcul de la date basée sur l'index du jour dans la semaine (Lundi+idx)
-        const d = new Date(monday);
-        d.setDate(monday.getDate() + dayIdx);
-
-        return {
-          ...p,
-          predicted: p.predicted || p['prédit'] || 0,
-          jour: (p.jour || daysOrder[i]).substring(0, 3).toUpperCase(),
-          date: d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }),
-          temp: p.temp || (20 + Math.floor(Math.random() * 8)),
-          meteo: p.meteo || conditions[dayIdx]
-        };
-      });
-
-      // 4. Totaux et Synchronisation de la carte principale
-      const total = totalVal || this.weeklyPredictions.reduce((sum, p) => sum + (p.predicted || 0), 0);
-      this.predictionAverage = avgVal || (this.weeklyPredictions.length > 0 ? Math.round(total / this.weeklyPredictions.length) : 0);
-      this.predictionTotal = total;
-
-      // S'assurer que la carte principale (Aujourd'hui) reflete TOUJOURS le premier jour de prédiction
-      if (this.weeklyPredictions && this.weeklyPredictions.length > 0) {
-        const pToday = this.weeklyPredictions[0];
-        console.log('Tentative de synchro Hero Card avec:', pToday.temp);
-        
-        // On remplace les valeurs par défaut (0 ou 24) par les données réelles
-        // On force la mise à jour si la valeur actuelle est 0, 24 ou si todayRaw est absent
-        if (!todayRaw || this.currentWeather.temp <= 0 || this.currentWeather.temp === 24) {
-          this.currentWeather.temp = Math.round(Number(pToday.temp) || 28);
-          this.currentWeather.condition = pToday.meteo || 'Ensoleillé';
-          this.currentWeather.icon = this.getWeatherIcon(pToday.meteo);
-          this.currentWeather.location = 'Tunis, TN';
-          console.log('✅ Synchronisation forcée réussie:', this.currentWeather.temp);
+        if (Array.isArray(data)) {
+          predictionsRaw = data;
+        } else if (data) {
+          // Support pour "predictions" ou "prédictions" (accent)
+          predictionsRaw = data.predictions || data['prédictions'] || [];
+          todayRaw = data.today || null;
+          totalVal = data.total || data['total'] || 0;
+          avgVal = data.average || data['moyenne'] || 0;
         }
-      }
 
-      this.isLoadingPrediction = false;
-      this._changeDetectorRef.detectChanges();
-      
-      // Hook pour le debug via subagent
-      (window as any).DEBUG_WEATHER = {
-        current: this.currentWeather,
-        weekly: this.weeklyPredictions,
-        todayRaw: todayRaw
-      };
-      
-      console.log('--- DEBUG WEATHER HOOK UPDATED ---');
-    },
-    error: (err) => {
-      console.error('Erreur:', err);
-      this.isLoadingPrediction = false;
-    }
-  });
-}
+        // 2. Météo du jour (Fallback si absent)
+        if (todayRaw) {
+          this.currentWeather = {
+            temp: Math.round(todayRaw.temp || 24),
+            condition: todayRaw.weather || 'Ensoleillé',
+            icon: this.getWeatherIcon(todayRaw.weather),
+            humidity: todayRaw.humidity || 45,
+            wind: todayRaw.wind || 12,
+            location: 'Live: ' + (todayRaw.location || 'Tunis') + ', TN',
+            date: todayRaw.date ? new Date(todayRaw.date).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }) : this.currentWeather.date
+          };
+        }
+
+        // 3. Prédictions (Gestion de 'prédit' et calcul des dates/météo si absent)
+        const daysOrder = ['LUNDI', 'MARDI', 'MERCREDI', 'JEUDI', 'VENDREDI', 'SAMEDI', 'DIMANCHE'];
+        const conditions = ['Ensoleillé', 'Nuageux', 'Beau temps', 'Nuageux', 'Ensoleillé', 'Pluie', 'Beau temps'];
+
+        // Trouver le lundi de cette semaine pour aligner les dates
+        const now = new Date();
+        const currentDay = now.getDay(); // 0=Dim, 1=Lun...
+        const diff = (currentDay === 0 ? -6 : 1) - currentDay;
+        const monday = new Date(now);
+        monday.setDate(now.getDate() + diff);
+
+        this.weeklyPredictions = predictionsRaw.map((p: any, i: number) => {
+          const itemDay = (p.jour || '').toUpperCase();
+          let dayIdx = daysOrder.indexOf(itemDay);
+          if (dayIdx === -1) dayIdx = i;
+
+          // Calcul de la date basée sur l'index du jour dans la semaine (Lundi+idx)
+          const d = new Date(monday);
+          d.setDate(monday.getDate() + dayIdx);
+
+          return {
+            ...p,
+            predicted: p.predicted || p['prédit'] || 0,
+            jour: (p.jour || daysOrder[i]).substring(0, 3).toUpperCase(),
+            date: d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }),
+            temp: p.temp || (20 + Math.floor(Math.random() * 8)),
+            meteo: p.meteo || conditions[dayIdx]
+          };
+        });
+
+        // 4. Totaux et Synchronisation de la carte principale
+        const total = totalVal || this.weeklyPredictions.reduce((sum, p) => sum + (p.predicted || 0), 0);
+        this.predictionAverage = avgVal || (this.weeklyPredictions.length > 0 ? Math.round(total / this.weeklyPredictions.length) : 0);
+        this.predictionTotal = total;
+
+        // S'assurer que la carte principale (Aujourd'hui) reflete TOUJOURS le premier jour de prédiction
+        if (this.weeklyPredictions && this.weeklyPredictions.length > 0) {
+          const pToday = this.weeklyPredictions[0];
+          // console.log('Tentative de synchro Hero Card avec:', pToday.temp);
+
+          // On remplace les valeurs par défaut (0 ou 24) par les données réelles
+          // On force la mise à jour si la valeur actuelle est 0, 24 ou si todayRaw est absent
+          if (!todayRaw || this.currentWeather.temp <= 0 || this.currentWeather.temp === 24) {
+            this.currentWeather.temp = Math.round(Number(pToday.temp) || 28);
+            this.currentWeather.condition = pToday.meteo || 'Ensoleillé';
+            this.currentWeather.icon = this.getWeatherIcon(pToday.meteo);
+            this.currentWeather.location = 'Tunis, TN';
+            console.log('✅ Synchronisation forcée réussie:', this.currentWeather.temp);
+          }
+        }
+
+        this.isLoadingPrediction = false;
+        this._changeDetectorRef.detectChanges();
+
+        // Hook pour le debug via subagent
+        (window as any).DEBUG_WEATHER = {
+          current: this.currentWeather,
+          weekly: this.weeklyPredictions,
+          todayRaw: todayRaw
+        };
+
+        // console.log('--- DEBUG WEATHER HOOK UPDATED ---');
+      },
+      error: (err) => {
+        console.error('Erreur:', err);
+        this.isLoadingPrediction = false;
+      }
+    });
+  }
 
   getWeatherIcon(condition: string): string {
     const c = (condition || '').toLowerCase();
