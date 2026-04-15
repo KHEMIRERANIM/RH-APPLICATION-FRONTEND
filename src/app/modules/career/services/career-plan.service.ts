@@ -6,7 +6,7 @@ import { CareerPlan } from '../models/career-plan';
 @Injectable({ providedIn: 'root' })
 export class CareerPlanService {
 
-  private apiUrl = 'http://localhost:8081/api/evolution-plans';
+  private apiUrl = 'http://localhost:8081/api/evolution_plans';
 
   constructor(private http: HttpClient) {}
 

@@ -1,6 +1,9 @@
-import { NgModule } from '@angular/core';
+import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+
+// Import du composant analyse
+import { MotivationAnalysisComponent } from './components/motivation-analysis/motivation-analysis.component';
 
 import { CareerRoutingModule } from './career-routing.module';
 
@@ -41,14 +44,13 @@ import { MotivationPreviewDialogComponent } from './components/motivation-previe
     EmployeeMobilityComponent,
     EmployeePlanComponent,
     MotivationPreviewDialogComponent,
-    
+    MotivationAnalysisComponent
   ],
   imports: [
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
     CareerRoutingModule,
-
     MatTableModule,
     MatPaginatorModule,
     MatSortModule,
@@ -62,6 +64,7 @@ import { MotivationPreviewDialogComponent } from './components/motivation-previe
     MatProgressSpinnerModule,
     MatTooltipModule,
     MatSlideToggleModule
-  ]
+  ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]   // ← Cette ligne est obligatoire ici
 })
 export class CareerModule {}

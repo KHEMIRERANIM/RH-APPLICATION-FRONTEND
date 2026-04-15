@@ -1,0 +1,154 @@
+<div style="display:flex;flex-direction:column;gap:16px;">
+
+  <!-- Bouton déclencheur -->
+  <button *ngIf="!hasAnalyzed && !isLoading"
+          (click)="analyze()"
+          style="display:flex;align-items:center;gap:8px;padding:10px 20px;
+                 border-radius:8px;border:none;background:linear-gradient(135deg,#7c3aed,#4f46e5);
+                 color:white;cursor:pointer;font-size:14px;font-weight:600;
+                 font-family:inherit;align-self:flex-start;">
+     Analyser avec l'IA
+  </button>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading"
+       style="display:flex;align-items:center;gap:12px;padding:16px;
+              background:#faf5ff;border-radius:12px;border:1px solid #e9d5ff;">
+    <mat-spinner diameter="24"></mat-spinner>
+    <span style="font-size:14px;color:#7c3aed;font-weight:600;">
+      Analyse en cours par l'IA...
+    </span>
+  </div>
+
+  <!-- Erreur -->
+  <div *ngIf="error"
+       style="padding:12px 16px;background:#fee2e2;border-radius:8px;
+              color:#991b1b;font-size:13px;">
+    ❌ {{ error }}
+  </div>
+
+  <!-- Résultats -->
+  <div *ngIf="analysis && !isLoading">
+
+    <!-- Score global + recommandation -->
+    <div style="background:white;border-radius:16px;padding:20px;
+                border:2px solid;margin-bottom:16px;"
+         [style.borderColor]="analysis.recommandationColor">
+
+      <div style="display:flex;justify-content:space-between;align-items:center;
+                  flex-wrap:wrap;gap:12px;">
+        <div>
+          <p style="font-size:13px;color:#6b7280;margin:0 0 4px;">Analyse IA de la lettre de motivation</p>
+          <p style="font-size:28px;font-weight:800;margin:0;"
+             [style.color]="analysis.recommandationColor">
+            {{ analysis.scoreGlobal }}/100
+          </p>
+          <p style="font-size:12px;color:#6b7280;margin:4px 0 0;font-style:italic;">
+            {{ analysis.resume }}
+          </p>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:32px;">{{ getSentimentIcon(analysis.sentiment) }}</div>
+          <span [style]="'padding:4px 12px;border-radius:9999px;font-size:11px;font-weight:700;background:'
+                         + analysis.recommandationColor + '20;color:' + analysis.recommandationColor">
+            {{ analysis.recommandation }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Barre de progression globale -->
+      <div style="margin-top:12px;background:#f3f4f6;border-radius:9999px;height:8px;overflow:hidden;">
+        <div [style]="'height:100%;border-radius:9999px;transition:width .5s;background:'
+                      + analysis.recommandationColor + ';width:' + analysis.scoreGlobal + '%'">
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+        <span style="font-size:11px;background:#f3f4f6;color:#374151;
+                     padding:3px 10px;border-radius:9999px;">
+          {{ getLangueLabel(analysis.langue) }}
+        </span>
+        <button (click)="analyze()"
+                style="font-size:11px;background:#ede9fe;color:#7c3aed;
+                       padding:3px 10px;border-radius:9999px;border:none;cursor:pointer;
+                       font-family:inherit;">
+          🔄 Relancer l'analyse
+        </button>
+      </div>
+    </div>
+
+    <!-- Scores détaillés -->
+    <div style="background:white;border-radius:16px;padding:20px;
+                border:1px solid #f3f4f6;margin-bottom:16px;">
+      <p style="font-size:14px;font-weight:700;color:#111827;margin:0 0 14px;">
+        📊 Scores détaillés
+      </p>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div *ngFor="let item of [
+          {label:'Pertinence avec le poste', score: analysis.scorePertinence},
+          {label:'Clarté et structure',      score: analysis.scoreClarte},
+          {label:'Niveau de motivation',     score: analysis.scoreMotivation},
+          {label:'Professionnalisme',        score: analysis.scoreProfessionnalisme},
+          {label:'Originalité',             score: analysis.scoreOriginalite}
+        ]">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+            <span style="font-size:12px;color:#374151;">{{ item.label }}</span>
+            <span style="font-size:12px;font-weight:700;"
+                  [style.color]="getScoreColor(item.score)">
+              {{ item.score }}/10
+            </span>
+          </div>
+          <div style="background:#f3f4f6;border-radius:9999px;height:6px;overflow:hidden;">
+            <div [style]="'height:100%;border-radius:9999px;background:'
+                          + getScoreColor(item.score)
+                          + ';width:' + (item.score * 10) + '%'">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Points forts + À améliorer -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+
+      <div style="background:#f0fdf4;border-radius:12px;padding:16px;border:1px solid #bbf7d0;">
+        <p style="font-size:13px;font-weight:700;color:#166534;margin:0 0 10px;">
+          ✅ Points forts
+        </p>
+        <ul style="margin:0;padding-left:16px;display:flex;flex-direction:column;gap:6px;">
+          <li *ngFor="let p of analysis.pointsForts"
+              style="font-size:12px;color:#166534;">{{ p }}</li>
+        </ul>
+      </div>
+
+      <div style="background:#fef2f2;border-radius:12px;padding:16px;border:1px solid #fecaca;">
+        <p style="font-size:13px;font-weight:700;color:#991b1b;margin:0 0 10px;">
+          ⚠️ À améliorer
+        </p>
+        <ul style="margin:0;padding-left:16px;display:flex;flex-direction:column;gap:6px;">
+          <li *ngFor="let p of analysis.pointsAmeliorer"
+              style="font-size:12px;color:#991b1b;">{{ p }}</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Suggestions -->
+    <div style="background:#eff6ff;border-radius:12px;padding:16px;border:1px solid #bfdbfe;">
+      <p style="font-size:13px;font-weight:700;color:#1d4ed8;margin:0 0 10px;">
+        💡 Suggestions d'amélioration
+      </p>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div *ngFor="let s of analysis.suggestions; let i = index"
+             style="display:flex;gap:10px;align-items:flex-start;">
+          <span style="background:#1d4ed8;color:white;border-radius:50%;width:18px;height:18px;
+                       display:flex;align-items:center;justify-content:center;
+                       font-size:10px;font-weight:700;flex-shrink:0;margin-top:1px;">
+            {{ i + 1 }}
+          </span>
+          <span style="font-size:12px;color:#1e40af;">{{ s }}</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

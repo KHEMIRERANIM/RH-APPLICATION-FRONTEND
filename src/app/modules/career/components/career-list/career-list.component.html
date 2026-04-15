@@ -10,7 +10,6 @@
         {{ authRole.isAdminOrRH() ? 'Manage positions, levels and career domains' : 'Consultez les postes et gérez votre évolution' }}
       </p>
     </div>
-    <!-- Bouton New Position : RH/Admin seulement -->
     <button *ngIf="authRole.isAdminOrRH() && activeTab === 0"
             mat-flat-button color="primary"
             class="new-position-btn"
@@ -32,7 +31,7 @@
   <!-- ===== ONGLET 0 : Positions ===== -->
   <ng-container *ngIf="activeTab === 0">
 
-    <!-- KPI Cards — RH/Admin seulement -->
+    <!-- KPI Cards -->
     <div *ngIf="authRole.isAdminOrRH()"
          class="grid grid-cols-2 sm:grid-cols-4 gap-4 px-6 mt-6 mb-6">
       <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex flex-col gap-1">
@@ -63,12 +62,8 @@
                 display:flex;align-items:center;gap:12px;">
       <span style="font-size:24px;">💼</span>
       <div>
-        <p style="font-size:14px;font-weight:700;color:#5b21b6;margin:0;">
-          Postes disponibles dans l'entreprise
-        </p>
-        <p style="font-size:12px;color:#7c3aed;margin:0;">
-          Consultez les postes et soumettez une demande de mobilité
-        </p>
+        <p style="font-size:14px;font-weight:700;color:#5b21b6;margin:0;">Postes disponibles dans l'entreprise</p>
+        <p style="font-size:12px;color:#7c3aed;margin:0;">Consultez les postes et soumettez une demande de mobilité</p>
       </div>
     </div>
 
@@ -83,12 +78,10 @@
                (input)="applyFilter($event)" />
       </div>
 
-      <!-- Loading -->
       <div *ngIf="isLoading" class="flex justify-center items-center py-16">
         <mat-spinner diameter="36"></mat-spinner>
       </div>
 
-      <!-- Table -->
       <div style="overflow-x:auto;" [style.display]="isLoading ? 'none' : 'block'">
         <mat-table [dataSource]="dataSource" matSort style="min-width:900px;background:transparent;">
 
@@ -96,9 +89,19 @@
           <ng-container matColumnDef="title">
             <mat-header-cell *matHeaderCellDef mat-sort-header>Title</mat-header-cell>
             <mat-cell *matCellDef="let career">
-              <div class="flex flex-col py-2">
+              <div class="flex flex-col py-2" style="gap:4px;">
                 <span class="font-semibold text-gray-800 text-sm">{{ career.title }}</span>
                 <span *ngIf="career.poste" class="text-xs text-secondary">{{ career.poste }}</span>
+                <!-- ✅ Certifications requises -->
+                <div *ngIf="career.certifRequises?.length"
+                     style="display:flex;flex-wrap:wrap;gap:4px;margin-top:2px;">
+                  <span *ngFor="let c of career.certifRequises"
+                        [style]="c.type === 'TECHNIQUE'
+                          ? 'font-size:10px;background:#dbeafe;color:#1d4ed8;padding:1px 7px;border-radius:9999px;font-weight:600;'
+                          : 'font-size:10px;background:#fed7aa;color:#c2410c;padding:1px 7px;border-radius:9999px;font-weight:600;'">
+                    ★ {{ c.nom }}
+                  </span>
+                </div>
               </div>
             </mat-cell>
           </ng-container>
@@ -113,9 +116,7 @@
                       [ngClass]="domainColors[career.domain]">
                   {{ domainLabels[career.domain] }}
                 </span>
-                <span *ngIf="career.departement" class="text-xs text-secondary">
-                  {{ career.departement }}
-                </span>
+                <span *ngIf="career.departement" class="text-xs text-secondary">{{ career.departement }}</span>
               </div>
             </mat-cell>
           </ng-container>
@@ -145,15 +146,15 @@
             <mat-cell *matCellDef="let career">
               <div style="display:flex;flex-direction:column;gap:4px;">
                 <span *ngIf="career.isRemoteFriendly"
-                  style="display:inline-flex;align-items:center;gap:4px;padding:2px 10px;
-                         border-radius:9999px;font-size:11px;font-weight:600;
-                         background:#dbeafe;color:#1d4ed8;width:fit-content;">
+                      style="display:inline-flex;align-items:center;gap:4px;padding:2px 10px;
+                             border-radius:9999px;font-size:11px;font-weight:600;
+                             background:#dbeafe;color:#1d4ed8;width:fit-content;">
                   🌐 Remote
                 </span>
                 <span *ngIf="career.isAccessibleForDisabled"
-                  style="display:inline-flex;align-items:center;gap:4px;padding:2px 10px;
-                         border-radius:9999px;font-size:11px;font-weight:600;
-                         background:#dcfce7;color:#15803d;width:fit-content;">
+                      style="display:inline-flex;align-items:center;gap:4px;padding:2px 10px;
+                             border-radius:9999px;font-size:11px;font-weight:600;
+                             background:#dcfce7;color:#15803d;width:fit-content;">
                   ♿ Access
                 </span>
               </div>
@@ -181,7 +182,7 @@
             </mat-cell>
           </ng-container>
 
-          <!-- ✅ Actions Employé — Postuler seulement -->
+          <!-- Actions Employé -->
           <ng-container matColumnDef="employee-actions">
             <mat-header-cell *matHeaderCellDef>Action</mat-header-cell>
             <mat-cell *matCellDef="let career">
@@ -189,7 +190,7 @@
                       style="padding:0 16px;height:32px;border-radius:8px;border:none;
                              background:#7c3aed;color:white;cursor:pointer;
                              font-size:12px;font-weight:600;font-family:inherit;">
-                 Postuler
+                Postuler
               </button>
             </mat-cell>
           </ng-container>
@@ -214,24 +215,19 @@
                      showFirstLastButtons
                      class="border-t border-gray-100">
       </mat-paginator>
-
     </div>
   </ng-container>
 
   <!-- ===== ONGLET 1 ===== -->
   <ng-container *ngIf="activeTab === 1">
-    <!-- RH : toutes les demandes -->
     <app-mobility-dashboard *ngIf="authRole.isAdminOrRH()"></app-mobility-dashboard>
-    <!-- Employé : ses demandes uniquement -->
-    <app-employee-mobility *ngIf="authRole.isEmployee()"></app-employee-mobility>
+    <app-employee-mobility  *ngIf="authRole.isEmployee()"></app-employee-mobility>
   </ng-container>
 
   <!-- ===== ONGLET 2 ===== -->
   <ng-container *ngIf="activeTab === 2">
-    <!-- RH : tous les plans -->
     <app-career-plan-dashboard *ngIf="authRole.isAdminOrRH()"></app-career-plan-dashboard>
-    <!-- Employé : son plan uniquement -->
-    <app-employee-plan *ngIf="authRole.isEmployee()"></app-employee-plan>
+    <app-employee-plan         *ngIf="authRole.isEmployee()"></app-employee-plan>
   </ng-container>
- 
+
 </div>

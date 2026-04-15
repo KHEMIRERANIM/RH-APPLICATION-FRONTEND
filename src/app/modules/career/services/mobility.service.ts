@@ -3,9 +3,25 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { MobilityRequest, MobilityStatus } from '../models/mobility.model';
 
+export interface MotivationAnalysis {
+  scoreGlobal: number;
+  scorePertinence: number;
+  scoreClarte: number;
+  scoreMotivation: number;
+  scoreProfessionnalisme: number;
+  scoreOriginalite: number;
+  sentiment: string;
+  langue: string;
+  pointsForts: string[];
+  pointsAmeliorer: string[];
+  suggestions: string[];
+  resume: string;
+  recommandation: string;
+  recommandationColor: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class MobilityService {
-
   private apiUrl = 'http://localhost:8081/api/mobility';
 
   constructor(private http: HttpClient) {}
@@ -20,7 +36,6 @@ export class MobilityService {
   // =========================
   // 🔹 ADMIN
   // =========================
-
   getAll(): Observable<MobilityRequest[]> {
     return this.http.get<MobilityRequest[]>(this.apiUrl, {
       headers: this.getHeaders()
@@ -62,8 +77,6 @@ export class MobilityService {
   // =========================
   // 🔹 EMPLOYÉ
   // =========================
-
-  /** Demandes de l'employé connecté */
   getMyRequests(): Observable<MobilityRequest[]> {
     return this.http.get<MobilityRequest[]>(
       `${this.apiUrl}/me`,
@@ -71,7 +84,6 @@ export class MobilityService {
     );
   }
 
-  /** Soumettre sans fichier */
   submit(dto: {
     employeeId: string;
     targetCareerId: string;
@@ -84,7 +96,6 @@ export class MobilityService {
     );
   }
 
-  /** Soumettre avec fichier PDF */
   submitWithFile(formData: FormData): Observable<MobilityRequest> {
     return this.http.post<MobilityRequest>(
       `${this.apiUrl}/with-file`,
@@ -96,7 +107,6 @@ export class MobilityService {
   // =========================
   // 🔹 FICHIERS
   // =========================
-
   getPreview(id: string): Observable<Blob> {
     return this.http.get(
       `${this.apiUrl}/${id}/preview`,
@@ -108,6 +118,16 @@ export class MobilityService {
     return this.http.get(
       `${this.apiUrl}/${id}/download`,
       { headers: this.getHeaders(), responseType: 'blob' }
+    );
+  }
+
+  // =========================
+  // 🔹 ANALYSE IA MOTIVATION
+  // =========================
+  analyzeMotivation(id: string): Observable<MotivationAnalysis> {
+    return this.http.get<MotivationAnalysis>(
+      `${this.apiUrl}/${id}/analyze`,
+      { headers: this.getHeaders() }
     );
   }
 }

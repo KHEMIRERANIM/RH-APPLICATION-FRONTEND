@@ -54,29 +54,28 @@ export class CareerFormComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.isEdit = !!this.data;
-    this.dialogRef.updateSize('700px');
+  this.isEdit = !!this.data;
+  this.dialogRef.updateSize('700px');
 
-    // ✅ Charger les certifs requises existantes si édition
-    this.certifRequises = (this.data as any)?.certifRequises
-      ? [...(this.data as any).certifRequises]
-      : [];
+  // ✅ SAFE INIT (IMPORTANT FIX)
+  this.certifRequises = this.data?.certifRequises
+    ? JSON.parse(JSON.stringify(this.data.certifRequises))
+    : [];
 
-    this.form = this.fb.group({
-      title:                   [this.data?.title || '',   [Validators.required, Validators.minLength(3)]],
-      description:             [this.data?.description || ''],
-      level:                   [this.data?.level || '',    Validators.required],
-      domain:                  [this.data?.domain || '',   Validators.required],
-      requiredSkills:          [this.data?.requiredSkills || []],
-      departement:             [this.data?.departement || ''],
-      poste:                   [this.data?.poste || ''],
-      salaryMin:               [this.data?.salaryMin || null],
-      salaryMax:               [this.data?.salaryMax || null],
-      isRemoteFriendly:        [this.data?.isRemoteFriendly        || false],
-      isAccessibleForDisabled: [this.data?.isAccessibleForDisabled || false]
-    });
-  }
-
+  this.form = this.fb.group({
+    title: [this.data?.title || '', [Validators.required, Validators.minLength(3)]],
+    description: [this.data?.description || ''],
+    level: [this.data?.level || '', Validators.required],
+    domain: [this.data?.domain || '', Validators.required],
+    requiredSkills: [this.data?.requiredSkills || []],
+    departement: [this.data?.departement || ''],
+    poste: [this.data?.poste || ''],
+    salaryMin: [this.data?.salaryMin || null],
+    salaryMax: [this.data?.salaryMax || null],
+    isRemoteFriendly: [this.data?.isRemoteFriendly || false],
+    isAccessibleForDisabled: [this.data?.isAccessibleForDisabled || false]
+  });
+}
   // ── Skills ────────────────────────────────────────────────────────────
   get skills(): string[] {
     return this.form.get('requiredSkills')?.value || [];

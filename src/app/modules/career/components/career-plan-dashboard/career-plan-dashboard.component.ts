@@ -1,4 +1,4 @@
-﻿import { Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { of } from 'rxjs';
@@ -26,10 +26,12 @@ export class CareerPlanDashboardComponent implements OnInit {
 
   evolutionPlans: EvolutionPlan[] = [];
   selectedPlan: EvolutionPlan | null = null;
+  // ✅ Poste cible du plan sélectionné (pour afficher certifRequises)
   selectedCareer: Career | null = null;
 
   newFormation = '';
   EvolutionPlanStatus = EvolutionPlanStatus;
+
   activeView: 'plans' | 'evolution' = 'evolution';
   isLoading = true;
 
@@ -69,6 +71,7 @@ export class CareerPlanDashboardComponent implements OnInit {
     return c?.title ?? '—';
   }
 
+  // ✅ Trouver le Career complet par id
   private getCareer(careerId: string): Career | null {
     return this.careers.find(c => c.id === careerId) ?? null;
   }
@@ -115,7 +118,7 @@ export class CareerPlanDashboardComponent implements OnInit {
   delete(plan: CareerPlan): void {
     if (!confirm(`Supprimer le plan de ${plan.employeeName} ?`)) return;
     this.planService.delete(plan.id!).subscribe({
-      next: () => { this.snackBar.open('Supprime', 'OK', { duration: 3000 }); this.loadAll(); }
+      next: () => { this.snackBar.open('Supprimé', 'OK', { duration: 3000 }); this.loadAll(); }
     });
   }
 
@@ -154,6 +157,7 @@ export class CareerPlanDashboardComponent implements OnInit {
       currentCareerTitle:     this.getCareerTitle(p.currentCareerId ?? ''),
       targetCareerTitle:      this.getCareerTitle(p.targetCareerId)
     };
+    // ✅ Charger le Career cible pour afficher ses certifRequises
     this.selectedCareer = this.getCareer(p.targetCareerId);
   }
 
@@ -167,13 +171,9 @@ export class CareerPlanDashboardComponent implements OnInit {
       .filter(c => c.type === CertificationType.SOFT_SKILL);
   }
 
-  certifRequisesDuPoste(): any[] {
-    return (this.selectedCareer as any)?.certifRequises ?? [];
-  }
-
-  competencesEmploye(): { nom: string; niveau: string; annees?: number }[] {
-    if (!this.selectedPlan) return [];
-    return parseCompetences(this.selectedPlan);
+  // ✅ Certifs requises définies sur le poste cible
+  certifRequisesDuPoste(): EmployeeCertification[] {
+    return this.selectedCareer?.certifRequises ?? [];
   }
 
   planScores(): { label: string; value: number; color: string }[] {
@@ -183,6 +183,12 @@ export class CareerPlanDashboardComponent implements OnInit {
       { label: 'Technique', value: this.selectedPlan.scoreTechnique ?? 0, color: '#2563eb' },
       { label: 'Soft',      value: this.selectedPlan.scoreSoftSkill ?? 0, color: '#ea580c' }
     ];
+  }
+
+  // ✅ Compétences parsées pour affichage admin
+  competencesEmploye(): { nom: string; niveau: string; annees?: number }[] {
+    if (!this.selectedPlan) return [];
+    return parseCompetences(this.selectedPlan);
   }
 
   addFormation(): void {
@@ -201,7 +207,7 @@ export class CareerPlanDashboardComponent implements OnInit {
       formationsRecommandees: this.selectedPlan.formationsRecommandees,
       commentaireAdmin:       this.selectedPlan.commentaireAdmin
     }).subscribe({
-      next:  () => this.snackBar.open('Plan enrichi', 'OK', { duration: 3000 }),
+      next:  () => this.snackBar.open('Plan enrichi ✓', 'OK', { duration: 3000 }),
       error: () => this.snackBar.open('Erreur', 'Fermer', { duration: 3000 })
     });
   }
@@ -228,10 +234,12 @@ export class CareerPlanDashboardComponent implements OnInit {
       methodeEval:      certif.methodeEval,
       niveauRequis:     certif.niveauRequis
     };
+
     if (certif.valideParAdmin === true) {
       payload.statut = 'OBTENU';
       certif.statut  = 'OBTENU' as any;
     }
+
     this.evolutionPlanService.updateCertification(
       this.selectedPlan.id, certif.id, payload
     ).subscribe({
@@ -243,17 +251,18 @@ export class CareerPlanDashboardComponent implements OnInit {
           currentCareerTitle:   this.getCareerTitle(updatedPlan.currentCareerId ?? ''),
           targetCareerTitle:    this.getCareerTitle(updatedPlan.targetCareerId)
         };
+        // ✅ Garder selectedCareer inchangé
         const idx = this.evolutionPlans.findIndex(p => p.id === updatedPlan.id);
         if (idx !== -1) this.evolutionPlans[idx] = this.enrichPlans([updatedPlan])[0];
-        this.snackBar.open('Certif mise a jour', 'OK', { duration: 2500 });
+        this.snackBar.open('Certif mise à jour ✓', 'OK', { duration: 2500 });
       },
       error: () => this.snackBar.open('Erreur', 'Fermer', { duration: 3000 })
     });
   }
 
   evolutionStatusLabel(s: string): string {
-    return ({ DRAFT: 'Brouillon', SUBMITTED: 'Soumis', REVIEWED: 'Examine',
-              ACTIVE: 'Actif', COMPLETED: 'Complete' } as any)[s] ?? s;
+    return ({ DRAFT: 'Brouillon', SUBMITTED: 'Soumis', REVIEWED: 'Examiné',
+              ACTIVE: 'Actif', COMPLETED: 'Complété' } as any)[s] ?? s;
   }
 
   evolutionStatusStyle(s: string): string {
@@ -267,7 +276,7 @@ export class CareerPlanDashboardComponent implements OnInit {
   }
 
   certifStatusLabel(s: string): string {
-    return ({ NON_COMMENCE: 'Non commence', EN_COURS: 'En cours', OBTENU: 'Obtenu' } as any)[s] ?? s;
+    return ({ NON_COMMENCE: 'Non commencé', EN_COURS: 'En cours', OBTENU: 'Obtenu' } as any)[s] ?? s;
   }
 
   certifStatusStyle(s: string): string {
