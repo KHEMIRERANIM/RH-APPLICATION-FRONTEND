@@ -6,4 +6,8 @@
   dateCommande: string;
   statut?: string;
   montantTotal?: number;
+  codeRetrait?: string;
+  datePrete?: string;
+  reductionAppliquee?: boolean;
+  montantReduction?: number;
 }
