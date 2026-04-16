@@ -11,4 +11,8 @@ export class PaiementService {
  createStripePayment(reservationId: string, montant: number): Observable<any> {
   return this.http.post(`${this.apiUrl}/stripe/create`, { reservationId, montant });
 }
+
+  refundPayment(reservationId: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/stripe/refund`, { reservationId });
+  }
 }

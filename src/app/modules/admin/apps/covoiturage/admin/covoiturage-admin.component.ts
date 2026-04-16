@@ -6,6 +6,8 @@ import { UserService } from '../../../../../services/user.service';
 import { catchError } from 'rxjs/operators';
 import { PredictionService } from '../services/prediction.service';
 import { ReclamationService, Reclamation } from '../services/reclamation.service';
+import { NotificationsService } from 'app/layout/common/notifications/notifications.service';
+import { WalkingService } from '../services/walking.service';
 
 declare var L: any;
 
@@ -99,6 +101,8 @@ export class CovoiturageAdminComponent implements OnInit {
   createBusPack = false;
   packBusList: PackBusEntry[] = [];
   packDates: string[] = [];
+  minDate: string = ''; // Bornes semaine
+  maxDate: string = '';
   arretInput = '';
   searchSuggestions: any[] = [];
   isSearching = false;
@@ -134,6 +138,9 @@ export class CovoiturageAdminComponent implements OnInit {
   chartEco: Partial<ChartOptions>;
   chartDaily: Partial<ChartOptions>;
 
+  syncWithFleet: boolean = false;
+  relatedBuses: Bus[] = [];
+
   // Nouveaux graphiques pour le design user
   co2Chart: any;
   departureZonesChart: any;
@@ -157,6 +164,7 @@ export class CovoiturageAdminComponent implements OnInit {
   // Heatmap & Reclamations
   reclamations: Reclamation[] = [];
   reclamationStats: any[] = [];
+  employeUsageFreq: Map<string, number> = new Map();
   get maxReclamations(): number {
     if (!this.reclamationStats || this.reclamationStats.length === 0) return 1;
     return Math.max(...this.reclamationStats.map(s => s.count));
@@ -174,19 +182,68 @@ export class CovoiturageAdminComponent implements OnInit {
   predictionAverage: number = 0;
   isLoadingPrediction: boolean = false;
 
+  // Sunday Alert
+  sundayAlertMessage: string = '📅 Rappel : Pensez à activer les bus pour la semaine prochaine !';
+
   constructor(
     private busService: BusService,
     private covoiturageService: CovoiturageService,
     private userService: UserService,
     private predictionService: PredictionService,
     private reclamationService: ReclamationService,
+    private notificationsService: NotificationsService,
+    private _walkingService: WalkingService,
     private _changeDetectorRef: ChangeDetectorRef
   ) { }
+
+  // ─────────────────────────────────────────────────────────────
+  // SUNDAY ALERT SCHEDULER (Reminder to activate buses)
+  // ─────────────────────────────────────────────────────────────
+
+  private initSundayScheduler(): void {
+    setInterval(() => {
+      this.checkSundayCondition();
+    }, 30000);
+    this.checkSundayCondition();
+  }
+
+  private checkSundayCondition(): void {
+    const now = new Date();
+    const isSunday = now.getDay() === 0;
+    const isAfter17h = now.getHours() >= 17;
+
+    if (isSunday && isAfter17h) {
+      const todayKey = `sunday_alert_${now.getFullYear()}_${now.getMonth()}_${now.getDate()}`;
+      const alreadyShown = localStorage.getItem(todayKey);
+
+      if (!alreadyShown) {
+        // Add to notification icon list
+        this.notificationsService.addLocalNotification({
+          id: 'sunday-bus-activation',
+          icon: 'heroicons_outline:truck',
+          title: 'Activation des bus',
+          description: this.sundayAlertMessage,
+          time: now.toISOString(),
+          read: false,
+          type: 'ACTIVATION_BUS'
+        });
+        localStorage.setItem(todayKey, 'true');
+        this.notificationsService.getAll().subscribe();
+        this._changeDetectorRef.detectChanges();
+      }
+    }
+  }
+
+  dismissSundayAlert(): void {
+    // Logic for banner removal no longer needed as banner was removed
+  }
 
   ngOnInit(): void {
     const now = new Date();
     const options: Intl.DateTimeFormatOptions = { weekday: 'long', day: 'numeric', month: 'long' };
     this.currentWeather.date = now.toLocaleDateString('fr-FR', options);
+    this.initSundayScheduler();
+    this.initWeekBoundaries();
 
     this.loadAllData();
     this.loadWeeklyPrediction();
@@ -241,13 +298,15 @@ export class CovoiturageAdminComponent implements OnInit {
 
         // Navettes
         results.resNavette.forEach((rn: any) => {
-          const bus = this.navettes.find(b => b.id === rn.busId);
-          // Calcul de l'index du jour : 0=Dim, 1=Lun, ..., 6=Sam
+          // Recherche robuste incluant shuttleId (utilisé parfois en interne)
+          const bus = this.navettes.find(b => 
+            String(b.id) === String(rn.busId || rn.trajetId || rn.shuttleId)
+          );
+          
           let dayIndex = -1;
           if (rn.date && rn.date.includes('-')) {
             dayIndex = new Date(rn.date).getDay();
           } else if (rn.joursSelectionnes && rn.joursSelectionnes.length > 0) {
-            // Mapping si 0=Lun, 1=Mar... 6=Dim (Backend) vers 0=Dim, 1=Lun... (JS)
             dayIndex = (rn.joursSelectionnes[0] + 1) % 7;
           }
 
@@ -257,9 +316,10 @@ export class CovoiturageAdminComponent implements OnInit {
             employeNom: this.getNomEmploye(rn.employeId),
             employePhoto: `https://ui-avatars.com/api/?name=${this.getNomEmploye(rn.employeId)}&background=random`,
             type: 'navette',
-            trajet: bus ? (bus.ligne || `${bus.depart} -> ${bus.arrivee}`) : 'Navette',
-            adresseDepart: bus ? (bus.depart || (bus.ligne ? bus.ligne.split(' - ')[0] : 'Inconnue')) : 'Inconnue',
-            date: (rn.date && rn.date.includes('-')) ? rn.date : '—',
+            trajet: bus ? (bus.ligne || `${bus.depart} -> ${bus.arrivee}`) : 'Ligne introuvable (Bus supprimé)',
+            busDetail: bus ? `${bus.marque} ${bus.modele}` : 'Données indisponibles',
+            adresseDepart: bus ? (bus.depart || (bus.ligne ? bus.ligne.split(' - ')[0] : 'Inconnue')) : '—',
+            date: (rn.date && rn.date.includes('-')) ? rn.date : (rn.dateReservation ? rn.dateReservation.split('T')[0] : '—'),
             dayIndex: dayIndex,
             heure: bus?.heureDepart || '—',
             statut: this.mapStatut(rn.statut),
@@ -275,8 +335,9 @@ export class CovoiturageAdminComponent implements OnInit {
           merged.push({
             id: rc.id,
             employeId: rc.employeId,
-            employeNom: this.getNomEmploye(rc.employeId),
+            employeNom: this.getNomEmploye(rc.employeId), // Passager
             employePhoto: `https://ui-avatars.com/api/?name=${this.getNomEmploye(rc.employeId)}&background=random`,
+            conducteurNom: trajet ? this.getNomEmploye(trajet.employeId) : 'Conducteur Inconnu', // Conducteur
             type: 'covoiturage',
             trajet: trajet ? `${trajet.adresseDepart} -> ${trajet.adresseArrivee}` : 'Covoiturage',
             adresseDepart: trajet ? (trajet.adresseDepart || '—').split(',')[0] : 'Inconnue',
@@ -290,6 +351,16 @@ export class CovoiturageAdminComponent implements OnInit {
         });
 
         this.reservations = merged;
+
+        // Calculer la fréquence d'utilisation par employé
+        this.employeUsageFreq.clear();
+        this.reservations.forEach(r => {
+          if (r.employeId) {
+            const current = this.employeUsageFreq.get(String(r.employeId)) || 0;
+            this.employeUsageFreq.set(String(r.employeId), current + 1);
+          }
+        });
+
         this.isLoading = false;
         this.initCharts();
         this.initNewCharts();
@@ -441,6 +512,9 @@ export class CovoiturageAdminComponent implements OnInit {
     const st = String(s || '').toUpperCase();
     if (st === 'CONFIRME' || st === 'CONFIRMÉE') return 'Confirmée';
     if (st === 'ANNULE' || st === 'ANNULÉE') return 'Annulée';
+    if (st === 'EFFECTUE' || st === 'EFFECTUÉE') return 'Effectuée';
+    if (st === 'EN_ROUTE') return 'En Route';
+    if (st === 'COMPLET') return 'Complet';
     return 'En attente';
   }
 
@@ -548,6 +622,29 @@ export class CovoiturageAdminComponent implements OnInit {
     this.packDates.splice(index, 1);
   }
 
+  private initWeekBoundaries(): void {
+    const now = new Date();
+    const day = now.getDay(); // 0 = Dimanche, 1 = Lundi...
+    
+    let monday = new Date(now);
+    
+    if (day === 0) {
+      // Si on est dimanche, on bascule déjà sur la semaine suivante (demain)
+      monday.setDate(now.getDate() + 1);
+    } else {
+      // Sinon, on reste sur le lundi de la semaine actuelle
+      const diff = 1 - day;
+      monday.setDate(now.getDate() + diff);
+    }
+
+    // Capture des bornes
+    this.minDate = monday.toISOString().split('T')[0];
+    
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    this.maxDate = sunday.toISOString().split('T')[0];
+  }
+
   reservantsPourBus(busId: string | undefined): { employeId: string; statut: string }[] {
     if (!busId || !this.reservationsNavette.length) return [];
     return this.reservationsNavette
@@ -593,6 +690,12 @@ export class CovoiturageAdminComponent implements OnInit {
       this.busForm.arrivee = '';
     }
     this.joursSelectionnes = bus.joursDisponibles ? bus.joursDisponibles.split(',').map(j => j.trim()) : [];
+    
+    // Identifier les bus de la même flotte (même ligne)
+    this.relatedBuses = this.navettes.filter(b => b.ligne === bus.ligne && b.id !== bus.id);
+    this.syncWithFleet = false;
+
+    this.packDates = Array.isArray(bus.packDates) ? [...bus.packDates] : [];
     if (!this.busForm.arrets) this.busForm.arrets = [];
     this.showModal = true;
     this.initStopPickerMap();
@@ -787,9 +890,10 @@ export class CovoiturageAdminComponent implements OnInit {
       Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
       Math.sin(dLon / 2) * Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const d = R * c; // Distance en km
-    const t = Math.round((d / 4.5) * 60); // Estimation temps de marche (4.5 km/h)
-    return { distance: Math.round(d * 100) / 100, time: t };
+    const d = R * c; // Distance à vol d'oiseau en km
+    const distanceReelle = d * 1.3; // Facteur de correction pour les rues (trajet réel)
+    const t = Math.round((distanceReelle / 6) * 60); // Estimation temps de marche à 6 km/h
+    return { distance: Math.round(distanceReelle * 100) / 100, time: t };
   }
 
   loadReclamations(): void {
@@ -820,6 +924,12 @@ export class CovoiturageAdminComponent implements OnInit {
       const key = `${stopName}|${neighborhood}`;
 
       if (r.latitude && r.longitude) {
+        console.log(`[RECLAMATION-DEBUG] ${neighborhood} -> ${stopName}`, {
+          lat: r.latitude,
+          lng: r.longitude,
+          distStored: r.walkingDistance,
+          timeStored: r.walkingTime
+        });
         // Fallback distance/time si 0
         let effectiveDist = r.walkingDistance || 0;
         let effectiveTime = r.walkingTime || 0;
@@ -834,6 +944,7 @@ export class CovoiturageAdminComponent implements OnInit {
             }
           }
           if (stopCoords.lat !== 0) {
+            console.log(`[STOP-FOUND] ${stopName}`, stopCoords);
             const h = this.calculateHaversine(r.latitude, r.longitude, stopCoords.lat, stopCoords.lng);
             effectiveDist = h.distance;
             effectiveTime = h.time;
@@ -863,21 +974,89 @@ export class CovoiturageAdminComponent implements OnInit {
     this.reclamationStats = Array.from(statsMap.entries()).map(([key, data]) => {
       const [stopName, neighborhood] = key.split('|');
       const uniquePeopleCount = data.employees.size;
-      const avgTime = Math.round(data.totalTime / data.employeeIds.size);
+      const count = data.employeeIds.size;
+      const avgTime = Math.round(data.totalTime / count);
+      const status = avgTime > 30 ? 'critical' : (avgTime >= 15 ? 'warning' : 'ok');
+      
+      // Compter les employés réguliers (>= 3 réservations) et actifs
+      const regularEmployees = Array.from(data.employeeIds).filter(id => {
+        const isDetailPresent = this.employeDetailsMap.has(id);
+        const freq = this.employeUsageFreq.get(id) || 0;
+        return isDetailPresent && freq >= 3;
+      });
+
+      const regularEmployeesDetails = regularEmployees.map(id => ({
+        name: this.getNomEmploye(id),
+        freq: this.employeUsageFreq.get(id) || 0
+      }));
+
+      // Trouver un bus potentiel pour cet arrêt
+      const targetBus = this.navettes.find(b => 
+        (b.depart || '').toLowerCase().includes(stopName.toLowerCase()) ||
+        (b.arrivee || '').toLowerCase().includes(stopName.toLowerCase()) ||
+        b.arrets?.some(ar => ar.name.toLowerCase().includes(stopName.toLowerCase()))
+      );
 
       return {
         stopName,
         neighborhood,
         count: uniquePeopleCount,
+        regularCount: regularEmployees.length,
         latitude: data.lat,
         longitude: data.lng,
-        avgDistance: Math.round((data.totalDistance / data.employeeIds.size) * 10) / 10,
+        avgDistance: Math.round((data.totalDistance / count) * 10) / 10,
         avgTime,
         employeeList: Array.from(data.employees).join(', '),
-        // Sévérité selon les seuils du graphique (Red > 30, Orange 15-30, Green < 15)
-        status: avgTime > 30 ? 'critical' : (avgTime >= 15 ? 'warning' : 'ok')
+        status,
+        isRecommended: regularEmployees.length >= 3 && status !== 'ok',
+        regularEmployeesDetails,
+        targetBusId: targetBus?.id,
+        showDetails: false // Flag pour l'affichage UI
       };
     }).sort((a, b) => b.avgTime - a.avgTime);
+
+    // Déclencher les mises à jour ORS pour les données manquantes (Optimisé par paires Quartier|Arrêt)
+    this.fetchMissingRealMetrics();
+  }
+
+  private _pendingOrsUpdates = new Set<string>();
+
+  private fetchMissingRealMetrics(): void {
+    this.reclamations.forEach(r => {
+      if ((!r.walkingTime || r.walkingTime === 0) && r.latitude && r.longitude) {
+        const stopName = (r.stopName || '').trim();
+        const neighborhood = (r.neighborhood || '').trim();
+        const key = `${stopName}|${neighborhood}`;
+
+        if (this._pendingOrsUpdates.has(key)) return;
+
+        // Trouver les coordonnées de l'arrêt
+        let stopCoords = { lat: 0, lng: 0 };
+        for (const bus of this.navettes) {
+          const s = bus.arrets?.find(a => a.name.trim().toLowerCase() === stopName.toLowerCase());
+          if (s) {
+            stopCoords = { lat: s.latitude, lng: s.longitude };
+            break;
+          }
+        }
+
+        if (stopCoords.lat !== 0) {
+          this._pendingOrsUpdates.add(key);
+          this._walkingService.getWalkingMetrics(r.latitude, r.longitude, stopCoords.lat, stopCoords.lng)
+            .subscribe(metrics => {
+              // Mettre à jour toutes les réclamations ayant la même paire (Quartier, Arrêt)
+              this.reclamations.forEach(rec => {
+                if (rec.stopName?.trim() === stopName && rec.neighborhood?.trim() === neighborhood) {
+                  rec.walkingDistance = metrics.distance;
+                  rec.walkingTime = metrics.time;
+                }
+              });
+              this.calculateReclamationStats();
+              this._changeDetectorRef.detectChanges();
+            });
+        }
+      }
+    });
   }
 
   // Calcul dynamique des métriques pour l'affichage (si 0 dans la base)
@@ -886,7 +1065,7 @@ export class CovoiturageAdminComponent implements OnInit {
       return { time: r.walkingTime, dist: r.walkingDistance || 0 };
     }
 
-    // Sinon recalcul via Haversine (Secours)
+    // Sinon recalcul via Haversine (Secours temporaire)
     let stopCoords = { lat: 0, lng: 0 };
     const stopName = (r.stopName || '').trim().toLowerCase();
 
@@ -898,8 +1077,8 @@ export class CovoiturageAdminComponent implements OnInit {
       }
     }
 
-    if (stopCoords.lat !== 0 && r.latitude && r.longitude) {
-      const h = this.calculateHaversine(r.latitude, r.longitude, stopCoords.lat, stopCoords.lng);
+    if (stopCoords.lat !== 0) {
+      const h = this.calculateHaversine(r.latitude || 0, r.longitude || 0, stopCoords.lat, stopCoords.lng);
       return { time: h.time, dist: h.distance };
     }
 
@@ -999,8 +1178,22 @@ export class CovoiturageAdminComponent implements OnInit {
       });
 
       // 3. Plot Neighborhood Clusters (Green Proportional Numbered Circles)
+      const usedCoords = new Map<string, number>();
+      
       this.reclamationStats.forEach(stat => {
         if (stat.latitude && stat.longitude) {
+          const baseLat = parseFloat(stat.latitude.toString());
+          const baseLng = parseFloat(stat.longitude.toString());
+          const coordKey = `${baseLat.toFixed(5)}|${baseLng.toFixed(5)}`;
+          
+          // Compter les superpositions pour décaler légèrement chaque point
+          const overlapCount = usedCoords.get(coordKey) || 0;
+          usedCoords.set(coordKey, overlapCount + 1);
+          
+          // Appliquer un petit décalage en spirale si superposition
+          const jitterLat = baseLat + (overlapCount > 0 ? (Math.sin(overlapCount) * 0.0006) : 0);
+          const jitterLng = baseLng + (overlapCount > 0 ? (Math.cos(overlapCount) * 0.0006) : 0);
+
           const color = '#10B981'; // Vert par défaut pour les quartiers
           const pulsingColor = 'rgba(16, 185, 129, 0.3)';
           const size = Math.min(70, 35 + (stat.count * 3));
@@ -1019,7 +1212,7 @@ export class CovoiturageAdminComponent implements OnInit {
             iconAnchor: [size / 2, size / 2]
           });
 
-          L.marker([stat.latitude, stat.longitude], { icon: neighborhoodIcon })
+          L.marker([jitterLat, jitterLng], { icon: neighborhoodIcon })
             .bindPopup(`
               <div class="p-3 max-w-[220px]">
                 <div class="font-black text-[#1A1A2E] border-b pb-1.5 mb-2 uppercase text-[10px] tracking-wider flex justify-between items-center">
@@ -1027,6 +1220,8 @@ export class CovoiturageAdminComponent implements OnInit {
                   <span class="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded text-[9px]">${stat.count} pers.</span>
                 </div>
                 
+                <div class="text-[9px] text-gray-400 mb-2 italic">Destination : ${stat.stopName}</div>
+
                 <!-- Marche Info -->
                 <div class="bg-blue-50/50 rounded-lg p-2 mb-3 border border-blue-100 flex items-center gap-3">
                   <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm">
@@ -1089,12 +1284,28 @@ export class CovoiturageAdminComponent implements OnInit {
         statut: this.busForm.statut,
         placesRestantes: this.busForm.capacite - occupiedCount,
         photoUrl: photoUrlValue,
+        packDates: [...this.packDates],
         arrets: this.busForm.arrets || []
       };
       this.busService.update(this.busForm.id, busToUpdate).subscribe({
         next: () => {
-          this.loadBus();
-          this.closeModal();
+          // Si on veut synchroniser avec la reste de la flotte (Reserve/Actifs sur la même ligne)
+          if (this.syncWithFleet && this.relatedBuses.length > 0) {
+            const syncRequests = this.relatedBuses.map(rb => {
+              const occupied = this.reservantsPourBus(rb.id).length;
+              return this.busService.update(rb.id, {
+                ...busToUpdate,
+                placesRestantes: rb.capacite - occupied
+              });
+            });
+            forkJoin(syncRequests).subscribe(() => {
+              this.loadBus();
+              this.closeModal();
+            });
+          } else {
+            this.loadBus();
+            this.closeModal();
+          }
         },
         error: () => this.errorMessage = 'Erreur lors de la modification'
       });
@@ -1167,6 +1378,38 @@ export class CovoiturageAdminComponent implements OnInit {
   }
 
   removePackBus(index: number): void { this.packBusList.splice(index, 1); }
+
+  applyStopRecommendation(stat: any): void {
+    if (!stat.targetBusId) {
+      alert("Impossible de trouver un bus correspondant à cet arrêt.");
+      return;
+    }
+
+    const bus = this.navettes.find(b => b.id === stat.targetBusId);
+    if (!bus) return;
+
+    // 1. Ouvrir le modal pour ce bus
+    this.openEditModal(bus);
+
+    // 2. Pré-remplir le nouvel arrêt
+    this.arretInput = stat.neighborhood;
+    
+    // 3. Pré-remplir les coordonnées
+    this.selectedLat = stat.latitude;
+    this.selectedLng = stat.longitude;
+
+    // 4. Mettre à jour le marqueur sur la mini-map du modal
+    if (this.stopPickerMap && this.selectedLat && this.selectedLng) {
+      if (this.stopPickerMarker) {
+        this.stopPickerMap.removeLayer(this.stopPickerMarker);
+      }
+      this.stopPickerMarker = L.marker([this.selectedLat, this.selectedLng]).addTo(this.stopPickerMap);
+      this.stopPickerMap.setView([this.selectedLat, this.selectedLng], 15);
+    }
+
+    // Défiler vers le haut pour voir le modal si besoin (bien que l'overlay le centre normalement)
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 
   deleteBus(id: string): void {
     if (confirm('Supprimer ce bus ?')) {

@@ -40,12 +40,14 @@ export class VehicleModalComponent implements OnChanges, OnInit {
 
   ngOnInit() {
     if (this.isOpen && this.employeId) {
+      this.cancelForm();
       this.loadVehicules();
     }
   }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['isOpen'] && changes['isOpen'].currentValue === true) {
+      this.cancelForm(); // Reset to list view and clear form
       this.loadVehicules();
     }
   }

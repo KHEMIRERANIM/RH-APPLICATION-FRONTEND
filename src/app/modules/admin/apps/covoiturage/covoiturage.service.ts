@@ -29,7 +29,7 @@ export interface Trajet {
   placesDisponibles: number;
   placesRestantes: number;
   prix?: number;
-  statut: 'ACTIF' | 'COMPLET' | 'ANNULE' | 'EFFECTUE' | 'EN_ROUTE';
+  statut: 'ACTIF' | 'COMPLET' | 'ANNULE' | 'EFFECTUE' | 'EN_ROUTE' | 'INACTIF';
   dateCreation?: string;
   reservations?: ReservationResponse[];
 }
@@ -41,6 +41,7 @@ export interface ReservationRequest {
   statut?: string;
   joursSelectionnes?: string;
   distanceKm?: number;
+  dateAcceptation?: string;
 }
 
 export interface ReservationResponse {
@@ -94,6 +95,10 @@ export class CovoiturageService {
 
   creerTrajet(trajet: Trajet): Observable<Trajet> {
     return this.http.post<Trajet>(`${this.apiUrl}/trajets`, trajet);
+  }
+
+  updateTrajet(id: string, trajet: Partial<Trajet>): Observable<Trajet> {
+    return this.http.put<Trajet>(`${this.apiUrl}/trajets/${id}`, trajet);
   }
 
   deleteTrajet(id: string): Observable<void> {

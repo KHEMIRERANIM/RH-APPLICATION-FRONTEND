@@ -125,6 +125,23 @@ export class NotificationsService {
     // -----------------------------------------------------------------------------------------------------
 
     /**
+     * Add a local notification (frontend-only)
+     * @param notification
+     */
+    addLocalNotification(notification: Notification): void {
+        this._notifications.pipe(take(1)).subscribe((current) => {
+            // Ensure ID exists
+            if (!notification.id) {
+                notification.id = 'local-' + Math.random().toString(36).substring(2, 9);
+            }
+            // Add only if not already present
+            if (!current.some(n => n.id === notification.id)) {
+                this._notifications.next(this.mergeById([notification], current));
+            }
+        });
+    }
+
+    /**
      * Get all notifications
      */
     getAll(): Observable<Notification[]> {
@@ -179,11 +196,7 @@ export class NotificationsService {
             take(1),
             switchMap(notifications => this._httpClient.post<Notification>('api/common/notifications', { notification }).pipe(
                 map((newNotification) => {
-
-                    // Update the notifications with the new notification
                     this._notifications.next([...notifications, newNotification]);
-
-                    // Return the new notification from observable
                     return newNotification;
                 })
             ))
@@ -200,7 +213,6 @@ export class NotificationsService {
         return this.notifications$.pipe(
             take(1),
             switchMap(notifications => {
-                // If backend notification, assume we can hit the marquer-lu endpoint
                 if (notification.type) {
                     return this._httpClient.put<Notification>(`${NOTIF_API}/${id}/lire`, {}).pipe(
                         map((backendNotif: any) => {
@@ -294,7 +306,6 @@ export class NotificationsService {
                     } catch (e) {}
                 }
                 
-                // Fallback for mock
                 return this._httpClient.get<boolean>('api/common/notifications/mark-all-as-read').pipe(
                     map((isUpdated: boolean) => {
                         notifications.forEach((notification, index) => {

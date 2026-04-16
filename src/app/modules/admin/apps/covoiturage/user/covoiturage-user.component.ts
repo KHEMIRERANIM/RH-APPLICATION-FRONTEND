@@ -13,6 +13,7 @@ import { catchError } from 'rxjs/operators';
 import { PaiementService } from '../services/paiement.service';
 import { loadStripe } from '@stripe/stripe-js';
 import { ReclamationService, Reclamation } from '../services/reclamation.service';
+import { WalkingService } from '../services/walking.service';
 
 // Leaflet loaded via CDN
 declare var L: any;
@@ -170,6 +171,8 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
   showChat = false;
   activeSection: 'utilises' | 'proposes' | 'recompenses' = 'utilises';
   showGiftModal = false;
+  isEditingTrajet = false;
+  editingTrajetId: string | null = null;
 
   userLevel: string = 'OR';
   totalPointsEco: number = 425;
@@ -207,19 +210,35 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
   }
   annulerEtNotifierPassagers(id?: string): void {
     if (!id) return;
-    if (!confirm('Annuler ce trajet ? Tous les passagers seront notifiés !')) return;
+    if (!confirm('Annuler ce trajet ? Tous les passagers seront notifiés et remboursés si nécessaire !')) return;
 
-    this.covoiturageService.annulerTrajetConducteur(id).subscribe({
-      next: () => {
-        this.loadTrajets();
-        this.loadAllTrajets();
-        alert('✅ Trajet annulé — passagers notifiés !');
-        this.cdr.detectChanges();
+    // Récupérer les réservations pour gérer les remboursements
+    this.covoiturageService.getReservationsByTrajet(id).subscribe({
+      next: (reservations) => {
+        const paidReservations = (reservations || []).filter(r => r.statut === 'CONFIRME');
+
+        this.covoiturageService.annulerTrajetConducteur(id).subscribe({
+          next: () => {
+            // Initier les remboursements pour les réservations payées
+            paidReservations.forEach(res => {
+              this.paiementService.refundPayment(res.id).subscribe({
+                next: () => console.log(`Remboursement initié pour la réservation ${res.id}`),
+                error: (err) => console.error(`Erreur remboursement pour ${res.id}`, err)
+              });
+            });
+
+            this.loadTrajets();
+            this.loadAllTrajets();
+            alert('✅ Trajet annulé — passagers notifiés et remboursés !');
+            this.cdr.detectChanges();
+          },
+          error: (err) => {
+            console.error('Erreur annulation', err);
+            alert('❌ Erreur lors de l\'annulation');
+          }
+        });
       },
-      error: (err) => {
-        console.error('Erreur annulation', err);
-        alert('❌ Erreur lors de l\'annulation');
-      }
+      error: (err) => console.error('Erreur récupération réservations pour remboursement', err)
     });
   }
 
@@ -290,12 +309,17 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
 
   private searchTimeout: any;
 
+  reclamationSearchQuery: string = '';
+  reclamationSearchSuggestions: any[] = [];
+  private reclamationSearchTimeout: any;
+
   pubSearchQuery: string = '';
   pubSearchSuggestions: any[] = [];
   private pubSearchTimeout: any;
 
   @ViewChild('mapElement') mapDiv!: ElementRef;
   @ViewChild('publishMapElement') publishMapDiv!: ElementRef;
+  @ViewChild('reclamationMapElement') reclamationMapDiv!: ElementRef;
 
   private map: any;
   private publishMap: any;
@@ -374,7 +398,12 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
   reclamationNeighborhood: string = '';
   reclamationSuccess: boolean = false;
   reclamationError: string = '';
-  // ---------------------------------------------
+
+  // Leaflet Map for Reclamation
+  private reclamationMap: any;
+  private reclamationMarker: any;
+  public selectedLat: number | null = null;
+  public selectedLng: number | null = null;
 
   constructor(
     private renderer: Renderer2,
@@ -387,7 +416,8 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     private emailService: EmailService,
     private route: ActivatedRoute,
     private paiementService: PaiementService,
-    private reclamationService: ReclamationService
+    private reclamationService: ReclamationService,
+    private _walkingService: WalkingService
   ) {
     this.trajetForm = this.fb.group({
       vehiculeId: ['', Validators.required],
@@ -912,7 +942,12 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     if (!this.employeId) return;
     this.covoiturageService.getTrajetsByEmployeId(this.employeId).subscribe({
       next: (res) => {
-        this.backendTrajets = res;
+        // Filtrer les trajets INACTIFS mais UNIQUEMENT s'ils sont complets (véhicule et adresses renseignés)
+        this.backendTrajets = (res || []).filter(t => 
+          (t.statut === 'ACTIF' || t.statut === 'EN_ROUTE' || t.statut === 'COMPLET' || t.statut === 'INACTIF') &&
+          t.vehiculeId && t.adresseDepart && t.adresseArrivee
+        );
+        
         this.backendTrajets.forEach(trajet => {
           if (trajet.id) {
             this.covoiturageService.getReservationsByTrajet(trajet.id).subscribe({
@@ -935,6 +970,40 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     return v ? `${v.marque} ${v.modele}` : 'Véhicule inconnu';
   }
 
+  editTrajet(trajet: any) {
+    this.isEditingTrajet = true;
+    this.editingTrajetId = trajet.id;
+    
+    // Patch form values
+    this.trajetForm.patchValue({
+      categorie: trajet.categorie,
+      vehiculeId: trajet.vehiculeId,
+      adresseDepart: trajet.adresseDepart,
+      adresseArrivee: trajet.adresseArrivee,
+      heureDepart: trajet.heureDepart ? trajet.heureDepart.substring(0, 5) : '',
+      placesDisponibles: trajet.placesDisponibles,
+      prix: trajet.prix
+    });
+
+    // Patch selected days
+    if (trajet.joursDisponibles) {
+      this.selectedDays = trajet.joursDisponibles.split(',').map((d: string) => d.trim());
+    }
+
+    // Scroll to form
+    const formElement = document.querySelector('form');
+    if (formElement) {
+      formElement.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+
+  annulerModification() {
+    this.isEditingTrajet = false;
+    this.editingTrajetId = null;
+    this.trajetForm.reset({ categorie: 'COVOITURAGE', vehiculeId: '' });
+    this.selectedDays = ["Lun", "Mar", "Mer", "Jeu", "Ven"];
+  }
+
   publierTrajet() {
     if (this.trajetForm.invalid || !this.employeId || this.selectedDays.length === 0) {
       this.trajetForm.markAllAsTouched();
@@ -952,36 +1021,38 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     const formValues = this.trajetForm.value;
     const jours = this.selectedDays.join(', ');
 
-    const newTrajet: Trajet = {
+    const trajetData: any = {
       employeId: this.employeId,
       vehiculeId: formValues.vehiculeId,
       categorie: formValues.categorie,
       adresseDepart: formValues.adresseDepart,
       adresseArrivee: formValues.adresseArrivee,
-      heureDepart: formValues.heureDepart + ':00',
+      heureDepart: formValues.heureDepart + (formValues.heureDepart.length === 5 ? ':00' : ''),
       joursDisponibles: jours,
       placesDisponibles: formValues.placesDisponibles,
-      placesRestantes: formValues.placesDisponibles,
+      placesRestantes: this.isEditingTrajet ? undefined : formValues.placesDisponibles,
       prix: formValues.prix,
       statut: 'ACTIF'
     };
 
-    this.covoiturageService.creerTrajet(newTrajet).subscribe({
+    const obs = this.isEditingTrajet && this.editingTrajetId
+      ? this.covoiturageService.updateTrajet(this.editingTrajetId, trajetData)
+      : this.covoiturageService.creerTrajet(trajetData);
+
+    obs.subscribe({
       next: () => {
         this.loadTrajets();
-        this.trajetForm.reset({ categorie: 'COVOITURAGE', vehiculeId: '' });
-        this.selectedDays = ["Lun", "Mar", "Mer", "Jeu", "Ven"];
-
+        this.annulerModification();
         if (this.publishMap) {
           if (this.pubDepMarker) this.publishMap.removeLayer(this.pubDepMarker);
           if (this.pubDestMarker) this.publishMap.removeLayer(this.pubDestMarker);
           this.pubDepMarker = null;
           this.pubDestMarker = null;
         }
-
+        alert(this.isEditingTrajet ? "✅ Trajet modifié avec succès !" : "✅ Trajet publié avec succès !");
         this.cdr.detectChanges();
       },
-      error: (err) => console.error("Erreur publication trajet", err)
+      error: (err) => console.error("Erreur action trajet", err)
     });
   }
 
@@ -1112,17 +1183,39 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
   }
 
   annulerReservation(reservationId: string): void {
-    if (!confirm('Annuler cette réservation ?')) return;
-    this.covoiturageService.annulerReservation(reservationId).subscribe({
-      next: () => { this.loadMesReservations(); this.loadTotalPoints(); this.loadAllTrajets(); },
+    const res = this.mesReservations.find(r => r.id === reservationId);
+    if (!res) return;
+
+    const isPaid = res.statut === 'CONFIRME';
+    const message = isPaid 
+      ? 'Annuler cette réservation ? Un remboursement sera effectué car vous avez déjà payé.' 
+      : 'Annuler cette réservation ?';
+
+    if (!confirm(message)) return;
+
+    const update: Partial<ReservationRequest> = { statut: 'ANNULE' };
+    this.covoiturageService.updateReservationStatus(reservationId, update).subscribe({
+      next: () => { 
+        if (isPaid) {
+          this.paiementService.refundPayment(reservationId).subscribe({
+            next: () => console.log('Remboursement initié'),
+            error: (err) => console.error('Erreur remboursement', err)
+          });
+        }
+        this.loadMesReservations(); 
+        this.loadTotalPoints(); 
+        this.loadAllTrajets(); 
+      },
       error: (err) => console.error('Erreur annulation', err)
     });
   }
 
   accepterReservation(reservationId: string): void {
-    // Enlève dateAcceptation si le champ n'existe pas
-    const update = { statut: 'EN_ATTENTE_PAIEMENT' };  // ← Sans dateAcceptation
-    this.covoiturageService.updateReservationStatus(reservationId, update as any).subscribe({
+    const update: Partial<ReservationRequest> = { 
+      statut: 'EN_ATTENTE_PAIEMENT',
+      dateAcceptation: new Date().toISOString()
+    };
+    this.covoiturageService.updateReservationStatus(reservationId, update).subscribe({
       next: () => {
         this.loadTrajets();
         alert('Réservation acceptée. Le passager a 15 minutes pour payer.');
@@ -1143,9 +1236,10 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     });
   }
 
-  getTempsRestantPaiement(dateAcceptation?: string): string {
-    if (!dateAcceptation) return '15:00';
-    const acceptTime = new Date(dateAcceptation).getTime();
+  getTempsRestantPaiement(dateAcceptation?: string, dateReservation?: string): string {
+    const referenceTime = dateAcceptation || dateReservation;
+    if (!referenceTime) return '15:00';
+    const acceptTime = new Date(referenceTime).getTime();
     const now = new Date().getTime();
     const diff = 15 * 60 * 1000 - (now - acceptTime);
 
@@ -1156,30 +1250,65 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
   }
 
+  isPaiementExpire(res: any): boolean {
+    const referenceTime = res.dateAcceptation || res.dateReservation;
+    if (!referenceTime) return false;
+    const startTime = new Date(referenceTime).getTime();
+    const now = new Date().getTime();
+    return (now - startTime) > (15 * 60 * 1000);
+  }
+
   // Vérification périodique des expirations
   checkPaiementsExpire() {
     this.mesReservations.forEach(res => {
-      if (res.statut === 'EN_ATTENTE_PAIEMENT' && res.dateAcceptation) {
-        const acceptTime = new Date(res.dateAcceptation).getTime();
-        const now = new Date().getTime();
-        const diff = 15 * 60 * 1000 - (now - acceptTime);
-        if (diff <= 0) {
-          this.annulerReservationAutomatique(res.id);
+      if (res.statut === 'EN_ATTENTE_PAIEMENT') {
+        const referenceTime = res.dateAcceptation || res.dateReservation;
+        if (referenceTime) {
+          const startTime = new Date(referenceTime).getTime();
+          const now = new Date().getTime();
+          const diff = 15 * 60 * 1000 - (now - startTime);
+          if (diff <= 0) {
+            this.annulerReservationAutomatique(res);
+          }
         }
       }
     });
   }
 
-  annulerReservationAutomatique(id: string) {
-    this.covoiturageService.updateReservationStatus(id, { statut: 'ANNULE' } as any).subscribe({
+  annulerReservationAutomatique(res: any) {
+    this.covoiturageService.updateReservationStatus(res.id, { statut: 'ANNULE' } as any).subscribe({
       next: () => {
         this.loadMesReservations();
+        this.loadTrajets();
+
+        // Notification pour le passager
+        this.covoiturageService.sendNotification({
+          destinataireId: res.employeId,
+          type: 'RESERVATION_EXPIREE',
+          contenu: 'Délai dépassé : Votre réservation a été annulée car le paiement n\'a pas été effectué dans les 15 minutes.'
+        }).subscribe();
+
+        // Notification pour le chauffeur (propriétaire du trajet)
+        const trajet = this.getTrajetInfo(res.trajetId);
+        if (trajet && trajet.employeId) {
+          this.covoiturageService.sendNotification({
+            destinataireId: trajet.employeId,
+            type: 'PLACE_LIBEREE',
+            contenu: `Une place s'est libérée : La réservation de ${this.getEmployeeName(res.employeId)} a expiré.`
+          }).subscribe();
+        }
+
         this.showToast('ℹ️ Réservation expirée', 'Le délai de paiement de 15 minutes est dépassé.');
       }
     });
   }
 
   payerReservation(reservation: any): void {
+    if (this.isPaiementExpire(reservation)) {
+      alert("Ce délai de paiement est dépassé. La réservation va être annulée.");
+      this.loadMesReservations();
+      return;
+    }
     const trajet = this.getTrajetInfo(reservation.trajetId);
     if (!trajet || (trajet.prix === undefined || trajet.prix === null)) {
       alert("Erreur: Le prix de ce trajet n'est pas défini.");
@@ -1773,19 +1902,72 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
       className: 'search-marker',
       html: `
         <div class="relative">
-          <div style="background-color: #3B82F6; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);"></div>
-          <div style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%); white-space: nowrap; background: white; padding: 4px 8px; border-radius: 8px; font-size: 12px; font-weight: 600; color: #1A1A2E; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+          <div class="w-10 h-10 bg-white rounded-full shadow-xl flex items-center justify-center border-2 border-[#1D9E75] animate-bounce">
+            <div class="w-3 h-3 bg-[#1D9E75] rounded-full"></div>
+          </div>
+          <div class="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-3 py-1 rounded text-xs whitespace-nowrap font-bold shadow-lg">
             ${nomLieu}
           </div>
         </div>
       `,
-      iconSize: [40, 50],
-      iconAnchor: [20, 40]
+      iconSize: [40, 40],
+      iconAnchor: [20, 20],
+      popupAnchor: [0, -20]
     });
 
     this.searchMarker = L.marker([lat, lng], { icon: searchIcon }).addTo(this.map);
+    this.searchQuery = lieu.display_name;
     this.searchSuggestions = [];
-    this.searchQuery = nomLieu;
+    this.cdr.detectChanges();
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // RECLAMATION SEARCH
+  // ─────────────────────────────────────────────────────────────
+
+  onReclamationSearchInput() {
+    if (this.reclamationSearchTimeout) clearTimeout(this.reclamationSearchTimeout);
+    if (!this.reclamationSearchQuery || this.reclamationSearchQuery.length < 3) {
+      this.reclamationSearchSuggestions = [];
+      return;
+    }
+
+    this.reclamationSearchTimeout = setTimeout(() => {
+      fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(this.reclamationSearchQuery + ', Tunisie')}&limit=5&countrycodes=tn`)
+        .then(res => res.json())
+        .then(data => {
+          this.ngZone.run(() => {
+            this.reclamationSearchSuggestions = data;
+            this.cdr.detectChanges();
+          });
+        });
+    }, 500);
+  }
+
+  async searchReclamationLocation() {
+    if (!this.reclamationSearchQuery) return;
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(this.reclamationSearchQuery + ', Tunisie')}&limit=1&countrycodes=tn`);
+      const data = await res.json();
+      if (data && data.length > 0) {
+        this.selectReclamationSuggestion(data[0]);
+      }
+    } catch (e) {
+      console.error("Reclamation Search Error:", e);
+    }
+  }
+
+  selectReclamationSuggestion(lieu: any) {
+    if (!lieu) return;
+    this.reclamationSearchQuery = lieu.display_name.split(',')[0] + ', ' + lieu.display_name.split(',').slice(1, 3).join(', ');
+    this.reclamationSearchSuggestions = [];
+
+    const lat = parseFloat(lieu.lat);
+    const lng = parseFloat(lieu.lon);
+
+    if (this.reclamationMap) {
+      this.reclamationMap.setView([lat, lng], 15);
+    }
   }
 
   centerOnMyLocation() {
@@ -2041,7 +2223,10 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
 
   ngAfterViewInit() {
     if (this.activeSection === 'utilises') {
-      setTimeout(() => this.initLeaflet(), 100);
+      setTimeout(() => {
+        this.initLeaflet();
+        this.initReclamationMap();
+      }, 100);
     }
   }
 
@@ -2061,6 +2246,13 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
 
   switchSection(section: 'utilises' | 'proposes' | 'recompenses') {
     this.activeSection = section;
+    this.cdr.detectChanges();
+
+    // Si on switch vers UTILISES, on initialise la carte de réclamation si besoin (si on est déjà sur l'onglet navette)
+    if (section === 'utilises' && this.selectedTab === 'navette') {
+      setTimeout(() => this.initReclamationMap(), 200);
+    }
+    
     if (section === 'proposes') {
       setTimeout(() => {
         if (this.publishMap) {
@@ -2077,6 +2269,112 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
           this.map.invalidateSize();
         }
       }, 300);
+    }
+  }
+
+  switchTab(tab: string) {
+    this.selectedTab = tab;
+    this.cdr.detectChanges();
+    
+    if (tab === 'navette' && this.activeSection === 'utilises') {
+      setTimeout(() => {
+        this.initReclamationMap();
+      }, 200);
+    }
+  }
+
+  initReclamationMap() {
+    // Si la carte existe déjà ou si l'élément n'est pas dans le DOM, on arrête
+    if (!this.reclamationMapDiv || this.reclamationMap) {
+      if (this.reclamationMap) {
+        setTimeout(() => this.reclamationMap.invalidateSize(), 100);
+      }
+      return;
+    }
+
+    this.reclamationMap = L.map(this.reclamationMapDiv.nativeElement, {
+      zoomControl: true,
+      attributionControl: false
+    }).setView([36.8065, 10.1815], 11); // Centré sur Tunis
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap'
+    }).addTo(this.reclamationMap);
+
+    this.reclamationMap.on('click', (e: any) => {
+      this.onReclamationMapClick(e.latlng.lat, e.latlng.lng);
+    });
+
+    // Ajouter les arrêts de bus existants pour aider l'employé
+    this.ajouterArretsSurCarteReclamation();
+  }
+
+  private ajouterArretsSurCarteReclamation() {
+    if (!this.reclamationMap || !this.shuttles) return;
+    
+    this.shuttles.forEach(bus => {
+      if (bus.arrets) {
+        bus.arrets.forEach((stop: any) => {
+          L.circleMarker([stop.latitude, stop.longitude], {
+            radius: 4,
+            fillColor: "#1D9E75",
+            color: "#fff",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+          }).addTo(this.reclamationMap)
+            .bindPopup(`Arrêt: ${stop.name} (${bus.ligne || bus.route})`);
+        });
+      }
+    });
+  }
+
+  onReclamationMapClick(lat: number, lng: number) {
+    this.selectedLat = lat;
+    this.selectedLng = lng;
+
+    if (this.reclamationMarker) {
+      this.reclamationMarker.setLatLng([lat, lng]);
+    } else {
+      const redIcon = L.icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+      });
+      this.reclamationMarker = L.marker([lat, lng], { icon: redIcon, draggable: true }).addTo(this.reclamationMap)
+        .bindPopup('Ma position précise').openPopup();
+      
+      this.reclamationMarker.on('dragend', (event: any) => {
+        const marker = event.target;
+        const position = marker.getLatLng();
+        this.onReclamationMapClick(position.lat, position.lng);
+      });
+    }
+
+    // Reverse Geocoding pour remplir le champ neighborhood
+    this.reverseGeocode(lat, lng);
+    this.cdr.detectChanges();
+  }
+
+  private async reverseGeocode(lat: number, lng: number) {
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`);
+      const data = await res.json();
+      if (data && data.display_name) {
+        const addr = data.address;
+        const neighborhood = addr.suburb || addr.neighbourhood || addr.city_district || addr.town || addr.village;
+        if (neighborhood) {
+          this.reclamationNeighborhood = neighborhood;
+        } else {
+          this.reclamationNeighborhood = data.display_name.split(',').slice(0, 2).join(',');
+        }
+        this.cdr.detectChanges();
+      }
+    } catch (e) {
+      console.warn("Reverse geocoding error", e);
     }
   }
 
@@ -2123,6 +2421,7 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     if (typeof L !== 'undefined') {
       this.initMap();
       this.initPublishMap();
+      this.initReclamationMap();
       return;
     }
 
@@ -2136,6 +2435,7 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     script.onload = () => {
       this.initMap();
       this.initPublishMap();
+      this.initReclamationMap();
     };
     this.renderer.appendChild(document.body, script);
   }
@@ -2437,14 +2737,24 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
 
   private async proceedWithReclamation(selectedBusId: string): Promise<void> {
     try {
-      const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(this.reclamationNeighborhood + ', Tunisie')}&limit=1&countrycodes=tn`);
-      const data = await geoRes.json();
+      // Amélioration de la précision de la recherche (on ajoute El Mourouj si c'est un quartier de cette zone)
+      let searchQuery = this.reclamationNeighborhood;
+      if (searchQuery.toLowerCase().includes('mourouj') && !searchQuery.toLowerCase().includes('el mourouj')) {
+        searchQuery = 'El ' + searchQuery;
+      }
       
-      let lat = 36.8065; 
-      let lng = 10.1815;
-      if (data && data.length > 0) {
-        lat = parseFloat(data[0].lat);
-        lng = parseFloat(data[0].lon);
+      let lat = this.selectedLat || 36.8065;
+      let lng = this.selectedLng || 10.1815;
+
+      // Si pas de sélection sur carte, on tente le géocodage par texte (fallback)
+      if (!this.selectedLat || !this.selectedLng) {
+        const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery + ', Tunisie')}&limit=1&countrycodes=tn`);
+        const data = await geoRes.json();
+        
+        if (data && data.length > 0) {
+          lat = parseFloat(data[0].lat);
+          lng = parseFloat(data[0].lon);
+        }
       }
 
       // Trouver les coordonnées de l'arrêt
@@ -2470,14 +2780,12 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
       // Calcul OSRM si on a les coordonnées des deux points
       if (stopLat !== 0 && stopLng !== 0) {
         try {
-          const osrmRes = await fetch(`https://router.project-osrm.org/route/v1/foot/${lng},${lat};${stopLng},${stopLat}?overview=false`);
-          const osrmData = await osrmRes.json();
-          if (osrmData.routes && osrmData.routes[0]) {
-            walkingDistance = Math.round((osrmData.routes[0].distance / 1000) * 100) / 100; // km
-            walkingTime = Math.round(osrmData.routes[0].duration / 60); // minutes
-          }
+          // Utilisation du nouveau WalkingService (OpenRouteService) pour des données réelles
+          const metrics = await firstValueFrom(this._walkingService.getWalkingMetrics(lat, lng, stopLat, stopLng));
+          walkingDistance = metrics.distance;
+          walkingTime = metrics.time;
         } catch (e) {
-          console.warn("OSRM error", e);
+          console.warn("WalkingService error", e);
         }
       }
 

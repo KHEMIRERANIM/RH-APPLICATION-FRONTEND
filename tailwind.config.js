@@ -332,7 +332,7 @@ const config = {
         }
     },
     corePlugins : {
-        appearance        : false,
+        appearance        : true,
         container         : false,
         float             : false,
         clear             : false,

@@ -1,5 +1,6 @@
 <div class="w-full flex-auto p-6 sm:p-10 space-y-6">
 
+
   <!-- Action Bar -->
   <div class="flex items-center justify-end">
     <button (click)="openModal()"
@@ -21,7 +22,7 @@
         </div>
         <div *ngIf="activeSection === 'statistiques'" class="w-2 h-2 rounded-full bg-[#1D9E75] animate-pulse"></div>
       </div>
-      <h3 class="text-lg font-bold text-[#1A1A2E] mb-2">Vue d'ensemble</h3>
+      <h3 class="text-lg font-bold text-[#0F3460] mb-2">Vue d'ensemble</h3>
       <p class="text-gray-500 text-sm mb-6 leading-relaxed">Analysez les performances globales, le CO₂ économisé et
         l'usage système.</p>
       <div
@@ -41,7 +42,7 @@
         </div>
         <div *ngIf="activeSection === 'navettes'" class="w-2 h-2 rounded-full bg-[#1D9E75] animate-pulse"></div>
       </div>
-      <h3 class="text-lg font-bold text-[#1A1A2E] mb-2">Gestion Flotte</h3>
+      <h3 class="text-lg font-bold text-[#0F3460] mb-2">Gestion Flotte</h3>
       <p class="text-gray-500 text-sm mb-6 leading-relaxed">Gérez vos navettes, lignes régulières et l'activation des
         packs de bus.</p>
       <div
@@ -61,7 +62,7 @@
         </div>
         <div *ngIf="activeSection === 'reservations'" class="w-2 h-2 rounded-full bg-[#1D9E75] animate-pulse"></div>
       </div>
-      <h3 class="text-lg font-bold text-[#1A1A2E] mb-2">Réservations</h3>
+      <h3 class="text-lg font-bold text-[#0F3460] mb-2">Réservations</h3>
       <p class="text-gray-500 text-sm mb-6 leading-relaxed">Suivez et validez les demandes de covoiturage et
         réservations navette.</p>
       <div
@@ -81,7 +82,7 @@
         </div>
         <div *ngIf="activeSection === 'reclamations'" class="w-2 h-2 rounded-full bg-[#1D9E75] animate-pulse"></div>
       </div>
-      <h3 class="text-lg font-bold text-[#1A1A2E] mb-2">Heatmap Besoins</h3>
+      <h3 class="text-lg font-bold text-[#0F3460] mb-2">Heatmap Besoins</h3>
       <p class="text-gray-500 text-sm mb-6 leading-relaxed">Visualisez les zones à forte demande et optimisez vos lignes
         de bus.</p>
       <div
@@ -99,7 +100,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-8">
       <!-- Today Hero -->
       <div
-        class="lg:col-span-4 bg-gradient-to-br from-[#1D9E75] to-[#0F3460] rounded-[2.5rem] p-8 text-white shadow-xl flex flex-col justify-between relative overflow-hidden group">
+        class="lg:col-span-4 bg-gradient-to-br from-[#1D9E75] to-[#0F3460] rounded-3xl p-8 text-white shadow-xl flex flex-col justify-between relative overflow-hidden group">
         <div class="relative z-10">
           <div class="flex items-center justify-between mb-8">
             <div class="flex flex-col">
@@ -113,7 +114,7 @@
             <mat-icon class="icon-size-10 text-yellow-300 drop-shadow-lg" [svgIcon]="currentWeather.icon"></mat-icon>
           </div>
           <div class="flex items-baseline gap-2 mb-2">
-            <span class="text-7xl font-black tracking-tighter">{{ (currentWeather.temp <= 0 && weeklyPredictions.length>
+            <span class="text-7xl font-bold tracking-tighter">{{ (currentWeather.temp <= 0 && weeklyPredictions.length>
                 0) ? Math.round(weeklyPredictions[0].temp) : currentWeather.temp }}°</span>
             <span class="text-xl font-medium opacity-90">{{ currentWeather.condition }}</span>
           </div>
@@ -148,7 +149,7 @@
 
       <!-- Weekly Forecast avec PRÉDICTIONS IA -->
       <div
-        class="lg:col-span-8 bg-slate-50/40 backdrop-blur-2xl rounded-[2.5rem] p-8 border border-slate-200/50 shadow-inner flex flex-col relative overflow-hidden group/container">
+        class="lg:col-span-8 bg-slate-50/40 backdrop-blur-2xl rounded-3xl p-8 border border-slate-200/50 shadow-inner flex flex-col relative overflow-hidden group/container">
         <!-- Subtle Mesh Gradient / Glow -->
         <div class="absolute -top-12 -left-12 w-64 h-64 bg-indigo-500/5 rounded-full blur-[100px] pointer-events-none">
         </div>
@@ -156,20 +157,14 @@
           class="absolute -bottom-12 -right-12 w-64 h-64 bg-emerald-500/5 rounded-full blur-[100px] pointer-events-none">
         </div>
         <div
-          class="flex items-center justify-between mb-8 bg-slate-50/80 p-6 -mx-8 -mt-8 rounded-t-[2.5rem] border-b border-gray-100 shadow-sm">
-          <div class="flex items-center gap-3">
-            <div
-              class="w-10 h-10 bg-indigo-500 rounded-xl flex items-center justify-center shadow-indigo-200 shadow-lg">
-              <span class="text-xl">🔮</span>
-            </div>
-            <h3 class="text-xl font-black text-[#1A1A2E] tracking-tight">
-              Prédictions IA
-            </h3>
-          </div>
+          class="flex items-center gap-4 p-6 -mx-8 -mt-8 rounded-t-[2.5rem] border-b border-gray-100 bg-white/50">
           <div
-            class="px-5 py-2 bg-white rounded-2xl text-xs font-black text-indigo-600 shadow-sm border border-indigo-100 flex items-center gap-2">
-            <mat-icon class="icon-size-4 text-indigo-400" svgIcon="heroicons_solid:chart-bar"></mat-icon>
-            {{ predictionAverage }} employés/jour
+            class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center shadow-sm">
+            <mat-icon class="icon-size-6" svgIcon="heroicons_solid:chart-bar"></mat-icon>
+          </div>
+          <div>
+            <h2 class="text-xl font-bold text-[#0F3460] mb-0.5">Prédictions IA</h2>
+            <p class="text-sm text-gray-500 font-medium">Analyse prédictive de la fréquentation</p>
           </div>
         </div>
 
@@ -194,7 +189,7 @@
               <span class="font-normal normal-case text-gray-400">• {{ p.date }}</span>
             </div>
 
-            <div class="text-3xl font-black text-[#1A1A2E] my-2">{{ p.predicted }}</div>
+            <div class="text-3xl font-bold text-[#0F3460] my-2">{{ p.predicted }}</div>
             <div class="text-[10px] text-gray-400">employés</div>
 
             <div class="flex items-center justify-center gap-1 mt-2">
@@ -238,7 +233,7 @@
         <div class="space-y-1">
           <p class="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1">IMPACT CO₂</p>
           <div class="flex items-baseline gap-2">
-            <p class="text-4xl font-extrabold text-[#1A1A2E] tracking-tight">{{ stats.co2Value }}</p>
+            <p class="text-4xl font-extrabold text-[#0F3460] tracking-tight">{{ stats.co2Value }}</p>
             <p class="text-emerald-500 text-sm font-bold">kg économisés</p>
           </div>
         </div>
@@ -246,7 +241,7 @@
 
       <!-- Points Distribués -->
       <div
-        class="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 group">
+        class="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 group">
         <div class="flex items-center justify-between mb-8">
           <div
             class="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
@@ -260,13 +255,13 @@
         </div>
         <div class="space-y-1">
           <p class="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1">POINTS ÉCO</p>
-          <p class="text-4xl font-extrabold text-[#1A1A2E] tracking-tight">{{ stats.pointsValue }}</p>
+          <p class="text-4xl font-extrabold text-[#0F3460] tracking-tight">{{ stats.pointsValue }}</p>
         </div>
       </div>
 
       <!-- Trajets Covoiturage -->
       <div
-        class="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 group">
+        class="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 group">
         <div class="flex items-center justify-between mb-8">
           <div
             class="w-14 h-14 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
@@ -280,13 +275,13 @@
         </div>
         <div class="space-y-1">
           <p class="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1">TRAJETS COVOIT</p>
-          <p class="text-4xl font-extrabold text-[#1A1A2E] tracking-tight">{{ stats.covoitValue }}</p>
+          <p class="text-4xl font-extrabold text-[#0F3460] tracking-tight">{{ stats.covoitValue }}</p>
         </div>
       </div>
 
       <!-- Trajets Navette -->
       <div
-        class="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 group">
+        class="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 group">
         <div class="flex items-center justify-between mb-8">
           <div
             class="w-14 h-14 bg-teal-50 text-teal-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
@@ -300,7 +295,7 @@
         </div>
         <div class="space-y-1">
           <p class="text-gray-400 text-[10px] font-bold uppercase tracking-widest mb-1">TRAJETS NAVETTE</p>
-          <p class="text-4xl font-extrabold text-[#1A1A2E] tracking-tight">{{ stats.navetteValue }}</p>
+          <p class="text-4xl font-extrabold text-[#0F3460] tracking-tight">{{ stats.navetteValue }}</p>
         </div>
       </div>
 
@@ -363,7 +358,7 @@
     <div class="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm">
       <div class="flex items-center justify-between mb-8">
         <div>
-          <h2 class="text-[#1A1A2E] text-xl font-bold mb-1">Distribution des Réservations par Date</h2>
+          <h2 class="text-[#0F3460] text-xl font-bold mb-1">Distribution des Réservations par Date</h2>
           <p class="text-gray-500 text-sm">Analyse des jours les plus fréquentés</p>
         </div>
       </div>
@@ -379,16 +374,16 @@
       <!-- Quick Stats Footer -->
       <div class="grid grid-cols-2 gap-4 mt-10 pt-8 border-t border-gray-100">
         <div class="bg-indigo-50/30 rounded-2xl p-4 border border-indigo-100/50">
-          <p class="text-indigo-600 text-[10px] uppercase font-black tracking-widest mb-1">Total Bus</p>
+          <p class="text-indigo-600 text-[10px] uppercase font-bold tracking-widest mb-1">Total Bus</p>
           <div class="flex items-baseline gap-1">
-            <p class="text-3xl font-black text-[#1A1A2E]">{{ stats.totalNavettes }}</p>
+            <p class="text-3xl font-bold text-[#0F3460]">{{ stats.totalNavettes }}</p>
             <p class="text-xs text-indigo-400 font-bold">ACTIFS</p>
           </div>
         </div>
         <div class="bg-emerald-50/30 rounded-2xl p-4 border border-emerald-100/50 text-right">
-          <p class="text-emerald-600 text-[10px] uppercase font-black tracking-widest mb-1">Tendance</p>
+          <p class="text-emerald-600 text-[10px] uppercase font-bold tracking-widest mb-1">Tendance</p>
           <div class="flex items-baseline justify-end gap-1">
-            <p class="text-3xl font-black text-emerald-600">+12%</p>
+            <p class="text-3xl font-bold text-emerald-600">+12%</p>
             <p class="text-xs text-emerald-400 font-bold">CROISSANCE</p>
           </div>
         </div>
@@ -423,19 +418,19 @@
           <div class="grid grid-cols-2 gap-3">
             <div class="bg-gray-50 rounded-lg p-3">
               <p class="text-xs text-gray-500 mb-1">Départ</p>
-              <p class="text-sm text-[#1A1A2E]">{{ bus.heureDepart }}</p>
+              <p class="text-sm text-[#0F3460]">{{ bus.heureDepart }}</p>
             </div>
             <div class="bg-gray-50 rounded-lg p-3">
               <p class="text-xs text-gray-500 mb-1">Durée</p>
-              <p class="text-sm text-[#1A1A2E]">{{ bus.dureeMinutes }} min</p>
+              <p class="text-sm text-[#0F3460]">{{ bus.dureeMinutes }} min</p>
             </div>
             <div class="bg-gray-50 rounded-lg p-3">
               <p class="text-xs text-gray-500 mb-1">Capacité</p>
-              <p class="text-sm text-[#1A1A2E]">{{ bus.capacite }} places</p>
+              <p class="text-sm text-[#0F3460]">{{ bus.capacite }} places</p>
             </div>
             <div class="bg-gray-50 rounded-lg p-3">
               <p class="text-xs text-gray-500 mb-1">Carburant</p>
-              <p class="text-sm text-[#1A1A2E]">{{ bus.typeCarburant }}</p>
+              <p class="text-sm text-[#0F3460]">{{ bus.typeCarburant }}</p>
             </div>
           </div>
           <div class="bg-gray-50 rounded-lg p-3">
@@ -492,7 +487,7 @@
           <div>
             <div class="flex items-center justify-between mb-2">
               <p class="text-xs text-gray-500">Places restantes</p>
-              <p class="text-sm font-medium text-[#1A1A2E]">{{ bus.placesRestantes }}/{{ bus.capacite }}</p>
+              <p class="text-sm font-medium text-[#0F3460]">{{ bus.placesRestantes }}/{{ bus.capacite }}</p>
             </div>
             <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
               <div class="h-full bg-[#1D9E75] rounded-full"
@@ -513,13 +508,13 @@
     <!-- Bus groupés par PACK -->
     <div *ngFor="let pack of busParPack" class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
       <div class="flex items-center justify-between px-6 py-4 bg-gray-50/50 border-b border-gray-100">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 bg-[#1A1A2E] text-white rounded-xl flex items-center justify-center">
-            <mat-icon class="icon-size-5" svgIcon="feather:layers"></mat-icon>
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center">
+            <mat-icon class="icon-size-6" svgIcon="feather:layers"></mat-icon>
           </div>
           <div>
-            <p class="text-sm font-black text-[#1A1A2E] uppercase tracking-wider">{{ pack.buses[0].ligne }}</p>
-            <p class="text-[10px] text-gray-400 font-bold">LIGNE ACTIVE &bull; {{ pack.buses.length }} VÉHICULES</p>
+            <h2 class="text-xl font-bold text-[#0F3460] mb-0.5 uppercase tracking-tight">{{ pack.buses[0].ligne }}</h2>
+            <p class="text-gray-500 text-sm font-medium">Ligne active • {{ pack.buses.length }} véhicules configurés</p>
           </div>
         </div>
         <div class="flex items-center gap-4">
@@ -554,11 +549,11 @@
             <div class="grid grid-cols-2 gap-2">
               <div class="bg-gray-50 rounded-lg p-2">
                 <p class="text-xs text-gray-400">Capacité</p>
-                <p class="text-sm font-medium text-[#1A1A2E]">{{ bus.capacite }} places</p>
+                <p class="text-sm font-medium text-[#0F3460]">{{ bus.capacite }} places</p>
               </div>
               <div class="bg-gray-50 rounded-lg p-2">
                 <p class="text-xs text-gray-400">Restantes</p>
-                <p class="text-sm font-medium text-[#1A1A2E]">{{ bus.placesRestantes }}</p>
+                <p class="text-sm font-medium text-[#0F3460]">{{ bus.placesRestantes }}</p>
               </div>
             </div>
             <div class="bg-indigo-50/30 rounded-lg p-2 border border-indigo-100/30" *ngIf="bus.arrets?.length">
@@ -588,7 +583,7 @@
                   <div class="flex flex-wrap gap-1">
                     <div *ngFor="let r of reservantsParJour(bus.id, date)"
                       class="group relative flex items-center gap-1.5 px-2 py-1 bg-white border border-gray-100 rounded-md shadow-sm">
-                      <span class="text-[9px] text-[#1A1A2E] font-semibold">{{ getNomEmploye(r.employeId) }}</span>
+                      <span class="text-[9px] text-[#0F3460] font-semibold">{{ getNomEmploye(r.employeId) }}</span>
                       <div class="w-1.5 h-1.5 rounded-full" [class.bg-[#1D9E75]]="!r.isWaitlisted"
                         [class.bg-orange-400]="r.isWaitlisted"></div>
                     </div>
@@ -598,7 +593,7 @@
             </div>
             <div class="flex gap-2 pt-1 border-t border-gray-100">
               <button (click)="openEditModal(bus)"
-                class="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 bg-gray-50 text-[#1A1A2E] rounded-lg hover:bg-gray-100 transition text-xs"><mat-icon
+                class="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 bg-gray-50 text-[#0F3460] rounded-lg hover:bg-gray-100 transition text-xs"><mat-icon
                   class="icon-size-3" svgIcon="feather:edit-2"></mat-icon>Modifier</button>
               <button (click)="deleteBus(bus.id!)"
                 class="px-2 py-1.5 bg-red-50 text-[#E94560] rounded-lg hover:bg-red-100 transition"><mat-icon
@@ -640,24 +635,43 @@
                   [svgIcon]="reservation.type === 'navette' ? 'feather:truck' : 'feather:users'"></mat-icon></div>
             </div>
             <div>
-              <p class="font-bold text-[#1A1A2E]">{{ reservation.employeNom }}</p>
-              <p class="text-sm text-gray-500 flex items-center gap-1"><mat-icon class="icon-size-3"
-                  svgIcon="feather:map-pin"></mat-icon>{{ reservation.trajet }}</p>
+              <p class="font-bold text-[#0F3460]">{{ reservation.employeNom }} <small
+                  class="text-gray-400 font-normal">(Passager)</small></p>
+              <div class="flex flex-col">
+                <p class="text-xs text-gray-500 flex items-center gap-1">
+                  <mat-icon class="icon-size-3" svgIcon="feather:map-pin"></mat-icon>
+                  {{ reservation.trajet }}
+                </p>
+                <!-- Detail Conducteur (Covoiturage) -->
+                <p *ngIf="reservation.type === 'covoiturage'"
+                  class="text-[10px] text-blue-600 font-bold flex items-center gap-1 mt-0.5">
+                  <mat-icon class="icon-size-3" svgIcon="feather:user"></mat-icon>
+                  Conducteur: {{ reservation.conducteurNom }}
+                </p>
+                <!-- Detail Bus (Navette) -->
+                <p *ngIf="reservation.type === 'navette'"
+                  class="text-[10px] text-emerald-600 font-bold flex items-center gap-1 mt-0.5">
+                  <mat-icon class="icon-size-3" svgIcon="feather:truck"></mat-icon>
+                  Bus: {{ reservation.busDetail }}
+                </p>
+              </div>
             </div>
           </div>
           <div class="flex items-center gap-3">
             <div class="text-right">
               <p class="text-[10px] uppercase font-bold text-gray-400">Date & Heure</p>
-              <p class="font-medium text-[#1A1A2E]">{{ reservation.date }} à {{ reservation.heure }}</p>
+              <p class="font-medium text-[#0F3460]">{{ reservation.date }} - {{ reservation.heure }}</p>
             </div>
+
+            <!-- DESIGN UNIFORME (TEXTE + CROIX) -->
             <span
-              [class]="reservation.statut === 'Confirmée' ? 'bg-green-50 text-green-700' : (reservation.statut === 'En attente' ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700')"
-              class="px-4 py-2 rounded-lg text-xs font-bold border flex items-center gap-2 shadow-sm">{{
-              reservation.statut }}</span>
-            <button *ngIf="reservation.statut === 'En attente'" (click)="confirmReservation(reservation)"
-              class="px-4 py-2 bg-[#1D9E75] text-white rounded-lg text-xs font-bold hover:bg-[#178a66] transition shadow-sm">Confirmer</button>
+              class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-[10px] font-bold uppercase tracking-wider border border-gray-200">
+              {{ reservation.statut }}
+            </span>
             <button (click)="cancelReservation(reservation)"
-              class="px-4 py-2 bg-red-50 text-[#E94560] rounded-lg text-xs font-bold hover:bg-red-100 transition shadow-sm">Annuler</button>
+              class="w-10 h-10 flex items-center justify-center hover:bg-red-50 text-gray-300 hover:text-red-500 rounded-xl transition-all border border-transparent hover:border-red-100">
+              <mat-icon class="icon-size-4" svgIcon="feather:x"></mat-icon>
+            </button>
           </div>
         </div>
       </div>
@@ -669,20 +683,13 @@
   <!-- ===================== SECTION HEATMAP / RÉCLAMATIONS ===================== -->
   <div *ngIf="activeSection === 'reclamations'" class="space-y-6 animate-in fade-in duration-500">
     <div class="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-        <div class="flex items-center gap-4">
-          <div class="w-12 h-12 bg-red-50 text-red-600 rounded-xl flex items-center justify-center">
-            <mat-icon class="icon-size-6" svgIcon="feather:map"></mat-icon>
-          </div>
-          <div>
-            <h2 class="text-xl font-bold text-[#1A1A2E] mb-0.5">Analyse des Besoins</h2>
-            <p class="text-gray-500 text-sm">Visualisation de la densité des demandes de transport.</p>
-          </div>
+      <div class="flex items-center gap-4 mb-8">
+        <div class="w-12 h-12 bg-red-50 text-red-600 rounded-xl flex items-center justify-center">
+          <mat-icon class="icon-size-6" svgIcon="feather:map"></mat-icon>
         </div>
-        <div
-          class="bg-red-50 text-red-600 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 border border-red-100">
-          <mat-icon class="icon-size-4" svgIcon="feather:alert-circle"></mat-icon>
-          {{ reclamations.length }} demandes enregistrées
+        <div>
+          <h2 class="text-xl font-bold text-[#0F3460] mb-0.5">Heatmap des Besoins</h2>
+          <p class="text-sm text-gray-500 font-medium">Visualisation de la densité des demandes de transport</p>
         </div>
       </div>
 
@@ -693,38 +700,91 @@
 
       <!-- Graphique d'Écart Arrêt -> Quartier (Style Mockup) -->
       <div class="bg-white/50 rounded-2xl p-6 border border-gray-100 shadow-sm">
-        <div class="mb-8">
-          <h2 class="text-xl font-bold text-gray-800">Écart arrêt &rarr; quartier employé</h2>
-          <p class="text-sm text-gray-500 font-medium">Nombre de réclamation par arrêt et quartier d'origine</p>
+        <div class="flex items-center gap-4 mb-10">
+          <div class="w-12 h-12 bg-red-50 text-red-600 rounded-xl flex items-center justify-center">
+            <mat-icon class="icon-size-6" svgIcon="heroicons_solid:chart-bar"></mat-icon>
+          </div>
+          <div>
+            <h2 class="text-xl font-bold text-[#0F3460] mb-0.5">Analyse des Besoins d'Optimisation</h2>
+            <p class="text-sm text-gray-500 font-medium">Réclamations groupées par arrêt et quartier (Seuil : 3 employés
+              réguliers)</p>
+          </div>
         </div>
 
         <div class="space-y-6 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
-          <div *ngFor="let stat of reclamationStats" class="flex items-center gap-6 group">
-            <!-- Labels Gauche -->
-            <div class="w-40 text-right shrink-0">
-              <div class="font-bold text-[#1A1A2E] text-sm leading-tight">{{ stat.stopName }}</div>
-              <div class="text-[10px] text-gray-400 font-medium mt-0.5 uppercase tracking-wider">depuis {{
-                stat.neighborhood }}</div>
-            </div>
+          <div *ngFor="let stat of reclamationStats"
+            class="flex flex-col gap-2 p-2 rounded-2xl transition-all hover:bg-gray-50/50 group">
+            <div class="flex items-center gap-6">
+              <!-- Labels Gauche -->
+              <div class="w-48 text-right shrink-0">
+                <div class="text-xl font-bold text-[#0F3460] leading-tight">{{ stat.stopName | uppercase }}</div>
+                <div class="text-sm text-gray-500 font-medium mt-0.5">depuis {{ stat.neighborhood }}</div>
+              </div>
 
-            <!-- Barre Centrale -->
-            <div
-              class="flex-1 h-12 bg-gray-50 rounded-xl relative overflow-hidden flex items-center shadow-inner border border-gray-100/50">
               <div
-                [class]="stat.status === 'critical' ? 'bg-[#E94560]' : (stat.status === 'warning' ? 'bg-[#FF9F43]' : 'bg-[#1D9E75]')"
-                class="h-full rounded-lg shadow-lg flex items-center justify-end px-4 transition-all duration-1000 ease-out min-w-[60px]"
-                [style.width.%]="Math.min(100, (stat.avgTime / 50) * 100)">
-                <span class="text-white text-[10px] font-black whitespace-nowrap drop-shadow-sm">{{ stat.avgTime }} min
-                  • {{ stat.avgDistance }} km</span>
+                class="flex-1 h-12 bg-gray-50 rounded-xl relative flex items-center shadow-inner border border-gray-100/50 overflow-hidden">
+                <!-- Bar Background -->
+                <div
+                  [class]="stat.status === 'critical' ? 'bg-[#E94560]' : (stat.status === 'warning' ? 'bg-[#FF9F43]' : 'bg-[#1D9E75]')"
+                  class="h-full rounded-lg shadow-lg transition-all duration-1000 ease-out flex items-center px-4 min-w-[120px]"
+                  [style.width.%]="Math.min(100, (stat.avgTime / 50) * 100)">
+
+                  <span class="text-white text-xs font-bold whitespace-nowrap drop-shadow-sm">
+                    {{ stat.avgTime }} min • {{ stat.avgDistance }} km de distance
+                  </span>
+                </div>
+              </div>
+
+              <!-- Count Droite + Optimiser -->
+              <div class="w-56 shrink-0 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <span class="text-2xl font-bold text-[#0F3460]">{{ stat.count }}</span>
+                  <span
+                    class="text-xs text-gray-400 font-bold lowercase tracking-widest leading-none">réclamations</span>
+                </div>
+
+                <!-- Actions Recommandation -->
+                <div class="flex items-center gap-2" *ngIf="stat.isRecommended">
+                  <button (click)="stat.showDetails = !stat.showDetails"
+                    class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                    [title]="'Voir les détails des ' + stat.regularCount + ' employés réguliers'">
+                    <mat-icon class="icon-size-4"
+                      [svgIcon]="stat.showDetails ? 'feather:chevron-up' : 'feather:info'"></mat-icon>
+                  </button>
+
+                  <button (click)="applyStopRecommendation(stat)"
+                    class="px-4 py-2 bg-[#1D9E75] text-white rounded-xl hover:bg-[#168567] transition shadow-md shadow-[#1D9E75]/20 flex items-center gap-2 group/btn animate-pulse hover:animate-none"
+                    [title]="stat.regularCount + ' employés réguliers identifiés'">
+                    <mat-icon class="icon-size-4 group-hover/btn:rotate-12 transition-transform"
+                      svgIcon="heroicons_solid:plus-circle"></mat-icon>
+                    <div class="flex flex-col items-start leading-none">
+                      <span class="text-[11px] font-bold lowercase tracking-tighter">optimiser</span>
+                    </div>
+                  </button>
+                </div>
               </div>
             </div>
 
-            <!-- Count Droite -->
-            <div class="w-32 shrink-0">
-              <div class="flex items-center gap-2">
-                <span class="text-lg font-black text-[#1A1A2E]">{{ stat.count }}</span>
-                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">réclamation{{ stat.count > 1
-                  ? 's' : '' }}</span>
+            <!-- Détails de l'Optimisation -->
+            <div *ngIf="stat.showDetails && stat.isRecommended"
+              class="ml-54 border-l-4 border-indigo-200 pl-6 py-4 mt-2 space-y-3 animate-in slide-in-from-top-2 duration-300 bg-indigo-50/30 rounded-r-xl">
+              <p class="text-xs font-bold text-indigo-500 uppercase tracking-widest flex items-center gap-2">
+                <mat-icon class="icon-size-4" svgIcon="feather:users"></mat-icon>
+                Utilisateurs réguliers impactés (Profils haute fréquence)
+              </p>
+              <div class="flex flex-wrap gap-3">
+                <div *ngFor="let emp of stat.regularEmployeesDetails"
+                  class="bg-white border border-indigo-100 rounded-xl px-4 py-3 shadow-sm flex items-center gap-4">
+                  <div
+                    class="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold">
+                    {{ emp.name.charAt(0) }}
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="text-sm font-bold text-gray-800">{{ emp.name }}</span>
+                    <span class="text-[11px] text-gray-400 font-bold uppercase tracking-wide">{{ emp.freq }} trajets
+                      effectués</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -759,89 +819,88 @@
       <!-- Historique individuel pour suppression -->
       <div class="mt-12 pt-8 border-t border-gray-100">
         <div class="flex items-center justify-between mb-6">
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 bg-gray-50 text-gray-400 rounded-lg flex items-center justify-center">
-              <mat-icon class="icon-size-4" svgIcon="heroicons_solid:clipboard-list"></mat-icon>
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-red-50 text-red-600 rounded-xl flex items-center justify-center">
+              <mat-icon class="icon-size-6" svgIcon="heroicons_solid:clipboard-list"></mat-icon>
             </div>
             <div>
-              <h3 class="text-sm font-black text-[#1A1A2E] uppercase tracking-widest">Historique détaillé</h3>
-              <p class="text-[10px] text-gray-400 font-medium">Gestion individuelle des demandes</p>
+              <h2 class="text-xl font-bold text-[#0F3460] mb-0.5">Historique détaillé</h2>
+              <p class="text-sm text-gray-500 font-medium">Gestion individuelle des demandes</p>
             </div>
           </div>
           <span class="text-[10px] text-gray-400 font-bold uppercase bg-gray-50 px-3 py-1 rounded-full">{{
             reclamations.length }} DEMANDES</span>
         </div>
 
-        <div class="overflow-x-auto rounded-xl border border-gray-100 bg-white">
-          <table class="w-full text-left border-collapse">
+        <div class="overflow-x-auto pb-4">
+          <table class="w-full border-separate border-spacing-y-4">
             <thead>
-              <tr class="bg-gray-50/50">
-                <th class="px-6 py-3 text-[9px] font-bold text-gray-400 uppercase tracking-widest">Employé</th>
-                <th class="px-6 py-3 text-[9px] font-bold text-gray-400 uppercase tracking-widest">Quartier</th>
-                <th class="px-6 py-3 text-[9px] font-bold text-gray-400 uppercase tracking-widest text-center">
-                  Estimation Marche</th>
-                <th class="px-6 py-3 text-[9px] font-bold text-gray-400 uppercase tracking-widest text-right">Actions
-                </th>
+              <tr class="text-left">
+                <th class="px-8 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest opacity-80">EMPLOYÉ</th>
+                <th class="px-8 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest opacity-80">QUARTIER</th>
+                <th class="px-8 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest opacity-80 text-center">ESTIMATION MARCHE</th>
+                <th class="px-8 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest opacity-80 text-right">ACTIONS</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-gray-50 bg-white">
-              <tr *ngFor="let r of reclamations" class="hover:bg-gray-50/50 transition-all group">
+            <tbody>
+              <tr *ngFor="let r of reclamations"
+                class="bg-white/95 backdrop-blur-md rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/20 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300 group">
+                
                 <!-- Collaborateur -->
-                <td class="px-6 py-4">
-                  <div class="flex items-center gap-3">
-                    <div
-                      class="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-black text-[10px] shadow-sm uppercase border border-indigo-100/50">
-                      {{ (getNomEmploye(r.employeId) | slice:0:1) || '?' }}
+                <td class="px-8 py-5 first:rounded-l-2xl">
+                  <div class="flex items-center gap-4">
+                    <div class="relative flex-shrink-0">
+                      <div class="w-12 h-12 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-base shadow-sm border border-indigo-100/50 uppercase">
+                        {{ (getNomEmploye(r.employeId) | slice:0:1) || '?' }}
+                      </div>
+                      <div class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white flex items-center justify-center shadow-sm bg-blue-500">
+                        <mat-icon class="text-white icon-size-3" svgIcon="feather:alert-circle"></mat-icon>
+                      </div>
                     </div>
                     <div class="flex flex-col">
-                      <span class="text-[11px] font-black text-[#1A1A2E] leading-tight capitalize">{{
-                        getNomEmploye(r.employeId) }}</span>
+                      <span class="text-sm font-bold text-[#0F3460] leading-tight tracking-tight">{{ getNomEmploye(r.employeId) | uppercase }}</span>
+                      <span class="text-[10px] text-gray-400 font-bold lowercase tracking-wider mt-1">employé impacté</span>
                     </div>
                   </div>
                 </td>
 
                 <!-- Itinéraire -->
-                <td class="px-6 py-4">
+                <td class="px-8 py-5">
                   <div class="flex flex-col gap-1.5">
                     <div class="flex items-center gap-2">
-                      <mat-icon class="icon-size-3 text-gray-400" svgIcon="heroicons_solid:home"></mat-icon>
-                      <span class="text-[10px] font-bold text-gray-700 leading-none">{{ r.neighborhood }}</span>
+                      <mat-icon class="icon-size-3.5 text-gray-400" svgIcon="heroicons_solid:home"></mat-icon>
+                      <span class="text-xs font-bold text-gray-700 leading-none">{{ r.neighborhood }}</span>
                     </div>
-                    <div class="flex items-center gap-2 opacity-50 ml-1">
-                      <mat-icon class="icon-size-3 text-blue-500" svgIcon="heroicons_solid:chevron-right"></mat-icon>
-                      <mat-icon class="icon-size-3 text-blue-500" svgIcon="heroicons_solid:map-pin"></mat-icon>
-                      <span class="text-[9px] font-medium text-blue-700 uppercase tracking-tighter">{{ r.stopName
-                        }}</span>
+                    <div class="flex items-center gap-2 text-blue-600/70 mt-0.5">
+                      <mat-icon class="icon-size-3.5" svgIcon="feather:arrow-right"></mat-icon>
+                      <span class="text-[10px] font-medium lowercase tracking-widest truncate max-w-[220px]">vers arrêt : {{ r.stopName }}</span>
                     </div>
                   </div>
                 </td>
 
-                <!-- Estimation Marche -->
-                <td class="px-6 py-4 text-center">
-                  <div
-                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-[9px] font-black uppercase tracking-widest shadow-sm transition-transform duration-300 group-hover:scale-105"
-                    [class]="getSeverityClass(getMetrics(r).time)">
-                    <i class="fas fa-walking text-[8px]"></i>
-                    {{ getMetrics(r).time }} min
+                <!-- Estimation -->
+                <td class="px-8 py-5 text-center">
+                  <div class="inline-flex items-center gap-2 px-5 py-2 rounded-full border shadow-sm transition-all duration-300 group-hover:scale-105"
+                    [class]="getMetrics(r).time > 30 ? 'bg-red-50 text-red-600 border-red-100' : (getMetrics(r).time >= 15 ? 'bg-orange-50 text-orange-600 border-orange-100' : 'bg-emerald-50 text-emerald-600 border-emerald-100')">
+                    <span class="text-[11px] font-bold lowercase tracking-widest">{{ getMetrics(r).time }} min</span>
                   </div>
                 </td>
 
                 <!-- Actions -->
-                <td class="px-6 py-4 text-right">
-                  <div class="flex justify-end pr-2">
-                    <button (click)="deleteReclamation(r.id!)"
-                      class="p-2 hover:bg-red-50 text-gray-300 hover:text-red-500 rounded-xl transition-all duration-300 opacity-0 group-hover:opacity-100 border border-transparent hover:border-red-100/50">
-                      <mat-icon class="icon-size-4" svgIcon="heroicons_solid:trash"></mat-icon>
-                    </button>
-                  </div>
+                <td class="px-8 py-5 text-right last:rounded-r-2xl">
+                  <button (click)="deleteReclamation(r.id!)"
+                    class="w-10 h-10 inline-flex items-center justify-center hover:bg-neutral-100 text-gray-300 hover:text-red-500 rounded-xl transition-all border border-transparent hover:border-gray-200">
+                    <mat-icon class="icon-size-4" svgIcon="feather:x"></mat-icon>
+                  </button>
                 </td>
-              </tr>
-              <tr *ngIf="reclamations.length === 0">
-                <td colspan="4" class="px-6 py-8 text-center text-[10px] text-gray-400 italic">Aucune réclamation
-                  enregistrée</td>
               </tr>
             </tbody>
           </table>
+          <!-- Empty State -->
+          <div *ngIf="reclamations.length === 0"
+            class="py-20 text-center bg-white/40 rounded-3xl border-2 border-dashed border-gray-100 mt-4">
+            <p class="text-[11px] text-gray-400 font-bold lowercase tracking-widest italic">aucun signalement dans l'historique</p>
+          </div>
         </div>
       </div>
     </div>
@@ -851,7 +910,7 @@
   <div *ngIf="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between p-6 border-b border-gray-200">
-        <h2 class="text-xl font-semibold text-[#1A1A2E]">{{ isEditing ? 'Modifier le bus' : 'Nouveau bus' }}</h2>
+        <h2 class="text-xl font-semibold text-[#0F3460]">{{ isEditing ? 'Modifier le bus' : 'Nouveau bus' }}</h2>
         <button (click)="closeModal()" class="p-2 hover:bg-gray-100 rounded-lg transition">
           <mat-icon svgIcon="feather:x" class="text-gray-500"></mat-icon>
         </button>
@@ -860,7 +919,7 @@
       <div class="p-6 space-y-4">
         <!-- Option Pack (uniquement en création) -->
         <div *ngIf="!isEditing" class="rounded-lg border border-[#1D9E75]/30 bg-[#1D9E75]/5 p-4 space-y-3">
-          <label class="flex items-center gap-2 cursor-pointer text-sm font-medium text-[#1A1A2E]">
+          <label class="flex items-center gap-2 cursor-pointer text-sm font-medium text-[#0F3460]">
             <input type="checkbox" [(ngModel)]="createBusPack" class="rounded border-gray-300" />
             Créer un pack (plusieurs bus sur la même ligne)
           </label>
@@ -1019,8 +1078,7 @@
             <div *ngIf="searchSuggestions.length > 0"
               class="absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-xl z-[100] max-h-60 overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200">
               <div class="p-2 border-b border-gray-50 bg-gray-50/50">
-                <span class="text-[10px] uppercase font-black text-gray-400 tracking-widest pl-2">Suggestions
-                  suggérées</span>
+                <span class="text-[10px] uppercase font-bold text-gray-400 tracking-widest pl-2">Suggestions suggérées</span>
               </div>
               <div *ngFor="let s of searchSuggestions" (click)="selectSuggestion(s)"
                 class="flex items-center gap-3 px-4 py-3 hover:bg-[#1D9E75]/5 cursor-pointer transition-colors border-b last:border-0 border-gray-50 group">
@@ -1030,9 +1088,8 @@
                     [svgIcon]="s.type === 'heatmap' ? 'feather:zap' : 'feather:map-pin'"></mat-icon>
                 </div>
                 <div class="flex flex-col min-w-0">
-                  <span class="text-sm font-bold text-[#1A1A2E] truncate">{{ s.name }}</span>
-                  <span class="text-[10px] text-gray-400 truncate">{{ s.type === 'heatmap' ? 'Demande employé via
-                    Heatmap' : (s.fullName || 'Adresse trouvée') }}</span>
+                  <span class="text-sm font-bold text-[#0F3460] truncate">{{ s.name }}</span>
+                  <span class="text-[10px] text-gray-400 truncate">{{ s.type === 'heatmap' ? 'Demande employé via Heatmap' : (s.fullName || 'Adresse trouvée') }}</span>
                 </div>
               </div>
             </div>
@@ -1049,8 +1106,7 @@
             <div class="rounded-xl overflow-hidden border border-gray-200 shadow-inner">
               <div id="stopPickerMap" class="w-full h-48 z-10 transition-all duration-500"></div>
             </div>
-            <p class="text-[9px] text-gray-400 font-medium italic">Cliquez sur la carte pour définir l'emplacement de
-              l'arrêt.</p>
+            <p class="text-[9px] text-gray-400 font-medium italic">Cliquez sur la carte pour définir l'emplacement de l'arrêt.</p>
           </div>
           <div class="space-y-2 mt-2">
             <div *ngFor="let arret of busForm.arrets; let idx = index"
@@ -1059,7 +1115,7 @@
                 <span
                   class="w-6 h-6 rounded-full bg-[#1D9E75]/10 text-[#1D9E75] flex items-center justify-center text-xs font-bold">{{
                   idx + 1 }}</span>
-                <span class="text-sm font-medium text-[#1A1A2E]">{{ arret.name }}</span>
+                <span class="text-sm font-medium text-[#0F3460]">{{ arret.name }}</span>
               </div>
               <div class="flex items-center gap-1">
                 <button (click)="moveArret(idx, 'up')" [disabled]="idx === 0"
@@ -1075,8 +1131,7 @@
                 </button>
               </div>
             </div>
-            <p *ngIf="!busForm.arrets?.length" class="text-xs text-gray-400 italic text-center py-2">Aucun arrêt
-              intermédiaire ajouté.</p>
+            <p *ngIf="!busForm.arrets?.length" class="text-xs text-gray-400 italic text-center py-2">Aucun arrêt intermédiaire ajouté.</p>
           </div>
         </div>
 
