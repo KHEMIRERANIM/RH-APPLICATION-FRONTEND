@@ -248,74 +248,39 @@
         </div>
       </div>
 
-      <!-- NEW: HUD SOFT-SKILLS (Fifa style) -->
-      <div class="mt-4 bg-gray-900 rounded-3xl p-6 shadow-2xl relative overflow-hidden text-white" *ngIf="selectedCandidature.scoreLeadership">
-        <div class="absolute -top-10 -right-10 p-4 opacity-5 transform rotate-12">
-           <mat-icon [svgIcon]="'heroicons_outline:sparkles'" class="icon-size-48"></mat-icon>
-        </div>
-        
-        <h3 class="text-xl font-black mb-6 flex items-center gap-3">
-          <div class="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl shadow-lg">
+      <!-- NEW: PREMIUM PSYCHOMETRIC RADAR -->
+      <div class="mt-4 bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl border border-gray-100 flex flex-col items-center" *ngIf="selectedCandidature.scoreLeadership">
+        <h3 class="text-xl font-black mb-2 flex items-center gap-3 w-full text-gray-800">
+          <div class="p-2 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl shadow-lg">
             <mat-icon class="text-white icon-size-5" [svgIcon]="'heroicons_outline:cpu-chip'"></mat-icon>
           </div>
-          Profil Psychologique (IA)
+          Intelligence Psychométrique
         </h3>
+        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest w-full mb-6">Profil Soft-Skills généré par l'IA</p>
         
-        <div class="grid grid-cols-1 gap-5">
-          <!-- Leadership -->
-          <div>
-            <div class="flex justify-between text-xs font-bold mb-1.5 uppercase tracking-wider text-gray-400">
-              <span>Leadership & Management</span>
-              <span class="text-yellow-400 font-black text-sm">{{selectedCandidature.scoreLeadership}}</span>
-            </div>
-            <div class="h-2.5 bg-gray-800 rounded-full overflow-hidden shadow-inner flex">
-               <div class="h-full bg-gradient-to-r from-yellow-600 to-yellow-400 shadow-[0_0_10px_rgba(250,204,21,0.8)]" [style.width.%]="selectedCandidature.scoreLeadership"></div>
-            </div>
-          </div>
+        <div id="chart" class="w-full flex justify-center">
+            <apx-chart
+              [series]="radarChartOptions.series"
+              [chart]="radarChartOptions.chart"
+              [xaxis]="radarChartOptions.xaxis"
+              [stroke]="radarChartOptions.stroke"
+              [colors]="radarChartOptions.colors"
+              [fill]="radarChartOptions.fill"
+              [markers]="radarChartOptions.markers"
+              [plotOptions]="radarChartOptions.plotOptions"
+              class="w-full"
+            ></apx-chart>
+        </div>
 
-          <!-- Innovation -->
-          <div>
-            <div class="flex justify-between text-xs font-bold mb-1.5 uppercase tracking-wider text-gray-400">
-              <span>Innovation & Créativité</span>
-              <span class="text-pink-400 font-black text-sm">{{selectedCandidature.scoreInnovation}}</span>
+        <div class="grid grid-cols-2 gap-3 w-full mt-4">
+            <div class="bg-gray-50 p-2 rounded-xl border border-gray-100 flex flex-col items-center">
+                <span class="text-[9px] font-black text-gray-400 uppercase">Leadership</span>
+                <span class="text-sm font-black text-indigo-600">{{selectedCandidature.scoreLeadership}}%</span>
             </div>
-            <div class="h-2.5 bg-gray-800 rounded-full overflow-hidden shadow-inner flex">
-               <div class="h-full bg-gradient-to-r from-pink-600 to-pink-400 shadow-[0_0_10px_rgba(244,114,182,0.8)]" [style.width.%]="selectedCandidature.scoreInnovation"></div>
+            <div class="bg-gray-50 p-2 rounded-xl border border-gray-100 flex flex-col items-center">
+                <span class="text-[9px] font-black text-gray-400 uppercase">Innovation</span>
+                <span class="text-sm font-black text-pink-600">{{selectedCandidature.scoreInnovation}}%</span>
             </div>
-          </div>
-
-          <!-- Empathie -->
-          <div>
-            <div class="flex justify-between text-xs font-bold mb-1.5 uppercase tracking-wider text-gray-400">
-              <span>Empathie & Écoute</span>
-              <span class="text-blue-400 font-black text-sm">{{selectedCandidature.scoreEmpathie}}</span>
-            </div>
-            <div class="h-2.5 bg-gray-800 rounded-full overflow-hidden shadow-inner flex">
-               <div class="h-full bg-gradient-to-r from-blue-600 to-blue-400 shadow-[0_0_10px_rgba(96,165,250,0.8)]" [style.width.%]="selectedCandidature.scoreEmpathie"></div>
-            </div>
-          </div>
-
-          <!-- Adaptabilité -->
-          <div>
-            <div class="flex justify-between text-xs font-bold mb-1.5 uppercase tracking-wider text-gray-400">
-              <span>Agilité & Adaptabilité</span>
-              <span class="text-green-400 font-black text-sm">{{selectedCandidature.scoreAdaptabilite}}</span>
-            </div>
-            <div class="h-2.5 bg-gray-800 rounded-full overflow-hidden shadow-inner flex">
-               <div class="h-full bg-gradient-to-r from-green-600 to-green-400 shadow-[0_0_10px_rgba(74,222,128,0.8)]" [style.width.%]="selectedCandidature.scoreAdaptabilite"></div>
-            </div>
-          </div>
-
-          <!-- Communication -->
-          <div>
-            <div class="flex justify-between text-xs font-bold mb-1.5 uppercase tracking-wider text-gray-400">
-              <span>Communication & Éloquence</span>
-              <span class="text-purple-400 font-black text-sm">{{selectedCandidature.scoreCommunication}}</span>
-            </div>
-            <div class="h-2.5 bg-gray-800 rounded-full overflow-hidden shadow-inner flex">
-               <div class="h-full bg-gradient-to-r from-purple-600 to-purple-400 shadow-[0_0_10px_rgba(192,132,252,0.8)]" [style.width.%]="selectedCandidature.scoreCommunication"></div>
-            </div>
-          </div>
         </div>
       </div>
 

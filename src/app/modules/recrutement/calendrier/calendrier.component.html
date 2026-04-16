@@ -193,17 +193,28 @@
 
           <div class="flex flex-col gap-3">
             <div *ngFor="let e of selectedJour.entretiens"
-              class="p-4 rounded-2xl border border-gray-200 shadow-sm cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
+              class="p-4 rounded-2xl border border-gray-200 shadow-sm cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 bg-white"
               (click)="selectionnerEntretien(e)">
-              <div class="flex items-center flex-wrap gap-2 mb-2">
-                <span class="text-lg">{{ getIconType(e.type) }}</span>
-                <span class="text-sm font-bold text-gray-800">{{ e.dateHeure | date:'HH:mm' }}</span>
-                <span class="px-2 py-0.5 rounded-full text-xs font-bold border ml-auto"
-                  [ngClass]="getBadgeStatut(e.statut)">
-                  {{ e.statut }}
-                </span>
+              <div class="flex items-center gap-4">
+                <div class="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-xl shrink-0">{{ getIconType(e.type) }}</div>
+                <div class="flex flex-col flex-auto min-w-0">
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm font-bold text-gray-800">{{ e.dateHeure | date:'HH:mm' }}</span>
+                    <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase border ml-auto"
+                      [ngClass]="getBadgeStatut(e.statut)">
+                      {{ e.statut }}
+                    </span>
+                  </div>
+                  <div class="text-[10px] font-bold text-secondary uppercase tracking-widest mt-0.5">{{ e.dureeMinutes }} min</div>
+                </div>
+                
+                <!-- NEW: Action Button -->
+                <button *ngIf="e.lienVisio && e.statut === 'PLANIFIE'" mat-icon-button 
+                  class="bg-green-50 text-green-600 rounded-lg hover:bg-green-600 hover:text-white transition-all"
+                  (click)="rejoindreMeet(e.lienVisio); $event.stopPropagation()" matTooltip="Rejoindre Meet">
+                  <mat-icon [svgIcon]="'heroicons_outline:video-camera'" class="icon-size-5"></mat-icon>
+                </button>
               </div>
-              <div class="text-xs font-medium text-secondary bg-gray-50 w-fit px-2 py-1 rounded-md">{{ e.dureeMinutes }} min</div>
             </div>
           </div>
         </div>

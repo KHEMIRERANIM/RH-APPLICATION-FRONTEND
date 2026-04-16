@@ -5,45 +5,38 @@
     width: 100%;
 }
 
-.animate-spin-slow {
-    animation: spin 8s linear infinite;
+// Entrance Animations
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+.group, section, .bg-white {
+    animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.backdrop-blur-md {
+section:nth-child(1) { animation-delay: 0.1s; }
+section:nth-child(2) { animation-delay: 0.2s; }
+section:nth-child(3) { animation-delay: 0.3s; }
+
+// Glassmorphism System
+.glass-effect {
+    background: rgba(255, 255, 255, 0.7);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
-.animate-pulse {
-    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: .5; }
-}
-
-.bg-white\/70 {
-    background-color: rgba(255, 255, 255, 0.7);
-}
-
-.rounded-\[2rem\] {
-    border-radius: 2rem;
-}
-
-.rounded-\[2\.5rem\] {
-    border-radius: 2.5rem;
-}
-
-/* Scrollbar styles for consistent premium look */
+// Scrollbar styles for consistent premium look
 ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
 }
 
 ::-webkit-scrollbar-track {

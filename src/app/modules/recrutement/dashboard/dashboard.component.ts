@@ -4,6 +4,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { forkJoin } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { OffreService } from '../services/offre.service';
+import { CandidatureService } from '../services/candidature.service';
 import { EntretienService } from '../services/entretien.service';
 import { NotificationsService } from 'app/layout/common/notifications/notifications.service';
 import { AuthService } from 'app/core/auth/auth.service';
@@ -50,6 +51,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   funnelChartOptions: Partial<ChartOptions>;
   departementChartOptions: Partial<ChartOptions>;
   topCandidats: any[] = [];
+  smartAlerts: any[] = [];
   aiInsight: string = "";
 
   loading = true;
@@ -87,6 +89,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   constructor(
     private offreService: OffreService,
+    private candidatureService: CandidatureService,
     private entretienService: EntretienService,
     private notificationsService: NotificationsService,
     private _snackBar: MatSnackBar,
@@ -139,6 +142,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.tousEntretiens = entretiens;
         this.initCharts();
         this.generateAiInsight();
+        
+        // Fetch real candidatures for Top Talents
+        if (this.offres.length > 0) {
+          const candRequests = this.offres.slice(0, 5).map(o => this.candidatureService.getCandidaturesParOffre(o.id));
+          forkJoin(candRequests).subscribe(allCands => {
+            const flatCands = allCands.flat();
+            this.generateTopCandidatsReal(flatCands);
+            this.generateSmartAlertsReal(flatCands);
+          });
+        }
+
         this.loading = false;
         this.checkEntretienAlerts();
         this._alertInterval = setInterval(() => this.checkEntretienAlerts(), 60000);
@@ -163,7 +177,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       ],
       chart: {
         type: "bar",
-        height: 350,
+        height: 320,
         toolbar: { show: false }
       },
       plotOptions: {
@@ -214,12 +228,75 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private generateAiInsight(): void {
     const activeOffres = this.offresPubliees;
     if (activeOffres === 0) {
-      this.aiInsight = "Vous n'avez aucune offre publiée. La visibilité de votre entreprise est faible actuellement.";
+      this.aiInsight = "Visibilité faible : aucune offre active. Publiez des postes pour attirer des talents.";
     } else if (this.totalCandidatures / activeOffres < 2) {
-      this.aiInsight = "Le volume de candidatures est faible par rapport à vos besoins. Pensez à réviser vos descriptions de postes ou à les promouvoir.";
+      this.aiInsight = "Sourcing à optimiser : volume de candidatures faible. Revoyez vos critères de segmentation.";
     } else {
-      this.aiInsight = "Votre pipeline de recrutement est sain. Focus recommandé : la phase d'entretiens pour les offres 'High-Match'.";
+      this.aiInsight = "Pipeline sain : focus recommandé sur les entretiens techniques des profils 'Elite'.";
     }
+  }
+
+  private generateSmartAlertsReal(candidatures: any[]): void {
+    const alerts = [];
+    
+    // 1. Alert Urgent: Entretien imminent (moins d'1h)
+    const now = new Date().getTime();
+    const imminent = this.entretiensAVenir.find(e => {
+        const diff = new Date(e.dateHeure).getTime() - now;
+        return diff > 0 && diff < 3600000;
+    });
+    if (imminent) {
+        alerts.push({
+            type: 'URGENT',
+            title: 'Entretien imminent',
+            message: `Votre entretien ${imminent.type} commence bientôt.`,
+            icon: 'heroicons_outline:clock',
+            color: 'bg-red-500',
+            textColor: 'text-red-700'
+        });
+    }
+
+    // 2. Alert Match: Candidat avec score élevé
+    const topMatch = candidatures.find(c => c.scoreMatching > 90);
+    if (topMatch) {
+        alerts.push({
+            type: 'MATCH',
+            title: 'Haut Potentiel !',
+            message: `Un candidat vient de postuler avec un score de ${topMatch.scoreMatching.toFixed(0)}%.`,
+            icon: 'heroicons_outline:sparkles',
+            color: 'bg-indigo-500',
+            textColor: 'text-indigo-700'
+        });
+    }
+
+    // 3. Diversité (Mock car data non dispo, mais basé sur volume)
+    if (this.totalCandidatures > 20) {
+        alerts.push({
+            type: 'BIAS',
+            title: 'Alerte Sourcing',
+            message: 'Le pipeline est saturé pour "Développeur", diversifiez vos offres.',
+            icon: 'heroicons_outline:exclamation-triangle',
+            color: 'bg-amber-500',
+            textColor: 'text-amber-700'
+        });
+    }
+
+    this.smartAlerts = alerts.length > 0 ? alerts : [
+        { type: 'INFO', title: 'Dashboard prêt', message: 'Toutes les données sont synchronisées.', icon: 'heroicons_outline:check', color: 'bg-green-500', textColor: 'text-green-700' }
+    ];
+  }
+
+  private generateTopCandidatsReal(candidatures: any[]): void {
+    const sorted = [...candidatures]
+      .sort((a, b) => b.scoreMatching - a.scoreMatching)
+      .slice(0, 4);
+
+    this.topCandidats = sorted.map(c => ({
+      name: `Candidat #${c.id.substring(c.id.length - 4)}`,
+      score: c.scoreMatching.toFixed(0),
+      role: this.offres.find(o => o.id === c.offreId)?.titre || 'Poste RH',
+      avatar: `https://i.pravatar.cc/150?u=${c.id}`
+    }));
   }
 
   ngOnDestroy(): void {

@@ -57,6 +57,13 @@ export class CandidatureService {
     return this.http.delete<void>(`${this.api}/${id}`);
   }
 
+  modifierCandidature(id: string, cv?: File, lettre?: File): Observable<Candidature> {
+    const formData = new FormData();
+    if (cv) formData.append('cv', cv);
+    if (lettre) formData.append('lettre', lettre);
+    return this.http.put<Candidature>(`${this.api}/${id}`, formData);
+  }
+
   analyzeSpeechPython(text: string): Observable<any> {
     return this.http.post<any>('http://localhost:5000/analyze-speech', { text });
   }

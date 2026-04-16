@@ -1,4 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import {
+  ApexAxisChartSeries,
+  ApexTitleSubtitle,
+  ApexChart,
+  ApexXAxis,
+  ApexStroke,
+  ApexFill,
+  ApexMarkers,
+  ApexPlotOptions,
+  ChartComponent
+} from "ng-apexcharts";
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { CandidatureService } from '../services/candidature.service';
@@ -16,6 +27,17 @@ import {
   ChangerStatutRequest,
 } from '../models/recrutement.models';
 
+export type ChartOptions = {
+  series: ApexAxisChartSeries;
+  chart: ApexChart;
+  title: ApexTitleSubtitle;
+  stroke: ApexStroke;
+  fill: ApexFill;
+  markers: ApexMarkers;
+  xaxis: ApexXAxis;
+  plotOptions: ApexPlotOptions;
+};
+
 @Component({
   selector: 'app-pipeline',
   templateUrl: './pipeline.component.html',
@@ -31,6 +53,10 @@ export class PipelineComponent implements OnInit {
   notesText = '';
   savingNotes = false;
   changingStatut = false;
+
+  // ApexCharts Radar
+  @ViewChild("chart") chart: ChartComponent | undefined;
+  public radarChartOptions: Partial<ChartOptions> | any;
 
   // Modernization: Sort & Analytics
   columnSortMap: Record<string, 'SCORE' | 'DATE'> = {
@@ -57,7 +83,9 @@ export class PipelineComponent implements OnInit {
     private candidatureService: CandidatureService,
     private offreService: OffreService,
     private authService: AuthService,
-  ) {}
+  ) {
+    this.initRadarChart();
+  }
 
   ngOnInit(): void {
     const offreId = this.route.snapshot.paramMap.get('offreId');
@@ -132,6 +160,83 @@ export class PipelineComponent implements OnInit {
   selectCandidature(c: Candidature): void {
     this.selectedCandidature = c;
     this.notesText = c.notesRecruteur || '';
+    this.updateRadarChart(c);
+  }
+
+  private initRadarChart(): void {
+    this.radarChartOptions = {
+      series: [
+        {
+          name: "Score IA",
+          data: [0, 0, 0, 0, 0]
+        }
+      ],
+      chart: {
+        height: 300,
+        type: "radar",
+        toolbar: { show: false },
+        dropShadow: {
+            enabled: true,
+            blur: 8,
+            left: 1,
+            top: 1,
+            opacity: 0.2
+        }
+      },
+      plotOptions: {
+        radar: {
+          polygons: {
+            strokeColors: "#e8e8e8",
+            fill: {
+              colors: ["#f8f8f8", "#fff"]
+            }
+          }
+        }
+      },
+      title: {
+        text: ""
+      },
+      stroke: {
+        width: 3,
+        colors: ["#4F46E5"] // Indigo-600
+      },
+      fill: {
+        opacity: 0.4,
+        colors: ["#4F46E5"]
+      },
+      markers: {
+        size: 4,
+        colors: ["#fff"],
+        strokeColors: ["#4F46E5"],
+        strokeWidth: 2
+      },
+      xaxis: {
+        categories: ["Leadership", "Innovation", "Empathie", "Adaptabilité", "Communication"],
+        labels: {
+            show: true,
+            style: {
+                colors: ["#64748b", "#64748b", "#64748b", "#64748b", "#64748b"],
+                fontSize: "11px",
+                fontWeight: 800
+            }
+        }
+      }
+    };
+  }
+
+  private updateRadarChart(c: Candidature): void {
+    if (!c.scoreLeadership) return;
+    
+    this.radarChartOptions.series = [{
+      name: "Score IA",
+      data: [
+        c.scoreLeadership,
+        c.scoreInnovation,
+        c.scoreEmpathie,
+        c.scoreAdaptabilite,
+        c.scoreCommunication
+      ]
+    }];
   }
 
   closePanel(): void {

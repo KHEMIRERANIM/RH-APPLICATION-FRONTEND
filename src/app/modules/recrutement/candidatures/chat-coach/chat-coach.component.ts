@@ -190,7 +190,12 @@ export class ChatCoachComponent implements OnInit, AfterViewChecked, OnDestroy {
         setTimeout(() => {
           this.isTyping = false;
           this.messages.push({ sender: 'bot', text: res.reply });
-          this.speakText(res.reply);
+          
+          // Voice output (Cleaned from special tag symbols for better speech)
+          const voiceText = res.reply
+            .replace(/💡 \[Note RSE\] :/g, "Information importante sur notre engagement éthique.")
+            .replace(/🎓 \[Action Formation\] :/g, "Conseil de formation pour votre réussite :");
+          this.speakText(voiceText);
         }, 800);
       },
       error: (err) => {
