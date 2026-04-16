@@ -22,7 +22,8 @@ import {
   ApexYAxis,
   ApexFill,
   ApexLegend,
-  ApexPlotOptions
+  ApexPlotOptions,
+  ApexMarkers
 } from "ng-apexcharts";
 
 export type ChartOptions = {
@@ -39,6 +40,7 @@ export type ChartOptions = {
   labels?: string[];
   legend?: ApexLegend;
   title?: ApexTitleSubtitle;
+  markers?: ApexMarkers;
 };
 
 @Component({
@@ -50,9 +52,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   funnelChartOptions: Partial<ChartOptions>;
   departementChartOptions: Partial<ChartOptions>;
+  radarChartOptions: Partial<ChartOptions>;
   topCandidats: any[] = [];
   smartAlerts: any[] = [];
   aiInsight: string = "";
+  selectedCandidat: any = null;
+  showDetails: boolean = false;
 
   loading = true;
   offres: Offre[] = [];
@@ -223,6 +228,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
         }
       }
     };
+
+    // 3. RADAR CHART (Soft Skills Initial State)
+    this.radarChartOptions = {
+      series: [{ name: 'Scores', data: [0, 0, 0, 0, 0] }],
+      chart: { type: 'radar', height: 280, toolbar: { show: false } },
+      xaxis: { categories: ['Leadership', 'Innovation', 'Émpathie', 'Adaptation', 'Communication'] },
+      colors: ['#6366f1'],
+      fill: { opacity: 0.2, colors: ['#6366f1'] },
+      markers: { size: 4, colors: ['#6366f1'], strokeWidth: 2 }
+    };
   }
 
   private generateAiInsight(): void {
@@ -265,7 +280,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
             message: `Un candidat vient de postuler avec un score de ${topMatch.scoreMatching.toFixed(0)}%.`,
             icon: 'heroicons_outline:sparkles',
             color: 'bg-indigo-500',
-            textColor: 'text-indigo-700'
+            textColor: 'text-indigo-700',
+            link: topMatch.id
         });
     }
 
@@ -292,11 +308,33 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .slice(0, 4);
 
     this.topCandidats = sorted.map(c => ({
+      id: c.id,
       name: `Candidat #${c.id.substring(c.id.length - 4)}`,
       score: c.scoreMatching.toFixed(0),
       role: this.offres.find(o => o.id === c.offreId)?.titre || 'Poste RH',
-      avatar: `https://i.pravatar.cc/150?u=${c.id}`
+      avatar: `https://i.pravatar.cc/150?u=${c.id}`,
+      original: c, // Keep full object for details
+      radarData: [
+        c.scoreLeadership || 75,
+        c.scoreInnovation || 80,
+        c.scoreEmpathie || 90,
+        c.scoreAdaptabilite || 85,
+        c.scoreCommunication || 70
+      ]
     }));
+  }
+
+  openCandidatDetails(talent: any): void {
+    this.selectedCandidat = talent;
+    this.radarChartOptions.series = [{
+       name: talent.name,
+       data: talent.radarData
+    }];
+    this.showDetails = true;
+  }
+
+  closeDetails(): void {
+    this.showDetails = false;
   }
 
   ngOnDestroy(): void {
@@ -305,12 +343,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Navigation
-  voirPipeline(offre: Offre): void {
-    this.router.navigate(['/recrutement/admin/pipeline', offre.id]);
+  voirPipeline(item: any): void {
+    const id = typeof item === 'string' ? item : (item?.id || 'all');
+    this.router.navigate(['/recrutement/admin/pipeline', id]);
   }
 
-  modifierOffre(offre: Offre): void {
+  modifierOffre(offre: any): void {
     this.router.navigate(['/recrutement/admin/offres/modifier', offre.id]);
   }
 
