@@ -22,6 +22,8 @@ export class OffreDetailDialogComponent implements OnInit {
     prixTotal  = 0;
     nuitsH = 0;
     confirmationStep = false;
+    isUrgent = false; // Flag pointant la prédiction de l'Intelligence Artificielle
+    probaRupture = 0; // Pourcentage calculé par le modèle XGBoost
 
     constructor(
         private _fb      : FormBuilder,
@@ -64,6 +66,19 @@ export class OffreDetailDialogComponent implements OnInit {
 
         this._calculateTotal();
         this.form.valueChanges.subscribe(() => this._calculateTotal());
+
+        // 🤖 Évaluation intelligente du risque de rupture de stock via ML
+        this._svc.evaluerUrgence(this.offre.id!).subscribe({
+            next: (res) => {
+                if (res && res.urgence) {
+                    this.isUrgent = true;
+                    this.probaRupture = Math.round(res.probabilite_rupture * 100); // Ex: 0.85 -> 85
+                }
+            },
+            error: (err) => {
+                console.warn("L'analyse prédictive via l'IA est indisponible ou l'historique est insuffisant.");
+            }
+        });
     }
 
     private _calculateTotal(): void {

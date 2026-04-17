@@ -71,6 +71,27 @@
             color          : white;
             backdrop-filter: blur(8px);
         }
+
+        .urgency-badge {
+            display        : flex;
+            align-items    : center;
+            gap            : 4px;
+            padding        : 0.25rem 0.85rem;
+            border-radius  : 100px;
+            font-size      : 0.75rem;
+            font-weight    : 800;
+            background     : linear-gradient(135deg, #ef4444, #f97316); /* Dégradé premium rouge-orangé */
+            color          : white;
+            border         : 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow     : 0 0 12px rgba(249, 115, 22, 0.6);
+            animation      : pulse-urgency 2s infinite;
+
+            .fire-icon {
+                width : 16px;
+                height: 16px;
+                color : #ffffff;
+            }
+        }
     }
 
     .close-btn {
@@ -184,6 +205,72 @@
             font-size: 20px;
             width    : 20px;
             height   : 20px;
+        }
+    }
+}
+
+// ── Alerte Intelligence Artificielle ─────────────────────────
+.ia-alert {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: linear-gradient(to right, #fff1f2, #ffffff);
+    border: 1px solid #fecdd3;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(225, 29, 72, 0.05);
+
+    .ia-alert-decor {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 4px;
+        background: linear-gradient(to bottom, #f43f5e, #fb923c);
+    }
+
+    .ia-alert-icon {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: #ffe4e6;
+        color: #e11d48;
+
+        mat-icon {
+            width: 20px;
+            height: 20px;
+        }
+    }
+
+    .ia-alert-content {
+        flex: 1;
+
+        .ia-alert-title {
+            margin: 0 0 0.25rem 0;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #be123c;
+            letter-spacing: 0.02em;
+        }
+
+        .ia-alert-text {
+            margin: 0;
+            font-size: 0.85rem;
+            color: #4c0519;
+            line-height: 1.5;
+
+            strong {
+                font-weight: 800;
+                color: #e11d48;
+                font-size: 0.9rem;
+            }
         }
     }
 }
@@ -409,3 +496,10 @@
     from { opacity: 0; transform: translateY(12px); }
     to   { opacity: 1; transform: translateY(0); }
 }
+
+@keyframes pulse-urgency {
+    0% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.7); }
+    70% { box-shadow: 0 0 0 8px rgba(249, 115, 22, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); }
+}
+

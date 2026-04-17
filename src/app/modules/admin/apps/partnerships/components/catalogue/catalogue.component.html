@@ -136,6 +136,12 @@
                     -{{ getEconomie(offre) | number:'1.0-0' }} DT
                 </span>
 
+                <!-- 🤖 Ruban créatif I.A (Surgit si risque élevé) -->
+                <div class="ia-ribbon" *ngIf="urgenceMap[offre.id]">
+                    <mat-icon svgIcon="heroicons_solid:fire"></mat-icon>
+                    <span>Forte demande : {{ urgenceMap[offre.id] }}%</span>
+                </div>
+
                 <!-- Bouton Cœur (Favori) -->
                 <button mat-icon-button class="btn-favori" 
                         (click)="toggleFavori(offre, $event)"

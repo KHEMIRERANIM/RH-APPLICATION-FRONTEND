@@ -26,6 +26,7 @@ export class CatalogueComponent implements OnInit, OnDestroy {
     isAdmin = false;
     favoriMap: { [idOffre: string]: boolean } = {};
     isTogglingFavori: { [idOffre: string]: boolean } = {};
+    urgenceMap: { [idOffre: string]: number } = {}; // 🤖 Map de l'IA (Taux de rupture)
 
     filters: { key: FilterType; label: string; icon: string }[] = [
         { key: 'TOUS',     label: 'Toutes',    icon: 'heroicons_outline:view-grid'        },
@@ -74,6 +75,19 @@ export class CatalogueComponent implements OnInit, OnDestroy {
                     this.kpis.totalOffres = offres.length;
                     this.kpis.placesTotal = offres.reduce((acc, o) => acc + (o.nbPlacesDispo || 0), 0);
                     if (this.isAdmin) { this._loadPartenaires(); }
+
+                    // 🤖 Évaluation asynchrone IA de la demande pour chaque offre affichée
+                    this.offres.forEach(offre => {
+                        if (offre.id) {
+                            this._svc.evaluerUrgence(offre.id).subscribe({
+                                next: (res) => {
+                                    if (res && res.urgence) {
+                                        this.urgenceMap[offre.id!] = Math.round(res.probabilite_rupture * 100);
+                                    }
+                                }
+                            });
+                        }
+                    });
                 },
                 error: () => this._toastr.error('Erreur lors du chargement des offres', 'Erreur')
             });

@@ -13,6 +13,11 @@
             <span class="eco-badge" *ngIf="getEconomie() > 0">
                 Économisez {{ getEconomie() | number:'1.0-0' }} DT
             </span>
+            <!-- 🤖 Badge Intelligence Artificielle (Demand Forecasting) -->
+            <span class="urgency-badge" *ngIf="isUrgent">
+                <mat-icon svgIcon="heroicons_solid:fire" class="fire-icon"></mat-icon>
+                Forte demande (IA)
+            </span>
         </div>
         <button mat-icon-button class="close-btn" (click)="fermer()">
             <mat-icon svgIcon="heroicons_outline:x"></mat-icon>
@@ -60,6 +65,18 @@
             <div class="price-convention" *ngIf="isHotel">
                 <span class="price-label">Dès / adulte / nuit</span>
                 <span class="price-value highlight">{{ offre.detailsHotel?.prixAdulte | number:'1.0-2' }} DT</span>
+            </div>
+        </div>
+
+        <!-- 🤖 Warning IA -->
+        <div class="ia-alert" *ngIf="isUrgent">
+            <div class="ia-alert-decor"></div>
+            <div class="ia-alert-icon">
+                <mat-icon svgIcon="heroicons_solid:sparkles"></mat-icon>
+            </div>
+            <div class="ia-alert-content">
+                <h4 class="ia-alert-title">Diagnostic de l'Intelligence Artificielle</h4>
+                <p class="ia-alert-text">Selon l'historique de notre entreprise et les algorithmes prédictifs, le risque de rupture de stock sur cette offre atteint <strong>{{ probaRupture }}%</strong>. Il vous est conseillé de réserver dès aujourd'hui.</p>
             </div>
         </div>
 

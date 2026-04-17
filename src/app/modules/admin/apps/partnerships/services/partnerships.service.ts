@@ -77,6 +77,11 @@ export class PartnershipsService {
         return this._http.get<Offre>(`${this.BASE_URL}/offres/${id}`);
     }
 
+    /** GET /api/offres/{id}/urgence — ADMIN + EMPLOYÉ */
+    evaluerUrgence(id: string): Observable<{ urgence: boolean; probabilite_rupture: number }> {
+        return this._http.get<{ urgence: boolean; probabilite_rupture: number }>(`${this.BASE_URL}/offres/${id}/urgence`);
+    }
+
     /** GET /api/offres/partenaire/{idPartenaire} — ADMIN */
     getOffresByPartenaire(idPartenaire: string): Observable<Offre[]> {
         return this._http.get<Offre[]>(`${this.BASE_URL}/offres/partenaire/${idPartenaire}`);

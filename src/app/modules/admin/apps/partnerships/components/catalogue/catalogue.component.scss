@@ -475,6 +475,32 @@ $border      : #e2e8f0;
         backdrop-filter: blur(8px);
         animation    : pulse 2s ease-in-out infinite;
     }
+
+    .ia-ribbon {
+        position      : absolute;
+        top           : 44px;
+        left          : 0;
+        display       : flex;
+        align-items   : center;
+        gap           : 6px;
+        background    : linear-gradient(135deg, #f43f5e 0%, #fb923c 100%);
+        color         : white;
+        padding       : 0.35rem 0.85rem 0.35rem 0.75rem;
+        font-size     : 0.7rem;
+        font-weight   : 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border-radius : 0 100px 100px 0;
+        box-shadow    : 0 4px 12px rgba(243, 63, 94, 0.4);
+        z-index       : 10;
+        animation     : slideInRibbon 0.5s ease-out, pulseRibbon 2s infinite alternate;
+
+        mat-icon {
+            width : 14px;
+            height: 14px;
+            color : #fff;
+        }
+    }
 }
 
 // ── Corps Carte ───────────────────────────────────────────
@@ -672,4 +698,14 @@ $border      : #e2e8f0;
 @keyframes pulse {
     0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
     50%       { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);  }
+}
+
+@keyframes slideInRibbon {
+    from { transform: translateX(-100%); opacity: 0; }
+    to   { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes pulseRibbon {
+    from { box-shadow: 0 4px 12px rgba(243, 63, 94, 0.4); }
+    to   { box-shadow: 0 0 20px rgba(243, 63, 94, 0.9); }
 }
