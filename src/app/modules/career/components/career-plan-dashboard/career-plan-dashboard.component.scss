@@ -1,0 +1,73 @@
+@use '../../styles/career-theme' as career;
+
+/* NOTE:
+   This template currently uses inline styles heavily.
+   This SCSS improves what we can: page background, card hover, and focus rings. */
+
+:host {
+  display: block;
+}
+
+:host ::ng-deep .career-plan-admin {
+  border-radius: 18px;
+  background:
+    radial-gradient(1200px 420px at 10% -10%, rgba(59, 130, 246, 0.18), transparent 55%),
+    radial-gradient(900px 380px at 90% 0%, rgba(37, 99, 235, 0.14), transparent 55%),
+    radial-gradient(700px 320px at 40% 110%, rgba(99, 102, 241, 0.10), transparent 55%);
+}
+
+/* Admin plan page header -> navy strip effect */
+:host ::ng-deep .career-plan-admin > div:first-child {
+  position: relative;
+  border-radius: 18px;
+  padding: 18px 18px 16px !important;
+  background:
+    radial-gradient(1200px 420px at 20% -20%, rgba(255, 255, 255, 0.18), transparent 55%),
+    radial-gradient(900px 360px at 85% 0%, rgba(59, 130, 246, 0.35), transparent 60%),
+    linear-gradient(135deg, #0b1b3a 0%, #0a255a 35%, #0b3a7a 100%) !important;
+  border: 1px solid rgba(59, 130, 246, 0.22) !important;
+  box-shadow:
+    0 18px 55px rgba(2, 6, 23, 0.25),
+    0 1px 0 rgba(255, 255, 255, 0.06) inset !important;
+  overflow: hidden;
+}
+
+:host ::ng-deep .career-plan-admin > div:first-child > div:first-child h2,
+:host ::ng-deep .career-plan-admin > div:first-child > div:first-child p {
+  color: rgba(255, 255, 255, 0.92) !important;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.22);
+}
+
+:host ::ng-deep .career-plan-admin > div:first-child > div:first-child p {
+  color: rgba(226, 232, 240, 0.84) !important;
+}
+
+/* KPI boxes on the right: keep them readable + a bit more "premium" */
+:host ::ng-deep .career-plan-admin > div:first-child > div:last-child > div {
+  border: 1px solid rgba(255, 255, 255, 0.35) !important;
+  box-shadow:
+    0 14px 30px rgba(2, 6, 23, 0.18),
+    0 1px 0 rgba(255, 255, 255, 0.06) inset !important;
+  backdrop-filter: blur(6px);
+}
+
+/* Make all "white cards" feel consistent when inline border/box-shadow exist */
+:host ::ng-deep [style*="background:white"][style*="border-radius:16px"] {
+  border: 1px solid rgba(148, 163, 184, 0.25) !important;
+  box-shadow: career.$career-shadow !important;
+}
+
+:host ::ng-deep [style*="background:white"][style*="border-radius:16px"]:hover {
+  border-color: rgba(59, 130, 246, 0.28) !important;
+  box-shadow:
+    0 14px 36px rgba(2, 6, 23, 0.10),
+    0 1px 0 rgba(2, 6, 23, 0.03) !important;
+}
+
+:host ::ng-deep button,
+:host ::ng-deep input,
+:host ::ng-deep select,
+:host ::ng-deep textarea {
+  @include career.career-focus-ring;
+}
+

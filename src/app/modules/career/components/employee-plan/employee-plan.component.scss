@@ -1,3 +1,13 @@
+@use '../../styles/career-theme' as career;
+
+.employee-plan-shell {
+  border-radius: 18px;
+  background:
+    radial-gradient(1200px 420px at 10% -10%, rgba(59, 130, 246, 0.16), transparent 55%),
+    radial-gradient(900px 380px at 90% 0%, rgba(37, 99, 235, 0.12), transparent 55%),
+    radial-gradient(700px 320px at 40% 110%, rgba(99, 102, 241, 0.10), transparent 55%);
+}
+
 .employee-plan {
   display: flex;
   flex-direction: column;
@@ -269,4 +279,25 @@
   }
 
   &__empty { text-align: center; padding: 32px; color: #9ca3af; font-size: 14px; }
+}
+
+/* While the template still has lots of inline styles,
+   make the main white panels feel consistent + dynamic. */
+:host ::ng-deep .employee-plan-shell [style*="background:white"][style*="border-radius:16px"] {
+  border: 1px solid rgba(148, 163, 184, 0.25) !important;
+  box-shadow: career.$career-shadow !important;
+}
+
+:host ::ng-deep .employee-plan-shell [style*="background:white"][style*="border-radius:16px"]:hover {
+  border-color: rgba(59, 130, 246, 0.28) !important;
+  box-shadow:
+    0 14px 36px rgba(2, 6, 23, 0.10),
+    0 1px 0 rgba(2, 6, 23, 0.03) !important;
+}
+
+:host ::ng-deep .employee-plan-shell button,
+:host ::ng-deep .employee-plan-shell input,
+:host ::ng-deep .employee-plan-shell select,
+:host ::ng-deep .employee-plan-shell textarea {
+  @include career.career-focus-ring;
 }

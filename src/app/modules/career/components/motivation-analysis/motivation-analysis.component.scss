@@ -1,0 +1,24 @@
+@use '../../styles/career-theme' as career;
+
+/* Motivation analysis panel (template mostly inline; this enhances animations + focus) */
+:host {
+  display: block;
+}
+
+:host ::ng-deep button {
+  @include career.career-focus-ring;
+  transition: transform 140ms ease, box-shadow 160ms ease, opacity 160ms ease;
+}
+
+:host ::ng-deep button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 26px rgba(2, 6, 23, 0.10);
+}
+
+/* Smooth progress bars */
+:host ::ng-deep [style*="transition:width"],
+:host ::ng-deep [style*="transition:width .5s"],
+:host ::ng-deep [style*="transition:width .4s"] {
+  will-change: width;
+}
+

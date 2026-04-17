@@ -20,17 +20,16 @@ export class CareerListComponent implements OnInit, AfterViewInit {
 
   displayedColumns: string[] = ['title', 'domain', 'level', 'salary', 'options', 'actions'];
   dataSource = new MatTableDataSource<Career>();
-  isLoading = true;
+  isLoading  = true;
 
   activeTab = 0;
   tabs: { icon: string; label: string }[] = [];
 
-  total          = 0;
-  totalRemote    = 0;
-  totalDisabled  = 0;
+  total           = 0;
+  totalRemote     = 0;
+  totalDisabled   = 0;
   totalSeniorPlus = 0;
 
-  // ✅ Stocker tous les careers pour les passer au formulaire de mobilité
   allCareers: Career[] = [];
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -106,10 +105,12 @@ export class CareerListComponent implements OnInit, AfterViewInit {
 
   buildTabs(): void {
     if (this.authRole.isAdminOrRH()) {
+      // ✅ Dashboard en premier pour l'admin
       this.tabs = [
-        { icon: '💼', label: 'Positions' },
-        { icon: '🔄', label: 'Mobilité'  },
-        { icon: '📈', label: 'Plans'     }
+        { icon: '📊', label: 'Dashboard'  },
+        { icon: '💼', label: 'Positions'  },
+        { icon: '🔄', label: 'Mobilité'   },
+        { icon: '📈', label: 'Plans'      }
       ];
     } else {
       this.tabs = [
@@ -133,9 +134,8 @@ export class CareerListComponent implements OnInit, AfterViewInit {
     this.careerService.getAll().subscribe({
       next: (data) => {
         this.ngZone.run(() => {
-          this.allCareers        = data;     // ✅ stocker tous les careers
-          this.dataSource.data   = data;
-          this.dataSource._updateChangeSubscription();
+          this.allCareers      = data;
+          this.dataSource.data = data;
           this.computeStats(data);
           this.isLoading = false;
           this.cdr.detectChanges();
@@ -227,7 +227,7 @@ export class CareerListComponent implements OnInit, AfterViewInit {
       width:      '600px',
       maxWidth:   '95vw',
       data: {
-        careers:             this.allCareers,   // ✅ tous les careers avec certifRequises
+        careers:             this.allCareers,
         preselectedCareerId: career.id,
         employeeId:          this.authRole.getCurrentUserId()
       },

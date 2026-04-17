@@ -1,94 +1,99 @@
-<div style="padding:24px; display:flex; flex-direction:column; gap:20px;">
+<div class="mobility-dashboard">
   <!-- Header -->
-  <div style="display:flex; justify-content:space-between; align-items:center;">
+  <div class="mobility-dashboard__header">
     <div>
-      <h3 style="font-size:20px; font-weight:700; color:#111827; margin:0;">
-        🔄 Demandes de Mobilité Interne
+      <h3 class="mobility-dashboard__title">
+        <span class="mobility-dashboard__emoji" aria-hidden="true">🔄</span>
+        Demandes de Mobilité Interne
       </h3>
-      <p style="font-size:13px; color:#6b7280; margin:4px 0 0;">
-        Gérez les demandes de changement de poste
-      </p>
+      <p class="mobility-dashboard__subtitle">Gérez les demandes de changement de poste</p>
     </div>
   </div>
 
   <!-- KPI -->
-  <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px;">
-    <div style="background:white; border-radius:16px; padding:20px; border:1px solid #f3f4f6; box-shadow:0 1px 3px rgba(0,0,0,0.06);">
-      <p style="font-size:11px; font-weight:700; color:#6b7280; text-transform:uppercase; margin:0;">En attente</p>
-      <p style="font-size:36px; font-weight:800; color:#d97706; margin:8px 0 0;">{{ totalPending }}</p>
+  <div class="mobility-dashboard__kpis">
+    <div class="mobility-kpi mobility-kpi--pending">
+      <p class="mobility-kpi__label">En attente</p>
+      <p class="mobility-kpi__value">{{ totalPending }}</p>
     </div>
-    <div style="background:white; border-radius:16px; padding:20px; border:1px solid #f3f4f6; box-shadow:0 1px 3px rgba(0,0,0,0.06);">
-      <p style="font-size:11px; font-weight:700; color:#6b7280; text-transform:uppercase; margin:0;">Approuvées</p>
-      <p style="font-size:36px; font-weight:800; color:#16a34a; margin:8px 0 0;">{{ totalApproved }}</p>
+    <div class="mobility-kpi mobility-kpi--approved">
+      <p class="mobility-kpi__label">Approuvées</p>
+      <p class="mobility-kpi__value">{{ totalApproved }}</p>
     </div>
-    <div style="background:white; border-radius:16px; padding:20px; border:1px solid #f3f4f6; box-shadow:0 1px 3px rgba(0,0,0,0.06);">
-      <p style="font-size:11px; font-weight:700; color:#6b7280; text-transform:uppercase; margin:0;">Refusées</p>
-      <p style="font-size:36px; font-weight:800; color:#dc2626; margin:8px 0 0;">{{ totalRejected }}</p>
+    <div class="mobility-kpi mobility-kpi--rejected">
+      <p class="mobility-kpi__label">Refusées</p>
+      <p class="mobility-kpi__value">{{ totalRejected }}</p>
     </div>
   </div>
 
   <!-- Filtres statut -->
-  <div style="display:flex; gap:8px; flex-wrap:wrap;">
+  <div class="mobility-dashboard__filters">
     <button *ngFor="let s of statuses"
             (click)="selectedStatus = s"
-            [style]="selectedStatus === s
-              ? 'padding:6px 16px; border-radius:9999px; border:none; background:#7c3aed; color:white; cursor:pointer; font-size:13px; font-weight:600; font-family:inherit;'
-              : 'padding:6px 16px; border-radius:9999px; border:1px solid #e5e7eb; background:white; color:#374151; cursor:pointer; font-size:13px; font-weight:500; font-family:inherit;'">
-      {{ s === 'ALL' ? '🔍 Tous'
-        : s === 'PENDING' ? '⏳ En attente'
-        : s === 'APPROVED' ? '✅ Approuvés'
-        : s === 'REJECTED' ? '❌ Refusés'
-        : '⏸️ En suspens' }}
+            class="segmented-btn"
+            [class.segmented-btn--active]="selectedStatus === s">
+      <span class="segmented-btn__emoji" aria-hidden="true">
+        {{ s === 'ALL' ? '🔍'
+          : s === 'PENDING' ? '⏳'
+          : s === 'APPROVED' ? '✅'
+          : s === 'REJECTED' ? '❌'
+          : '⏸️' }}
+      </span>
+      <span>
+        {{ s === 'ALL' ? 'Tous'
+          : s === 'PENDING' ? 'En attente'
+          : s === 'APPROVED' ? 'Approuvés'
+          : s === 'REJECTED' ? 'Refusés'
+          : 'En suspens' }}
+      </span>
     </button>
   </div>
 
   <!-- Loading -->
-  <div *ngIf="isLoading" style="display:flex; justify-content:center; padding:40px;">
+  <div *ngIf="isLoading" class="mobility-dashboard__loading">
     <mat-spinner diameter="36"></mat-spinner>
   </div>
 
   <!-- Liste des demandes -->
-  <div *ngIf="!isLoading" style="display:flex; flex-direction:column; gap:12px;">
+  <div *ngIf="!isLoading" class="mobility-dashboard__list">
     <div *ngIf="filteredRequests.length === 0"
-         style="text-align:center; padding:48px; color:#9ca3af; font-size:14px;">
+         class="mobility-dashboard__empty">
       Aucune demande trouvée
     </div>
 
     <!-- Une carte par demande -->
     <div *ngFor="let req of filteredRequests"
-         style="background:white; border-radius:16px; padding:20px;
-                border:1px solid #f3f4f6; box-shadow:0 1px 3px rgba(0,0,0,0.06); width:100%;">
+         class="request-card">
 
-      <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
+      <div class="request-card__top">
 
         <!-- Info employé + boutons -->
-        <div style="display:flex; gap:14px; align-items:flex-start; flex:1; min-width:0;">
-          <div style="width:44px; height:44px; border-radius:12px; background:#ede9fe;
-                      display:flex; align-items:center; justify-content:center;
-                      font-size:18px; flex-shrink:0;">👤</div>
-          <div style="min-width:0;">
-            <p style="font-size:15px; font-weight:700; color:#111827; margin:0;">
-              {{ req.employeeName }}
-            </p>
-            <p style="font-size:12px; color:#6b7280; margin:4px 0 0;">
-              {{ req.currentCareerTitle || '—' }}
-              <span style="margin:0 6px;">→</span>
-              <strong style="color:#7c3aed;">{{ req.targetCareerTitle }}</strong>
+        <div class="request-card__info">
+          <div class="request-card__avatar" aria-hidden="true">
+            <span class="request-card__emoji">👤</span>
+          </div>
+          <div class="request-card__meta">
+            <p class="request-card__name">{{ req.employeeName }}</p>
+            <p class="request-card__path">
+              <span class="request-card__muted">{{ req.currentCareerTitle || '—' }}</span>
+              <span class="request-card__arrow" aria-hidden="true">→</span>
+              <strong class="request-card__target">{{ req.targetCareerTitle }}</strong>
             </p>
 
-            <div style="display:flex; align-items:center; gap:10px; margin-top:12px; flex-wrap:wrap;">
-              <span style="font-size:12px; color:#6b7280;">
-                📎 {{ req.motivationFileName || req.motivationLetter || 'Aucun fichier' }}
+            <div class="request-card__files">
+              <span class="request-card__file">
+                <span class="request-card__file-icon" aria-hidden="true">📎</span>
+                {{ req.motivationFileName || req.motivationLetter || 'Aucun fichier' }}
               </span>
 
-              <button (click)="openPreview(req)"
-                      style="padding:4px 10px; border-radius:6px; border:1px solid #7c3aed; background:white; color:#7c3aed; cursor:pointer; font-size:11px;">
-                👁️ Voir
+              <button (click)="openPreview(req)" class="chip-btn chip-btn--primary">
+                <span aria-hidden="true">👁️</span>
+                Voir
               </button>
 
-              <button (click)="downloadFile(req)"
-                      style="padding:4px 10px; border-radius:6px; border:1px solid #16a34a; background:white; color:#16a34a; cursor:pointer; font-size:11px;">
-                ⬇ Download
+              <button (click)="downloadFile(req)" class="chip-btn chip-btn--success">
+                <span aria-hidden="true">⬇</span>
+                Télécharger
               </button>
             </div>
 
@@ -103,34 +108,39 @@
         </div>
 
         <!-- Actions (statut + boutons admin) -->
-        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px; flex-shrink:0;">
-          <span [style]="'padding:4px 12px; border-radius:9999px; font-size:12px; font-weight:700;' + statusColors[req.status]">
+        <div class="request-card__actions">
+          <span class="status-pill" [style]="statusColors[req.status]">
+            <span class="status-pill__emoji" aria-hidden="true">
+              {{ req.status === 'PENDING' ? '⏳' : req.status === 'APPROVED' ? '✅' : req.status === 'REJECTED' ? '❌' : '⏸️' }}
+            </span>
             {{ statusLabels[req.status] }}
           </span>
 
           <div *ngIf="req.status === MobilityStatus.PENDING"
-               style="display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end;">
-            <button (click)="review(req, MobilityStatus.APPROVED)"
-                    style="padding:6px 12px; border-radius:8px; border:none; background:#dcfce7; color:#166534; cursor:pointer; font-size:12px; font-weight:600;">
-              ✅ Approuver
+               class="request-card__admin-buttons">
+            <button (click)="review(req, MobilityStatus.APPROVED)" class="action-btn action-btn--approve">
+              <span aria-hidden="true">✅</span>
+              Approuver
             </button>
-            <button (click)="review(req, MobilityStatus.ON_HOLD)"
-                    style="padding:6px 12px; border-radius:8px; border:none; background:#e0e7ff; color:#3730a3; cursor:pointer; font-size:12px; font-weight:600;">
-              ⏸️ Suspendre
+            <button (click)="review(req, MobilityStatus.ON_HOLD)" class="action-btn action-btn--hold">
+              <span aria-hidden="true">⏸️</span>
+              Suspendre
             </button>
-            <button (click)="review(req, MobilityStatus.REJECTED)"
-                    style="padding:6px 12px; border-radius:8px; border:none; background:#fee2e2; color:#991b1b; cursor:pointer; font-size:12px; font-weight:600;">
-              ❌ Refuser
+            <button (click)="review(req, MobilityStatus.REJECTED)" class="action-btn action-btn--reject">
+              <span aria-hidden="true">❌</span>
+              Refuser
             </button>
           </div>
 
-          <p *ngIf="req.reviewComment" style="font-size:11px; color:#6b7280; margin:0; text-align:right;">
-            💬 {{ req.reviewComment }}
+          <p *ngIf="req.reviewComment" class="request-card__comment">
+            <span class="request-card__comment-icon" aria-hidden="true">💬</span>
+            {{ req.reviewComment }}
           </p>
 
           <button (click)="delete(req)"
-                  style="background:none; border:none; cursor:pointer; color:#dc2626; font-size:12px;">
-            🗑️ Supprimer
+                  class="link-danger">
+            <span aria-hidden="true">🗑️</span>
+            Supprimer
           </button>
         </div>
       </div>

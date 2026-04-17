@@ -1,8 +1,15 @@
+@use '../../styles/career-theme' as career;
+
 .my-requests {
   display: flex;
   flex-direction: column;
   gap: 12px;
   padding: 24px;
+
+  background:
+    radial-gradient(900px 320px at 15% -10%, rgba(59, 130, 246, 0.14), transparent 55%),
+    radial-gradient(700px 300px at 90% 0%, rgba(37, 99, 235, 0.10), transparent 55%);
+  border-radius: 18px;
 
   &__empty {
     text-align: center;
@@ -12,11 +19,9 @@
   }
 
   &__card {
-    background: white;
-    border-radius: 16px;
+    @include career.career-glass-panel;
+    @include career.career-hover-lift;
     padding: 20px;
-    border: 1px solid #f3f4f6;
-    box-shadow: 0 1px 3px rgba(0,0,0,.06);
   }
 
   &__card-inner {
@@ -34,12 +39,13 @@
     width: 44px;
     height: 44px;
     border-radius: 12px;
-    background: #ede9fe;
+    background: rgba(59, 130, 246, 0.14);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 18px;
     flex-shrink: 0;
+    border: 1px solid rgba(59, 130, 246, 0.18);
   }
 
   &__career { font-size: 14px; font-weight: 600; color: #111827; margin: 0; }

@@ -1,3 +1,6 @@
+@use '../../styles/career-theme' as career;
+
+/* Dialog chrome (the template currently uses lots of inline styles) */
 ::ng-deep .career-dialog {
   .mat-mdc-dialog-container,
   .mdc-dialog__surface {
@@ -7,6 +10,18 @@
     width: 680px !important;
     max-width: 95vw !important;
     box-sizing: border-box !important;
+    border: 1px solid rgba(59, 130, 246, 0.18) !important;
+    box-shadow:
+      0 20px 60px rgba(2, 6, 23, 0.18),
+      0 1px 0 rgba(2, 6, 23, 0.04) !important;
+  }
+
+  /* Navy glossy feel behind the dialog content */
+  .mdc-dialog__surface {
+    background:
+      radial-gradient(1200px 420px at 20% -20%, rgba(255, 255, 255, 0.16), transparent 55%),
+      radial-gradient(900px 360px at 85% 0%, rgba(59, 130, 246, 0.22), transparent 60%),
+      linear-gradient(135deg, #0b1b3a 0%, #0a255a 35%, #0b3a7a 100%) !important;
   }
 
   .mat-mdc-dialog-content {
@@ -15,11 +30,25 @@
     max-height: 62vh !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
+    background:
+      radial-gradient(900px 320px at 10% -10%, rgba(59, 130, 246, 0.14), transparent 55%),
+      radial-gradient(700px 300px at 90% 0%, rgba(37, 99, 235, 0.10), transparent 55%),
+      rgba(255, 255, 255, 0.92) !important;
   }
 
   .mat-mdc-dialog-actions {
     padding: 0 !important;
     margin: 0 !important;
     min-height: unset !important;
+    background:
+      linear-gradient(180deg, rgba(15, 23, 42, 0.00), rgba(15, 23, 42, 0.04)) !important;
   }
+}
+
+/* Better focus ring in dialog */
+::ng-deep .career-dialog input,
+::ng-deep .career-dialog select,
+::ng-deep .career-dialog textarea,
+::ng-deep .career-dialog button {
+  @include career.career-focus-ring;
 }

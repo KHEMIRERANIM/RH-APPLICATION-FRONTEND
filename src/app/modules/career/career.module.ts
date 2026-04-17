@@ -1,12 +1,8 @@
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
-// Import du composant analyse
-import { MotivationAnalysisComponent } from './components/motivation-analysis/motivation-analysis.component';
-
-import { CareerRoutingModule } from './career-routing.module';
-
+// Angular Material
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSortModule } from '@angular/material/sort';
@@ -19,7 +15,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatCardModule } from '@angular/material/card';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+
+import { CareerRoutingModule } from './career-routing.module';
 
 import { CareerListComponent } from './components/career-list/career-list.component';
 import { CareerFormComponent } from './components/career-form/career-form.component';
@@ -31,6 +31,8 @@ import { CareerEmployeesDialogComponent } from './components/career-employees-di
 import { EmployeeMobilityComponent } from './components/employee-mobility/employee-mobility.component';
 import { EmployeePlanComponent } from './components/employee-plan/employee-plan.component';
 import { MotivationPreviewDialogComponent } from './components/motivation-preview-dialog/motivation-preview-dialog.component';
+import { MotivationAnalysisComponent } from './components/motivation-analysis/motivation-analysis.component';
+import { CareerAdminDashboardComponent } from './components/career-admin-dashboard/career-admin-dashboard.component';
 
 @NgModule({
   declarations: [
@@ -44,13 +46,15 @@ import { MotivationPreviewDialogComponent } from './components/motivation-previe
     EmployeeMobilityComponent,
     EmployeePlanComponent,
     MotivationPreviewDialogComponent,
-    MotivationAnalysisComponent
+    MotivationAnalysisComponent,
+    CareerAdminDashboardComponent
   ],
   imports: [
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
     CareerRoutingModule,
+
     MatTableModule,
     MatPaginatorModule,
     MatSortModule,
@@ -63,8 +67,10 @@ import { MotivationPreviewDialogComponent } from './components/motivation-previe
     MatSnackBarModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
-    MatSlideToggleModule
+    MatCardModule,
+    MatDatepickerModule,
+    MatNativeDateModule
   ],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA]   // ← Cette ligne est obligatoire ici
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]   // ← Ajouté temporairement
 })
-export class CareerModule {}
+export class CareerModule { }
