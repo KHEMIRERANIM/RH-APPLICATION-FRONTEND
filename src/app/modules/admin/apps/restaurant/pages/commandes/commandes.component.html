@@ -1,540 +1,576 @@
-﻿<div class="w-full"><div class="max-w-5xl mx-auto px-4 py-6">
+﻿<div class="flex flex-col flex-auto min-w-0">
 
-  <!-- HEADER -->
-  <div class="flex items-center justify-between mb-6">
-    <div>
-      <h2 class="text-2xl font-bold text-gray-900">
-        {{ roleService.isAdmin() ? 'Gestion des Commandes' : 'Mes Commandes' }}
-      </h2>
-      <p class="text-sm text-gray-400 mt-0.5">
-        {{ roleService.isAdmin() ? 'Suivez et gerez toutes les commandes' : 'Passez et suivez vos commandes' }}
-      </p>
-    </div>
-    <button *ngIf="roleService.isEmploye()" (click)="ouvrirFormulaire()"
-      class="px-5 py-2.5 bg-blue-700 text-white rounded-xl hover:bg-blue-800 font-semibold shadow-sm transition-all text-sm">
-      + Nouvelle Commande
-    </button>
-  </div>
-
-  <!-- MESSAGES -->
-  <div *ngIf="successMsg" class="mb-4 p-3 bg-green-50 text-green-700 border border-green-200 rounded-xl flex justify-between text-sm">
-    <span>{{ successMsg }}</span>
-    <button (click)="successMsg=''" class="font-bold ml-3">✕</button>
-  </div>
-  <div *ngIf="errorMsg" class="mb-4 p-3 bg-red-50 text-red-700 border border-red-200 rounded-xl flex justify-between text-sm">
-    <span>{{ errorMsg }}</span>
-    <button (click)="errorMsg=''" class="font-bold ml-3">✕</button>
-  </div>
-
-  <!-- MODAL PAIEMENT -->
-  <div *ngIf="showModalPaiement && commandeEnCoursDePaiement"
-    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
-      <div class="bg-blue-700 px-6 py-4 flex items-center justify-between">
-        <div>
-          <p class="text-white font-bold text-base">Encaisser la commande</p>
-          <p class="text-blue-200 text-xs mt-0.5">
-            {{ getUserNom(commandeEnCoursDePaiement.userId) }} —
-            #{{ commandeEnCoursDePaiement.id?.slice(-8) | uppercase }}
-          </p>
-        </div>
-        <button (click)="fermerModalPaiement()" class="text-blue-200 hover:text-white text-xl font-bold leading-none">✕</button>
+  <!-- HEADER Fuse -->
+  <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-6 sm:px-10 border-b bg-card">
+    <div class="flex items-center min-w-0">
+      <div class="flex items-center justify-center w-12 h-12 rounded-lg bg-primary-100 dark:bg-primary-900">
+        <mat-icon svgIcon="heroicons_outline:shopping-cart" class="icon-size-6 text-primary-600 dark:text-primary-400"></mat-icon>
       </div>
-      <div class="px-6 py-5">
-        <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-5 flex items-center justify-between">
-          <div>
-            <p class="text-xs text-gray-400 uppercase tracking-wide mb-0.5">Montant à encaisser</p>
-            <p class="text-2xl font-extrabold text-blue-700">
-              {{ commandeEnCoursDePaiement.montantTotal | number:'1.2-2' }} TND
-            </p>
-            <p *ngIf="commandeEnCoursDePaiement.reductionAppliquee"
-              class="text-xs text-purple-600 mt-0.5">
-              Réduction de {{ commandeEnCoursDePaiement.montantReduction | number:'1.2-2' }} TND appliquée
-            </p>
-          </div>
-          <div class="text-center">
-            <div class="w-16 h-16 bg-blue-700 rounded-xl flex items-center justify-center">
-              <span class="text-white font-black text-xl tracking-widest font-mono">
-                {{ getCodeRetrait(commandeEnCoursDePaiement) }}
-              </span>
-            </div>
-            <p class="text-xs text-gray-400 mt-1">Code retrait</p>
-          </div>
-        </div>
-        <p class="text-sm font-semibold text-gray-700 mb-3">Mode de paiement</p>
-        <div class="grid grid-cols-2 gap-3 mb-5">
-          <button (click)="modePaiementSelectionne = 'especes'"
-            [ngClass]="modePaiementSelectionne === 'especes'
-              ? 'border-blue-600 bg-blue-50 text-blue-700'
-              : 'border-gray-200 bg-white text-gray-600 hover:border-blue-300'"
-            class="flex flex-col items-center gap-2 p-4 border-2 rounded-xl transition-all font-semibold text-sm">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
-            </svg>
-            Espèces
-          </button>
-          <button (click)="modePaiementSelectionne = 'salaire'"
-            [ngClass]="modePaiementSelectionne === 'salaire'
-              ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
-              : 'border-gray-200 bg-white text-gray-600 hover:border-indigo-300'"
-            class="flex flex-col items-center gap-2 p-4 border-2 rounded-xl transition-all font-semibold text-sm">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
-            </svg>
-            Déduction salaire
-          </button>
-        </div>
-        <p *ngIf="modePaiementSelectionne === 'salaire'"
-          class="text-xs text-indigo-600 bg-indigo-50 border border-indigo-100 rounded-lg px-3 py-2 mb-4">
-          Le montant sera déduit automatiquement du prochain versement de salaire.
+      <div class="ml-4 min-w-0">
+        <h2 class="text-xl font-semibold truncate">
+          {{ roleService.isAdmin() ? 'Gestion des Commandes' : 'Mes Commandes' }}
+        </h2>
+        <p class="text-secondary truncate">
+          {{ roleService.isAdmin() ? 'Suivez et gérez toutes les commandes' : 'Passez et suivez vos commandes' }}
         </p>
-        <div class="flex gap-3">
-          <button (click)="fermerModalPaiement()"
-            class="flex-1 px-4 py-2.5 bg-white text-gray-600 border border-gray-200 rounded-xl text-sm font-semibold hover:bg-gray-50">
-            Annuler
-          </button>
-          <button (click)="confirmerPaiement()"
-            [disabled]="!modePaiementSelectionne || paiementEnCours"
-            [ngClass]="!modePaiementSelectionne || paiementEnCours ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-800'"
-            class="flex-1 px-4 py-2.5 bg-blue-700 text-white rounded-xl text-sm font-bold transition-all">
-            {{ paiementEnCours ? 'Traitement...' : 'Confirmer le paiement' }}
-          </button>
-        </div>
       </div>
     </div>
-  </div>
-
-  <!-- STATS EMPLOYE -->
-  <div *ngIf="roleService.isEmploye()" class="grid grid-cols-4 gap-3 mb-5">
-    <div class="bg-white rounded-2xl border border-gray-200 p-4 text-center shadow-sm">
-      <p class="text-2xl font-extrabold text-blue-700">{{ commandes.length }}</p>
-      <p class="text-xs text-gray-400 mt-0.5 uppercase tracking-wide">Commandes</p>
-    </div>
-    <div class="bg-white rounded-2xl border border-gray-200 p-4 text-center shadow-sm">
-      <p class="text-2xl font-extrabold text-yellow-500">{{ getCountByStatut('en_attente') }}</p>
-      <p class="text-xs text-gray-400 mt-0.5 uppercase tracking-wide">En attente</p>
-    </div>
-    <div class="bg-white rounded-2xl border border-gray-200 p-4 text-center shadow-sm">
-      <p class="text-2xl font-extrabold text-indigo-600">{{ getTotalMontant() | number:'1.2-2' }} TND</p>
-      <p class="text-xs text-gray-400 mt-0.5 uppercase tracking-wide">Total depense</p>
-    </div>
-    <div *ngIf="fidelite" class="bg-blue-700 rounded-2xl p-4 text-center shadow-sm">
-      <p class="text-2xl font-extrabold text-white">{{ fidelite.points }}</p>
-      <p class="text-xs text-blue-200 mt-0.5 uppercase tracking-wide">Points fidelite</p>
-    </div>
-  </div>
-
-  <!-- WIDGET FIDELITE EMPLOYE -->
-  <div *ngIf="roleService.isEmploye() && fidelite" class="mb-5">
-    <div *ngIf="fidelite.reductionDisponible"
-      class="bg-purple-50 border border-purple-200 rounded-2xl p-4 flex items-center justify-between gap-4">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0">
-          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/>
-          </svg>
-        </div>
-        <div>
-          <p class="text-sm font-bold text-purple-900">Reduction disponible !</p>
-          <p class="text-xs text-purple-500">{{ fidelite.points }} points — valeur : {{ fidelite.montantReduction }} TND</p>
-        </div>
-      </div>
-    </div>
-    <div *ngIf="!fidelite.reductionDisponible" class="bg-white border border-gray-200 rounded-2xl p-4">
-      <div class="flex items-center justify-between mb-3">
-        <div class="flex items-center gap-2">
-          <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
-          </svg>
-          <p class="text-sm font-bold text-gray-900">Programme fidelite</p>
-          <span class="text-xs text-gray-400">— 1 TND = 10 pts — 500 pts = 5 TND</span>
-        </div>
-        <p class="text-xs text-gray-400">encore <span class="font-bold text-blue-600">{{ getPointsVersProchain() }} pts</span> avant reduction</p>
-      </div>
-      <div class="w-full bg-gray-100 rounded-full h-2">
-        <div class="bg-blue-600 h-2 rounded-full transition-all" [style.width.%]="getPointsProgression()"></div>
-      </div>
-      <div class="flex justify-between text-xs text-gray-300 mt-1">
-        <span>0</span><span>250</span><span>500 pts</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- STATS ADMIN -->
-  <div *ngIf="roleService.isAdmin()" class="grid grid-cols-4 gap-4 mb-6">
-    <div *ngFor="let s of statuts"
-      (click)="selectedStatut = selectedStatut === s ? '' : s"
-      class="bg-white rounded-2xl border-2 p-5 shadow-sm cursor-pointer transition-all hover:shadow-md"
-      [ngClass]="selectedStatut === s ? 'border-blue-400 bg-blue-50' : 'border-gray-200'">
-      <p class="text-3xl font-extrabold mb-1"
-        [ngClass]="{
-          'text-yellow-500': s === 'en_attente',
-          'text-blue-600': s === 'confirmee',
-          'text-indigo-600': s === 'prete',
-          'text-green-600': s === 'livree'
-        }">{{ getCountByStatut(s) }}</p>
-      <p class="text-xs text-gray-400 font-medium uppercase tracking-wide">{{ s }}</p>
-    </div>
-  </div>
-
-  <!-- TICKET EMPLOYE (commande prete) -->
-  <div *ngIf="roleService.isEmploye() && getCommandesPretes().length > 0" class="mb-5">
-    <div *ngFor="let c of getCommandesPretes()"
-      class="p-4 bg-white border-2 border-blue-400 rounded-2xl flex items-center justify-between gap-4">
-      <div class="flex-1">
-        <p class="text-xs text-blue-400 font-semibold uppercase tracking-wide mb-1">Votre repas est pret — montrez ce ticket</p>
-        <p class="text-sm text-gray-700">{{ getMenuTitre(c.menuId) }} — {{ c.dateCommande }}</p>
-        <div class="flex flex-wrap gap-1 mt-1.5">
-          <span *ngFor="let item of getPlatsGroupes(c.plats)"
-            class="text-xs px-2 py-0.5 bg-blue-50 text-blue-700 rounded-full border border-blue-100">
-            {{ item.qty > 1 ? item.qty + '× ' : '' }}{{ item.nom }}
-          </span>
-        </div>
-        <p class="text-sm font-bold text-blue-700 mt-1.5">{{ c.montantTotal | number:'1.2-2' }} TND</p>
-      </div>
-      <div class="text-center flex-shrink-0">
-        <div class="w-20 h-20 bg-blue-700 rounded-2xl flex items-center justify-center">
-          <span class="text-white font-black text-2xl tracking-widest">{{ getCodeRetrait(c) }}</span>
-        </div>
-        <p class="text-xs text-gray-400 mt-1">Code retrait</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- ALLERGIES EMPLOYE -->
-  <div *ngIf="roleService.isEmploye()" class="mb-5">
-    <button (click)="showHistorique = !showHistorique"
-      class="w-full flex items-center justify-between p-4 bg-white border border-gray-200 rounded-2xl hover:bg-gray-50 transition-all">
-      <div class="flex items-center gap-2">
-        <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-        </svg>
-        <span class="text-sm font-bold text-gray-800">Mes allergies — Verification IA</span>
-        <span *ngIf="allergiesEmploye.length > 0" class="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-medium">{{ allergiesEmploye.length }}</span>
-        <span *ngIf="alertesAllergie.length > 0" class="text-xs px-2 py-0.5 bg-red-100 text-red-600 rounded-full font-medium">{{ alertesAllergie.length }} alerte(s)</span>
-      </div>
-      <svg class="w-4 h-4 text-gray-400 transition-transform" [ngClass]="showHistorique ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-      </svg>
+    <button *ngIf="roleService.isEmploye()" mat-flat-button [color]="'primary'" (click)="ouvrirFormulaire()" class="mt-4 sm:mt-0">
+      <mat-icon svgIcon="heroicons_outline:plus" class="icon-size-5 mr-1"></mat-icon>
+      Nouvelle Commande
     </button>
-    <div *ngIf="showHistorique" class="mt-2 p-4 bg-blue-50 border border-blue-200 rounded-2xl">
-      <div class="flex gap-2 mb-3">
-        <input type="text" placeholder="Ajouter une allergie (ex: gluten, lactose...)"
-          [(ngModel)]="nouvelleAllergie" (keyup.enter)="ajouterAllergie()"
-          class="flex-1 px-4 py-2 border border-blue-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white" />
-        <button (click)="ajouterAllergie()" class="px-4 py-2 bg-blue-700 text-white rounded-xl text-sm font-bold hover:bg-blue-800">Ajouter</button>
-      </div>
-      <div *ngIf="allergiesEmploye.length > 0" class="flex flex-wrap gap-2 mb-3">
-        <span *ngFor="let a of allergiesEmploye"
-          class="flex items-center gap-1 px-3 py-1 bg-white text-blue-700 border border-blue-300 rounded-full text-xs font-semibold">
-          {{ a }}<button (click)="supprimerAllergie(a)" class="ml-1 font-bold hover:text-red-500">✕</button>
-        </span>
-      </div>
-      <button *ngIf="allergiesEmploye.length > 0" (click)="verifierAllergies()" [disabled]="analyseEnCours"
-        class="px-5 py-2 bg-blue-700 text-white rounded-xl text-sm font-bold hover:bg-blue-800 disabled:opacity-50">
-        {{ analyseEnCours ? 'Analyse...' : 'Verifier les plats disponibles' }}
-      </button>
-      <div *ngIf="alertesAllergie.length > 0" class="mt-3 space-y-2">
-        <p class="text-sm font-bold text-blue-700">Plats a eviter :</p>
-        <div *ngFor="let alerte of alertesAllergie" class="p-3 bg-white border border-blue-200 rounded-xl flex items-center justify-between gap-3">
+  </div>
+
+  <!-- CONTENU -->
+  <div class="flex flex-col flex-auto p-6 sm:p-8 bg-gray-100 dark:bg-transparent">
+
+    <!-- MESSAGES -->
+    <div *ngIf="successMsg" class="mb-4 p-4 bg-green-50 text-green-700 border border-green-200 rounded-2xl flex justify-between text-sm shadow-sm">
+      <span>{{ successMsg }}</span>
+      <button (click)="successMsg=''" class="font-bold ml-3 text-green-500 hover:text-green-700">✕</button>
+    </div>
+    <div *ngIf="errorMsg" class="mb-4 p-4 bg-red-50 text-red-700 border border-red-200 rounded-2xl flex justify-between text-sm shadow-sm">
+      <span>{{ errorMsg }}</span>
+      <button (click)="errorMsg=''" class="font-bold ml-3 text-red-500 hover:text-red-700">✕</button>
+    </div>
+
+    <!-- MODAL PAIEMENT -->
+    <div *ngIf="showModalPaiement && commandeEnCoursDePaiement"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+      <div class="bg-card rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+        <div class="bg-primary px-6 py-4 flex items-center justify-between">
           <div>
-            <p class="font-semibold text-sm text-gray-900">{{ alerte.nom }}</p>
-            <p class="text-xs text-blue-600 mt-0.5">Conflits : {{ alerte.conflits.join(', ') }}</p>
+            <p class="text-white font-bold text-base">Encaisser la commande</p>
+            <p class="text-blue-200 text-xs mt-0.5">
+              {{ getUserNom(commandeEnCoursDePaiement.userId) }} —
+              #{{ commandeEnCoursDePaiement.id?.slice(-8) | uppercase }}
+            </p>
           </div>
-          <span class="px-2 py-1 bg-red-50 text-red-600 border border-red-200 rounded-lg text-xs font-bold flex-shrink-0">A eviter</span>
+          <button (click)="fermerModalPaiement()" class="text-blue-200 hover:text-white text-xl font-bold">✕</button>
         </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- VALIDATION CODE ADMIN -->
-  <div *ngIf="roleService.isAdmin()" class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-2xl">
-    <p class="text-sm font-bold text-blue-800 mb-3">Valider une livraison par code</p>
-    <div class="flex gap-3">
-      <input type="text" placeholder="Code retrait (ex: B7F2)"
-        [(ngModel)]="codeRetrait" (ngModelChange)="codeRetrait = codeRetrait.toUpperCase()" maxlength="4"
-        class="flex-1 px-4 py-2 border border-blue-300 rounded-xl text-sm font-mono font-bold tracking-widest text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
-      <button (click)="validerParCode()" class="px-6 py-2 bg-blue-700 text-white rounded-xl font-bold hover:bg-blue-800 text-sm">
-        Valider → Payer
-      </button>
-    </div>
-    <p *ngIf="codeErreur" class="text-xs text-red-500 mt-2">{{ codeErreur }}</p>
-  </div>
-
-  <!-- BARRE ADMIN -->
-  <div *ngIf="roleService.isAdmin()" class="bg-white border border-gray-200 rounded-2xl p-4 mb-5 shadow-sm flex flex-wrap gap-3 items-center justify-between">
-    <input type="text" placeholder="Rechercher par nom employe..."
-      [(ngModel)]="searchUserId"
-      class="flex-1 min-w-48 px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-    <div class="flex items-center gap-3">
-      <span class="text-sm text-gray-500">{{ getFiltered().length }} commande(s)</span>
-      <span class="text-sm font-bold text-blue-700">{{ getTotalMontant() | number:'1.2-2' }} TND</span>
-      <button *ngIf="selectedStatut || searchUserId" (click)="selectedStatut=''; searchUserId=''" class="px-3 py-1 bg-gray-100 text-gray-500 rounded-xl text-sm">Reset</button>
-    </div>
-  </div>
-
-  <!-- FORMULAIRE EMPLOYE (nouvelle commande ou modification) -->
-  <div *ngIf="showForm && roleService.isEmploye()"
-    class="mb-5 bg-white border border-blue-200 rounded-2xl shadow-sm overflow-hidden">
-
-    <!-- Bandeau modification -->
-    <div *ngIf="commandeEnModification" class="bg-amber-50 border-b border-amber-200 px-5 py-2.5 flex items-center gap-2">
-      <svg class="w-4 h-4 text-amber-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
-      </svg>
-      <p class="text-xs font-semibold text-amber-700">
-        Modification de la commande #{{ commandeEnModification.id?.slice(-8) | uppercase }}
-      </p>
-    </div>
-
-    <div class="flex border-b border-blue-100">
-      <div class="flex-1 py-3 text-center text-sm font-bold"
-        [ngClass]="step === 1 ? 'bg-blue-700 text-white' : 'bg-gray-50 text-gray-400'">
-        1 — Choisir un menu
-      </div>
-      <div class="flex-1 py-3 text-center text-sm font-bold"
-        [ngClass]="step === 2 ? 'bg-blue-700 text-white' : 'bg-gray-50 text-gray-400'">
-        2 — Choisir les plats
-      </div>
-    </div>
-
-    <div class="p-5">
-
-      <!-- STEP 1 : MENUS -->
-      <div *ngIf="step === 1">
-        <p class="text-sm font-semibold text-gray-600 mb-3">Menus disponibles :</p>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          <div *ngFor="let m of menus"
-            (click)="!isMenuDejaCommande(m.id!) && (newCommande.menuId = m.id!) && onMenuChange()"
-            [ngClass]="{
-              'border-blue-500 bg-blue-50 shadow-md': newCommande.menuId === m.id,
-              'opacity-50 cursor-not-allowed': isMenuDejaCommande(m.id!),
-              'hover:border-blue-300 cursor-pointer': !isMenuDejaCommande(m.id!)
-            }"
-            class="border-2 border-gray-200 rounded-2xl p-4 transition-all bg-white">
-            <div class="flex items-center justify-between mb-2">
-              <h4 class="font-bold text-gray-900">{{ m.titre }}</h4>
-              <span *ngIf="isMenuDejaCommande(m.id!)" class="text-xs px-2 py-1 bg-gray-200 text-gray-500 rounded-full">Deja commande</span>
-              <span *ngIf="!isMenuDejaCommande(m.id!) && newCommande.menuId === m.id" class="text-xs px-2 py-1 bg-blue-600 text-white rounded-full">Selectionne</span>
+        <div class="px-6 py-5">
+          <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-5 flex items-center justify-between">
+            <div>
+              <p class="text-xs text-secondary uppercase tracking-wide mb-0.5">Montant à encaisser</p>
+              <p class="text-2xl font-extrabold text-primary">
+                {{ commandeEnCoursDePaiement.montantTotal | number:'1.2-2' }} TND
+              </p>
+              <p *ngIf="commandeEnCoursDePaiement.reductionAppliquee" class="text-xs text-purple-600 mt-0.5">
+                Réduction de {{ commandeEnCoursDePaiement.montantReduction | number:'1.2-2' }} TND appliquée
+              </p>
             </div>
-            <p class="text-xs text-gray-400">{{ m.date }}</p>
-            <p class="text-xs text-blue-600 font-semibold mt-1">{{ m.plats?.length || 0 }} plat(s)</p>
-          </div>
-        </div>
-        <button (click)="showForm = false; commandeEnModification = null" class="mt-4 px-5 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50 text-sm">Annuler</button>
-      </div>
-
-      <!-- STEP 2 : PLATS AVEC QUANTITÉS -->
-      <div *ngIf="step === 2">
-        <div class="flex items-center gap-3 mb-4">
-          <button *ngIf="!commandeEnModification" (click)="step = 1; platsSelectionnes = []" class="text-blue-600 text-sm font-semibold hover:underline">Changer de menu</button>
-          <span *ngIf="!commandeEnModification" class="text-gray-300">|</span>
-          <p class="text-sm text-gray-600">Menu : <span class="text-blue-700 font-bold">{{ getMenuTitre(newCommande.menuId) }}</span></p>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-          <div *ngFor="let plat of platsDisponibles"
-            class="flex items-center gap-3 p-3 border-2 rounded-2xl transition-all bg-white"
-            [ngClass]="{
-              'border-blue-500 bg-blue-50': isPlatSelected(plat.platId!),
-              'border-gray-200': !isPlatSelected(plat.platId!) && (plat.quantite || 0) > 0,
-              'border-gray-100 bg-gray-50 opacity-50': (plat.quantite || 0) <= 0 || !plat.disponible
-            }">
-            <img [src]="plat.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'"
-              class="w-14 h-14 rounded-xl object-cover flex-shrink-0" />
-            <div class="flex-1 min-w-0">
-              <p class="font-bold text-sm text-gray-900 truncate">{{ plat.nom }}</p>
-              <div class="flex items-center gap-1 mt-0.5 flex-wrap">
-                <span *ngIf="plat.calories" class="text-xs px-1.5 py-0.5 bg-indigo-50 text-indigo-600 rounded-full border border-indigo-100 font-semibold">{{ plat.calories }} kcal</span>
-                <span *ngIf="plat.pmrAdapte" class="text-xs px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded-full border border-blue-100">PMR</span>
-                <span *ngIf="(plat.quantite || 0) > 0 && plat.disponible"
-                  class="text-xs px-1.5 py-0.5 rounded-full font-semibold border"
-                  [ngClass]="getStockRestant(plat.platId!) <= 3
-                    ? 'bg-orange-50 text-orange-600 border-orange-200'
-                    : 'bg-green-50 text-green-600 border-green-200'">
-                  {{ getStockRestant(plat.platId!) }} restant(s)
-                </span>
-                <span *ngIf="(plat.quantite || 0) <= 0 || !plat.disponible"
-                  class="text-xs px-1.5 py-0.5 bg-red-50 text-red-500 border border-red-200 rounded-full font-semibold">
-                  Épuisé
+            <div class="text-center">
+              <div class="w-16 h-16 bg-primary rounded-xl flex items-center justify-center">
+                <span class="text-white font-black text-xl tracking-widest font-mono">
+                  {{ getCodeRetrait(commandeEnCoursDePaiement) }}
                 </span>
               </div>
-              <p class="text-blue-700 font-extrabold text-sm mt-1">{{ plat.prix }} TND</p>
-            </div>
-
-            <!-- Contrôle quantité -->
-            <div class="flex flex-col items-center gap-1 flex-shrink-0">
-              <ng-container *ngIf="(plat.quantite || 0) > 0 && plat.disponible; else epuise">
-                <button (click)="incrementerPlat(plat.platId!)"
-                  [disabled]="!isPlatCommandable(plat.platId!)"
-                  [ngClass]="isPlatCommandable(plat.platId!)
-                    ? 'bg-blue-700 hover:bg-blue-800 text-white'
-                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'"
-                  class="w-8 h-8 rounded-full text-lg font-bold flex items-center justify-center transition-all leading-none">
-                  +
-                </button>
-                <span class="text-sm font-extrabold text-gray-800 w-5 text-center leading-none py-1">
-                  {{ getQuantiteSelectionnee(plat.platId!) }}
-                </span>
-                <button (click)="decrementerPlat(plat.platId!)"
-                  [disabled]="getQuantiteSelectionnee(plat.platId!) === 0"
-                  [ngClass]="getQuantiteSelectionnee(plat.platId!) > 0
-                    ? 'bg-gray-200 hover:bg-gray-300 text-gray-700'
-                    : 'bg-gray-100 text-gray-300 cursor-not-allowed'"
-                  class="w-8 h-8 rounded-full text-lg font-bold flex items-center justify-center transition-all leading-none">
-                  −
-                </button>
-              </ng-container>
-              <ng-template #epuise>
-                <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
-                  <span class="text-gray-400 text-sm font-bold">✕</span>
-                </div>
-              </ng-template>
+              <p class="text-xs text-secondary mt-1">Code retrait</p>
             </div>
           </div>
-        </div>
-
-        <!-- Récapitulatif -->
-        <div *ngIf="platsSelectionnes.length > 0"
-          class="p-4 bg-blue-50 border border-blue-200 rounded-2xl mb-4 flex justify-between items-center">
-          <span class="font-bold text-gray-700">{{ platsSelectionnes.length }} unité(s) sélectionnée(s)</span>
-          <span class="text-xl font-extrabold text-blue-700">{{ getMontantPreview() | number:'1.2-2' }} TND</span>
-        </div>
-
-        <div class="flex gap-3">
-          <button (click)="submitCommande()" [disabled]="platsSelectionnes.length === 0"
-            [ngClass]="platsSelectionnes.length === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-800'"
-            class="px-6 py-2 bg-blue-700 text-white rounded-xl font-bold text-sm">
-            {{ commandeEnModification ? 'Enregistrer les modifications' : 'Confirmer (' + platsSelectionnes.length + ' unité(s))' }}
-          </button>
-          <button (click)="showForm = false; commandeEnModification = null" class="px-5 py-2 bg-white text-gray-600 border border-gray-200 rounded-xl text-sm">Annuler</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- FILTRES EMPLOYE -->
-  <div *ngIf="roleService.isEmploye()" class="flex gap-2 flex-wrap mb-4">
-    <button *ngFor="let s of statuts"
-      (click)="selectedStatut = selectedStatut === s ? '' : s"
-      [ngClass]="selectedStatut === s ? 'bg-blue-700 text-white' : 'bg-white text-gray-600 border border-gray-200'"
-      class="px-4 py-2 rounded-xl text-sm font-semibold transition-all">{{ s }}</button>
-    <button *ngIf="selectedStatut" (click)="selectedStatut=''" class="px-4 py-2 bg-gray-100 text-gray-500 rounded-xl text-sm">Reset</button>
-  </div>
-
-  <div *ngIf="loading" class="text-center py-12">
-    <div class="inline-block w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-    <p class="mt-3 text-gray-500 text-sm">Chargement...</p>
-  </div>
-
-  <!-- LISTE COMMANDES -->
-  <div class="space-y-4" *ngIf="!loading">
-    <div *ngFor="let c of getFiltered()"
-      class="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-all overflow-hidden">
-      <div class="h-1 w-full"
-        [ngClass]="{
-          'bg-yellow-400': c.statut === 'en_attente',
-          'bg-blue-500': c.statut === 'confirmee',
-          'bg-indigo-500': c.statut === 'prete',
-          'bg-green-500': c.statut === 'livree'
-        }"></div>
-      <div class="p-5 flex flex-col md:flex-row md:items-start justify-between gap-4">
-        <div class="flex-1">
-          <div class="flex items-center gap-3 mb-4">
-            <span class="text-base font-bold text-gray-900 font-mono bg-gray-100 px-3 py-1 rounded-lg">#{{ c.id?.slice(-8) | uppercase }}</span>
-            <span class="px-3 py-1 rounded-full text-xs font-bold" [ngClass]="getStatutClass(c.statut)">{{ c.statut }}</span>
-          </div>
-          <div class="grid grid-cols-2 gap-3 mb-3">
-            <div *ngIf="roleService.isAdmin()" class="bg-gray-50 rounded-xl p-3">
-              <p class="text-xs text-gray-400 uppercase tracking-wide mb-1">Employe</p>
-              <p class="font-semibold text-gray-800 text-sm">{{ getUserNom(c.userId) }}</p>
-            </div>
-            <div class="bg-gray-50 rounded-xl p-3">
-              <p class="text-xs text-gray-400 uppercase tracking-wide mb-1">Date</p>
-              <p class="font-semibold text-gray-800 text-sm">{{ c.dateCommande }}</p>
-            </div>
-            <div class="bg-gray-50 rounded-xl p-3">
-              <p class="text-xs text-gray-400 uppercase tracking-wide mb-1">Menu</p>
-              <p class="font-semibold text-gray-800 text-sm">{{ getMenuTitre(c.menuId) }}</p>
-            </div>
-            <div class="bg-blue-50 rounded-xl p-3">
-              <p class="text-xs text-blue-400 uppercase tracking-wide mb-1">Montant</p>
-              <p class="font-extrabold text-blue-700 text-lg">{{ c.montantTotal | number:'1.2-2' }} TND</p>
-            </div>
-          </div>
-          <!-- Plats groupés -->
-          <div *ngIf="c.plats?.length" class="flex flex-wrap gap-1">
-            <span *ngFor="let item of getPlatsGroupes(c.plats)"
-              class="text-xs px-2 py-1 bg-blue-50 text-blue-700 rounded-full border border-blue-100 font-medium">
-              {{ item.qty > 1 ? item.qty + '× ' : '' }}{{ item.nom }}
-            </span>
-          </div>
-          <!-- Code retrait admin -->
-          <div *ngIf="roleService.isAdmin() && c.statut === 'prete'" class="mt-3 flex items-center gap-3 p-3 bg-indigo-50 border border-indigo-200 rounded-xl">
-            <span class="text-xs text-indigo-600 font-semibold">Code retrait :</span>
-            <span class="font-black text-indigo-800 text-xl tracking-widest font-mono">{{ getCodeRetrait(c) }}</span>
-          </div>
-        </div>
-
-        <!-- ACTIONS ADMIN -->
-        <div *ngIf="roleService.isAdmin()" class="flex flex-col gap-2 min-w-52">
-          <button *ngIf="c.statut === 'prete'"
-            (click)="ouvrirModalPaiement(c)"
-            class="w-full px-4 py-2.5 bg-green-600 text-white rounded-xl text-sm font-bold hover:bg-green-700 transition-all flex items-center justify-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
-            </svg>
-            Encaisser
-          </button>
-          <button *ngIf="getNextStatut(c.statut)"
-            (click)="updateStatut(c.id!, getNextStatut(c.statut)!)"
-            class="w-full px-4 py-2.5 bg-blue-700 text-white rounded-xl text-sm font-bold hover:bg-blue-800 transition-all">
-            {{ getNextStatutLabel(c.statut) }}
-          </button>
-          <div *ngIf="c.statut === 'livree'" class="w-full px-4 py-2.5 bg-green-50 text-green-700 border border-green-200 rounded-xl text-sm font-bold text-center">
-            Completee ✓
-          </div>
-          <div class="grid grid-cols-5 gap-1">
-            <button *ngFor="let s of statuts"
-              (click)="updateStatut(c.id!, s)"
-              [disabled]="c.statut === s"
-              [ngClass]="c.statut === s ? 'opacity-30 cursor-not-allowed bg-gray-100' : 'hover:bg-gray-50 bg-white'"
-              class="py-1.5 border border-gray-200 rounded-lg text-xs transition-all text-center font-medium">
-              {{ s | slice:0:3 }}
+          <p class="text-sm font-semibold text-gray-700 mb-3">Mode de paiement</p>
+          <div class="grid grid-cols-2 gap-3 mb-5">
+            <button (click)="modePaiementSelectionne = 'especes'"
+              [ngClass]="modePaiementSelectionne === 'especes' ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-gray-200 bg-white text-gray-600 hover:border-blue-300'"
+              class="flex flex-col items-center gap-2 p-4 border-2 rounded-xl transition-all font-semibold text-sm">
+              <mat-icon svgIcon="heroicons_outline:banknotes" class="icon-size-6"></mat-icon>
+              Espèces
             </button>
-            <button (click)="deleteCommande(c.id!)" class="py-1.5 bg-red-50 text-red-500 border border-red-200 rounded-lg text-xs hover:bg-red-100 font-medium">
-              Sup
+            <button (click)="modePaiementSelectionne = 'salaire'"
+              [ngClass]="modePaiementSelectionne === 'salaire' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-gray-200 bg-white text-gray-600 hover:border-indigo-300'"
+              class="flex flex-col items-center gap-2 p-4 border-2 rounded-xl transition-all font-semibold text-sm">
+              <mat-icon svgIcon="heroicons_outline:document-text" class="icon-size-6"></mat-icon>
+              Déduction salaire
             </button>
           </div>
-        </div>
-
-        <!-- ACTIONS EMPLOYE -->
-        <div *ngIf="roleService.isEmploye()" class="flex flex-col gap-2 items-end min-w-36">
-          <div class="px-4 py-2 rounded-xl text-sm font-bold" [ngClass]="getStatutClass(c.statut)">{{ c.statut }}</div>
-          <!-- Modifier uniquement si en_attente -->
-          <button *ngIf="c.statut === 'en_attente'" (click)="modifierCommande(c)"
-            class="px-4 py-1.5 bg-blue-50 text-blue-600 border border-blue-200 rounded-xl text-xs hover:bg-blue-100 font-semibold transition-all">
-            ✏️ Modifier
-          </button>
-          <button *ngIf="canDelete(c)" (click)="deleteCommande(c.id!)"
-            class="px-4 py-1.5 bg-red-50 text-red-500 border border-red-200 rounded-xl text-xs hover:bg-red-100">
-            Annuler
-          </button>
-          <p *ngIf="!canDelete(c) && c.statut !== 'livree'" class="text-xs text-gray-400 italic">Non annulable</p>
+          <p *ngIf="modePaiementSelectionne === 'salaire'"
+            class="text-xs text-indigo-600 bg-indigo-50 border border-indigo-100 rounded-lg px-3 py-2 mb-4">
+            Le montant sera déduit automatiquement du prochain versement de salaire.
+          </p>
+          <div class="flex gap-3">
+            <button (click)="fermerModalPaiement()" mat-stroked-button class="flex-1">Annuler</button>
+            <button (click)="confirmerPaiement()"
+              [disabled]="!modePaiementSelectionne || paiementEnCours"
+              mat-flat-button [color]="'primary'" class="flex-1">
+              {{ paiementEnCours ? 'Traitement...' : 'Confirmer le paiement' }}
+            </button>
+          </div>
         </div>
       </div>
     </div>
 
-    <div *ngIf="getFiltered().length === 0" class="text-center py-16 bg-white rounded-2xl border border-gray-200">
-      <p class="text-gray-400 font-medium text-sm">{{ roleService.isEmploye() ? 'Pas encore de commandes.' : 'Aucune commande.' }}</p>
-      <button *ngIf="roleService.isEmploye()" (click)="ouvrirFormulaire()"
-        class="mt-4 px-5 py-2 bg-blue-700 text-white rounded-xl text-sm font-semibold hover:bg-blue-800">
-        Passer ma premiere commande
+    <!-- ALERTES EMPLOYE -->
+    <div *ngIf="roleService.isEmploye() && alertes.length > 0" class="mb-6 space-y-3">
+      <div *ngFor="let alerte of alertes"
+        class="rounded-2xl border-2 p-4 shadow-sm bg-card transition-all"
+        [ngClass]="alerte.enRetard ? 'border-red-300' : 'border-blue-300'">
+        <div class="flex items-center justify-between gap-4 flex-wrap">
+          <div class="flex items-center gap-3">
+            <mat-icon [svgIcon]="alerte.enRetard ? 'heroicons_outline:exclamation-triangle' : 'heroicons_outline:bell'"
+              class="icon-size-8" [ngClass]="alerte.enRetard ? 'text-red-500' : 'text-blue-500'"></mat-icon>
+            <div>
+              <p class="font-bold text-sm" [ngClass]="alerte.enRetard ? 'text-red-700' : 'text-blue-700'">
+                {{ alerte.enRetard ? 'Récupérez votre repas rapidement !' : 'Votre repas est prêt !' }}
+              </p>
+              <p class="text-xs text-secondary mt-0.5">
+                {{ alerte.enRetard ? 'Annulation dans ' + alerte.minutesRestantes + ' min' : 'Présentez votre code au comptoir' }}
+              </p>
+            </div>
+          </div>
+          <div class="text-center">
+            <div class="px-5 py-3 rounded-xl font-mono font-extrabold text-2xl tracking-widest text-white shadow-md"
+              [ngClass]="alerte.enRetard ? 'bg-red-500' : 'bg-primary'">
+              {{ alerte.codeRetrait }}
+            </div>
+            <p class="text-xs text-secondary mt-1">Code retrait</p>
+          </div>
+        </div>
+        <div class="mt-3">
+          <div class="flex justify-between text-xs mb-1 text-secondary">
+            <span>Temps restant</span>
+            <span class="font-semibold">{{ alerte.minutesRestantes }} min</span>
+          </div>
+          <div class="w-full h-2 rounded-full bg-gray-100">
+            <div class="h-2 rounded-full transition-all duration-500"
+              [ngClass]="alerte.enRetard ? 'bg-red-400' : 'bg-primary'"
+              [style.width.%]="getProgressWidth(alerte.minutesRestantes)"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATS EMPLOYE -->
+    <div *ngIf="roleService.isEmploye()" class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+      <div class="bg-card shadow rounded-2xl p-5 text-center">
+        <p class="text-4xl font-semibold text-primary">{{ commandes.length }}</p>
+        <p class="text-sm text-secondary mt-1 uppercase tracking-wide">Commandes</p>
+      </div>
+      <div class="bg-card shadow rounded-2xl p-5 text-center">
+        <p class="text-4xl font-semibold text-amber-500">{{ getCountByStatut('en_attente') }}</p>
+        <p class="text-sm text-secondary mt-1 uppercase tracking-wide">En attente</p>
+      </div>
+      <div class="bg-card shadow rounded-2xl p-5 text-center">
+        <p class="text-4xl font-semibold text-indigo-600">{{ getTotalMontant() | number:'1.2-2' }} TND</p>
+        <p class="text-sm text-secondary mt-1 uppercase tracking-wide">Total dépensé</p>
+      </div>
+      <div *ngIf="fidelite" class="bg-primary shadow rounded-2xl p-5 text-center">
+        <p class="text-4xl font-semibold text-white">{{ fidelite.points }}</p>
+        <p class="text-sm text-blue-200 mt-1 uppercase tracking-wide">Points fidélité</p>
+      </div>
+    </div>
+
+    <!-- WIDGET FIDELITE EMPLOYE -->
+    <div *ngIf="roleService.isEmploye() && fidelite" class="mb-6">
+      <div *ngIf="fidelite.reductionDisponible"
+        class="bg-card shadow rounded-2xl p-5 flex items-center gap-4 border-l-4 border-purple-500">
+        <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+          <mat-icon svgIcon="heroicons_outline:gift" class="icon-size-5 text-purple-600"></mat-icon>
+        </div>
+        <div>
+          <p class="text-sm font-semibold text-gray-900">Réduction disponible !</p>
+          <p class="text-xs text-secondary mt-0.5">
+            {{ fidelite.points }} points —
+            <span class="font-bold text-purple-700">-{{ fidelite.montantReduction }} TND</span>
+            sera déduite automatiquement de votre prochaine commande
+          </p>
+        </div>
+      </div>
+      <div *ngIf="!fidelite.reductionDisponible" class="bg-card shadow rounded-2xl p-5">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <mat-icon svgIcon="heroicons_outline:star" class="icon-size-5 text-primary"></mat-icon>
+            <p class="text-sm font-semibold text-gray-900">Programme fidélité</p>
+            <span class="text-xs text-secondary">— 1 TND = 10 pts — 500 pts = 5 TND</span>
+          </div>
+          <p class="text-xs text-secondary">encore <span class="font-bold text-primary">{{ getPointsVersProchain() }} pts</span></p>
+        </div>
+        <div class="w-full bg-gray-100 rounded-full h-2">
+          <div class="bg-primary h-2 rounded-full transition-all" [style.width.%]="getPointsProgression()"></div>
+        </div>
+        <div class="flex justify-between text-xs text-secondary mt-1">
+          <span>0</span><span>250</span><span>500 pts</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATS ADMIN -->
+    <div *ngIf="roleService.isAdmin()" class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+      <div *ngFor="let s of statuts"
+        (click)="selectedStatut = selectedStatut === s ? '' : s"
+        class="bg-card shadow rounded-2xl p-5 cursor-pointer transition-all hover:shadow-md"
+        [ngClass]="selectedStatut === s ? 'ring-2 ring-primary' : ''">
+        <p class="text-4xl font-semibold mb-1"
+          [ngClass]="{
+            'text-amber-500': s === 'en_attente',
+            'text-blue-600': s === 'confirmee',
+            'text-indigo-600': s === 'prete',
+            'text-green-600': s === 'livree'
+          }">{{ getCountByStatut(s) }}</p>
+        <p class="text-xs text-secondary font-medium uppercase tracking-wide">{{ s }}</p>
+      </div>
+    </div>
+
+    <!-- ALLERGIES EMPLOYE -->
+    <div *ngIf="roleService.isEmploye()" class="mb-6">
+      <button (click)="showHistorique = !showHistorique"
+        class="w-full flex items-center justify-between p-4 bg-card shadow rounded-2xl hover:shadow-md transition-all">
+        <div class="flex items-center gap-2">
+          <mat-icon svgIcon="heroicons_outline:shield-check" class="icon-size-5 text-primary"></mat-icon>
+          <span class="text-sm font-semibold text-gray-900">Mes allergies — Vérification IA</span>
+          <span *ngIf="allergiesEmploye.length > 0" class="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-medium">{{ allergiesEmploye.length }}</span>
+          <span *ngIf="alertesAllergie.length > 0" class="text-xs px-2 py-0.5 bg-red-100 text-red-600 rounded-full font-medium">{{ alertesAllergie.length }} alerte(s)</span>
+        </div>
+        <mat-icon [svgIcon]="showHistorique ? 'heroicons_outline:chevron-up' : 'heroicons_outline:chevron-down'" class="icon-size-5 text-secondary"></mat-icon>
       </button>
+      <div *ngIf="showHistorique" class="mt-2 p-5 bg-card shadow rounded-2xl">
+        <div class="flex gap-2 mb-3">
+          <input type="text" placeholder="Ajouter une allergie (ex: gluten, lactose...)"
+            [(ngModel)]="nouvelleAllergie" (keyup.enter)="ajouterAllergie()"
+            class="flex-1 px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-50" />
+          <button (click)="ajouterAllergie()" mat-flat-button [color]="'primary'" class="text-sm">Ajouter</button>
+        </div>
+        <div *ngIf="allergiesEmploye.length > 0" class="flex flex-wrap gap-2 mb-3">
+          <span *ngFor="let a of allergiesEmploye"
+            class="flex items-center gap-1 px-3 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded-full text-xs font-semibold">
+            {{ a }}<button (click)="supprimerAllergie(a)" class="ml-1 font-bold hover:text-red-500">✕</button>
+          </span>
+        </div>
+        <button *ngIf="allergiesEmploye.length > 0" (click)="verifierAllergies()" [disabled]="analyseEnCours"
+          mat-stroked-button [color]="'primary'" class="text-sm">
+          {{ analyseEnCours ? 'Analyse...' : 'Vérifier les plats disponibles' }}
+        </button>
+        <div *ngIf="alertesAllergie.length > 0" class="mt-3 space-y-2">
+          <p class="text-sm font-semibold text-gray-700">Plats à éviter :</p>
+          <div *ngFor="let alerte of alertesAllergie"
+            class="p-3 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-between gap-3">
+            <div>
+              <p class="font-semibold text-sm text-gray-900">{{ alerte.nom }}</p>
+              <p class="text-xs text-secondary mt-0.5">Conflits : {{ alerte.conflits.join(', ') }}</p>
+            </div>
+            <span class="px-2 py-1 bg-red-50 text-red-600 border border-red-200 rounded-lg text-xs font-bold flex-shrink-0">À éviter</span>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
 
-</div></div>
+    <!-- DASHBOARD FIDELITE ADMIN -->
+    <div *ngIf="roleService.isAdmin()" class="mb-6">
+      <button (click)="showDashboardFidelite = !showDashboardFidelite; loadFidelites()"
+        class="w-full flex items-center justify-between p-4 bg-card shadow rounded-2xl hover:shadow-md transition-all">
+        <div class="flex items-center gap-2">
+          <mat-icon svgIcon="heroicons_outline:star" class="icon-size-5 text-primary"></mat-icon>
+          <span class="text-sm font-semibold text-gray-900">Programme Fidélité — Vue Admin</span>
+          <span *ngIf="fidelites.length > 0" class="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-medium">
+            {{ fidelites.length }} employé(s)
+          </span>
+        </div>
+        <mat-icon [svgIcon]="showDashboardFidelite ? 'heroicons_outline:chevron-up' : 'heroicons_outline:chevron-down'" class="icon-size-5 text-secondary"></mat-icon>
+      </button>
+      <div *ngIf="showDashboardFidelite" class="mt-2 bg-card shadow rounded-2xl overflow-hidden">
+        <div class="px-5 py-3 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
+          <p class="text-xs text-secondary uppercase tracking-wide font-semibold">
+            Classement — 1 TND = 10 pts — 500 pts = 5 TND
+          </p>
+          <button (click)="loadFidelites()" mat-button class="text-xs text-primary font-semibold">Actualiser</button>
+        </div>
+        <div class="divide-y divide-gray-100">
+          <div *ngFor="let f of fidelites; let i = index"
+            class="p-4 flex items-center gap-4 hover:bg-gray-50 transition-all">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-black"
+              [ngClass]="{
+                'bg-yellow-100 text-yellow-700': i === 0,
+                'bg-gray-200 text-gray-600': i === 1,
+                'bg-orange-100 text-orange-600': i === 2,
+                'bg-blue-50 text-blue-400': i > 2
+              }">
+              {{ i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1 }}
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-semibold text-gray-900 truncate">{{ getUserNom(f.userId) }}</p>
+              <div class="w-full bg-gray-100 rounded-full h-1.5 mt-1.5">
+                <div class="h-1.5 rounded-full transition-all"
+                  [ngClass]="f.reductionDisponible ? 'bg-purple-500' : 'bg-primary'"
+                  [style.width.%]="f.reductionDisponible ? 100 : ((f.points % 500) / 500 * 100)"></div>
+              </div>
+              <p class="text-xs text-secondary mt-0.5">{{ f.totalDepense | number:'1.2-2' }} TND dépensé</p>
+            </div>
+            <div class="text-right flex-shrink-0">
+              <p class="text-sm font-semibold" [ngClass]="f.reductionDisponible ? 'text-purple-600' : 'text-primary'">
+                {{ f.points }} pts
+              </p>
+            </div>
+            <div class="flex-shrink-0 w-32 text-right">
+              <span *ngIf="f.reductionDisponible"
+                class="px-2 py-1 bg-purple-100 text-purple-700 border border-purple-200 rounded-full text-xs font-bold">
+                🎁 Réduction dispo
+              </span>
+              <span *ngIf="!f.reductionDisponible"
+                class="px-2 py-1 bg-gray-100 text-secondary rounded-full text-xs">
+                {{ 500 - (f.points % 500) }} pts restants
+              </span>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="fidelites.length === 0" class="p-8 text-center text-secondary text-sm">
+          Aucune donnée de fidélité disponible.
+        </div>
+      </div>
+    </div>
+
+    <!-- VALIDATION CODE ADMIN -->
+    <div *ngIf="roleService.isAdmin()" class="mb-6 p-5 bg-card shadow rounded-2xl">
+      <p class="text-sm font-semibold text-gray-900 mb-3">Valider une livraison par code</p>
+      <div class="flex gap-3">
+        <input type="text" placeholder="Code retrait (ex: B7F2)"
+          [(ngModel)]="codeRetrait" (ngModelChange)="codeRetrait = codeRetrait.toUpperCase()" maxlength="4"
+          class="flex-1 px-4 py-2 border border-gray-200 rounded-xl text-sm font-mono font-bold tracking-widest text-primary focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50" />
+        <button (click)="validerParCode()" mat-flat-button [color]="'primary'" class="text-sm">
+          Valider → Payer
+        </button>
+      </div>
+      <p *ngIf="codeErreur" class="text-xs text-red-500 mt-2">{{ codeErreur }}</p>
+    </div>
+
+    <!-- BARRE ADMIN -->
+    <div *ngIf="roleService.isAdmin()" class="bg-card shadow rounded-2xl p-4 mb-6 flex flex-wrap gap-3 items-center justify-between">
+      <input type="text" placeholder="Rechercher par nom employé..."
+        [(ngModel)]="searchUserId"
+        class="flex-1 min-w-48 px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50" />
+      <div class="flex items-center gap-3">
+        <span class="text-sm text-secondary">{{ getFiltered().length }} commande(s)</span>
+        <span class="text-sm font-semibold text-primary">{{ getTotalMontant() | number:'1.2-2' }} TND</span>
+        <button *ngIf="selectedStatut || searchUserId" (click)="selectedStatut=''; searchUserId=''" mat-stroked-button class="text-sm">Reset</button>
+      </div>
+    </div>
+
+    <!-- FORMULAIRE EMPLOYE -->
+    <div *ngIf="showForm && roleService.isEmploye()" class="mb-6 bg-card shadow rounded-2xl overflow-hidden">
+      <div *ngIf="commandeEnModification" class="bg-amber-50 border-b border-amber-200 px-5 py-2.5 flex items-center gap-2">
+        <mat-icon svgIcon="heroicons_outline:pencil-square" class="icon-size-4 text-amber-500 flex-shrink-0"></mat-icon>
+        <p class="text-xs font-semibold text-amber-700">
+          Modification de la commande #{{ commandeEnModification.id?.slice(-8) | uppercase }}
+        </p>
+      </div>
+      <div class="flex border-b border-gray-100">
+        <div class="flex-1 py-3 text-center text-sm font-semibold"
+          [ngClass]="step === 1 ? 'bg-primary text-white' : 'bg-gray-50 text-secondary'">
+          1 — Choisir un menu
+        </div>
+        <div class="flex-1 py-3 text-center text-sm font-semibold"
+          [ngClass]="step === 2 ? 'bg-primary text-white' : 'bg-gray-50 text-secondary'">
+          2 — Choisir les plats
+        </div>
+      </div>
+      <div class="p-5">
+
+        <!-- STEP 1 -->
+        <div *ngIf="step === 1">
+          <p class="text-sm font-semibold text-secondary mb-3">Menus disponibles :</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div *ngFor="let m of menus"
+              (click)="!isMenuDejaCommande(m.id!) && (newCommande.menuId = m.id!) && onMenuChange()"
+              [ngClass]="{
+                'ring-2 ring-primary bg-primary-50': newCommande.menuId === m.id,
+                'opacity-50 cursor-not-allowed': isMenuDejaCommande(m.id!),
+                'hover:shadow-md cursor-pointer': !isMenuDejaCommande(m.id!)
+              }"
+              class="border border-gray-200 bg-card rounded-2xl p-4 transition-all shadow-sm">
+              <div class="flex items-center justify-between mb-2">
+                <h4 class="font-semibold text-gray-900">{{ m.titre }}</h4>
+                <span *ngIf="isMenuDejaCommande(m.id!)" class="text-xs px-2 py-1 bg-gray-200 text-secondary rounded-full">Déjà commandé</span>
+                <span *ngIf="!isMenuDejaCommande(m.id!) && newCommande.menuId === m.id" class="text-xs px-2 py-1 bg-primary text-white rounded-full">Sélectionné</span>
+              </div>
+              <p class="text-xs text-secondary">{{ m.date }}</p>
+              <p class="text-xs text-primary font-semibold mt-1">{{ m.plats?.length || 0 }} plat(s)</p>
+            </div>
+          </div>
+          <button (click)="showForm = false; commandeEnModification = null" mat-stroked-button class="mt-4 text-sm">Annuler</button>
+        </div>
+
+        <!-- STEP 2 -->
+        <div *ngIf="step === 2">
+          <div class="flex items-center gap-3 mb-4">
+            <button *ngIf="!commandeEnModification" (click)="step = 1; platsSelectionnes = []" mat-button [color]="'primary'" class="text-sm font-semibold">Changer de menu</button>
+            <span *ngIf="!commandeEnModification" class="text-gray-300">|</span>
+            <p class="text-sm text-secondary">Menu : <span class="text-primary font-semibold">{{ getMenuTitre(newCommande.menuId) }}</span></p>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+            <div *ngFor="let plat of platsDisponibles"
+              class="flex items-center gap-3 p-3 border rounded-2xl transition-all bg-card shadow-sm"
+              [ngClass]="{
+                'border-primary ring-1 ring-primary': isPlatSelected(plat.platId!),
+                'border-gray-200': !isPlatSelected(plat.platId!) && (plat.quantite || 0) > 0,
+                'border-gray-100 opacity-50': (plat.quantite || 0) <= 0 || !plat.disponible
+              }">
+              <img [src]="plat.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400'"
+                class="w-14 h-14 rounded-xl object-cover flex-shrink-0" />
+              <div class="flex-1 min-w-0">
+                <p class="font-semibold text-sm text-gray-900 truncate">{{ plat.nom }}</p>
+                <div class="flex items-center gap-1 mt-0.5 flex-wrap">
+                  <span *ngIf="plat.calories" class="text-xs px-1.5 py-0.5 bg-indigo-50 text-indigo-600 rounded-full border border-indigo-100 font-semibold">{{ plat.calories }} kcal</span>
+                  <span *ngIf="plat.pmrAdapte" class="text-xs px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded-full border border-blue-100">PMR</span>
+                  <span *ngIf="(plat.quantite || 0) > 0 && plat.disponible"
+                    class="text-xs px-1.5 py-0.5 rounded-full font-semibold border"
+                    [ngClass]="getStockRestant(plat.platId!) <= 3 ? 'bg-amber-50 text-amber-600 border-amber-200' : 'bg-green-50 text-green-600 border-green-200'">
+                    {{ getStockRestant(plat.platId!) }} restant(s)
+                  </span>
+                  <span *ngIf="(plat.quantite || 0) <= 0 || !plat.disponible"
+                    class="text-xs px-1.5 py-0.5 bg-red-50 text-red-500 border border-red-200 rounded-full font-semibold">Épuisé</span>
+                </div>
+                <p class="text-primary font-bold text-sm mt-1">{{ plat.prix }} TND</p>
+              </div>
+              <div class="flex flex-col items-center gap-1 flex-shrink-0">
+                <ng-container *ngIf="(plat.quantite || 0) > 0 && plat.disponible; else epuise">
+                  <button (click)="incrementerPlat(plat.platId!)" [disabled]="!isPlatCommandable(plat.platId!)"
+                    [ngClass]="isPlatCommandable(plat.platId!) ? 'bg-primary hover:opacity-80 text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed'"
+                    class="w-8 h-8 rounded-full text-lg font-bold flex items-center justify-center transition-all leading-none">+</button>
+                  <span class="text-sm font-bold text-gray-800 w-5 text-center leading-none py-1">{{ getQuantiteSelectionnee(plat.platId!) }}</span>
+                  <button (click)="decrementerPlat(plat.platId!)" [disabled]="getQuantiteSelectionnee(plat.platId!) === 0"
+                    [ngClass]="getQuantiteSelectionnee(plat.platId!) > 0 ? 'bg-gray-200 hover:bg-gray-300 text-gray-700' : 'bg-gray-100 text-gray-300 cursor-not-allowed'"
+                    class="w-8 h-8 rounded-full text-lg font-bold flex items-center justify-center transition-all leading-none">−</button>
+                </ng-container>
+                <ng-template #epuise>
+                  <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                    <span class="text-secondary text-sm font-bold">✕</span>
+                  </div>
+                </ng-template>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="platsSelectionnes.length > 0" class="p-4 bg-primary-50 border border-primary-200 rounded-2xl mb-4 flex justify-between items-center">
+            <span class="font-semibold text-gray-700">{{ platsSelectionnes.length }} unité(s)</span>
+            <span class="text-xl font-bold text-primary">{{ getMontantPreview() | number:'1.2-2' }} TND</span>
+          </div>
+          <div class="flex gap-3">
+            <button (click)="submitCommande()" [disabled]="platsSelectionnes.length === 0" mat-flat-button [color]="'primary'"
+              [ngClass]="platsSelectionnes.length === 0 ? 'opacity-50 cursor-not-allowed' : ''">
+              {{ commandeEnModification ? 'Enregistrer les modifications' : 'Confirmer (' + platsSelectionnes.length + ' unité(s))' }}
+            </button>
+            <button (click)="showForm = false; commandeEnModification = null" mat-stroked-button>Annuler</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FILTRES EMPLOYE -->
+    <div *ngIf="roleService.isEmploye()" class="flex gap-2 flex-wrap mb-5">
+      <button *ngFor="let s of statuts"
+        (click)="selectedStatut = selectedStatut === s ? '' : s"
+        [ngClass]="selectedStatut === s ? 'bg-primary text-white' : 'bg-card text-secondary border border-gray-200'"
+        class="px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-sm">{{ s }}</button>
+      <button *ngIf="selectedStatut" (click)="selectedStatut=''" mat-stroked-button class="text-sm">Reset</button>
+    </div>
+
+    <div *ngIf="loading" class="text-center py-12">
+      <mat-progress-spinner mode="indeterminate" diameter="40" class="mx-auto"></mat-progress-spinner>
+      <p class="mt-3 text-secondary text-sm">Chargement...</p>
+    </div>
+
+    <!-- LISTE COMMANDES -->
+    <div class="space-y-4" *ngIf="!loading">
+      <div *ngFor="let c of getFiltered()"
+        class="bg-card rounded-2xl shadow hover:shadow-md transition-all overflow-hidden">
+        <div class="h-1 w-full"
+          [ngClass]="{
+            'bg-amber-400': c.statut === 'en_attente',
+            'bg-blue-500': c.statut === 'confirmee',
+            'bg-indigo-500': c.statut === 'prete',
+            'bg-green-500': c.statut === 'livree'
+          }"></div>
+        <div class="p-5 flex flex-col md:flex-row md:items-start justify-between gap-4">
+          <div class="flex-1">
+            <div class="flex items-center gap-3 mb-4">
+              <span class="text-sm font-bold text-gray-900 font-mono bg-gray-100 px-3 py-1 rounded-lg">#{{ c.id?.slice(-8) | uppercase }}</span>
+              <span class="px-3 py-1 rounded-full text-xs font-bold" [ngClass]="getStatutClass(c.statut)">{{ c.statut }}</span>
+            </div>
+            <div class="grid grid-cols-2 gap-3 mb-3">
+              <div *ngIf="roleService.isAdmin()" class="bg-gray-50 rounded-xl p-3">
+                <p class="text-xs text-secondary uppercase tracking-wide mb-1">Employé</p>
+                <p class="font-semibold text-gray-900 text-sm">{{ getUserNom(c.userId) }}</p>
+              </div>
+              <div class="bg-gray-50 rounded-xl p-3">
+                <p class="text-xs text-secondary uppercase tracking-wide mb-1">Date</p>
+                <p class="font-semibold text-gray-900 text-sm">{{ c.dateCommande }}</p>
+              </div>
+              <div class="bg-gray-50 rounded-xl p-3">
+                <p class="text-xs text-secondary uppercase tracking-wide mb-1">Menu</p>
+                <p class="font-semibold text-gray-900 text-sm">{{ getMenuTitre(c.menuId) }}</p>
+              </div>
+              <div class="bg-primary-50 rounded-xl p-3">
+                <p class="text-xs text-primary uppercase tracking-wide mb-1">Montant</p>
+                <p class="font-bold text-primary text-lg">{{ c.montantTotal | number:'1.2-2' }} TND</p>
+              </div>
+            </div>
+            <div *ngIf="c.plats?.length" class="flex flex-wrap gap-1">
+              <span *ngFor="let item of getPlatsGroupes(c.plats)"
+                class="text-xs px-2 py-1 bg-blue-50 text-blue-700 rounded-full border border-blue-100 font-medium">
+                {{ item.qty > 1 ? item.qty + '× ' : '' }}{{ item.nom }}
+              </span>
+            </div>
+            <div *ngIf="roleService.isAdmin() && c.statut === 'prete'"
+              class="mt-3 flex items-center gap-3 p-3 bg-indigo-50 border border-indigo-200 rounded-xl">
+              <mat-icon svgIcon="heroicons_outline:key" class="icon-size-5 text-indigo-600"></mat-icon>
+              <span class="text-xs text-indigo-600 font-semibold">Code retrait :</span>
+              <span class="font-black text-indigo-800 text-xl tracking-widest font-mono">{{ getCodeRetrait(c) }}</span>
+            </div>
+          </div>
+
+          <!-- ACTIONS ADMIN -->
+          <div *ngIf="roleService.isAdmin()" class="flex flex-col gap-2 min-w-52">
+            <button *ngIf="c.statut === 'prete'" (click)="ouvrirModalPaiement(c)"
+              mat-flat-button [color]="'accent'" class="w-full text-sm font-bold">
+              <mat-icon svgIcon="heroicons_outline:banknotes" class="icon-size-4 mr-1"></mat-icon>
+              Encaisser
+            </button>
+            <button *ngIf="getNextStatut(c.statut)" (click)="updateStatut(c.id!, getNextStatut(c.statut)!)"
+              mat-flat-button [color]="'primary'" class="w-full text-sm font-bold">
+              {{ getNextStatutLabel(c.statut) }}
+            </button>
+            <div *ngIf="c.statut === 'livree'"
+              class="w-full px-4 py-2 bg-green-50 text-green-700 border border-green-200 rounded-xl text-sm font-bold text-center">
+              Completée ✓
+            </div>
+            <div class="grid grid-cols-5 gap-1">
+              <button *ngFor="let s of statuts" (click)="updateStatut(c.id!, s)" [disabled]="c.statut === s"
+                [ngClass]="c.statut === s ? 'opacity-30 cursor-not-allowed bg-gray-100' : 'hover:bg-gray-50 bg-white'"
+                class="py-1.5 border border-gray-200 rounded-lg text-xs transition-all text-center font-medium">
+                {{ s | slice:0:3 }}
+              </button>
+              <button (click)="deleteCommande(c.id!)"
+                class="py-1.5 bg-red-50 text-red-500 border border-red-200 rounded-lg text-xs hover:bg-red-100 font-medium">
+                Sup
+              </button>
+            </div>
+          </div>
+
+          <!-- ACTIONS EMPLOYE -->
+          <div *ngIf="roleService.isEmploye()" class="flex flex-col gap-2 items-end min-w-36">
+            <div class="px-4 py-2 rounded-xl text-sm font-bold" [ngClass]="getStatutClass(c.statut)">{{ c.statut }}</div>
+            <button *ngIf="c.statut === 'en_attente'" (click)="modifierCommande(c)"
+              mat-stroked-button [color]="'primary'" class="text-xs">
+              <mat-icon svgIcon="heroicons_outline:pencil-square" class="icon-size-4 mr-1"></mat-icon>
+              Modifier
+            </button>
+            <button *ngIf="canDelete(c)" (click)="deleteCommande(c.id!)"
+              class="px-4 py-1.5 bg-red-50 text-red-500 border border-red-200 rounded-xl text-xs hover:bg-red-100">
+              Annuler
+            </button>
+            <p *ngIf="!canDelete(c) && c.statut !== 'livree'" class="text-xs text-secondary italic">Non annulable</p>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="getFiltered().length === 0" class="text-center py-16 bg-card rounded-2xl shadow">
+        <mat-icon svgIcon="heroicons_outline:clipboard-document-list" class="icon-size-12 text-gray-300 mx-auto"></mat-icon>
+        <p class="text-secondary font-medium text-sm mt-4">
+          {{ roleService.isEmploye() ? 'Pas encore de commandes.' : 'Aucune commande.' }}
+        </p>
+        <button *ngIf="roleService.isEmploye()" (click)="ouvrirFormulaire()"
+          mat-flat-button [color]="'primary'" class="mt-4 text-sm">
+          Passer ma première commande
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>

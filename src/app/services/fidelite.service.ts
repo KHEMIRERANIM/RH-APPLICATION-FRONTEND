@@ -12,4 +12,8 @@ export class FideliteService {
   getFidelite(userId: string): Observable<Fidelite> {
     return this.http.get<Fidelite>(`${this.apiUrl}/${userId}`);
   }
+
+  utiliserReduction(userId: string): Observable<Fidelite> {
+    return this.http.post<Fidelite>(`${this.apiUrl}/${userId}/utiliser-reduction`, {});
+  }
 }

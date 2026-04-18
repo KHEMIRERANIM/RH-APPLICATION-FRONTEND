@@ -3,6 +3,10 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatIconButton } from '@angular/material/button';
 
 import { RestaurantRoutingModule } from './restaurant-routing.module';
 import { MenusComponent } from './pages/menus/menus.component';
@@ -26,7 +30,10 @@ import { RestaurantMiniPanierComponent } from './restaurant-mini-panier/restaura
     FormsModule,
     RouterModule,
     HttpClientModule,
-    RestaurantRoutingModule
+    RestaurantRoutingModule,
+    MatIconModule,
+    MatButtonModule,
+    MatProgressSpinnerModule
   ]
 })
 export class RestaurantModule { }

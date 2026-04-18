@@ -1,5 +1,6 @@
-﻿import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { take } from 'rxjs/operators';
 import { Commande } from 'src/app/models/commande';
 import { CommandeService } from 'src/app/services/commande.service';
 import { MenuService } from 'src/app/services/menu.service';
@@ -8,13 +9,14 @@ import { RoleService } from 'app/core/auth/role.service';
 import { AllergieIaService, ResultatVerification } from 'src/app/services/allergie-ia.service';
 import { FideliteService } from 'src/app/services/fidelite.service';
 import { Fidelite } from 'src/app/models/fidelite';
+import { NotificationsService } from 'app/layout/common/notifications/notifications.service';
 
 @Component({
   selector: 'app-commandes',
   templateUrl: './commandes.component.html',
   styleUrls: ['./commandes.component.scss']
 })
-export class CommandesComponent implements OnInit {
+export class CommandesComponent implements OnInit, OnDestroy {
   commandes: Commande[] = [];
   menus: Menu[] = [];
   platsDisponibles: Plat[] = [];
@@ -34,29 +36,28 @@ export class CommandesComponent implements OnInit {
   codeRetrait = '';
   codeErreur = '';
 
-  // Modal paiement
   showModalPaiement = false;
   commandeEnCoursDePaiement: Commande | null = null;
   modePaiementSelectionne: 'especes' | 'salaire' | '' = '';
   paiementEnCours = false;
 
-  // Modification commande
   commandeEnModification: Commande | null = null;
 
-  // Allergies
   allergiesEmploye: string[] = [];
   nouvelleAllergie = '';
   alertesAllergie: ResultatVerification[] = [];
   analyseEnCours = false;
 
-  // Fidélité
   fidelite: Fidelite | null = null;
   showHistorique = false;
+  reductionEnCours = false;
   readonly SEUIL_REDUCTION = 500;
 
-  // Dashboard fidélité admin
   fidelites: any[] = [];
   showDashboardFidelite = false;
+
+  private refreshInterval: any;
+  private readonly DELAI_EXPIRATION_MIN = 2;
 
   constructor(
     private commandeService: CommandeService,
@@ -64,19 +65,50 @@ export class CommandesComponent implements OnInit {
     private http: HttpClient,
     public roleService: RoleService,
     private allergieIa: AllergieIaService,
-    private fideliteService: FideliteService
+    private fideliteService: FideliteService,
+    private notificationsService: NotificationsService
   ) {}
 
   ngOnInit(): void {
     this.loadMenus();
-    this.loadCommandes();
     const saved = localStorage.getItem('allergies_' + this.roleService.userId);
     if (saved) this.allergiesEmploye = JSON.parse(saved);
-    if (this.roleService.isEmploye()) { this.loadFidelite(); }
-    if (this.roleService.isAdmin()) { this.loadFidelites(); }
+    if (this.roleService.isEmploye()) {
+      this.loadFidelite();
+      this.refreshInterval = setInterval(() => this.loadCommandes(), 30_000);
+    }
+    if (this.roleService.isAdmin()) {
+      this.loadFidelites();
+    }
   }
 
-  // ─── CHARGEMENT ───────────────────────────────────────────────
+  ngOnDestroy(): void {
+    if (this.refreshInterval) clearInterval(this.refreshInterval);
+  }
+
+  get alertes(): any[] {
+    const result = [];
+    for (const c of this.commandes) {
+      if (c.statut !== 'prete') continue;
+      const raw = (c as any)['datePrete'];
+      if (!raw) continue;
+      const normalized = raw.replace(/(\.\d{1,2})$/, '$10').substring(0, 19);
+      const datePrete = new Date(normalized.replace('T', ' '));
+      if (isNaN(datePrete.getTime())) continue;
+      const minutes = Math.floor((Date.now() - datePrete.getTime()) / 60000);
+      result.push({
+        commandeId:       c.id,
+        codeRetrait:      (c as any).codeRetrait || '----',
+        minutesRestantes: Math.max(0, 2 - minutes),
+        enRetard:         minutes >= 1
+      });
+    }
+    return result;
+  }
+
+  getProgressWidth(minutesRestantes: number): number {
+    return Math.round((minutesRestantes / this.DELAI_EXPIRATION_MIN) * 100);
+  }
 
   loadCommandes(): void {
     this.loading = true;
@@ -88,17 +120,43 @@ export class CommandesComponent implements OnInit {
         this.commandes = data.sort((a, b) =>
           new Date(b.dateCommande).getTime() - new Date(a.dateCommande).getTime()
         );
-        // Bloquer seulement les menus avec commande active (pas livree)
         this.menusCommandesIds = this.commandes
-          .filter(c => c.statut === 'en_attente' || c.statut === 'confirmee' || c.statut === 'prete')
+          .filter(c => c.statut === 'en_attente' || c.statut === 'confirmee')
           .map(c => c.menuId);
         if (this.roleService.isAdmin()) {
           const ids = [...new Set(data.map(c => c.userId))];
           ids.forEach(id => this.loadUserNom(id));
         }
         this.loading = false;
+        this._syncAlertesVersNotifications();
       },
       error: () => { this.errorMsg = 'Erreur chargement.'; this.loading = false; }
+    });
+  }
+
+  private _syncAlertesVersNotifications(): void {
+    if (!this.roleService.isEmploye()) return;
+    const alertes = this.alertes;
+    alertes.forEach(alerte => {
+      const notif = {
+        id: 'commande-prete-' + alerte.commandeId,
+        icon: 'heroicons_outline:bell',
+        title: alerte.enRetard ? 'Recuperez votre repas rapidement !' : 'Votre commande est prete !',
+        description: alerte.enRetard
+          ? 'Annulation dans ' + alerte.minutesRestantes + ' min — Code : ' + alerte.codeRetrait
+          : 'Presentez le code ' + alerte.codeRetrait + ' au comptoir',
+        time: new Date().toISOString(),
+        link: '/apps/restaurant/commandes',
+        useRouter: true,
+        read: false
+      };
+      this.notificationsService.pushLocal(notif);
+    });
+    const idsActifs = new Set(alertes.map(a => 'commande-prete-' + a.commandeId));
+    this.notificationsService.notifications$.pipe(take(1)).subscribe(notifs => {
+      notifs
+        .filter(n => n.id.startsWith('commande-prete-') && !idsActifs.has(n.id))
+        .forEach(n => this.notificationsService.removeLocal(n.id));
     });
   }
 
@@ -117,11 +175,9 @@ export class CommandesComponent implements OnInit {
 
   loadMenus(): void {
     this.menuService.getAllMenus().subscribe({
-      next: (data) => { this.menus = data; }
+      next: (data) => { this.menus = data; this.loadCommandes(); }
     });
   }
-
-  // ─── MODAL PAIEMENT ───────────────────────────────────────────
 
   ouvrirModalPaiement(commande: Commande): void {
     this.commandeEnCoursDePaiement = commande;
@@ -157,8 +213,6 @@ export class CommandesComponent implements OnInit {
     });
   }
 
-  // ─── VALIDATION CODE ADMIN ────────────────────────────────────
-
   validerParCode(): void {
     this.codeErreur = '';
     if (!this.codeRetrait || this.codeRetrait.length < 4) {
@@ -184,8 +238,6 @@ export class CommandesComponent implements OnInit {
   getCommandesPretes(): Commande[] {
     return this.commandes.filter(c => c.statut === 'prete');
   }
-
-  // ─── GESTION QUANTITÉS PLATS ──────────────────────────────────
 
   getQuantiteSelectionnee(platId: string): number {
     return this.platsSelectionnes.filter(id => id === platId).length;
@@ -220,7 +272,8 @@ export class CommandesComponent implements OnInit {
     const platIds = [...new Set(this.platsSelectionnes)];
     return platIds.reduce((sum, platId) => {
       const plat = this.platsDisponibles.find(p => p.platId === platId);
-      return sum + (plat ? (plat.prix || 0) * this.getQuantiteSelectionnee(platId) : 0);
+      const qty = this.getQuantiteSelectionnee(platId);
+      return sum + (plat ? (plat.prix || 0) * qty : 0);
     }, 0);
   }
 
@@ -229,8 +282,6 @@ export class CommandesComponent implements OnInit {
     for (const id of plats) map.set(id, (map.get(id) || 0) + 1);
     return Array.from(map.entries()).map(([id, qty]) => ({ nom: this.getPlatNom(id), qty }));
   }
-
-  // ─── FORMULAIRE COMMANDE ──────────────────────────────────────
 
   ouvrirFormulaire(): void {
     this.showForm = true;
@@ -279,7 +330,6 @@ export class CommandesComponent implements OnInit {
           this.showForm = false;
           this.commandeEnModification = null;
           this.loadCommandes();
-          this.loadFidelite();
         },
         error: (err) => { this.errorMsg = err.error?.message || 'Erreur modification commande.'; }
       });
@@ -298,14 +348,10 @@ export class CommandesComponent implements OnInit {
         setTimeout(() => this.successMsg = '', 4000);
         this.showForm = false;
         this.loadCommandes();
-        // ✅ Rafraîchir fidélité après commande — réduction peut avoir été consommée
-        this.loadFidelite();
       },
       error: (err) => { this.errorMsg = err.error?.message || 'Erreur creation commande.'; }
     });
   }
-
-  // ─── ALLERGIES ────────────────────────────────────────────────
 
   ajouterAllergie(): void {
     const a = this.nouvelleAllergie.trim().toLowerCase();
@@ -347,8 +393,6 @@ export class CommandesComponent implements OnInit {
       error: () => { this.analyseEnCours = false; this.errorMsg = 'Erreur connexion IA.'; }
     });
   }
-
-  // ─── UTILITAIRES ──────────────────────────────────────────────
 
   canDelete(commande: Commande): boolean {
     if (this.roleService.isAdmin()) return true;
@@ -433,20 +477,33 @@ export class CommandesComponent implements OnInit {
 
   getStatutIcon(statut: string): string {
     switch (statut) {
-      case 'en_attente': return '⏳';
-      case 'confirmee':  return '✅';
-      case 'prete':      return '🍽️';
-      case 'livree':     return '📦';
+      case 'en_attente': return 'hourglass';
+      case 'confirmee':  return 'check';
+      case 'prete':      return 'restaurant';
+      case 'livree':     return 'inventory';
       default:           return '';
     }
   }
-
-  // ─── FIDÉLITÉ ─────────────────────────────────────────────────
 
   loadFidelite(): void {
     this.fideliteService.getFidelite(this.roleService.userId).subscribe({
       next: (f) => { this.fidelite = f; },
       error: () => {}
+    });
+  }
+
+  utiliserReduction(): void {
+    if (!this.fidelite || !this.fidelite.reductionDisponible) return;
+    if (!confirm('Utiliser votre reduction de ' + this.fidelite.montantReduction + ' TND ?')) return;
+    this.reductionEnCours = true;
+    this.fideliteService.utiliserReduction(this.roleService.userId).subscribe({
+      next: (f) => {
+        this.fidelite = f;
+        this.reductionEnCours = false;
+        this.successMsg = 'Reduction de ' + f.montantReduction + ' TND sera appliquee a votre prochain paiement !';
+        setTimeout(() => this.successMsg = '', 5000);
+      },
+      error: () => { this.reductionEnCours = false; this.errorMsg = 'Erreur reduction.'; }
     });
   }
 
@@ -460,14 +517,9 @@ export class CommandesComponent implements OnInit {
     return this.SEUIL_REDUCTION - (this.fidelite.points % this.SEUIL_REDUCTION);
   }
 
-  // ─── DASHBOARD FIDÉLITÉ ADMIN ─────────────────────────────────
-
   loadFidelites(): void {
     this.http.get<any[]>('http://localhost:8081/api/fidelite/all').subscribe({
-      next: (data) => {
-        this.fidelites = data.sort((a, b) => b.points - a.points);
-        data.forEach(f => this.loadUserNom(f.userId));
-      },
+      next: (data) => { this.fidelites = data.sort((a, b) => b.points - a.points); },
       error: () => {}
     });
   }
