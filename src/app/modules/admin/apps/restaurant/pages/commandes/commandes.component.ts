@@ -34,15 +34,29 @@ export class CommandesComponent implements OnInit {
   codeRetrait = '';
   codeErreur = '';
 
+  // Modal paiement
+  showModalPaiement = false;
+  commandeEnCoursDePaiement: Commande | null = null;
+  modePaiementSelectionne: 'especes' | 'salaire' | '' = '';
+  paiementEnCours = false;
+
+  // Modification commande
+  commandeEnModification: Commande | null = null;
+
+  // Allergies
   allergiesEmploye: string[] = [];
   nouvelleAllergie = '';
   alertesAllergie: ResultatVerification[] = [];
   analyseEnCours = false;
 
+  // Fidélité
   fidelite: Fidelite | null = null;
   showHistorique = false;
-  reductionEnCours = false;
   readonly SEUIL_REDUCTION = 500;
+
+  // Dashboard fidélité admin
+  fidelites: any[] = [];
+  showDashboardFidelite = false;
 
   constructor(
     private commandeService: CommandeService,
@@ -59,7 +73,10 @@ export class CommandesComponent implements OnInit {
     const saved = localStorage.getItem('allergies_' + this.roleService.userId);
     if (saved) this.allergiesEmploye = JSON.parse(saved);
     if (this.roleService.isEmploye()) { this.loadFidelite(); }
+    if (this.roleService.isAdmin()) { this.loadFidelites(); }
   }
+
+  // ─── CHARGEMENT ───────────────────────────────────────────────
 
   loadCommandes(): void {
     this.loading = true;
@@ -71,7 +88,10 @@ export class CommandesComponent implements OnInit {
         this.commandes = data.sort((a, b) =>
           new Date(b.dateCommande).getTime() - new Date(a.dateCommande).getTime()
         );
-        this.menusCommandesIds = this.commandes.map(c => c.menuId);
+        // Bloquer seulement les menus avec commande active (pas livree)
+        this.menusCommandesIds = this.commandes
+          .filter(c => c.statut === 'en_attente' || c.statut === 'confirmee' || c.statut === 'prete')
+          .map(c => c.menuId);
         if (this.roleService.isAdmin()) {
           const ids = [...new Set(data.map(c => c.userId))];
           ids.forEach(id => this.loadUserNom(id));
@@ -101,6 +121,192 @@ export class CommandesComponent implements OnInit {
     });
   }
 
+  // ─── MODAL PAIEMENT ───────────────────────────────────────────
+
+  ouvrirModalPaiement(commande: Commande): void {
+    this.commandeEnCoursDePaiement = commande;
+    this.modePaiementSelectionne = '';
+    this.paiementEnCours = false;
+    this.showModalPaiement = true;
+  }
+
+  fermerModalPaiement(): void {
+    this.showModalPaiement = false;
+    this.commandeEnCoursDePaiement = null;
+    this.modePaiementSelectionne = '';
+  }
+
+  confirmerPaiement(): void {
+    if (!this.commandeEnCoursDePaiement || !this.modePaiementSelectionne) return;
+    this.paiementEnCours = true;
+    this.commandeService.payerCommande(
+      this.commandeEnCoursDePaiement.id!,
+      this.modePaiementSelectionne
+    ).subscribe({
+      next: () => {
+        this.fermerModalPaiement();
+        this.successMsg = 'Paiement enregistre — commande livree !';
+        setTimeout(() => this.successMsg = '', 4000);
+        this.loadCommandes();
+        this.loadFidelites();
+      },
+      error: () => {
+        this.paiementEnCours = false;
+        this.errorMsg = 'Erreur lors du paiement.';
+      }
+    });
+  }
+
+  // ─── VALIDATION CODE ADMIN ────────────────────────────────────
+
+  validerParCode(): void {
+    this.codeErreur = '';
+    if (!this.codeRetrait || this.codeRetrait.length < 4) {
+      this.codeErreur = 'Entrez un code a 4 caracteres.';
+      return;
+    }
+    const commande = this.commandes.find(c =>
+      c.statut === 'prete' &&
+      (c.codeRetrait || (c.id || '').slice(-4).toUpperCase()) === this.codeRetrait.toUpperCase()
+    );
+    if (!commande) {
+      this.codeErreur = 'Aucune commande prete avec ce code.';
+      return;
+    }
+    this.codeRetrait = '';
+    this.ouvrirModalPaiement(commande);
+  }
+
+  getCodeRetrait(commande: Commande): string {
+    return commande.codeRetrait || (commande.id || '').slice(-4).toUpperCase();
+  }
+
+  getCommandesPretes(): Commande[] {
+    return this.commandes.filter(c => c.statut === 'prete');
+  }
+
+  // ─── GESTION QUANTITÉS PLATS ──────────────────────────────────
+
+  getQuantiteSelectionnee(platId: string): number {
+    return this.platsSelectionnes.filter(id => id === platId).length;
+  }
+
+  getStockRestant(platId: string): number {
+    const plat = this.platsDisponibles.find(p => p.platId === platId);
+    if (!plat) return 0;
+    return Math.max(0, (plat.quantite || 0) - this.getQuantiteSelectionnee(platId));
+  }
+
+  isPlatCommandable(platId: string): boolean {
+    const plat = this.platsDisponibles.find(p => p.platId === platId);
+    if (!plat || !plat.disponible || (plat.quantite || 0) <= 0) return false;
+    return this.getStockRestant(platId) > 0;
+  }
+
+  incrementerPlat(platId: string): void {
+    if (this.isPlatCommandable(platId)) this.platsSelectionnes.push(platId);
+  }
+
+  decrementerPlat(platId: string): void {
+    const idx = this.platsSelectionnes.lastIndexOf(platId);
+    if (idx !== -1) this.platsSelectionnes.splice(idx, 1);
+  }
+
+  isPlatSelected(platId: string): boolean {
+    return this.getQuantiteSelectionnee(platId) > 0;
+  }
+
+  getMontantPreview(): number {
+    const platIds = [...new Set(this.platsSelectionnes)];
+    return platIds.reduce((sum, platId) => {
+      const plat = this.platsDisponibles.find(p => p.platId === platId);
+      return sum + (plat ? (plat.prix || 0) * this.getQuantiteSelectionnee(platId) : 0);
+    }, 0);
+  }
+
+  getPlatsGroupes(plats: string[]): { nom: string; qty: number }[] {
+    const map = new Map<string, number>();
+    for (const id of plats) map.set(id, (map.get(id) || 0) + 1);
+    return Array.from(map.entries()).map(([id, qty]) => ({ nom: this.getPlatNom(id), qty }));
+  }
+
+  // ─── FORMULAIRE COMMANDE ──────────────────────────────────────
+
+  ouvrirFormulaire(): void {
+    this.showForm = true;
+    this.step = 1;
+    this.newCommande = { menuId: '' };
+    this.platsDisponibles = [];
+    this.platsSelectionnes = [];
+    this.commandeEnModification = null;
+  }
+
+  onMenuChange(): void {
+    const menu = this.menus.find(m => m.id === this.newCommande.menuId);
+    this.platsDisponibles = menu ? (menu.plats || []).filter(p => p.disponible) : [];
+    this.platsSelectionnes = [];
+    if (this.platsDisponibles.length > 0) this.step = 2;
+  }
+
+  isMenuDejaCommande(menuId: string): boolean {
+    return this.menusCommandesIds.includes(menuId);
+  }
+
+  modifierCommande(commande: Commande): void {
+    const menu = this.menus.find(m => m.id === commande.menuId);
+    if (!menu) return;
+    this.platsDisponibles = (menu.plats || []).filter(p => p.disponible);
+    this.platsSelectionnes = [...commande.plats];
+    this.newCommande = { menuId: commande.menuId };
+    this.commandeEnModification = commande;
+    this.step = 2;
+    this.showForm = true;
+  }
+
+  submitCommande(): void {
+    if (!this.newCommande.menuId || this.platsSelectionnes.length === 0) {
+      this.errorMsg = 'Choisissez un menu et au moins un plat.';
+      return;
+    }
+    if (this.commandeEnModification) {
+      this.commandeService.updateCommande(
+        this.commandeEnModification.id!,
+        { plats: this.platsSelectionnes }
+      ).subscribe({
+        next: () => {
+          this.successMsg = 'Commande modifiee avec succes !';
+          setTimeout(() => this.successMsg = '', 4000);
+          this.showForm = false;
+          this.commandeEnModification = null;
+          this.loadCommandes();
+          this.loadFidelite();
+        },
+        error: (err) => { this.errorMsg = err.error?.message || 'Erreur modification commande.'; }
+      });
+      return;
+    }
+    const commande: Commande = {
+      userId: this.roleService.userId,
+      menuId: this.newCommande.menuId,
+      plats: this.platsSelectionnes,
+      dateCommande: new Date().toISOString().split('T')[0],
+      statut: 'en_attente'
+    };
+    this.commandeService.createCommande(commande).subscribe({
+      next: () => {
+        this.successMsg = 'Commande envoyee avec succes !';
+        setTimeout(() => this.successMsg = '', 4000);
+        this.showForm = false;
+        this.loadCommandes();
+        // ✅ Rafraîchir fidélité après commande — réduction peut avoir été consommée
+        this.loadFidelite();
+      },
+      error: (err) => { this.errorMsg = err.error?.message || 'Erreur creation commande.'; }
+    });
+  }
+
+  // ─── ALLERGIES ────────────────────────────────────────────────
+
   ajouterAllergie(): void {
     const a = this.nouvelleAllergie.trim().toLowerCase();
     if (!a || this.allergiesEmploye.includes(a)) { this.nouvelleAllergie = ''; return; }
@@ -121,10 +327,8 @@ export class CommandesComponent implements OnInit {
     for (const menu of this.menus) {
       for (const plat of (menu.plats || [])) {
         tousLesPlats.push({
-          platId: plat.platId,
-          nom: plat.nom,
-          ingredients: plat.ingredients || '',
-          description: plat.description || ''
+          platId: plat.platId, nom: plat.nom,
+          ingredients: plat.ingredients || '', description: plat.description || ''
         });
       }
     }
@@ -136,7 +340,7 @@ export class CommandesComponent implements OnInit {
         this.alertesAllergie = res.filter(r => !r.sur);
         this.analyseEnCours = false;
         if (this.alertesAllergie.length === 0) {
-          this.successMsg = 'Aucun conflit allergie detecte sur les plats disponibles !';
+          this.successMsg = 'Aucun conflit allergie detecte !';
           setTimeout(() => this.successMsg = '', 4000);
         }
       },
@@ -144,100 +348,7 @@ export class CommandesComponent implements OnInit {
     });
   }
 
-  getCodeRetrait(commande: Commande): string {
-    return (commande.id || '').slice(-4).toUpperCase();
-  }
-
-  getCommandesPretes(): Commande[] {
-    return this.commandes.filter(c => c.statut === 'prete');
-  }
-
-  validerParCode(): void {
-    this.codeErreur = '';
-    if (!this.codeRetrait || this.codeRetrait.length < 4) {
-      this.codeErreur = 'Entrez un code a 4 caracteres.';
-      return;
-    }
-    const commande = this.commandes.find(c =>
-      c.statut === 'prete' &&
-      (c.id || '').slice(-4).toUpperCase() === this.codeRetrait.toUpperCase()
-    );
-    if (!commande) {
-      this.codeErreur = 'Aucune commande prete avec ce code.';
-      return;
-    }
-    this.updateStatut(commande.id!, 'livree');
-    this.codeRetrait = '';
-    this.successMsg = 'Livraison validee pour ' + this.getUserNom(commande.userId) + ' !';
-    setTimeout(() => this.successMsg = '', 4000);
-  }
-
-  ouvrirFormulaire(): void {
-    this.showForm = true;
-    this.step = 1;
-    this.newCommande = { menuId: '' };
-    this.platsDisponibles = [];
-    this.platsSelectionnes = [];
-  }
-
-  onMenuChange(): void {
-    const menu = this.menus.find(m => m.id === this.newCommande.menuId);
-    this.platsDisponibles = menu ? (menu.plats || []).filter(p => p.disponible) : [];
-    this.platsSelectionnes = [];
-    if (this.platsDisponibles.length > 0) this.step = 2;
-  }
-
-  togglePlat(platId: string): void {
-    this.platsSelectionnes.includes(platId)
-      ? this.platsSelectionnes = this.platsSelectionnes.filter(id => id !== platId)
-      : this.platsSelectionnes.push(platId);
-  }
-
-  isPlatSelected(platId: string): boolean {
-    return this.platsSelectionnes.includes(platId);
-  }
-
-  getMontantPreview(): number {
-    return this.platsDisponibles
-      .filter(p => this.platsSelectionnes.includes(p.platId!))
-      .reduce((sum, p) => sum + (p.prix || 0), 0);
-  }
-
-  getPlatNom(platId: string): string {
-    for (const menu of this.menus) {
-      const plat = (menu.plats || []).find(p => p.platId === platId);
-      if (plat) return plat.nom;
-    }
-    return '-';
-  }
-
-  isMenuDejaCommande(menuId: string): boolean {
-    return this.menusCommandesIds.includes(menuId);
-  }
-
-  submitCommande(): void {
-    if (!this.newCommande.menuId || this.platsSelectionnes.length === 0) {
-      this.errorMsg = 'Choisissez un menu et au moins un plat.';
-      return;
-    }
-    const commande: Commande = {
-      userId: this.roleService.userId,
-      menuId: this.newCommande.menuId,
-      plats: this.platsSelectionnes,
-      dateCommande: new Date().toISOString().split('T')[0],
-      statut: 'en_attente'
-    };
-    this.commandeService.createCommande(commande).subscribe({
-      next: () => {
-        this.successMsg = 'Commande envoyee avec succes !';
-        setTimeout(() => this.successMsg = '', 4000);
-        this.showForm = false;
-        this.loadCommandes();
-        this.loadFidelite();
-      },
-      error: (err) => { this.errorMsg = err.error?.message || 'Erreur creation commande.'; }
-    });
-  }
+  // ─── UTILITAIRES ──────────────────────────────────────────────
 
   canDelete(commande: Commande): boolean {
     if (this.roleService.isAdmin()) return true;
@@ -287,14 +398,15 @@ export class CommandesComponent implements OnInit {
   }
 
   getNextStatut(statut: string): string | null {
-    const flow = ['en_attente', 'confirmee', 'prete', 'livree'];
+    if (statut === 'prete') return null;
+    const flow = ['en_attente', 'confirmee', 'prete'];
     const idx = flow.indexOf(statut);
     return idx < flow.length - 1 ? flow[idx + 1] : null;
   }
 
   getNextStatutLabel(statut: string): string {
+    const labels: any = { confirmee: 'Confirmer', prete: 'Marquer Prete' };
     const next = this.getNextStatut(statut);
-    const labels: any = { confirmee: 'Confirmer', prete: 'Marquer Prete', livree: 'Marquer Livree' };
     return next ? labels[next] : '';
   }
 
@@ -310,35 +422,31 @@ export class CommandesComponent implements OnInit {
     const menu = this.menus.find(m => m.id === menuId);
     return menu ? menu.titre : '-';
   }
+
+  getPlatNom(platId: string): string {
+    for (const menu of this.menus) {
+      const plat = (menu.plats || []).find(p => p.platId === platId);
+      if (plat) return plat.nom;
+    }
+    return '-';
+  }
+
   getStatutIcon(statut: string): string {
     switch (statut) {
-      case 'en_attente': return '';
-      case 'confirmee':  return '';
-      case 'prete':      return '';
-      case 'livree':     return '';
+      case 'en_attente': return '⏳';
+      case 'confirmee':  return '✅';
+      case 'prete':      return '🍽️';
+      case 'livree':     return '📦';
       default:           return '';
     }
   }
+
+  // ─── FIDÉLITÉ ─────────────────────────────────────────────────
 
   loadFidelite(): void {
     this.fideliteService.getFidelite(this.roleService.userId).subscribe({
       next: (f) => { this.fidelite = f; },
       error: () => {}
-    });
-  }
-
-  utiliserReduction(): void {
-    if (!this.fidelite || !this.fidelite.reductionDisponible) return;
-    if (!confirm('Utiliser votre reduction de ' + this.fidelite.montantReduction + ' TND ?')) return;
-    this.reductionEnCours = true;
-    this.fideliteService.utiliserReduction(this.roleService.userId).subscribe({
-      next: (f) => {
-        this.fidelite = f;
-        this.reductionEnCours = false;
-        this.successMsg = 'Reduction de ' + f.montantReduction + ' TND appliquee !';
-        setTimeout(() => this.successMsg = '', 4000);
-      },
-      error: () => { this.reductionEnCours = false; this.errorMsg = 'Erreur reduction.'; }
     });
   }
 
@@ -350,5 +458,17 @@ export class CommandesComponent implements OnInit {
   getPointsVersProchain(): number {
     if (!this.fidelite) return this.SEUIL_REDUCTION;
     return this.SEUIL_REDUCTION - (this.fidelite.points % this.SEUIL_REDUCTION);
+  }
+
+  // ─── DASHBOARD FIDÉLITÉ ADMIN ─────────────────────────────────
+
+  loadFidelites(): void {
+    this.http.get<any[]>('http://localhost:8081/api/fidelite/all').subscribe({
+      next: (data) => {
+        this.fidelites = data.sort((a, b) => b.points - a.points);
+        data.forEach(f => this.loadUserNom(f.userId));
+      },
+      error: () => {}
+    });
   }
 }

@@ -6,13 +6,10 @@ import { Fidelite } from 'src/app/models/fidelite';
 @Injectable({ providedIn: 'root' })
 export class FideliteService {
   private apiUrl = 'http://localhost:8081/api/fidelite';
+
   constructor(private http: HttpClient) {}
 
   getFidelite(userId: string): Observable<Fidelite> {
     return this.http.get<Fidelite>(`${this.apiUrl}/${userId}`);
-  }
-
-  utiliserReduction(userId: string): Observable<Fidelite> {
-    return this.http.post<Fidelite>(`${this.apiUrl}/${userId}/utiliser-reduction`, {});
   }
 }

@@ -31,6 +31,14 @@ export class CommandeService {
     return this.http.patch<Commande>(this.apiUrl + '/' + id + '/statut?statut=' + statut, {});
   }
 
+  updateCommande(id: string, commande: Partial<Commande>): Observable<Commande> {
+    return this.http.patch<Commande>(this.apiUrl + '/' + id + '/plats', commande['plats']);
+  }
+
+  payerCommande(id: string, modePaiement: string): Observable<any> {
+    return this.http.post<any>(this.apiUrl + '/' + id + '/payer?modePaiement=' + modePaiement, {});
+  }
+
   deleteCommande(id: string): Observable<void> {
     return this.http.delete<void>(this.apiUrl + '/' + id);
   }

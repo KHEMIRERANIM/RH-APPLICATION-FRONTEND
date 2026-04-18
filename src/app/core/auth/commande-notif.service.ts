@@ -7,7 +7,6 @@ import { RoleService } from 'app/core/auth/role.service';
 
 @Injectable({ providedIn: 'root' })
 export class CommandeNotifService implements OnDestroy {
-
     private _timer: any;
     private _destroy$ = new Subject<void>();
     private readonly POLL_MS = 10_000;
@@ -22,7 +21,6 @@ export class CommandeNotifService implements OnDestroy {
     start(): void {
         if (this._timer) return;
         if (!this._roleService.isEmploye()) return;
-
         this._poll();
         this._timer = setInterval(() => this._poll(), this.POLL_MS);
     }
@@ -40,7 +38,6 @@ export class CommandeNotifService implements OnDestroy {
     private _poll(): void {
         const userId = this._roleService.userId;
         if (!userId) return;
-
         this._http
             .get<any[]>(`${this.BACKEND}/api/commandes/user/${userId}`)
             .pipe(takeUntil(this._destroy$))
@@ -62,7 +59,9 @@ export class CommandeNotifService implements OnDestroy {
             const minutes = Math.floor((Date.now() - datePrete.getTime()) / 60000);
             const minutesRestantes = Math.max(0, 2 - minutes);
             const enRetard = minutes >= 1;
-            const code = (c.id || '').slice(-4).toUpperCase();
+
+            // ✅ Utilise codeRetrait du backend en priorité
+            const code = c.codeRetrait || (c.id || '').slice(-4).toUpperCase();
 
             const notif: any = {
                 id: 'commande-prete-' + c.id,
@@ -91,4 +90,3 @@ export class CommandeNotifService implements OnDestroy {
             });
     }
 }
-
