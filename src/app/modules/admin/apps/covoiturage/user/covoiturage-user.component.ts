@@ -1,10 +1,10 @@
-import { Component, OnInit, AfterViewInit, OnDestroy, ElementRef, Renderer2, ViewChild, ChangeDetectorRef, NgZone, ApplicationRef } from '@angular/core';
+﻿import { Component, OnInit, AfterViewInit, OnDestroy, ElementRef, Renderer2, ViewChild, ChangeDetectorRef, NgZone, ApplicationRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CovoiturageService, Vehicule, Trajet, ReservationResponse, ReservationRequest } from '../covoiturage.service';
 import { UserService, Employee } from '../../../../../services/user.service';
 import { EmailService } from '../../../../../services/email.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { getWsTrackingSockJsUrl as getWsTrackingSockJsUrlFromEnv } from '../../../../../../environments/environment';
@@ -169,10 +169,117 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
   selectedTab: string = 'covoiturage';
   selectedDays: string[] = ["Lun", "Mar", "Mer", "Jeu", "Ven"];
   showChat = false;
-  activeSection: 'utilises' | 'proposes' | 'recompenses' = 'utilises';
+  activeSection: 'utilises' | 'proposes' | 'recompenses' | 'archives' = 'utilises';
   showGiftModal = false;
   isEditingTrajet = false;
   editingTrajetId: string | null = null;
+
+  /** Filtre statut actif dans "Mes trajets" */
+  trajetFilter: string = 'TOUS';
+
+  /** Afficher/masquer la section archive des trajets */
+  showTrajetArchive: boolean = false;
+
+  /** Faire défiler vers la section archive après l'ouverture */
+  scrollToArchive() {
+    setTimeout(() => {
+      const el = document.getElementById('trajet-archive-section');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+  }
+
+  /** Statuts disponibles pour le filtre */
+  readonly trajetStatuts = [
+    { key: 'TOUS', label: 'Tous', cls: 'bg-gray-100 text-gray-600' },
+    { key: 'ACTIF', label: 'Actif', cls: 'bg-green-100 text-green-700' },
+    { key: 'EN_ROUTE', label: 'En cours', cls: 'bg-blue-100 text-blue-700' },
+    { key: 'COMPLET', label: 'Complet', cls: 'bg-purple-100 text-purple-700' },
+    { key: 'INACTIF', label: 'Inactif', cls: 'bg-orange-100 text-orange-700' },
+    { key: 'EFFECTUE', label: 'Effectué', cls: 'bg-gray-200 text-gray-600' },
+    { key: 'ANNULE', label: 'Annulé', cls: 'bg-red-100 text-red-700' },
+  ];
+
+  // ─── Archive persistée dans localStorage ───────────────────────────────────
+  private readonly LS_TRAJET_KEY = 'archive_trajet_ids';
+  private readonly LS_RES_KEY = 'archive_res_ids';
+
+  /** IDs des trajets archivés (persistés) */
+  archivedTrajetIds: Set<string> = new Set(
+    JSON.parse(localStorage.getItem('archive_trajet_ids') || '[]')
+  );
+
+  /** IDs des réservations archivées (persistées) */
+  archivedResIds: Set<string> = new Set(
+    JSON.parse(localStorage.getItem('archive_res_ids') || '[]')
+  );
+
+  /** Archiver un trajet et sauvegarder */
+  archiverTrajet(id: string) {
+    this.archivedTrajetIds.add(id);
+    localStorage.setItem(this.LS_TRAJET_KEY, JSON.stringify([...this.archivedTrajetIds]));
+  }
+
+  /** Désarchiver un trajet et sauvegarder */
+  desarchiverTrajet(id: string) {
+    this.archivedTrajetIds.delete(id);
+    localStorage.setItem(this.LS_TRAJET_KEY, JSON.stringify([...this.archivedTrajetIds]));
+  }
+
+  /** Archiver une réservation et sauvegarder */
+  archiverReservation(id: string) {
+    this.archivedResIds.add(id);
+    localStorage.setItem(this.LS_RES_KEY, JSON.stringify([...this.archivedResIds]));
+  }
+
+  /** Désarchiver une réservation et sauvegarder */
+  desarchiverReservation(id: string) {
+    this.archivedResIds.delete(id);
+    localStorage.setItem(this.LS_RES_KEY, JSON.stringify([...this.archivedResIds]));
+  }
+
+  /** Trajets filtrés (hors archivés) */
+  get filteredBackendTrajets(): any[] {
+    const visible = this.backendTrajets.filter(t => !this.archivedTrajetIds.has(t.id));
+    if (this.trajetFilter === 'TOUS') return visible;
+    return visible.filter(t => String(t.statut || '').toUpperCase() === this.trajetFilter);
+  }
+
+  /** Liste des trajets archivés */
+  get archivedTrajetsList(): any[] {
+    return this.backendTrajets.filter(t => this.archivedTrajetIds.has(t.id));
+  }
+
+  /** Compte les trajets par statut (utilisé pour le filtre déroulant) */
+  countTrajetsByStatut(statut: string): number {
+    if (statut === 'TOUS') return this.backendTrajets.filter(t => !this.archivedTrajetIds.has(t.id)).length;
+    return this.backendTrajets.filter(t =>
+      !this.archivedTrajetIds.has(t.id) && String(t.statut || '').toUpperCase() === statut
+    ).length;
+  }
+
+  // Onglet actif dans la section "Mes réservations" (employé)
+  activeResTab: 'covoiturage' | 'navette' | 'archive' = 'covoiturage';
+
+  /** Covoiturage : toutes sauf archivées */
+  get visibleCovReservations(): ReservationResponse[] {
+    return this.mesReservations.filter(r => !this.archivedResIds.has(r.id!));
+  }
+
+  /** Navette : toutes sauf archivées */
+  get visibleNavReservations(): any[] {
+    return this.myShuttleReservations.filter(r => !this.archivedResIds.has(r.id));
+  }
+
+  /** Archive : réservations covoiturage + navette archivées manuellement */
+  get archiveReservations(): { type: 'cov' | 'nav'; data: any }[] {
+    const covArchive = this.mesReservations
+      .filter(r => this.archivedResIds.has(r.id!))
+      .map(r => ({ type: 'cov' as const, data: r }));
+    const navArchive = this.myShuttleReservations
+      .filter(r => this.archivedResIds.has(r.id))
+      .map(r => ({ type: 'nav' as const, data: r }));
+    return [...covArchive, ...navArchive];
+  }
 
   userLevel: string = 'OR';
   totalPointsEco: number = 425;
@@ -362,6 +469,18 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
   displayedTrajets: Trajet[] = [];
   mesReservations: ReservationResponse[] = [];
   reservationEnCours: boolean = false;
+  reservingTrajetId: string | null = null;
+  isVerifyingAddresses: boolean = false;
+  expandedResIds: Set<string> = new Set<string>();
+
+  toggleReservationDetails(reservationId: string): void {
+    if (this.expandedResIds.has(reservationId)) {
+      this.expandedResIds.delete(reservationId);
+    } else {
+      this.expandedResIds.add(reservationId);
+    }
+  }
+
 
   // Cache employés (already declared above)
 
@@ -415,6 +534,7 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     private userService: UserService,
     private emailService: EmailService,
     private route: ActivatedRoute,
+    private router: Router,
     private paiementService: PaiementService,
     private reclamationService: ReclamationService,
     private _walkingService: WalkingService
@@ -450,13 +570,18 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
         // Vérification périodique des paiements expirés
         setInterval(() => this.checkPaiementsExpire(), 60000);
 
-        this.route.queryParams.subscribe(params => {
-          const tid = params['annulationTrajetId'];
-          if (tid) {
-            this.trajetAnnuleId = tid;
-            this.reservationAnnuleeId = params['reservationId'] || '';
-            this.chercherAlternatives(this.trajetAnnuleId);
-          }
+     this.route.queryParams.subscribe(params => {
+  const tid = params['annulationTrajetId'];
+  if (tid) {
+    this.trajetAnnuleId = tid;
+    this.reservationAnnuleeId = params['reservationId'] || '';
+    this.notificationAnnulation = {
+      titre: 'Trajet annulé',
+      message: 'Votre conducteur a annulé le trajet. Consultez les alternatives disponibles.',
+      trajetAnnuleId: tid
+    };
+    this.showNotificationAnnulation = true;
+  }
           if (params['paymentSuccess']) {
             this.showToast('✅ Paiement réussi !', 'Votre réservation a été confirmée avec succès.');
           }
@@ -505,10 +630,11 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
               this.showNotificationAnnulation = true;
               this.trajetAnnuleId = this.notificationAnnulation.trajetAnnuleId;
               this.reservationAnnuleeId = notif?.reservationId || this.getReservationIdByTrajetId(this.trajetAnnuleId);
-              if (this.trajetAnnuleId) {
-                this.chercherAlternatives(this.trajetAnnuleId);
-              }
-              this.loadMesReservations();
+            // APRÈS
+if (this.trajetAnnuleId) {
+  // Rien — le banner s'affiche, l'utilisateur clique quand il veut
+}
+this.loadMesReservations();
               this.cdr.detectChanges();
             } else if (notifType === 'CONFIRMATION_ALTERNATIVE') {
               this.loadMesReservations();
@@ -921,6 +1047,32 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     return this.employesMap.get(String(id)) || `Employé Inconnu`;
   }
 
+  /** Déduplique les réservations par employeId.
+   *  Si un employé a plusieurs entrées (ex: ANNULE + CONFIRME),
+   *  on garde uniquement la plus "active" (CONFIRME > EN_ATTENTE > EN_ATTENTE_PAIEMENT > ANNULE).
+   */
+  getUniqueReservations(reservations: any[]): any[] {
+    if (!reservations?.length) return [];
+    const priority: Record<string, number> = {
+      'CONFIRME': 5, 'EN_ROUTE': 4, 'EN_ATTENTE_PAIEMENT': 3,
+      'EN_ATTENTE': 2, 'EFFECTUE': 1, 'ANNULE': 0
+    };
+    const map = new Map<string, any>();
+    for (const res of reservations) {
+      const key = String(res.employeId);
+      const existing = map.get(key);
+      if (!existing) {
+        map.set(key, res);
+      } else {
+        const pNew = priority[res.statut] ?? 0;
+        const pOld = priority[existing.statut] ?? 0;
+        if (pNew > pOld) map.set(key, res);
+      }
+    }
+    return Array.from(map.values());
+  }
+
+
   getEmployeePhone(id: string): string {
     return this.employesPhoneMap.get(String(id)) || 'N/A';
   }
@@ -943,16 +1095,16 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     this.covoiturageService.getTrajetsByEmployeId(this.employeId).subscribe({
       next: (res) => {
         // Filtrer les trajets INACTIFS mais UNIQUEMENT s'ils sont complets (véhicule et adresses renseignés)
-        this.backendTrajets = (res || []).filter(t => 
-          (t.statut === 'ACTIF' || t.statut === 'EN_ROUTE' || t.statut === 'COMPLET' || t.statut === 'INACTIF') &&
+        this.backendTrajets = (res || []).filter(t =>
+          (t.statut === 'ACTIF' || t.statut === 'EN_ROUTE' || t.statut === 'COMPLET' || t.statut === 'INACTIF' || t.statut === 'EFFECTUE') &&
           t.vehiculeId && t.adresseDepart && t.adresseArrivee
         );
-        
+
         this.backendTrajets.forEach(trajet => {
           if (trajet.id) {
             this.covoiturageService.getReservationsByTrajet(trajet.id).subscribe({
               next: (reserves) => {
-                trajet.reservations = reserves.filter(r => r.statut !== 'ANNULE');
+                trajet.reservations = reserves; // Garder TOUTES les réservations, y compris annulées
                 this.cdr.detectChanges();
               }
             });
@@ -973,7 +1125,7 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
   editTrajet(trajet: any) {
     this.isEditingTrajet = true;
     this.editingTrajetId = trajet.id;
-    
+
     // Patch form values
     this.trajetForm.patchValue({
       categorie: trajet.categorie,
@@ -1139,6 +1291,8 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
 
     if (this.estDejaReserve(trajetId)) return;
     this.reservationEnCours = true;
+    this.reservingTrajetId = trajetId;
+    this.isVerifyingAddresses = true;
 
     let distanceKm = 25.0;
 
@@ -1171,12 +1325,16 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     this.covoiturageService.creerReservation(request).subscribe({
       next: () => {
         this.reservationEnCours = false;
+        this.reservingTrajetId = null;
+        this.isVerifyingAddresses = false;
         this.loadMesReservations();
         this.loadTotalPoints();
         this.loadAllTrajets();
       },
       error: (err) => {
         this.reservationEnCours = false;
+        this.reservingTrajetId = null;
+        this.isVerifyingAddresses = false;
         console.error('Erreur réservation', err);
       }
     });
@@ -1187,31 +1345,31 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     if (!res) return;
 
     const isPaid = res.statut === 'CONFIRME';
-    const message = isPaid 
-      ? 'Annuler cette réservation ? Un remboursement sera effectué car vous avez déjà payé.' 
+    const message = isPaid
+      ? 'Annuler cette réservation ? Un remboursement sera effectué car vous avez déjà payé.'
       : 'Annuler cette réservation ?';
 
     if (!confirm(message)) return;
 
     const update: Partial<ReservationRequest> = { statut: 'ANNULE' };
     this.covoiturageService.updateReservationStatus(reservationId, update).subscribe({
-      next: () => { 
+      next: () => {
         if (isPaid) {
           this.paiementService.refundPayment(reservationId).subscribe({
             next: () => console.log('Remboursement initié'),
             error: (err) => console.error('Erreur remboursement', err)
           });
         }
-        this.loadMesReservations(); 
-        this.loadTotalPoints(); 
-        this.loadAllTrajets(); 
+        this.loadMesReservations();
+        this.loadTotalPoints();
+        this.loadAllTrajets();
       },
       error: (err) => console.error('Erreur annulation', err)
     });
   }
 
   accepterReservation(reservationId: string): void {
-    const update: Partial<ReservationRequest> = { 
+    const update: Partial<ReservationRequest> = {
       statut: 'EN_ATTENTE_PAIEMENT',
       dateAcceptation: new Date().toISOString()
     };
@@ -1309,21 +1467,23 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
       this.loadMesReservations();
       return;
     }
-    const trajet = this.getTrajetInfo(reservation.trajetId);
-    if (!trajet || (trajet.prix === undefined || trajet.prix === null)) {
-      alert("Erreur: Le prix de ce trajet n'est pas défini.");
+
+    // Chercher le trajet dans les deux sources disponibles
+    const trajet = this.getTrajetInfo(reservation.trajetId)
+      || this.allTrajets.find(t => t.id === reservation.trajetId)
+      || null;
+
+    if (!trajet) {
+      alert("Erreur: Informations du trajet introuvables. Veuillez rafraîchir la page.");
       return;
     }
 
-    this.paiementService.createStripePayment(reservation.id, trajet.prix).subscribe({
-      next: (response) => {
-        window.location.href = response.redirectUrl;
-      },
-      error: (err) => {
-        console.error('Erreur création paiement:', err);
-        alert('Erreur lors de la création du paiement PayPal');
-      }
-    });
+    const prix = trajet.prix ?? reservation.price ?? 0;
+
+    this.router.navigate(
+      ['/paiement-checkout'],
+      { state: { reservation: { ...reservation, price: prix }, trajet } }
+    );
   }
 
   estDejaReserve(trajetId: string): boolean {
@@ -1394,16 +1554,29 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     if (!bus) return statut;
 
     const packId = bus.packId;
-    if (packId) {
-      const days = (reservation.joursSelectionnes || '').split(',').map((d: string) => d.trim()).filter(Boolean);
-      // PRIORITÉ 2 : Simulation par distribution (fallback/prédiction)
-      const hasConfirmed = days.some((day: string) => {
-        const targetBus = this.getBusForUserAndDay(packId, reservation.employeId, day);
-        return targetBus?.statut === 'ACTIF';
-      });
-      if (hasConfirmed) return 'CONFIRME';
-      return 'EN_ATTENTE_ACTIVATION';
-    }
+if (packId) {
+  if (bus.statut !== 'ACTIF') {
+    // Bus de réserve : vérifier si au moins un jour est confirmé
+    // via activation du bus de réserve
+    const days = (reservation.joursSelectionnes || '').split(',')
+      .map((d: string) => d.trim()).filter(Boolean);
+    const hasConfirmed = days.some((day: string) => {
+      const targetBus = this.getBusForUserAndDay(packId, reservation.employeId, day);
+      return targetBus?.statut === 'ACTIF';
+    });
+    if (hasConfirmed) return 'CONFIRME';
+    return 'EN_ATTENTE_ACTIVATION';
+  }
+  // Bus principal ACTIF
+  const days = (reservation.joursSelectionnes || '').split(',')
+    .map((d: string) => d.trim()).filter(Boolean);
+  const hasConfirmed = days.some((day: string) => {
+    const targetBus = this.getBusForUserAndDay(packId, reservation.employeId, day);
+    return targetBus?.statut === 'ACTIF';
+  });
+  if (hasConfirmed) return 'CONFIRME';
+  return 'EN_ATTENTE_ACTIVATION';
+}
 
     return statut;
   }
@@ -1456,14 +1629,21 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     if (!bus) return 'none';
 
     const packId = bus.packId;
-    if (packId) {
-      // PRIORITÉ 2: Simulation par distribution du pack
-      const targetBus = this.getBusForUserAndDay(packId, reservation.employeId, day);
-      if (targetBus) {
-        return targetBus.statut === 'ACTIF' ? 'confirmed' : 'waiting';
-      }
-    }
-
+if (packId) {
+  if (bus.statut !== 'ACTIF') {
+    // Bus de réserve : confirmé seulement si l'admin a activé CE jour
+    // via joursConfirmes OU si le bus de réserve lui-même est devenu ACTIF
+    // On vérifie si l'admin a activé ce jour spécifiquement
+    const targetBus = this.getBusForUserAndDay(packId, reservation.employeId, day);
+    if (targetBus?.statut === 'ACTIF') return 'confirmed';
+    return 'waiting';
+  }
+  // Bus principal ACTIF → simulation normale
+  const targetBus = this.getBusForUserAndDay(packId, reservation.employeId, day);
+  if (targetBus) {
+    return targetBus.statut === 'ACTIF' ? 'confirmed' : 'waiting';
+  }
+}
     // PRIORITÉ 3: Fallback sur les listes d'attente du serveur
     if (reservation.joursEnAttente?.includes(day)) return 'waiting';
 
@@ -1690,16 +1870,14 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     const tousJours = this.selectedNavetteDays[shuttle.id] || [];
 
     if (tousJours.length === 0) {
-      alert('Veuillez sélectionner au moins un jour pour cette navette.');
-      return;
+this.showToast('ℹ️ Attention', 'Veuillez sélectionner au moins un jour.', 'info');      return;
     }
 
     // On ne réserve que les jours libres
     const joursLibres = this.getJoursLibres(shuttle.id);
 
     if (joursLibres.length === 0) {
-      alert('Tous les jours sélectionnés sont déjà réservés pour cette navette.');
-      return;
+this.showToast('ℹ️ Déjà réservé', 'Tous les jours sélectionnés sont déjà réservés.', 'info');      return;
     }
 
     const joursSelectionnes = joursLibres.join(',');
@@ -1768,15 +1946,17 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
 
           msg = `${confStr}${waitStr}${thresholdMsg}`;
         }
-        alert(msg);
-        this.cdr.detectChanges();
+this.showToast(
+  wait.length === 0 ? '✅ Réservation confirmée' : '⚠️ Liste d\'attente',
+  msg,
+  wait.length === 0 ? 'success' : 'info'
+);        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Erreur réservation', err);
         const body = err?.error;
         const msg = typeof body === 'string' ? body : (body?.message || err?.message || 'Erreur inconnue');
-        alert('Erreur lors de la réservation : ' + msg);
-      }
+this.showToast('❌ Erreur', msg, 'error');      }
     });
   }
 
@@ -2230,9 +2410,18 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     }
   }
 
-  showToast(title: string, message: string) {
-    alert(title + '\n' + message);
-  }
+toastTitle: string = '';
+toastMessage: string = '';
+toastType: 'success' | 'error' | 'info' = 'success';
+toastVisible: boolean = false;
+
+showToast(title: string, message: string, type: 'success' | 'error' | 'info' = 'success') {
+  this.toastTitle = title;
+  this.toastMessage = message;
+  this.toastType = type;
+  this.toastVisible = true;
+  this.cdr.detectChanges();
+}
 
   ngOnDestroy() {
     if (this.map) {
@@ -2252,7 +2441,7 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     if (section === 'utilises' && this.selectedTab === 'navette') {
       setTimeout(() => this.initReclamationMap(), 200);
     }
-    
+
     if (section === 'proposes') {
       setTimeout(() => {
         if (this.publishMap) {
@@ -2275,7 +2464,7 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
   switchTab(tab: string) {
     this.selectedTab = tab;
     this.cdr.detectChanges();
-    
+
     if (tab === 'navette' && this.activeSection === 'utilises') {
       setTimeout(() => {
         this.initReclamationMap();
@@ -2311,7 +2500,7 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
 
   private ajouterArretsSurCarteReclamation() {
     if (!this.reclamationMap || !this.shuttles) return;
-    
+
     this.shuttles.forEach(bus => {
       if (bus.arrets) {
         bus.arrets.forEach((stop: any) => {
@@ -2346,7 +2535,7 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
       });
       this.reclamationMarker = L.marker([lat, lng], { icon: redIcon, draggable: true }).addTo(this.reclamationMap)
         .bindPopup('Ma position précise').openPopup();
-      
+
       this.reclamationMarker.on('dragend', (event: any) => {
         const marker = event.target;
         const position = marker.getLatLng();
@@ -2714,8 +2903,8 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     // Validation des doublons : Vérifier si l'employé a déjà réclamé pour ce quartier
     this.reclamationService.getAll().subscribe({
       next: (reclamations) => {
-        const alreadyExists = reclamations.some(r => 
-          String(r.employeId) === String(this.employeId) && 
+        const alreadyExists = reclamations.some(r =>
+          String(r.employeId) === String(this.employeId) &&
           r.neighborhood?.trim().toLowerCase() === this.reclamationNeighborhood.trim().toLowerCase()
         );
 
@@ -2742,7 +2931,7 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
       if (searchQuery.toLowerCase().includes('mourouj') && !searchQuery.toLowerCase().includes('el mourouj')) {
         searchQuery = 'El ' + searchQuery;
       }
-      
+
       let lat = this.selectedLat || 36.8065;
       let lng = this.selectedLng || 10.1815;
 
@@ -2750,7 +2939,7 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
       if (!this.selectedLat || !this.selectedLng) {
         const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery + ', Tunisie')}&limit=1&countrycodes=tn`);
         const data = await geoRes.json();
-        
+
         if (data && data.length > 0) {
           lat = parseFloat(data[0].lat);
           lng = parseFloat(data[0].lon);
@@ -2763,7 +2952,7 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
       const bus = this.shuttles.find(s => s.id === selectedBusId);
       if (bus && bus.arrets) {
         // Recherche insensible à la casse et aux espaces
-        const stop = bus.arrets.find((a: any) => 
+        const stop = bus.arrets.find((a: any) =>
           a.name.trim().toLowerCase() === this.reclamationStop.trim().toLowerCase()
         );
         if (stop) {

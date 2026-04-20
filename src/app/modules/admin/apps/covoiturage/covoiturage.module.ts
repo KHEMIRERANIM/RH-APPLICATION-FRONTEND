@@ -4,6 +4,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { FuseConfirmationModule } from '@fuse/services/confirmation';
 import { NgApexchartsModule } from 'ng-apexcharts';
 
 import { CovoiturageUserComponent } from './user/covoiturage-user.component';
@@ -32,9 +34,11 @@ import { HttpClientModule } from '@angular/common/http';
     ReactiveFormsModule,
     MatIconModule,
     MatTooltipModule,
+    MatProgressSpinnerModule,
     CovoiturageRoutingModule,
     NgApexchartsModule,
-    HttpClientModule,  // ← AJOUTE SI PAS PRESENT
+    HttpClientModule,
+    FuseConfirmationModule  // ← AJOUTE SI PAS PRESENT
 
   ],
   exports: [

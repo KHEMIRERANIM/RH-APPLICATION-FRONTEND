@@ -1,7 +1,8 @@
-// Modal component logic
-import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, OnInit } from '@angular/core';
+import { Component, OnChanges, OnInit, Input, Output, EventEmitter, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Vehicule, CovoiturageService } from '../../covoiturage.service';
+import { ToastrService } from 'ngx-toastr';
+import { FuseConfirmationService } from '@fuse/services/confirmation';
 
 @Component({
   selector: 'app-vehicle-modal',
@@ -26,7 +27,9 @@ export class VehicleModalComponent implements OnChanges, OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private covoiturageService: CovoiturageService
+    private covoiturageService: CovoiturageService,
+    private _toastrService: ToastrService,
+    private _fuseConfirmationService: FuseConfirmationService
   ) {
     this.vehicleForm = this.fb.group({
       marque: ['', Validators.required],
@@ -150,22 +153,30 @@ export class VehicleModalComponent implements OnChanges, OnInit {
   }
 
   triggerDelete(id?: string) {
-    if (!id || !confirm("Êtes-vous sûr de vouloir supprimer ce véhicule ?")) return;
-    
-    this.isLoading = true;
-    this.errorMsg = '';
-    this.successMsg = '';
+    if (!id) return;
 
-    this.covoiturageService.deleteVehicule(id).subscribe({
-      next: () => {
-        this.successMsg = "Véhicule supprimé.";
-        this.isLoading = false;
-        this.loadVehicules();
-        this.vehiclesChanged.emit();
-      },
-      error: (err) => {
-        this.errorMsg = "Erreur lors de la suppression du véhicule.";
-        this.isLoading = false;
+    const dialogRef = this._fuseConfirmationService.open({
+      title: 'Supprimer le véhicule',
+      message: 'Êtes-vous sûr de vouloir supprimer ce véhicule ?',
+      icon: { show: true, name: 'heroicons_outline:trash', color: 'warn' },
+      actions: { confirm: { label: 'Supprimer', color: 'warn' } }
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result === 'confirmed') {
+        this.isLoading = true;
+        this.covoiturageService.deleteVehicule(id).subscribe({
+          next: () => {
+            this._toastrService.success("Véhicule supprimé.");
+            this.isLoading = false;
+            this.loadVehicules();
+            this.vehiclesChanged.emit();
+          },
+          error: (err) => {
+            this._toastrService.error("Erreur lors de la suppression du véhicule.");
+            this.isLoading = false;
+          }
+        });
       }
     });
   }

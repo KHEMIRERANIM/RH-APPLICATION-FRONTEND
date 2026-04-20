@@ -10,6 +10,7 @@ import { HttpClient } from '@angular/common/http';
 import { UserService } from 'app/services/user.service';
 import { Router } from '@angular/router';
 import { CovoiturageService } from 'app/modules/admin/apps/covoiturage/covoiturage.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
     selector: 'notifications',
@@ -39,7 +40,8 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         private _httpClient: HttpClient,
         private _userService: UserService,
         private _router: Router,
-        private _covoiturageService: CovoiturageService
+        private _covoiturageService: CovoiturageService,
+        private _toastrService: ToastrService
     ) {
     }
 
@@ -194,7 +196,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         event.stopPropagation(); // Évite de déclencher le toggleRead parent
 
         if (!notification.reservationId) {
-            alert("Cette ancienne notification ne possède pas d'identifiant de réservation. Vous devez créer une nouvelle demande de covoiturage pour tester ce bouton !");
+            this._toastrService.warning("Cette ancienne notification ne possède pas d'identifiant de réservation. Vous devez créer une nouvelle demande.");
             return;
         }
 
@@ -209,11 +211,11 @@ export class NotificationsComponent implements OnInit, OnDestroy {
                     const msg = statut === 'EN_ATTENTE_PAIEMENT' 
                         ? 'Acceptée ✅. Le passager a 15 min pour payer.' 
                         : 'Refusée ❌';
-                    alert(`Demande de réservation ${msg}`);
+                    this._toastrService.success(`Demande de réservation ${msg}`);
                 },
                 error: (err) => {
                     console.error(`Erreur ${statut} de la notification`, err);
-                    alert("Erreur lors de la réponse. Regardez la console (F12).");
+                    this._toastrService.error("Erreur lors de la réponse.");
                 }
             });
     }
@@ -226,7 +228,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         event.preventDefault();
         const trajetId = notification.trajetAnnuleId || notification.trajetId;
         if (!trajetId) {
-            alert('Identifiant du trajet annulé introuvable dans la notification.');
+            this._toastrService.error('Identifiant du trajet annulé introuvable.');
             return;
         }
         this.closePanel();

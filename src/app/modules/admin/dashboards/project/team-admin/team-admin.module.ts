@@ -9,6 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 
 import { TeamAdminComponent } from './team-admin.component';
 import { MaterialModule } from 'app/material.module';
+import { FuseConfirmationModule } from '@fuse/services/confirmation';
 
 @NgModule({
     declarations: [
@@ -21,7 +22,8 @@ import { MaterialModule } from 'app/material.module';
         ]),
         FormsModule,
         MatIconModule,
-        MatButtonModule
+        MatButtonModule,
+        FuseConfirmationModule
     ]
 })
 export class TeamAdminModule { }

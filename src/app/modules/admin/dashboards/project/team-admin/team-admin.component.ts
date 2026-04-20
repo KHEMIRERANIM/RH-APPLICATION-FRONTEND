@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
+import { FuseConfirmationService } from '@fuse/services/confirmation';
 
 export interface UserItem {
     id: string;
@@ -70,7 +71,8 @@ export class TeamAdminComponent implements OnInit {
     
     constructor(
         private http: HttpClient,
-        private toastr: ToastrService
+        private toastr: ToastrService,
+        private _fuseConfirmationService: FuseConfirmationService
     ) {}
     
     ngOnInit(): void {
@@ -309,17 +311,26 @@ export class TeamAdminComponent implements OnInit {
     }
     
     deleteUser(u: UserItem): void {
-        if (confirm(`Supprimer ${u.prenom} ${u.nom} ?`)) {
-            this.http.delete(`http://10.188.81.174:8081/api/users/${u.id}`)
-                .subscribe({
-                    next: () => {
-                        this.toastr.success('Membre supprimé', 'Succès');
-                        this.loadUsers();
-                    },
-                    error: () => {
-                        this.toastr.error('Erreur lors de la suppression', 'Erreur');
-                    }
-                });
-        }
+        const dialogRef = this._fuseConfirmationService.open({
+            title: 'Supprimer membre',
+            message: `Êtes-vous sûr de vouloir supprimer ${u.prenom} ${u.nom} ?`,
+            icon: { show: true, name: 'heroicons_outline:trash', color: 'warn' },
+            actions: { confirm: { label: 'Supprimer', color: 'warn' } }
+        });
+
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result === 'confirmed') {
+                this.http.delete(`http://10.188.81.174:8081/api/users/${u.id}`)
+                    .subscribe({
+                        next: () => {
+                            this.toastr.success('Membre supprimé', 'Succès');
+                            this.loadUsers();
+                        },
+                        error: () => {
+                            this.toastr.error('Erreur lors de la suppression', 'Erreur');
+                        }
+                    });
+            }
+        });
     }
 }

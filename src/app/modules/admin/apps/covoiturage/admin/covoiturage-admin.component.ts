@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+﻿import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { BusService, Bus, BusPackRequest } from '../bus.service';
 import { CovoiturageService } from '../covoiturage.service';
 import { forkJoin, of } from 'rxjs';
@@ -8,6 +8,8 @@ import { PredictionService } from '../services/prediction.service';
 import { ReclamationService, Reclamation } from '../services/reclamation.service';
 import { NotificationsService } from 'app/layout/common/notifications/notifications.service';
 import { WalkingService } from '../services/walking.service';
+import { ToastrService } from 'ngx-toastr';
+import { FuseConfirmationService } from '@fuse/services/confirmation';
 
 declare var L: any;
 
@@ -46,7 +48,7 @@ export type ChartOptions = {
 };
 
 type AdminSection = 'statistiques' | 'navettes' | 'reservations' | 'cadeaux' | 'reclamations';
-type ReservationType = 'navette' | 'covoiturage';
+type ReservationType = 'navette' | 'covoiturage' | 'archive';
 
 interface Reservation {
   id: number;
@@ -89,7 +91,9 @@ export class CovoiturageAdminComponent implements OnInit {
   protected Math = Math;
 
   activeSection: AdminSection = 'statistiques';
-  reservationType: ReservationType = 'navette';
+reservationType: ReservationType = 'covoiturage';
+archivedReservations: any[] = [];
+
   searchTerm = '';
   isLoading = false;
   errorMessage = '';
@@ -193,7 +197,9 @@ export class CovoiturageAdminComponent implements OnInit {
     private reclamationService: ReclamationService,
     private notificationsService: NotificationsService,
     private _walkingService: WalkingService,
-    private _changeDetectorRef: ChangeDetectorRef
+    private _changeDetectorRef: ChangeDetectorRef,
+    private _toastrService: ToastrService,
+    private _fuseConfirmationService: FuseConfirmationService
   ) { }
 
   // ─────────────────────────────────────────────────────────────
@@ -206,6 +212,30 @@ export class CovoiturageAdminComponent implements OnInit {
     }, 30000);
     this.checkSundayCondition();
   }
+ archiveReservation(res: any): void {
+  const dialogRef = this._fuseConfirmationService.open({
+    title: 'Archiver la réservation',
+    message: 'Voulez-vous archiver cette réservation ?',
+    icon: { show: true, name: 'heroicons_outline:archive', color: 'primary' },
+    actions: { confirm: { label: 'Archiver', color: 'primary' } }
+  });
+
+  dialogRef.afterClosed().subscribe((result) => {
+    if (result === 'confirmed') {
+      const archived = { ...res, archivedAt: new Date().toISOString() };
+      this.archivedReservations.push(archived);
+      
+      // Sauvegarder dans localStorage
+      localStorage.setItem('archivedReservations', JSON.stringify(this.archivedReservations));
+      
+      // Retirer de la liste active
+      this.reservations = this.reservations.filter(r => r.id !== res.id);
+      
+      this._toastrService.success('Réservation archivée');
+      this._changeDetectorRef.detectChanges();
+    }
+  });
+}
 
   private checkSundayCondition(): void {
     const now = new Date();
@@ -239,6 +269,10 @@ export class CovoiturageAdminComponent implements OnInit {
   }
 
   ngOnInit(): void {
+     const saved = localStorage.getItem('archivedReservations');
+  if (saved) {
+    this.archivedReservations = JSON.parse(saved);
+  }
     const now = new Date();
     const options: Intl.DateTimeFormatOptions = { weekday: 'long', day: 'numeric', month: 'long' };
     this.currentWeather.date = now.toLocaleDateString('fr-FR', options);
@@ -299,10 +333,10 @@ export class CovoiturageAdminComponent implements OnInit {
         // Navettes
         results.resNavette.forEach((rn: any) => {
           // Recherche robuste incluant shuttleId (utilisé parfois en interne)
-          const bus = this.navettes.find(b => 
+          const bus = this.navettes.find(b =>
             String(b.id) === String(rn.busId || rn.trajetId || rn.shuttleId)
           );
-          
+
           let dayIndex = -1;
           if (rn.date && rn.date.includes('-')) {
             dayIndex = new Date(rn.date).getDay();
@@ -352,6 +386,9 @@ export class CovoiturageAdminComponent implements OnInit {
 
         this.reservations = merged;
 
+        const archivedIds = this.archivedReservations.map(a => a.id);
+this.reservations = this.reservations.filter(r => !archivedIds.includes(r.id));
+
         // Calculer la fréquence d'utilisation par employé
         this.employeUsageFreq.clear();
         this.reservations.forEach(r => {
@@ -384,15 +421,21 @@ export class CovoiturageAdminComponent implements OnInit {
       zoneCounts.set(z, (zoneCounts.get(z) || 0) + 1);
     });
 
+    const unknownLabels = new Set(['inconnue', '—', '', '-', 'inconnu', 'unknown']);
     const colors = ['#6366F1', '#14B8A6', '#F59E0B', '#EF4444', '#8B5CF6'];
+    const totalKnown = Array.from(zoneCounts.entries())
+      .filter(([name]) => !unknownLabels.has(name.toLowerCase().trim()))
+      .reduce((sum, [, v]) => sum + v, 0);
+
     this.departureZonesData = Array.from(zoneCounts.entries())
+      .filter(([name]) => !unknownLabels.has(name.toLowerCase().trim()))
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 4)
+      .slice(0, 5)
       .map(([name, value], i) => ({
         name,
         value,
         color: colors[i % colors.length],
-        percentage: Math.round((value / this.reservations.length) * 100)
+        percentage: totalKnown > 0 ? Math.round((value / totalKnown) * 100) : 0
       }));
 
     // --- Logique Semaine Glissante ---
@@ -625,9 +668,9 @@ export class CovoiturageAdminComponent implements OnInit {
   private initWeekBoundaries(): void {
     const now = new Date();
     const day = now.getDay(); // 0 = Dimanche, 1 = Lundi...
-    
+
     let monday = new Date(now);
-    
+
     if (day === 0) {
       // Si on est dimanche, on bascule déjà sur la semaine suivante (demain)
       monday.setDate(now.getDate() + 1);
@@ -639,7 +682,7 @@ export class CovoiturageAdminComponent implements OnInit {
 
     // Capture des bornes
     this.minDate = monday.toISOString().split('T')[0];
-    
+
     const sunday = new Date(monday);
     sunday.setDate(monday.getDate() + 6);
     this.maxDate = sunday.toISOString().split('T')[0];
@@ -690,7 +733,7 @@ export class CovoiturageAdminComponent implements OnInit {
       this.busForm.arrivee = '';
     }
     this.joursSelectionnes = bus.joursDisponibles ? bus.joursDisponibles.split(',').map(j => j.trim()) : [];
-    
+
     // Identifier les bus de la même flotte (même ligne)
     this.relatedBuses = this.navettes.filter(b => b.ligne === bus.ligne && b.id !== bus.id);
     this.syncWithFleet = false;
@@ -759,23 +802,46 @@ export class CovoiturageAdminComponent implements OnInit {
   }
 
   addArret(): void {
-    if (this.arretInput?.trim()) {
-      if (!this.busForm.arrets) this.busForm.arrets = [];
-      this.busForm.arrets.push({
-        name: this.arretInput.trim(),
-        latitude: this.selectedLat || 36.8065,
-        longitude: this.selectedLng || 10.1815
+  if (this.arretInput?.trim()) {
+    if (!this.busForm.arrets) this.busForm.arrets = [];
+    
+    const newArret = {
+      name: this.arretInput.trim(),
+      latitude: this.selectedLat || 36.8065,
+      longitude: this.selectedLng || 10.1815
+    };
+    
+    this.busForm.arrets.push(newArret);
+
+    // ✅ Propager au reste du pack (si le bus fait partie d'un pack)
+    if (this.busForm.packId) {
+      const packBuses = this.navettes.filter(
+        b => b.packId === this.busForm.packId && b.id !== this.busForm.id
+      );
+
+      packBuses.forEach(bus => {
+        if (!bus.arrets) bus.arrets = [];
+        // Éviter les doublons
+        const alreadyExists = bus.arrets.some(
+          a => a.name.toLowerCase() === newArret.name.toLowerCase()
+        );
+        if (!alreadyExists) {
+          bus.arrets.push({ ...newArret });
+        }
       });
-      this.arretInput = '';
-      this.selectedLat = null;
-      this.selectedLng = null;
-      this.searchSuggestions = [];
-      if (this.stopPickerMarker) {
-        this.stopPickerMap.removeLayer(this.stopPickerMarker);
-        this.stopPickerMarker = null;
-      }
+    }
+
+    // Reset du formulaire
+    this.arretInput = '';
+    this.selectedLat = null;
+    this.selectedLng = null;
+    this.searchSuggestions = [];
+    if (this.stopPickerMarker) {
+      this.stopPickerMap.removeLayer(this.stopPickerMarker);
+      this.stopPickerMarker = null;
     }
   }
+}
 
   onArretSearch(query: string): void {
     if (this.searchTimeout) clearTimeout(this.searchTimeout);
@@ -794,13 +860,13 @@ export class CovoiturageAdminComponent implements OnInit {
     this.isSearching = true;
     this.searchSuggestions = [];
 
-    // 1. Suggestions de la Heatmap (Réclamations)
+    // 1. Suggestions de la Heatmap (Réclamations) — field is stopName, not stop
     const heatmapSuggestions = this.reclamationStats
-      .filter(s => s.stop.toLowerCase().includes(query.toLowerCase()))
+      .filter(s => s.stopName && s.stopName.toLowerCase().includes(query.toLowerCase()))
       .map(s => {
-        const original = this.reclamations.find(r => r.stopName === s.stop);
+        const original = this.reclamations.find(r => r.stopName === s.stopName);
         return {
-          name: s.stop,
+          name: s.stopName,
           lat: original?.latitude,
           lng: original?.longitude,
           type: 'heatmap'
@@ -809,10 +875,17 @@ export class CovoiturageAdminComponent implements OnInit {
 
     this.searchSuggestions.push(...heatmapSuggestions);
 
-    // 2. Recherche Nominatim (Tunisie uniquement)
-    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&countrycodes=tn&accept-language=fr`)
+    // 2. Recherche Nominatim (Tunisie uniquement) avec timeout de 5s
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+    fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&countrycodes=tn&accept-language=fr`,
+      { signal: controller.signal }
+    )
       .then(res => res.json())
       .then(data => {
+        clearTimeout(timeoutId);
         const nominatimResults = data.map((item: any) => ({
           name: item.display_name.split(',')[0],
           fullName: item.display_name,
@@ -833,7 +906,10 @@ export class CovoiturageAdminComponent implements OnInit {
         this._changeDetectorRef.detectChanges();
       })
       .catch(err => {
-        console.error('Erreur Nominatim:', err);
+        clearTimeout(timeoutId);
+        if (err.name !== 'AbortError') {
+          console.error('Erreur Nominatim:', err);
+        }
         this.isSearching = false;
         this._changeDetectorRef.detectChanges();
       });
@@ -862,6 +938,13 @@ export class CovoiturageAdminComponent implements OnInit {
     setTimeout(() => {
       const mapDiv = document.getElementById('stopPickerMap');
       if (!mapDiv) return;
+
+      // Supprimer l'ancienne instance de la carte si elle existe
+      if (this.stopPickerMap) {
+        this.stopPickerMap.off();
+        this.stopPickerMap.remove();
+        this.stopPickerMap = null;
+      }
 
       this.stopPickerMap = L.map('stopPickerMap').setView([36.8065, 10.1815], 11);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -977,7 +1060,7 @@ export class CovoiturageAdminComponent implements OnInit {
       const count = data.employeeIds.size;
       const avgTime = Math.round(data.totalTime / count);
       const status = avgTime > 30 ? 'critical' : (avgTime >= 15 ? 'warning' : 'ok');
-      
+
       // Compter les employés réguliers (>= 3 réservations) et actifs
       const regularEmployees = Array.from(data.employeeIds).filter(id => {
         const isDetailPresent = this.employeDetailsMap.has(id);
@@ -991,7 +1074,7 @@ export class CovoiturageAdminComponent implements OnInit {
       }));
 
       // Trouver un bus potentiel pour cet arrêt
-      const targetBus = this.navettes.find(b => 
+      const targetBus = this.navettes.find(b =>
         (b.depart || '').toLowerCase().includes(stopName.toLowerCase()) ||
         (b.arrivee || '').toLowerCase().includes(stopName.toLowerCase()) ||
         b.arrets?.some(ar => ar.name.toLowerCase().includes(stopName.toLowerCase()))
@@ -1092,15 +1175,25 @@ export class CovoiturageAdminComponent implements OnInit {
   }
 
   deleteReclamation(id: string): void {
-    if (confirm('Voulez-vous vraiment supprimer cette réclamation ?')) {
-      this.reclamationService.delete(id).subscribe({
-        next: () => {
-          this.loadReclamations();
-          this._changeDetectorRef.detectChanges();
-        },
-        error: (err) => console.error('Erreur suppression réclamation:', err)
-      });
-    }
+    const dialogRef = this._fuseConfirmationService.open({
+      title: 'Confirmer la suppression',
+      message: 'Voulez-vous vraiment supprimer cette réclamation ? Cette action est irréversible.',
+      icon: { show: true, name: 'heroicons_outline:exclamation', color: 'warn' },
+      actions: { confirm: { label: 'Supprimer', color: 'warn' } }
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result === 'confirmed') {
+        this.reclamationService.delete(id).subscribe({
+          next: () => {
+            this._toastrService.success('Réclamation supprimée');
+            this.loadReclamations();
+            this._changeDetectorRef.detectChanges();
+          },
+          error: (err) => this._toastrService.error('Erreur lors de la suppression')
+        });
+      }
+    });
   }
 
   initHeatmap(): void {
@@ -1179,17 +1272,17 @@ export class CovoiturageAdminComponent implements OnInit {
 
       // 3. Plot Neighborhood Clusters (Green Proportional Numbered Circles)
       const usedCoords = new Map<string, number>();
-      
+
       this.reclamationStats.forEach(stat => {
         if (stat.latitude && stat.longitude) {
           const baseLat = parseFloat(stat.latitude.toString());
           const baseLng = parseFloat(stat.longitude.toString());
           const coordKey = `${baseLat.toFixed(5)}|${baseLng.toFixed(5)}`;
-          
+
           // Compter les superpositions pour décaler légèrement chaque point
           const overlapCount = usedCoords.get(coordKey) || 0;
           usedCoords.set(coordKey, overlapCount + 1);
-          
+
           // Appliquer un petit décalage en spirale si superposition
           const jitterLat = baseLat + (overlapCount > 0 ? (Math.sin(overlapCount) * 0.0006) : 0);
           const jitterLng = baseLng + (overlapCount > 0 ? (Math.cos(overlapCount) * 0.0006) : 0);
@@ -1287,9 +1380,28 @@ export class CovoiturageAdminComponent implements OnInit {
         packDates: [...this.packDates],
         arrets: this.busForm.arrets || []
       };
-      this.busService.update(this.busForm.id, busToUpdate).subscribe({
+   this.busService.update(this.busForm.id, busToUpdate).subscribe({
         next: () => {
-          // Si on veut synchroniser avec la reste de la flotte (Reserve/Actifs sur la même ligne)
+          // Synchroniser les arrêts sur tous les bus du pack
+          if (this.busForm.packId) {
+            const packBuses = this.navettes.filter(
+              b => b.packId === this.busForm.packId && b.id !== this.busForm.id
+            );
+            if (packBuses.length > 0) {
+              const syncRequests = packBuses.map(rb => {
+                const occupied = this.reservantsPourBus(rb.id).length;
+                return this.busService.update(rb.id!, {
+                  arrets: [...(busToUpdate.arrets || [])],
+                  ...(this.syncWithFleet ? { ...busToUpdate, placesRestantes: rb.capacite - occupied } : {})
+                });
+              });
+              forkJoin(syncRequests).subscribe(() => {
+                this.loadBus();
+                this.closeModal();
+              });
+              return;
+            }
+          }
           if (this.syncWithFleet && this.relatedBuses.length > 0) {
             const syncRequests = this.relatedBuses.map(rb => {
               const occupied = this.reservantsPourBus(rb.id).length;
@@ -1381,7 +1493,7 @@ export class CovoiturageAdminComponent implements OnInit {
 
   applyStopRecommendation(stat: any): void {
     if (!stat.targetBusId) {
-      alert("Impossible de trouver un bus correspondant à cet arrêt.");
+      this._toastrService.warning("Impossible de trouver un bus correspondant à cet arrêt.");
       return;
     }
 
@@ -1393,7 +1505,7 @@ export class CovoiturageAdminComponent implements OnInit {
 
     // 2. Pré-remplir le nouvel arrêt
     this.arretInput = stat.neighborhood;
-    
+
     // 3. Pré-remplir les coordonnées
     this.selectedLat = stat.latitude;
     this.selectedLng = stat.longitude;
@@ -1407,17 +1519,29 @@ export class CovoiturageAdminComponent implements OnInit {
       this.stopPickerMap.setView([this.selectedLat, this.selectedLng], 15);
     }
 
-    // Défiler vers le haut pour voir le modal si besoin (bien que l'overlay le centre normalement)
+    // Défiler vers le haut pour voir le modal si besoin
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   deleteBus(id: string): void {
-    if (confirm('Supprimer ce bus ?')) {
-      this.busService.delete(id).subscribe({
-        next: () => this.loadBus(),
-        error: () => this.errorMessage = 'Erreur lors de la suppression'
-      });
-    }
+    const dialogRef = this._fuseConfirmationService.open({
+      title: 'Supprimer le bus',
+      message: 'Êtes-vous sûr de vouloir supprimer ce bus ?',
+      icon: { show: true, name: 'heroicons_outline:trash', color: 'warn' },
+      actions: { confirm: { label: 'Supprimer', color: 'warn' } }
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result === 'confirmed') {
+        this.busService.delete(id).subscribe({
+          next: () => {
+            this._toastrService.success('Bus supprimé avec succès');
+            this.loadBus();
+          },
+          error: () => this._toastrService.error('Erreur lors de la suppression du bus')
+        });
+      }
+    });
   }
 
   formatLigne(event: any) {
@@ -1451,10 +1575,12 @@ export class CovoiturageAdminComponent implements OnInit {
     if (!this.searchTerm) return this.navettes;
     return this.navettes.filter(n => n.ligne?.toLowerCase().includes(this.searchTerm.toLowerCase()) || n.marque?.toLowerCase().includes(this.searchTerm.toLowerCase()) || n.immatriculation?.toLowerCase().includes(this.searchTerm.toLowerCase()));
   }
-
-  get filteredReservations(): any[] {
-    return this.reservations.filter(r => r.type === this.reservationType);
+get filteredReservations(): any[] {
+  if (this.reservationType === 'archive') {
+    return this.archivedReservations;
   }
+  return this.reservations.filter(r => r.type === this.reservationType);
+}
   get totalStock(): number { return this.cadeaux.reduce((sum, c) => sum + c.stock, 0); }
 
   get stats() {
@@ -1504,7 +1630,9 @@ export class CovoiturageAdminComponent implements OnInit {
         covoit: getTrend(resCovoitCur.length, resCovoitLast.length),
         navette: getTrend(resNavetteCur.length, resNavetteLast.length)
       },
-      totalNavettes: this.navettes.length
+      totalNavettes: this.navettes.length,
+        archiveValue: this.archivedReservations.length  // ← ici
+
     };
   }
 
@@ -1579,57 +1707,46 @@ export class CovoiturageAdminComponent implements OnInit {
     this.notifications = this.notifications.filter(n => n.id !== id);
   }
 
-  activateBus(busId: string, date?: string): void {
-    if (date && !confirm(`Confirmer l'activation de ce bus pour le ${new Date(date).toLocaleDateString()} ?`)) return;
-    if (!date && !confirm(`Voulez-vous activer ce bus de manière permanente ?`)) return;
+  confirmActivation(date: string | null, busId: string): void {
+    const isPermanent = !date;
+    const dialogRef = this._fuseConfirmationService.open({
+      title: isPermanent ? 'Activation permanente' : 'Activation ponctuelle',
+      message: isPermanent 
+        ? 'Voulez-vous activer ce bus de manière permanente ?'
+        : `Confirmer l'activation de ce bus pour le ${new Date(date!).toLocaleDateString()} ?`,
+      icon: { show: true, name: 'heroicons_outline:check-circle', color: 'success' },
+      actions: { confirm: { label: 'Confirmer', color: 'primary' } }
+    });
 
-    this.isLoading = true;
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result === 'confirmed') {
+        this.executeActivation(date, busId);
+      }
+    });
+  }
 
+  private executeActivation(date: string | null, busId: string): void {
     if (date) {
       this.busService.activateForDay(busId, date).subscribe({
         next: () => {
-          const passengers = this.reservantsParJour(busId, date);
-          const bus = this.navettes.find(b => b.id === busId);
-          const busName = bus ? `${bus.marque} ${bus.modele}` : 'Navette';
-
-          passengers.forEach(p => {
-            const notification = {
-              destinataireId: p.employeId,
-              type: 'BUS_ACTIVE',
-              contenu: `Bonne nouvelle ! Votre navette "${busName}" pour le ${new Date(date).toLocaleDateString()} a été activée.`,
-              reservationId: p.id
-            };
-            this.covoiturageService.sendNotification(notification).subscribe({
-              error: (err) => console.error('Erreur envoi notification app', err)
-            });
-          });
-
-          this.loadAllData();
-          this.notifications = this.notifications.filter(n => n.busId !== busId || n.date !== date);
-          this.isLoading = false;
-          alert(`✅ Bus activé et ${passengers.length} notifications envoyées pour le ${new Date(date).toLocaleDateString()}`);
+          this._toastrService.success(`Bus activé pour le ${new Date(date).toLocaleDateString()}`);
+          this.loadBus();
         },
-        error: (err) => {
-          console.error('Erreur activation jour', err);
-          this.isLoading = false;
-          alert('❌ Erreur lors de l\'activation du bus pour cette date.');
-        }
+        error: () => this._toastrService.error('Erreur lors de l\'activation du bus pour cette date.')
       });
     } else {
       this.busService.update(busId, { statut: 'ACTIF' }).subscribe({
         next: () => {
-          this.loadAllData();
-          this.notifications = this.notifications.filter(n => n.busId !== busId);
-          this.isLoading = false;
-          alert('✅ Bus activé de manière permanente.');
+          this._toastrService.success('Bus activé de manière permanente.');
+          this.loadBus();
         },
-        error: (err) => {
-          console.error('Erreur activation bus', err);
-          this.isLoading = false;
-          alert('❌ Erreur lors de l\'activation permanente du bus.');
-        }
+        error: () => this._toastrService.error('Erreur lors de l\'activation permanente du bus.')
       });
     }
+  }
+
+  activateBus(busId: string, date?: string): void {
+    this.confirmActivation(date || null, busId);
   }
 
   private initWeather(): void {
@@ -1780,21 +1897,32 @@ export class CovoiturageAdminComponent implements OnInit {
   }
 
   cancelReservation(res: any): void {
-    if (!confirm('Voulez-vous vraiment annuler cette réservation ?')) return;
+    const dialogRef = this._fuseConfirmationService.open({
+      title: 'Annuler la réservation',
+      message: 'Voulez-vous vraiment annuler cette réservation ?',
+      icon: { show: true, name: 'heroicons_outline:exclamation', color: 'warn' },
+      actions: { confirm: { label: 'Annuler', color: 'warn' } }
+    });
 
-    this.isLoading = true;
-    const obs = res.type === 'navette'
-      ? this.covoiturageService.annulerReservationNavette(res.id)
-      : this.covoiturageService.annulerReservation(res.id);
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result === 'confirmed') {
+        this.isLoading = true;
+        const obs = res.type === 'navette'
+          ? this.covoiturageService.annulerReservationNavette(res.id)
+          : this.covoiturageService.annulerReservation(res.id);
 
-    obs.subscribe({
-      next: () => {
-        this.loadAllData();
-        this.isLoading = false;
-      },
-      error: (err) => {
-        console.error('Erreur annulation:', err);
-        this.isLoading = false;
+        obs.subscribe({
+          next: () => {
+            this.loadAllData();
+            this.isLoading = false;
+            this._toastrService.success('Réservation annulée');
+          },
+          error: (err) => {
+            console.error('Erreur annulation:', err);
+            this.isLoading = false;
+            this._toastrService.error('Erreur lors de l\'annulation');
+          }
+        });
       }
     });
   }

@@ -7,6 +7,7 @@ import { ProjectService } from 'app/modules/admin/dashboards/project/project.ser
 import { HttpClient } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
 import { UserService } from 'app/core/user/user.service';
+import { FuseConfirmationService } from '@fuse/services/confirmation';
 
 @Component({
     selector       : 'project',
@@ -100,7 +101,8 @@ export class ProjectComponent implements OnInit, OnDestroy
         private _router: Router,
         private _http: HttpClient,
         private toastr: ToastrService,
-        private _userService: UserService
+        private _userService: UserService,
+        private _fuseConfirmationService: FuseConfirmationService
     ) {}
 
     ngOnInit(): void
@@ -509,34 +511,27 @@ export class ProjectComponent implements OnInit, OnDestroy
 
     
 deleteEmployee(user: any): void {
-    console.log('=== DÉBUT SUPPRESSION ===');
-    console.log('Utilisateur à supprimer:', user);
-    console.log('ID:', user.id);
-    console.log('URL:', `http://10.188.81.174:8081/api/users/${user.id}`);
-    
-    const confirmDelete = confirm(`⚠️ Supprimer ${user.prenom} ${user.nom} ?`);
-    
-    if (confirmDelete) {
-        this._http.delete(`http://10.188.81.174:8081/api/users/${user.id}`)
-            .subscribe({
-                next: (response) => {
-                    console.log('✅ SUCCÈS:', response);
-                    this.toastr?.success(`${user.prenom} ${user.nom} supprimé`, 'Succès');
-                    this.loadEmployees();
-                },
-                error: (err) => {
-                    console.log('❌ ERREUR COMPLÈTE:');
-                    console.log('Status:', err.status);
-                    console.log('Message:', err.message);
-                    console.log('Erreur:', err.error);
-                    console.log('Headers:', err.headers);
-                    
-                    this.toastr?.error(`Erreur ${err.status}: ${err.error?.message || 'Impossible de supprimer'}`, 'Erreur');
-                }
-            });
-    } else {
-        console.log('Suppression annulée par l\'utilisateur');
-    }
+    const dialogRef = this._fuseConfirmationService.open({
+        title: 'Supprimer employé',
+        message: `Êtes-vous sûr de vouloir supprimer ${user.prenom} ${user.nom} ?`,
+        icon: { show: true, name: 'heroicons_outline:trash', color: 'warn' },
+        actions: { confirm: { label: 'Supprimer', color: 'warn' } }
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+        if (result === 'confirmed') {
+            this._http.delete(`http://10.188.81.174:8081/api/users/${user.id}`)
+                .subscribe({
+                    next: () => {
+                        this.toastr?.success(`${user.prenom} ${user.nom} supprimé`, 'Succès');
+                        this.loadEmployees();
+                    },
+                    error: (err) => {
+                        this.toastr?.error(`Erreur ${err.status}: ${err.error?.message || 'Impossible de supprimer'}`, 'Erreur');
+                    }
+                });
+        }
+    });
 }
     
 

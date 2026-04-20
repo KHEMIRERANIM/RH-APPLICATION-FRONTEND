@@ -4,7 +4,6 @@ import { CovoiturageUserComponent } from './user/covoiturage-user.component';
 import { CovoiturageAdminComponent } from './admin/covoiturage-admin.component';
 import { ChauffeurTrackingComponent } from './user/chauffeur-tracking/chauffeur-tracking.component';
 import { CovoiturageGuard } from 'app/core/auth/guards/covoiturage.guard';
-
 import { UserAdvantagesComponent } from './user/avantages/user-advantages.component';
 
 const routes: Routes = [

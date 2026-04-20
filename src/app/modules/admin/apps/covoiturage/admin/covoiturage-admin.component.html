@@ -2,10 +2,10 @@
 
 
   <!-- Action Bar -->
-  <div class="flex items-center justify-end">
+  <div class="flex justify-end">
     <button (click)="openModal()"
-      class="flex items-center gap-2 px-6 py-3 bg-[#1D9E75] text-white rounded-2xl hover:bg-[#168567] transition-all shadow-lg hover:shadow-emerald-500/20 active:scale-95 font-bold">
-      <mat-icon class="icon-size-5" svgIcon="feather:plus"></mat-icon>
+      class="flex items-center gap-1.5 px-4 py-2 bg-[#1D9E75] text-white text-sm font-medium rounded-lg hover:bg-[#168567] transition-colors shadow-sm">
+      <mat-icon class="icon-size-4 text-white" svgIcon="feather:plus"></mat-icon>
       Ajouter véhicule
     </button>
   </div>
@@ -156,10 +156,8 @@
         <div
           class="absolute -bottom-12 -right-12 w-64 h-64 bg-emerald-500/5 rounded-full blur-[100px] pointer-events-none">
         </div>
-        <div
-          class="flex items-center gap-4 p-6 -mx-8 -mt-8 rounded-t-[2.5rem] border-b border-gray-100 bg-white/50">
-          <div
-            class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center shadow-sm">
+        <div class="flex items-center gap-4 p-6 -mx-8 -mt-8 rounded-t-[2.5rem] border-b border-gray-100 bg-white/50">
+          <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center shadow-sm">
             <mat-icon class="icon-size-6" svgIcon="heroicons_solid:chart-bar"></mat-icon>
           </div>
           <div>
@@ -410,8 +408,8 @@
           <div class="absolute top-3 right-3 flex gap-2">
             <span class="px-2 py-1 bg-white/20 backdrop-blur-sm rounded text-xs text-white">{{ bus.immatriculation
               }}</span>
-            <span [class]="bus.statut === 'ACTIF' ? 'bg-green-500/80' : 'bg-gray-500/80'"
-              class="px-2 py-1 rounded text-xs text-white">{{ bus.statut }}</span>
+            <span [class]="bus.statut === 'ACTIF' ? 'bg-[#1D9E75]' : 'bg-gray-500/80'"
+              class="px-2 py-1 rounded-full text-xs text-white font-semibold shadow-sm">{{ bus.statut }}</span>
           </div>
         </div>
         <div class="p-4 space-y-3">
@@ -541,63 +539,65 @@
               <p class="text-white/70 text-xs">{{ bus.immatriculation }}</p>
             </div>
             <div class="absolute top-2 right-2"><span
-                [class]="bus.statut === 'ACTIF' ? 'bg-green-500/90' : 'bg-gray-500/90'"
-                class="px-2 py-0.5 rounded text-xs text-white font-medium">{{ bus.statut === 'ACTIF' ? 'Actif' :
+                [class]="bus.statut === 'ACTIF' ? 'bg-[#1D9E75]' : 'bg-gray-500/90'"
+                class="px-2 py-0.5 rounded-full text-xs text-white font-semibold shadow-sm">{{ bus.statut === 'ACTIF' ?
+                'Actif' :
                 'Réserve' }}</span></div>
           </div>
-          <div class="p-3 space-y-2 bg-white">
+          <div class="p-4 space-y-3 bg-white">
             <div class="grid grid-cols-2 gap-2">
-              <div class="bg-gray-50 rounded-lg p-2">
-                <p class="text-xs text-gray-400">Capacité</p>
-                <p class="text-sm font-medium text-[#0F3460]">{{ bus.capacite }} places</p>
+              <div class="bg-gray-50 rounded-lg p-3">
+                <p class="text-xs text-gray-400 mb-0.5">Capacité</p>
+                <p class="text-sm font-semibold text-[#0F3460]">{{ bus.capacite }} places</p>
               </div>
-              <div class="bg-gray-50 rounded-lg p-2">
-                <p class="text-xs text-gray-400">Restantes</p>
-                <p class="text-sm font-medium text-[#0F3460]">{{ bus.placesRestantes }}</p>
+              <div class="bg-gray-50 rounded-lg p-3">
+                <p class="text-xs text-gray-400 mb-0.5">Restantes</p>
+                <p class="text-sm font-semibold text-[#0F3460]">{{ bus.placesRestantes }}</p>
               </div>
             </div>
-            <div class="bg-indigo-50/30 rounded-lg p-2 border border-indigo-100/30" *ngIf="bus.arrets?.length">
-              <div class="flex flex-wrap gap-1">
+            <div class="bg-[#1D9E75]/5 rounded-lg p-2.5 border border-[#1D9E75]/15" *ngIf="bus.arrets?.length">
+              <div class="flex flex-wrap gap-1.5">
                 <span *ngFor="let arret of bus.arrets"
-                  class="px-1.5 py-0.5 bg-white border border-indigo-100 rounded text-[9px] text-indigo-600 font-medium">
+                  class="px-2 py-0.5 bg-white border border-[#1D9E75]/20 rounded-full text-xs text-[#1D9E75] font-semibold">
                   {{ arret.name }}
                 </span>
               </div>
             </div>
             <div *ngIf="bus.packDates && bus.packDates.length > 0" class="mt-2 pt-2 border-t border-gray-100">
-              <p class="text-[10px] font-bold text-gray-400 uppercase mb-2">Planning des dates</p>
-              <div class="space-y-2 max-h-40 overflow-y-auto">
-                <div *ngFor="let date of bus.packDates" class="bg-blue-50/30 rounded-lg p-2 border border-blue-100/50">
-                  <div class="flex items-center justify-between mb-1.5">
-                    <span class="text-[9px] font-bold text-[#0F3460]">{{ date | date:'EEEE dd/MM' | uppercase }}</span>
-                    <div class="flex items-center gap-1.5">
-                      <span class="text-[9px] font-extrabold text-[#1D9E75]">{{ countConfirmesParJour(bus.id, date)
+              <p class="text-xs font-bold text-[#1D9E75] uppercase mb-2 tracking-wider">Planning des dates</p>
+              <div class="space-y-2 max-h-48 overflow-y-auto">
+                <div *ngFor="let date of bus.packDates"
+                  class="bg-[#1D9E75]/5 rounded-lg p-3 border border-[#1D9E75]/10">
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-bold text-[#0F3460]">{{ date | date:'EEEE dd/MM' | uppercase }}</span>
+                    <div class="flex items-center gap-2">
+                      <span class="text-sm font-extrabold text-[#1D9E75]">{{ countConfirmesParJour(bus.id, date)
                         }}/{{ bus.capacite }}</span>
                       <button *ngIf="bus.statut === 'INACTIF' || bus.statut === 'RESERVE'"
                         (click)="activateForDay(bus.id, date)"
-                        class="text-[8px] h-4 px-1.5 bg-indigo-600 text-white rounded flex items-center justify-center hover:bg-indigo-700 transition font-bold uppercase tracking-tighter shadow-sm active:scale-95">
-                        Activer
+                        class="px-3 py-1.5 bg-[#1D9E75] text-white rounded-lg text-xs font-bold hover:bg-[#168567] transition shadow-sm active:scale-95 whitespace-nowrap">
+                        ACTIVER
                       </button>
                     </div>
                   </div>
-                  <div class="flex flex-wrap gap-1">
+                  <div class="flex flex-wrap gap-1.5">
                     <div *ngFor="let r of reservantsParJour(bus.id, date)"
-                      class="group relative flex items-center gap-1.5 px-2 py-1 bg-white border border-gray-100 rounded-md shadow-sm">
-                      <span class="text-[9px] text-[#0F3460] font-semibold">{{ getNomEmploye(r.employeId) }}</span>
-                      <div class="w-1.5 h-1.5 rounded-full" [class.bg-[#1D9E75]]="!r.isWaitlisted"
+                      class="group relative flex items-center gap-1.5 px-2.5 py-1 bg-white border border-gray-100 rounded-lg shadow-sm">
+                      <span class="text-xs text-[#0F3460] font-semibold">{{ getNomEmploye(r.employeId) }}</span>
+                      <div class="w-2 h-2 rounded-full flex-shrink-0" [class.bg-[#1D9E75]]="!r.isWaitlisted"
                         [class.bg-orange-400]="r.isWaitlisted"></div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-            <div class="flex gap-2 pt-1 border-t border-gray-100">
+            <div class="flex gap-2 pt-2 border-t border-gray-100">
               <button (click)="openEditModal(bus)"
-                class="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 bg-gray-50 text-[#0F3460] rounded-lg hover:bg-gray-100 transition text-xs"><mat-icon
-                  class="icon-size-3" svgIcon="feather:edit-2"></mat-icon>Modifier</button>
+                class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-gray-50 text-[#0F3460] rounded-lg hover:bg-gray-100 transition text-sm font-medium"><mat-icon
+                  class="icon-size-4" svgIcon="feather:edit-2"></mat-icon>Modifier</button>
               <button (click)="deleteBus(bus.id!)"
-                class="px-2 py-1.5 bg-red-50 text-[#E94560] rounded-lg hover:bg-red-100 transition"><mat-icon
-                  class="icon-size-3" svgIcon="feather:trash-2"></mat-icon></button>
+                class="px-3 py-2 bg-red-50 text-[#E94560] rounded-lg hover:bg-red-100 transition"><mat-icon
+                  class="icon-size-4" svgIcon="feather:trash-2"></mat-icon></button>
             </div>
           </div>
         </div>
@@ -606,77 +606,205 @@
   </div>
 
   <!-- ===================== SECTION RESERVATIONS ===================== -->
-  <div *ngIf="activeSection === 'reservations'" class="space-y-6">
+ <div *ngIf="activeSection === 'reservations'" class="space-y-6">
 
-    <div class="flex justify-start">
-      <div class="bg-gray-100 p-1.5 rounded-2xl flex w-full max-w-md border border-gray-200/50">
-        <button (click)="setReservationType('navette')"
-          [class]="'flex-1 py-3 px-6 rounded-xl font-bold transition-all duration-300 flex items-center justify-center gap-2 ' + (reservationType === 'navette' ? 'bg-white text-[#1D9E75] shadow-sm' : 'text-gray-500')">
-          <mat-icon class="icon-size-5" svgIcon="feather:truck"></mat-icon>Navettes
-        </button>
-        <button (click)="setReservationType('covoiturage')"
-          [class]="'flex-1 py-3 px-6 rounded-xl font-bold transition-all duration-300 flex items-center justify-center gap-2 ' + (reservationType === 'covoiturage' ? 'bg-white text-[#1D9E75] shadow-sm' : 'text-gray-500')">
-          <mat-icon class="icon-size-5" svgIcon="feather:users"></mat-icon>Covoiturage
-        </button>
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+
+      <!-- Header avec onglets -->
+      <div class="border-b border-gray-100 px-6 pt-6 pb-0">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-[#1D9E75]">
+            <mat-icon svgIcon="feather:bookmark" class="icon-size-5"></mat-icon>
+          </div>
+          <div>
+            <h3 class="text-xl font-bold text-[#0F3460]">Réservations</h3>
+            <p class="text-xs text-gray-400 font-medium mt-0.5">Gérez tous vos trajets en un seul endroit</p>
+          </div>
+        </div>
+    <div class="flex gap-0">
+          <button (click)="setReservationType('covoiturage')"
+            class="relative flex items-center gap-2 px-6 py-3 text-sm font-bold transition-all border-b-2"
+            [ngClass]="reservationType === 'covoiturage' ? 'border-[#1D9E75] text-[#1D9E75]' : 'border-transparent text-gray-400 hover:text-gray-600'">
+            <mat-icon svgIcon="feather:users" class="icon-size-5"></mat-icon>
+            Covoiturage
+            <span class="ml-1 px-1.5 py-0.5 rounded-full text-xs font-black"
+              [ngClass]="reservationType === 'covoiturage' ? 'bg-[#1D9E75] text-white' : 'bg-gray-100 text-gray-500'">
+              {{ stats.covoitValue }}
+            </span>
+          </button>
+          <button (click)="setReservationType('navette')"
+            class="relative flex items-center gap-2 px-6 py-3 text-sm font-bold transition-all border-b-2"
+            [ngClass]="reservationType === 'navette' ? 'border-[#0F3460] text-[#0F3460]' : 'border-transparent text-gray-400 hover:text-gray-600'">
+            <mat-icon svgIcon="feather:truck" class="icon-size-5"></mat-icon>
+            Navette
+            <span class="ml-1 px-1.5 py-0.5 rounded-full text-xs font-black"
+              [ngClass]="reservationType === 'navette' ? 'bg-[#0F3460] text-white' : 'bg-gray-100 text-gray-500'">
+              {{ stats.navetteValue }}
+            </span>
+          </button>
+          <!-- APRÈS -->
+<button (click)="setReservationType('archive')"
+  class="relative flex items-center gap-2 px-6 py-3 text-sm font-bold transition-all border-b-2"
+  [ngClass]="reservationType === 'archive' ? 'border-gray-500 text-gray-600' : 'border-transparent text-gray-400 hover:text-gray-600'">
+  <mat-icon svgIcon="feather:archive" class="icon-size-5"></mat-icon>
+  Archive
+  <span class="ml-1 px-1.5 py-0.5 rounded-full text-xs font-black"
+    [ngClass]="reservationType === 'archive' ? 'bg-gray-600 text-white' : 'bg-gray-100 text-gray-500'">
+    {{ archivedReservations.length }}
+  </span>
+</button>
+        </div>
       </div>
-    </div>
 
-    <div class="space-y-3">
-      <div *ngFor="let reservation of filteredReservations"
-        class="bg-white/90 backdrop-blur rounded-2xl p-6 border border-white/20 shadow-lg hover:shadow-xl transition-all">
-        <div class="flex flex-wrap items-center justify-between gap-4">
-          <div class="flex items-center gap-4">
-            <div class="relative"><img [src]="reservation.employePhoto" [alt]="reservation.employeNom"
-                class="w-12 h-12 rounded-full border-2 border-white shadow-sm">
-              <div
-                class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white flex items-center justify-center shadow-sm"
-                [class]="reservation.type === 'navette' ? 'bg-blue-500' : 'bg-green-500'"><mat-icon
-                  class="text-white icon-size-3"
-                  [svgIcon]="reservation.type === 'navette' ? 'feather:truck' : 'feather:users'"></mat-icon></div>
-            </div>
-            <div>
-              <p class="font-bold text-[#0F3460]">{{ reservation.employeNom }} <small
-                  class="text-gray-400 font-normal">(Passager)</small></p>
-              <div class="flex flex-col">
-                <p class="text-xs text-gray-500 flex items-center gap-1">
-                  <mat-icon class="icon-size-3" svgIcon="feather:map-pin"></mat-icon>
-                  {{ reservation.trajet }}
-                </p>
-                <!-- Detail Conducteur (Covoiturage) -->
-                <p *ngIf="reservation.type === 'covoiturage'"
-                  class="text-[10px] text-blue-600 font-bold flex items-center gap-1 mt-0.5">
-                  <mat-icon class="icon-size-3" svgIcon="feather:user"></mat-icon>
-                  Conducteur: {{ reservation.conducteurNom }}
-                </p>
-                <!-- Detail Bus (Navette) -->
-                <p *ngIf="reservation.type === 'navette'"
-                  class="text-[10px] text-emerald-600 font-bold flex items-center gap-1 mt-0.5">
-                  <mat-icon class="icon-size-3" svgIcon="feather:truck"></mat-icon>
-                  Bus: {{ reservation.busDetail }}
-                </p>
+      <!-- ═══ NAVETTE ═══ -->
+      <div *ngIf="reservationType === 'navette'" class="p-6 space-y-3">
+        <ng-container *ngIf="filteredReservations.length > 0; else noNav">
+          <div *ngFor="let reservation of filteredReservations"
+            class="bg-white rounded-xl p-5 border border-gray-200 hover:border-[#0F3460]/40 hover:shadow-sm transition-all">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-[#0F3460] rounded-xl flex items-center justify-center shrink-0">
+                  <mat-icon class="text-white icon-size-6" svgIcon="feather:truck"></mat-icon>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <p class="text-[#1A1A2E] font-semibold text-sm">{{ reservation.busDetail }}</p>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full font-medium"
+                      [ngClass]="reservation.statut === 'Confirmée'  ? 'bg-[#1D9E75] text-white' :
+                                 reservation.statut === 'Annulée'    ? 'bg-red-500 text-white'   :
+                                 reservation.statut === 'Effectuée'  ? 'bg-gray-500 text-white'  :
+                                 reservation.statut === 'En Route'   ? 'bg-blue-500 text-white'  :
+                                                                       'bg-yellow-500 text-white'">
+                      {{ reservation.statut }}
+                    </span>
+                  </div>
+                  <div class="flex items-center gap-1.5 text-xs text-gray-500 mt-1">
+                    <mat-icon class="icon-size-3.5" svgIcon="feather:map-pin"></mat-icon>
+                    <span>{{ reservation.trajet }}</span>
+                  </div>
+                  <div class="flex items-center gap-1.5 text-xs text-gray-500 mt-0.5">
+                    <mat-icon class="icon-size-3.5" svgIcon="feather:clock"></mat-icon>
+                    <span>{{ reservation.heure }}</span>
+                  </div>
+                  <div class="flex items-center gap-1.5 text-xs text-[#1D9E75] mt-0.5 font-bold">
+                    <mat-icon class="icon-size-3.5" svgIcon="feather:user"></mat-icon>
+                    <span>{{ getNomEmploye(reservation.employeId) }}</span>
+                  </div>
+                </div>
+             </div>
+     <div class="flex items-center gap-3 shrink-0">
+                <span class="px-3 py-1.5 bg-[#1D9E75] text-white text-xs font-bold rounded-lg">
+                  {{ reservation.date }}
+                </span>
+                <button (click)="archiveReservation(reservation)"
+                  class="px-3 py-1.5 bg-gray-100 text-gray-600 rounded-lg text-xs font-bold hover:bg-gray-200 transition flex items-center gap-1">
+                  <mat-icon svgIcon="feather:archive" class="icon-size-3.5"></mat-icon>
+                  Archiver
+                </button>
               </div>
             </div>
           </div>
-          <div class="flex items-center gap-3">
-            <div class="text-right">
-              <p class="text-[10px] uppercase font-bold text-gray-400">Date & Heure</p>
-              <p class="font-medium text-[#0F3460]">{{ reservation.date }} - {{ reservation.heure }}</p>
-            </div>
-
-            <!-- DESIGN UNIFORME (TEXTE + CROIX) -->
-            <span
-              class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-[10px] font-bold uppercase tracking-wider border border-gray-200">
-              {{ reservation.statut }}
-            </span>
-            <button (click)="cancelReservation(reservation)"
-              class="w-10 h-10 flex items-center justify-center hover:bg-red-50 text-gray-300 hover:text-red-500 rounded-xl transition-all border border-transparent hover:border-red-100">
-              <mat-icon class="icon-size-4" svgIcon="feather:x"></mat-icon>
-            </button>
+        </ng-container>
+        <ng-template #noNav>
+          <div class="text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+            <mat-icon svgIcon="feather:truck" class="icon-size-10 text-gray-200 mb-2"></mat-icon>
+            <p class="text-gray-400 text-sm font-medium italic">Aucune réservation navette</p>
           </div>
-        </div>
+        </ng-template>
       </div>
-      <div *ngIf="filteredReservations.length === 0" class="text-center py-12 text-gray-500 bg-white/50 rounded-2xl">
-        Aucune réservation pour le moment</div>
+
+      <!-- ═══ COVOITURAGE ═══ -->
+      <div *ngIf="reservationType === 'covoiturage'" class="p-6 space-y-3">
+        <ng-container *ngIf="filteredReservations.length > 0; else noCov">
+          <div *ngFor="let reservation of filteredReservations"
+            class="flex items-center gap-4 p-5 rounded-xl border transition-all bg-gray-50 border-gray-200 hover:border-[#1D9E75]/40 hover:shadow-sm">
+            <div class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold shrink-0 text-lg bg-[#1D9E75]">
+              {{ reservation.employeNom?.charAt(0) | uppercase }}
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 mb-1 flex-wrap">
+                <p class="font-semibold text-[#1A1A2E]">{{ reservation.employeNom }}
+                  <small class="text-gray-400 font-normal">(Passager)</small>
+                </p>
+                <span class="text-xs px-2 py-0.5 rounded-full font-bold shadow-sm"
+                  [ngClass]="reservation.statut === 'Confirmée'  ? 'bg-[#1D9E75] text-white' :
+                             reservation.statut === 'Annulée'    ? 'bg-red-500 text-white'   :
+                             reservation.statut === 'Effectuée'  ? 'bg-gray-500 text-white'  :
+                             reservation.statut === 'En Route'   ? 'bg-blue-500 text-white'  :
+                                                                   'bg-yellow-500 text-white'">
+                  {{ reservation.statut }}
+                </span>
+              </div>
+              <div class="flex items-center gap-1 text-sm text-gray-600 mb-1">
+                <mat-icon class="icon-size-4 shrink-0" svgIcon="feather:map-pin"></mat-icon>
+                <span class="truncate">{{ reservation.trajet }}</span>
+              </div>
+              <p class="text-[10px] text-blue-600 font-bold flex items-center gap-1">
+                <mat-icon class="icon-size-3" svgIcon="feather:user"></mat-icon>
+                Conducteur: {{ reservation.conducteurNom }}
+              </p>
+              <div class="flex items-center gap-2 mt-1 text-xs text-[#1D9E75]">
+                <mat-icon class="icon-size-3.5" svgIcon="feather:droplet"></mat-icon>
+                <span>+{{ reservation.pointsEco || 0 }} pts éco</span>
+                <span class="text-gray-300">|</span>
+                <span>-{{ reservation.co2Economise || 0 }} kg CO2</span>
+              </div>
+            </div>
+          <div class="flex flex-col items-end gap-2 shrink-0">
+              <div class="text-right">
+                <p class="text-[10px] uppercase font-bold text-gray-400">Date & Heure</p>
+                <p class="font-medium text-[#0F3460] text-sm">{{ reservation.date }} · {{ reservation.heure }}</p>
+              </div>
+              <button (click)="archiveReservation(reservation)"
+                class="px-3 py-1.5 bg-gray-100 text-gray-600 rounded-lg text-xs font-bold hover:bg-gray-200 transition flex items-center gap-1">
+                <mat-icon svgIcon="feather:archive" class="icon-size-3.5"></mat-icon>
+                Archiver
+              </button>
+            </div>
+          </div>
+        </ng-container>
+        <ng-template #noCov>
+          <div class="text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+            <mat-icon svgIcon="feather:users" class="icon-size-10 text-gray-200 mb-2"></mat-icon>
+            <p class="text-gray-400 text-sm font-medium italic">Aucune réservation covoiturage</p>
+          </div>
+        </ng-template>
+      </div>
+    <!-- ═══ ARCHIVE ═══ -->
+<div *ngIf="reservationType === 'archive'" class="p-6 space-y-3">
+  <ng-container *ngIf="archivedReservations.length > 0; else noArchive">
+    <div *ngFor="let reservation of archivedReservations"
+      class="flex items-center gap-4 p-5 rounded-xl border bg-gray-50 border-gray-200 opacity-80">
+      <div class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold shrink-0 text-lg"
+        [ngClass]="reservation.type === 'navette' ? 'bg-[#0F3460]' : 'bg-[#1D9E75]'">
+        <mat-icon *ngIf="reservation.type === 'navette'" svgIcon="feather:truck" class="icon-size-5 text-white"></mat-icon>
+        <span *ngIf="reservation.type === 'covoiturage'">{{ reservation.employeNom?.charAt(0) | uppercase }}</span>
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2 mb-1">
+          <p class="font-semibold text-[#1A1A2E]">
+            {{ reservation.type === 'navette' ? reservation.busDetail : reservation.employeNom }}
+          </p>
+          <span class="px-2 py-0.5 bg-gray-200 text-gray-500 text-xs rounded-full font-bold">Archivée</span>
+        </div>
+        <p class="text-sm text-gray-500">{{ reservation.trajet }}</p>
+        <p class="text-xs text-gray-400 mt-1">
+          Archivé le {{ reservation.archivedAt | date:'dd/MM/yyyy à HH:mm' }}
+        </p>
+      </div>
+      <span class="px-3 py-1.5 bg-gray-200 text-gray-600 text-xs font-bold rounded-lg shrink-0">
+        {{ reservation.date }}
+      </span>
+    </div>
+  </ng-container>
+  <ng-template #noArchive>
+    <div class="text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+      <mat-icon svgIcon="feather:archive" class="icon-size-10 text-gray-200 mb-2"></mat-icon>
+      <p class="text-gray-400 text-sm font-medium italic">Aucune réservation archivée</p>
+    </div>
+  </ng-template>
+</div>
+
     </div>
   </div>
 
@@ -716,10 +844,10 @@
             class="flex flex-col gap-2 p-2 rounded-2xl transition-all hover:bg-gray-50/50 group">
             <div class="flex items-center gap-6">
               <!-- Labels Gauche -->
-              <div class="w-48 text-right shrink-0">
-                <div class="text-xl font-bold text-[#0F3460] leading-tight">{{ stat.stopName | uppercase }}</div>
-                <div class="text-sm text-gray-500 font-medium mt-0.5">depuis {{ stat.neighborhood }}</div>
-              </div>
+             <div class="w-48 text-right shrink-0">
+        <div class="text-sm font-bold text-[#0F3460]">{{ stat.stopName }}</div>
+        <div class="text-xs text-gray-400 font-medium mt-0.5">depuis {{ stat.neighborhood }}</div>
+      </div>
 
               <div
                 class="flex-1 h-12 bg-gray-50 rounded-xl relative flex items-center shadow-inner border border-gray-100/50 overflow-hidden">
@@ -737,12 +865,10 @@
 
               <!-- Count Droite + Optimiser -->
               <div class="w-56 shrink-0 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                  <span class="text-2xl font-bold text-[#0F3460]">{{ stat.count }}</span>
-                  <span
-                    class="text-xs text-gray-400 font-bold lowercase tracking-widest leading-none">réclamations</span>
-                </div>
-
+               <div class="flex items-center gap-2">
+          <span class="text-sm font-bold text-[#0F3460]">{{ stat.count }}</span>
+          <span class="text-xs text-gray-400 font-medium">réclamations</span>
+        </div>
                 <!-- Actions Recommandation -->
                 <div class="flex items-center gap-2" *ngIf="stat.isRecommended">
                   <button (click)="stat.showDetails = !stat.showDetails"
@@ -751,43 +877,35 @@
                     <mat-icon class="icon-size-4"
                       [svgIcon]="stat.showDetails ? 'feather:chevron-up' : 'feather:info'"></mat-icon>
                   </button>
-
-                  <button (click)="applyStopRecommendation(stat)"
-                    class="px-4 py-2 bg-[#1D9E75] text-white rounded-xl hover:bg-[#168567] transition shadow-md shadow-[#1D9E75]/20 flex items-center gap-2 group/btn animate-pulse hover:animate-none"
+<button (click)="applyStopRecommendation(stat)"
+                    class="px-3 py-1.5 bg-[#1D9E75] text-white rounded-lg text-xs font-bold hover:bg-[#168567] transition flex items-center gap-1.5"
                     [title]="stat.regularCount + ' employés réguliers identifiés'">
-                    <mat-icon class="icon-size-4 group-hover/btn:rotate-12 transition-transform"
-                      svgIcon="heroicons_solid:plus-circle"></mat-icon>
-                    <div class="flex flex-col items-start leading-none">
-                      <span class="text-[11px] font-bold lowercase tracking-tighter">optimiser</span>
-                    </div>
+<mat-icon class="icon-size-3.5 text-white" svgIcon="feather:map-pin"></mat-icon>                    Optimiser
                   </button>
                 </div>
               </div>
             </div>
 
             <!-- Détails de l'Optimisation -->
-            <div *ngIf="stat.showDetails && stat.isRecommended"
-              class="ml-54 border-l-4 border-indigo-200 pl-6 py-4 mt-2 space-y-3 animate-in slide-in-from-top-2 duration-300 bg-indigo-50/30 rounded-r-xl">
-              <p class="text-xs font-bold text-indigo-500 uppercase tracking-widest flex items-center gap-2">
+      <div *ngIf="stat.showDetails && stat.isRecommended"
+              class="ml-54 border-l-4 border-[#1D9E75]/30 pl-6 py-4 mt-2 space-y-3 animate-in slide-in-from-top-2 duration-300 bg-[#1D9E75]/5 rounded-r-xl">
+              <p class="text-xs font-bold text-[#1D9E75] flex items-center gap-2">
                 <mat-icon class="icon-size-4" svgIcon="feather:users"></mat-icon>
-                Utilisateurs réguliers impactés (Profils haute fréquence)
+                Utilisateurs réguliers impactés
               </p>
               <div class="flex flex-wrap gap-3">
                 <div *ngFor="let emp of stat.regularEmployeesDetails"
-                  class="bg-white border border-indigo-100 rounded-xl px-4 py-3 shadow-sm flex items-center gap-4">
-                  <div
-                    class="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold">
+                  class="bg-white border border-gray-100 rounded-xl px-4 py-3 shadow-sm flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-full bg-[#1D9E75] text-white flex items-center justify-center text-sm font-bold">
                     {{ emp.name.charAt(0) }}
                   </div>
                   <div class="flex flex-col">
-                    <span class="text-sm font-bold text-gray-800">{{ emp.name }}</span>
-                    <span class="text-[11px] text-gray-400 font-bold uppercase tracking-wide">{{ emp.freq }} trajets
-                      effectués</span>
+                    <span class="text-sm font-semibold text-[#0F3460]">{{ emp.name }}</span>
+                    <span class="text-xs text-gray-400 font-medium">{{ emp.freq }} trajets effectués</span>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
 
           <!-- Empty State -->
           <div *ngIf="reclamationStats.length === 0" class="py-12 text-center">
@@ -832,76 +950,51 @@
             reclamations.length }} DEMANDES</span>
         </div>
 
-        <div class="overflow-x-auto pb-4">
-          <table class="w-full border-separate border-spacing-y-4">
-            <thead>
-              <tr class="text-left">
-                <th class="px-8 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest opacity-80">EMPLOYÉ</th>
-                <th class="px-8 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest opacity-80">QUARTIER</th>
-                <th class="px-8 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest opacity-80 text-center">ESTIMATION MARCHE</th>
-                <th class="px-8 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest opacity-80 text-right">ACTIONS</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let r of reclamations"
-                class="bg-white/95 backdrop-blur-md rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/20 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300 group">
-                
-                <!-- Collaborateur -->
-                <td class="px-8 py-5 first:rounded-l-2xl">
-                  <div class="flex items-center gap-4">
-                    <div class="relative flex-shrink-0">
-                      <div class="w-12 h-12 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-base shadow-sm border border-indigo-100/50 uppercase">
-                        {{ (getNomEmploye(r.employeId) | slice:0:1) || '?' }}
-                      </div>
-                      <div class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white flex items-center justify-center shadow-sm bg-blue-500">
-                        <mat-icon class="text-white icon-size-3" svgIcon="feather:alert-circle"></mat-icon>
-                      </div>
-                    </div>
-                    <div class="flex flex-col">
-                      <span class="text-sm font-bold text-[#0F3460] leading-tight tracking-tight">{{ getNomEmploye(r.employeId) | uppercase }}</span>
-                      <span class="text-[10px] text-gray-400 font-bold lowercase tracking-wider mt-1">employé impacté</span>
-                    </div>
-                  </div>
-                </td>
+       
+  <div class="space-y-3">
+  <div *ngFor="let r of reclamations"
+    class="flex items-center gap-4 p-5 rounded-xl border bg-gray-50 border-gray-200 hover:border-[#1D9E75]/40 hover:shadow-sm transition-all">
 
-                <!-- Itinéraire -->
-                <td class="px-8 py-5">
-                  <div class="flex flex-col gap-1.5">
-                    <div class="flex items-center gap-2">
-                      <mat-icon class="icon-size-3.5 text-gray-400" svgIcon="heroicons_solid:home"></mat-icon>
-                      <span class="text-xs font-bold text-gray-700 leading-none">{{ r.neighborhood }}</span>
-                    </div>
-                    <div class="flex items-center gap-2 text-blue-600/70 mt-0.5">
-                      <mat-icon class="icon-size-3.5" svgIcon="feather:arrow-right"></mat-icon>
-                      <span class="text-[10px] font-medium lowercase tracking-widest truncate max-w-[220px]">vers arrêt : {{ r.stopName }}</span>
-                    </div>
-                  </div>
-                </td>
+    <!-- Avatar -->
+    <div class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold shrink-0 text-lg bg-[#1D9E75] uppercase">
+      {{ (getNomEmploye(r.employeId) | slice:0:1) || '?' }}
+    </div>
 
-                <!-- Estimation -->
-                <td class="px-8 py-5 text-center">
-                  <div class="inline-flex items-center gap-2 px-5 py-2 rounded-full border shadow-sm transition-all duration-300 group-hover:scale-105"
-                    [class]="getMetrics(r).time > 30 ? 'bg-red-50 text-red-600 border-red-100' : (getMetrics(r).time >= 15 ? 'bg-orange-50 text-orange-600 border-orange-100' : 'bg-emerald-50 text-emerald-600 border-emerald-100')">
-                    <span class="text-[11px] font-bold lowercase tracking-widest">{{ getMetrics(r).time }} min</span>
-                  </div>
-                </td>
+    <!-- Infos -->
+    <div class="flex-1 min-w-0">
+      <div class="flex items-center gap-2 mb-1">
+        <p class="font-semibold text-[#0F3460]">{{ getNomEmploye(r.employeId) }}</p>
+        <span class="text-[10px] text-gray-400 font-medium">employé impacté</span>
+      </div>
+      <div class="flex items-center gap-1.5 text-sm text-gray-600 mb-0.5">
+        <mat-icon class="icon-size-3.5 shrink-0 text-gray-400" svgIcon="heroicons_solid:home"></mat-icon>
+        <span class="font-medium">{{ r.neighborhood }}</span>
+      </div>
+      <div class="flex items-center gap-1.5 text-xs text-blue-500">
+        <mat-icon class="icon-size-3.5 shrink-0" svgIcon="feather:arrow-right"></mat-icon>
+        <span>vers arrêt : {{ r.stopName }}</span>
+      </div>
+    </div>
 
-                <!-- Actions -->
-                <td class="px-8 py-5 text-right last:rounded-r-2xl">
-                  <button (click)="deleteReclamation(r.id!)"
-                    class="w-10 h-10 inline-flex items-center justify-center hover:bg-neutral-100 text-gray-300 hover:text-red-500 rounded-xl transition-all border border-transparent hover:border-gray-200">
-                    <mat-icon class="icon-size-4" svgIcon="feather:x"></mat-icon>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <!-- Empty State -->
-          <div *ngIf="reclamations.length === 0"
-            class="py-20 text-center bg-white/40 rounded-3xl border-2 border-dashed border-gray-100 mt-4">
-            <p class="text-[11px] text-gray-400 font-bold lowercase tracking-widest italic">aucun signalement dans l'historique</p>
-          </div>
-        </div>
+    <!-- Estimation -->
+    <span class="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-bold border shrink-0"
+      [class]="getMetrics(r).time > 30 ? 'bg-red-50 text-red-600 border-red-100' : (getMetrics(r).time >= 15 ? 'bg-orange-50 text-orange-600 border-orange-100' : 'bg-emerald-50 text-emerald-600 border-emerald-100')">
+      {{ getMetrics(r).time }} min
+    </span>
+
+    <!-- Action -->
+    <button (click)="deleteReclamation(r.id!)"
+      class="w-8 h-8 inline-flex items-center justify-center text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all border border-transparent hover:border-red-100 shrink-0">
+      <mat-icon class="icon-size-4" svgIcon="feather:x"></mat-icon>
+    </button>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="reclamations.length === 0"
+    class="py-20 text-center bg-white/40 rounded-3xl border-2 border-dashed border-gray-100 mt-4">
+    <p class="text-[11px] text-gray-400 font-bold lowercase tracking-widest italic">aucun signalement dans l'historique</p>
+  </div>
+</div>
       </div>
     </div>
   </div>
@@ -1078,7 +1171,8 @@
             <div *ngIf="searchSuggestions.length > 0"
               class="absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-xl z-[100] max-h-60 overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200">
               <div class="p-2 border-b border-gray-50 bg-gray-50/50">
-                <span class="text-[10px] uppercase font-bold text-gray-400 tracking-widest pl-2">Suggestions suggérées</span>
+                <span class="text-[10px] uppercase font-bold text-gray-400 tracking-widest pl-2">Suggestions
+                  suggérées</span>
               </div>
               <div *ngFor="let s of searchSuggestions" (click)="selectSuggestion(s)"
                 class="flex items-center gap-3 px-4 py-3 hover:bg-[#1D9E75]/5 cursor-pointer transition-colors border-b last:border-0 border-gray-50 group">
@@ -1089,7 +1183,8 @@
                 </div>
                 <div class="flex flex-col min-w-0">
                   <span class="text-sm font-bold text-[#0F3460] truncate">{{ s.name }}</span>
-                  <span class="text-[10px] text-gray-400 truncate">{{ s.type === 'heatmap' ? 'Demande employé via Heatmap' : (s.fullName || 'Adresse trouvée') }}</span>
+                  <span class="text-[10px] text-gray-400 truncate">{{ s.type === 'heatmap' ? 'Demande employé via
+                    Heatmap' : (s.fullName || 'Adresse trouvée') }}</span>
                 </div>
               </div>
             </div>
@@ -1106,7 +1201,8 @@
             <div class="rounded-xl overflow-hidden border border-gray-200 shadow-inner">
               <div id="stopPickerMap" class="w-full h-48 z-10 transition-all duration-500"></div>
             </div>
-            <p class="text-[9px] text-gray-400 font-medium italic">Cliquez sur la carte pour définir l'emplacement de l'arrêt.</p>
+            <p class="text-[9px] text-gray-400 font-medium italic">Cliquez sur la carte pour définir l'emplacement de
+              l'arrêt.</p>
           </div>
           <div class="space-y-2 mt-2">
             <div *ngFor="let arret of busForm.arrets; let idx = index"
@@ -1131,7 +1227,8 @@
                 </button>
               </div>
             </div>
-            <p *ngIf="!busForm.arrets?.length" class="text-xs text-gray-400 italic text-center py-2">Aucun arrêt intermédiaire ajouté.</p>
+            <p *ngIf="!busForm.arrets?.length" class="text-xs text-gray-400 italic text-center py-2">Aucun arrêt
+              intermédiaire ajouté.</p>
           </div>
         </div>
 

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -8,9 +8,13 @@ export class PaiementService {
 
   constructor(private http: HttpClient) {}
 
- createStripePayment(reservationId: string, montant: number): Observable<any> {
-  return this.http.post(`${this.apiUrl}/stripe/create`, { reservationId, montant });
-}
+  createStripePayment(reservationId: string, montant: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/stripe/create`, { reservationId, montant });
+  }
+
+  createStripePaymentDirect(paymentData: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/stripe/create`, paymentData);
+  }
 
   refundPayment(reservationId: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/stripe/refund`, { reservationId });

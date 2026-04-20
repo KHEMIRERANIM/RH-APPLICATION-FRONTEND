@@ -3,6 +3,8 @@ import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { CovoiturageService } from '../../covoiturage.service';
 import { getWsTrackingSockJsUrl } from 'src/environments/environment';
+import { ToastrService } from 'ngx-toastr';
+import { FuseConfirmationService } from '@fuse/services/confirmation';
 
 declare var L: any;
 
@@ -52,7 +54,9 @@ export class ChauffeurTrackingComponent implements OnInit, AfterViewInit, OnDest
 
   constructor(
     private cdr: ChangeDetectorRef,
-    private covoiturageService: CovoiturageService
+    private covoiturageService: CovoiturageService,
+    private _toastrService: ToastrService,
+    private _fuseConfirmationService: FuseConfirmationService
   ) { }
 
   ngOnInit() {
@@ -117,7 +121,7 @@ export class ChauffeurTrackingComponent implements OnInit, AfterViewInit, OnDest
   /** Ouvre Google Maps sur vos coordonnées (pour partager via Google Maps). */
   ouvrirGoogleMapsSurMaPosition() {
     if (this.lastLat === null || this.lastLng === null) {
-      alert('Actualisez votre position GPS d’abord.');
+      this._toastrService.warning('Actualisez votre position GPS d’abord.');
       return;
     }
     const url = `https://www.google.com/maps?q=${this.lastLat},${this.lastLng}`;
@@ -372,7 +376,7 @@ export class ChauffeurTrackingComponent implements OnInit, AfterViewInit, OnDest
 
   demarrerTrajet() {
     if (!navigator.geolocation) {
-      alert('GPS non supporté sur cet appareil');
+      this._toastrService.error('GPS non supporté sur cet appareil');
       return;
     }
     this.enRoute = true;
@@ -598,22 +602,33 @@ export class ChauffeurTrackingComponent implements OnInit, AfterViewInit, OnDest
           error: (err) => console.error('❌ Erreur update Trajet status:', err)
         });
 
-        alert(`Le trajet est effectué ! Toutes les réservations sont maintenant marquées comme "Effectuées" et le trajet est retiré des propositions.`);
+        this._toastrService.success(`Le trajet est effectué ! Toutes les réservations sont maintenant marquées comme "Effectuées".`);
         this.cdr.detectChanges();
       },
       error: (err) => console.error('❌ Erreur bulk update:', err)
     });
   }
-
   arreterTrajet() {
     if (this.enRoute) {
-      const confirmMsg = "Le trajet est en cours. Voulez-vous le marquer comme 'EFFECTUE' pour tous les passagers ?";
-      if (confirm(confirmMsg)) {
-        this.marquerReservationsCommeEffectuees();
-      }
+      const dialogRef = this._fuseConfirmationService.open({
+        title: 'Trajet en cours',
+        message: "Voulez-vous marquer ce trajet comme 'EFFECTUÉ' pour tous les passagers ?",
+        icon: { show: true, name: 'heroicons_outline:check-circle', color: 'success' },
+        actions: { confirm: { label: 'Confirmer', color: 'primary' } }
+      });
+
+      dialogRef.afterClosed().subscribe((result) => {
+        if (result === 'confirmed') {
+          this.marquerReservationsCommeEffectuees();
+        }
+        this.finaliserArretTrajet();
+      });
+      return;
     }
-    this.enRoute = false;
-    this.statut = 'Trajet effectué ✅';
+    this.finaliserArretTrajet();
+  }
+
+  private finaliserArretTrajet() {
     if (this.watchId !== undefined) {
       navigator.geolocation.clearWatch(this.watchId);
     }
