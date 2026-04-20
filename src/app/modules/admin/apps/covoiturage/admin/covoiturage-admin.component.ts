@@ -91,8 +91,8 @@ export class CovoiturageAdminComponent implements OnInit {
   protected Math = Math;
 
   activeSection: AdminSection = 'statistiques';
-reservationType: ReservationType = 'covoiturage';
-archivedReservations: any[] = [];
+  reservationType: ReservationType = 'covoiturage';
+  archivedReservations: any[] = [];
 
   searchTerm = '';
   isLoading = false;
@@ -212,30 +212,30 @@ archivedReservations: any[] = [];
     }, 30000);
     this.checkSundayCondition();
   }
- archiveReservation(res: any): void {
-  const dialogRef = this._fuseConfirmationService.open({
-    title: 'Archiver la réservation',
-    message: 'Voulez-vous archiver cette réservation ?',
-    icon: { show: true, name: 'heroicons_outline:archive', color: 'primary' },
-    actions: { confirm: { label: 'Archiver', color: 'primary' } }
-  });
+  archiveReservation(res: any): void {
+    const dialogRef = this._fuseConfirmationService.open({
+      title: 'Archiver la réservation',
+      message: 'Voulez-vous archiver cette réservation ?',
+      icon: { show: true, name: 'heroicons_outline:archive', color: 'primary' },
+      actions: { confirm: { label: 'Archiver', color: 'primary' } }
+    });
 
-  dialogRef.afterClosed().subscribe((result) => {
-    if (result === 'confirmed') {
-      const archived = { ...res, archivedAt: new Date().toISOString() };
-      this.archivedReservations.push(archived);
-      
-      // Sauvegarder dans localStorage
-      localStorage.setItem('archivedReservations', JSON.stringify(this.archivedReservations));
-      
-      // Retirer de la liste active
-      this.reservations = this.reservations.filter(r => r.id !== res.id);
-      
-      this._toastrService.success('Réservation archivée');
-      this._changeDetectorRef.detectChanges();
-    }
-  });
-}
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result === 'confirmed') {
+        const archived = { ...res, archivedAt: new Date().toISOString() };
+        this.archivedReservations.push(archived);
+
+        // Sauvegarder dans localStorage
+        localStorage.setItem('archivedReservations', JSON.stringify(this.archivedReservations));
+
+        // Retirer de la liste active
+        this.reservations = this.reservations.filter(r => r.id !== res.id);
+
+        this._toastrService.success('Réservation archivée');
+        this._changeDetectorRef.detectChanges();
+      }
+    });
+  }
 
   private checkSundayCondition(): void {
     const now = new Date();
@@ -268,11 +268,15 @@ archivedReservations: any[] = [];
     // Logic for banner removal no longer needed as banner was removed
   }
 
-  ngOnInit(): void {
-     const saved = localStorage.getItem('archivedReservations');
-  if (saved) {
-    this.archivedReservations = JSON.parse(saved);
-  }
+ngOnInit(): void {
+    const saved = localStorage.getItem('archivedReservations');
+    if (saved) {
+      this.archivedReservations = JSON.parse(saved);
+    }
+    const savedRec = localStorage.getItem('archivedReclamations');
+    if (savedRec) {
+      this.archivedReclamations = JSON.parse(savedRec);
+    }
     const now = new Date();
     const options: Intl.DateTimeFormatOptions = { weekday: 'long', day: 'numeric', month: 'long' };
     this.currentWeather.date = now.toLocaleDateString('fr-FR', options);
@@ -387,7 +391,7 @@ archivedReservations: any[] = [];
         this.reservations = merged;
 
         const archivedIds = this.archivedReservations.map(a => a.id);
-this.reservations = this.reservations.filter(r => !archivedIds.includes(r.id));
+        this.reservations = this.reservations.filter(r => !archivedIds.includes(r.id));
 
         // Calculer la fréquence d'utilisation par employé
         this.employeUsageFreq.clear();
@@ -715,8 +719,8 @@ this.reservations = this.reservations.filter(r => !archivedIds.includes(r.id));
     this.packBusList = [];
     this.packDates = [];
     this.submitted = false;
-    this.showModal = true;
-    this.initStopPickerMap();
+ this.showModal = true;
+setTimeout(() => this.initStopPickerMap(), 100);
   }
 
   openEditModal(bus: Bus): void {
@@ -741,7 +745,7 @@ this.reservations = this.reservations.filter(r => !archivedIds.includes(r.id));
     this.packDates = Array.isArray(bus.packDates) ? [...bus.packDates] : [];
     if (!this.busForm.arrets) this.busForm.arrets = [];
     this.showModal = true;
-    this.initStopPickerMap();
+setTimeout(() => this.initStopPickerMap(), 100);
   }
 
   toggleJour(jour: string): void {
@@ -773,7 +777,8 @@ this.reservations = this.reservations.filter(r => !archivedIds.includes(r.id));
         this.loadBus();
         // Optionnel: Notification de succès
       },
-      error: () => this.errorMessage = 'Erreur lors de l’activation du jour'
+      error: () => this._toastrService.error('Erreur lors de l\'activation du jour')
+
     });
   }
 
@@ -802,46 +807,46 @@ this.reservations = this.reservations.filter(r => !archivedIds.includes(r.id));
   }
 
   addArret(): void {
-  if (this.arretInput?.trim()) {
-    if (!this.busForm.arrets) this.busForm.arrets = [];
-    
-    const newArret = {
-      name: this.arretInput.trim(),
-      latitude: this.selectedLat || 36.8065,
-      longitude: this.selectedLng || 10.1815
-    };
-    
-    this.busForm.arrets.push(newArret);
+    if (this.arretInput?.trim()) {
+      if (!this.busForm.arrets) this.busForm.arrets = [];
 
-    // ✅ Propager au reste du pack (si le bus fait partie d'un pack)
-    if (this.busForm.packId) {
-      const packBuses = this.navettes.filter(
-        b => b.packId === this.busForm.packId && b.id !== this.busForm.id
-      );
+      const newArret = {
+        name: this.arretInput.trim(),
+        latitude: this.selectedLat || 36.8065,
+        longitude: this.selectedLng || 10.1815
+      };
 
-      packBuses.forEach(bus => {
-        if (!bus.arrets) bus.arrets = [];
-        // Éviter les doublons
-        const alreadyExists = bus.arrets.some(
-          a => a.name.toLowerCase() === newArret.name.toLowerCase()
+      this.busForm.arrets.push(newArret);
+
+      // ✅ Propager au reste du pack (si le bus fait partie d'un pack)
+      if (this.busForm.packId) {
+        const packBuses = this.navettes.filter(
+          b => b.packId === this.busForm.packId && b.id !== this.busForm.id
         );
-        if (!alreadyExists) {
-          bus.arrets.push({ ...newArret });
-        }
-      });
-    }
 
-    // Reset du formulaire
-    this.arretInput = '';
-    this.selectedLat = null;
-    this.selectedLng = null;
-    this.searchSuggestions = [];
-    if (this.stopPickerMarker) {
-      this.stopPickerMap.removeLayer(this.stopPickerMarker);
-      this.stopPickerMarker = null;
+        packBuses.forEach(bus => {
+          if (!bus.arrets) bus.arrets = [];
+          // Éviter les doublons
+          const alreadyExists = bus.arrets.some(
+            a => a.name.toLowerCase() === newArret.name.toLowerCase()
+          );
+          if (!alreadyExists) {
+            bus.arrets.push({ ...newArret });
+          }
+        });
+      }
+
+      // Reset du formulaire
+      this.arretInput = '';
+      this.selectedLat = null;
+      this.selectedLng = null;
+      this.searchSuggestions = [];
+      if (this.stopPickerMarker) {
+        this.stopPickerMap.removeLayer(this.stopPickerMarker);
+        this.stopPickerMarker = null;
+      }
     }
   }
-}
 
   onArretSearch(query: string): void {
     if (this.searchTimeout) clearTimeout(this.searchTimeout);
@@ -934,35 +939,39 @@ this.reservations = this.reservations.filter(r => !archivedIds.includes(r.id));
     this._changeDetectorRef.detectChanges();
   }
 
-  initStopPickerMap(): void {
-    setTimeout(() => {
-      const mapDiv = document.getElementById('stopPickerMap');
-      if (!mapDiv) return;
-
-      // Supprimer l'ancienne instance de la carte si elle existe
-      if (this.stopPickerMap) {
-        this.stopPickerMap.off();
-        this.stopPickerMap.remove();
-        this.stopPickerMap = null;
-      }
-
-      this.stopPickerMap = L.map('stopPickerMap').setView([36.8065, 10.1815], 11);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap'
-      }).addTo(this.stopPickerMap);
-
-      this.stopPickerMap.on('click', (e: any) => {
-        this.selectedLat = e.latlng.lat;
-        this.selectedLng = e.latlng.lng;
-
-        if (this.stopPickerMarker) {
-          this.stopPickerMarker.setLatLng(e.latlng);
-        } else {
-          this.stopPickerMarker = L.marker(e.latlng).addTo(this.stopPickerMap);
-        }
-      });
-    }, 500);
+ initStopPickerMap(): void {
+  const mapDiv = document.getElementById('stopPickerMap');
+  if (!mapDiv) {
+    setTimeout(() => this.initStopPickerMap(), 200);
+    return;
   }
+
+  if (this.stopPickerMap) {
+    this.stopPickerMap.off();
+    this.stopPickerMap.remove();
+    this.stopPickerMap = null;
+    this.stopPickerMarker = null;
+  }
+
+  this.stopPickerMap = L.map('stopPickerMap').setView([36.8065, 10.1815], 11);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap'
+  }).addTo(this.stopPickerMap);
+
+  this.stopPickerMap.on('click', (e: any) => {
+    this.selectedLat = e.latlng.lat;
+    this.selectedLng = e.latlng.lng;
+    if (this.stopPickerMarker) {
+      this.stopPickerMarker.setLatLng(e.latlng);
+    } else {
+      this.stopPickerMarker = L.marker(e.latlng).addTo(this.stopPickerMap);
+    }
+  });
+
+  setTimeout(() => {
+    if (this.stopPickerMap) this.stopPickerMap.invalidateSize();
+  }, 50);
+}
 
   private calculateHaversine(lat1: number, lon1: number, lat2: number, lon2: number): { distance: number, time: number } {
     const R = 6371; // Rayon de la Terre en km
@@ -1104,43 +1113,122 @@ this.reservations = this.reservations.filter(r => !archivedIds.includes(r.id));
 
   private _pendingOrsUpdates = new Set<string>();
 
-  private fetchMissingRealMetrics(): void {
-    this.reclamations.forEach(r => {
-      if ((!r.walkingTime || r.walkingTime === 0) && r.latitude && r.longitude) {
-        const stopName = (r.stopName || '').trim();
-        const neighborhood = (r.neighborhood || '').trim();
-        const key = `${stopName}|${neighborhood}`;
+ private fetchMissingRealMetrics(): void {
+  this.reclamations.forEach(r => {
+    if ((!r.walkingTime || r.walkingTime === 0) && r.latitude && r.longitude) {
+      const stopName = (r.stopName || '').trim();
+      const neighborhood = (r.neighborhood || '').trim();
+      const key = `${stopName}|${neighborhood}`;
 
-        if (this._pendingOrsUpdates.has(key)) return;
+      if (this._pendingOrsUpdates.has(key)) return;
 
-        // Trouver les coordonnées de l'arrêt
-        let stopCoords = { lat: 0, lng: 0 };
-        for (const bus of this.navettes) {
-          const s = bus.arrets?.find(a => a.name.trim().toLowerCase() === stopName.toLowerCase());
-          if (s) {
-            stopCoords = { lat: s.latitude, lng: s.longitude };
-            break;
-          }
+      let stopCoords = { lat: 0, lng: 0 };
+      for (const bus of this.navettes) {
+        const s = bus.arrets?.find(a => a.name.trim().toLowerCase() === stopName.toLowerCase());
+        if (s) {
+          stopCoords = { lat: s.latitude, lng: s.longitude };
+          break;
         }
+      }
 
-        if (stopCoords.lat !== 0) {
-          this._pendingOrsUpdates.add(key);
-          this._walkingService.getWalkingMetrics(r.latitude, r.longitude, stopCoords.lat, stopCoords.lng)
-            .subscribe(metrics => {
-              // Mettre à jour toutes les réclamations ayant la même paire (Quartier, Arrêt)
+      if (stopCoords.lat !== 0) {
+        this._pendingOrsUpdates.add(key);
+
+        this._walkingService.getWalkingMetrics(r.latitude, r.longitude, stopCoords.lat, stopCoords.lng)
+          .subscribe({
+            next: (metrics) => {
               this.reclamations.forEach(rec => {
                 if (rec.stopName?.trim() === stopName && rec.neighborhood?.trim() === neighborhood) {
                   rec.walkingDistance = metrics.distance;
                   rec.walkingTime = metrics.time;
                 }
               });
-              this.calculateReclamationStats();
+              this._recalcStatsOnly();
               this._changeDetectorRef.detectChanges();
-            });
+            },
+            error: () => {
+              // clé gardée dans _pendingOrsUpdates = pas de retry
+            }
+          });
+      }
+    }
+  });
+}
+private _recalcStatsOnly(): void {
+  const statsMap = new Map<string, any>();
+
+  this.reclamations.forEach(r => {
+    const stopName = (r.stopName || 'Non spécifié').trim();
+    const neighborhood = (r.neighborhood || 'Inconnu').trim();
+    const key = `${stopName}|${neighborhood}`;
+
+    if (r.latitude && r.longitude) {
+      let effectiveDist = r.walkingDistance || 0;
+      let effectiveTime = r.walkingTime || 0;
+
+      if (effectiveDist === 0) {
+        let stopCoords = { lat: 0, lng: 0 };
+        for (const bus of this.navettes) {
+          const s = bus.arrets?.find(a => a.name.trim().toLowerCase() === stopName.toLowerCase());
+          if (s) { stopCoords = { lat: s.latitude, lng: s.longitude }; break; }
+        }
+        if (stopCoords.lat !== 0) {
+          const h = this.calculateHaversine(r.latitude, r.longitude, stopCoords.lat, stopCoords.lng);
+          effectiveDist = h.distance;
+          effectiveTime = h.time;
         }
       }
-    });
-  }
+
+      if (!statsMap.has(key)) {
+        statsMap.set(key, {
+          lat: r.latitude, lng: r.longitude,
+          employeeIds: new Set([r.employeId]),
+          employees: new Set([this.getNomEmploye(r.employeId)]),
+          totalDistance: effectiveDist,
+          totalTime: effectiveTime
+        });
+      } else {
+        const entry = statsMap.get(key)!;
+        entry.employeeIds.add(r.employeId);
+        entry.employees.add(this.getNomEmploye(r.employeId));
+        entry.totalDistance += effectiveDist;
+        entry.totalTime += effectiveTime;
+      }
+    }
+  });
+
+  this.reclamationStats = Array.from(statsMap.entries()).map(([key, data]) => {
+    const [stopName, neighborhood] = key.split('|');
+    const count = data.employeeIds.size;
+    const avgTime = Math.round(data.totalTime / count);
+    const status = avgTime > 30 ? 'critical' : (avgTime >= 15 ? 'warning' : 'ok');
+
+    const regularEmployees = Array.from(data.employeeIds).filter((id: string) =>
+      this.employeDetailsMap.has(id) && (this.employeUsageFreq.get(id) || 0) >= 3
+    );
+
+    const targetBus = this.navettes.find(b =>
+      b.arrets?.some(ar => ar.name.toLowerCase().includes(stopName.toLowerCase()))
+    );
+
+    return {
+      stopName, neighborhood,
+      count: data.employees.size,
+      regularCount: regularEmployees.length,
+      latitude: data.lat, longitude: data.lng,
+      avgDistance: Math.round((data.totalDistance / count) * 10) / 10,
+      avgTime, employeeList: Array.from(data.employees).join(', '),
+      status,
+      isRecommended: regularEmployees.length >= 3 && status !== 'ok',
+      regularEmployeesDetails: regularEmployees.map((id: string) => ({
+        name: this.getNomEmploye(id),
+        freq: this.employeUsageFreq.get(id) || 0
+      })),
+      targetBusId: targetBus?.id,
+      showDetails: false
+    };
+  }).sort((a, b) => b.avgTime - a.avgTime);
+}
 
   // Calcul dynamique des métriques pour l'affichage (si 0 dans la base)
   getMetrics(r: Reclamation): { time: number, dist: number } {
@@ -1173,29 +1261,39 @@ this.reservations = this.reservations.filter(r => !archivedIds.includes(r.id));
     if (time >= 15) return 'bg-orange-50 text-orange-600 border-orange-100';
     return 'bg-emerald-50 text-emerald-600 border-emerald-100';
   }
+archivedReclamations: any[] = [];
 
-  deleteReclamation(id: string): void {
-    const dialogRef = this._fuseConfirmationService.open({
-      title: 'Confirmer la suppression',
-      message: 'Voulez-vous vraiment supprimer cette réclamation ? Cette action est irréversible.',
-      icon: { show: true, name: 'heroicons_outline:exclamation', color: 'warn' },
-      actions: { confirm: { label: 'Supprimer', color: 'warn' } }
-    });
+archiveReclamation(r: Reclamation): void {
+  const archived = { ...r, archivedAt: new Date().toISOString() };
+  this.archivedReclamations.push(archived);
+  localStorage.setItem('archivedReclamations', JSON.stringify(this.archivedReclamations));
+  this.reclamations = this.reclamations.filter(rec => rec.id !== r.id);
+  this.calculateReclamationStats();
+  this._toastrService.success('Réclamation archivée');
+  this._changeDetectorRef.detectChanges();
+}
 
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result === 'confirmed') {
-        this.reclamationService.delete(id).subscribe({
-          next: () => {
-            this._toastrService.success('Réclamation supprimée');
-            this.loadReclamations();
-            this._changeDetectorRef.detectChanges();
-          },
-          error: (err) => this._toastrService.error('Erreur lors de la suppression')
-        });
-      }
-    });
-  }
+deleteReclamation(id: string): void {
+  const dialogRef = this._fuseConfirmationService.open({
+    title: 'Confirmer la suppression',
+    message: 'Voulez-vous vraiment supprimer cette réclamation ? Cette action est irréversible.',
+    icon: { show: true, name: 'heroicons_outline:exclamation', color: 'warn' },
+    actions: { confirm: { label: 'Supprimer', color: 'warn' } }
+  });
 
+  dialogRef.afterClosed().subscribe((result) => {
+    if (result === 'confirmed') {
+      this.reclamationService.delete(id).subscribe({
+        next: () => {
+          this._toastrService.success('Réclamation supprimée');
+          this.loadReclamations();
+          this._changeDetectorRef.detectChanges();
+        },
+        error: (err) => this._toastrService.error('Erreur lors de la suppression')
+      });
+    }
+  });
+}
   initHeatmap(): void {
     setTimeout(() => {
       const mapContainer = document.getElementById('heatmapMap');
@@ -1380,7 +1478,7 @@ this.reservations = this.reservations.filter(r => !archivedIds.includes(r.id));
         packDates: [...this.packDates],
         arrets: this.busForm.arrets || []
       };
-   this.busService.update(this.busForm.id, busToUpdate).subscribe({
+      this.busService.update(this.busForm.id, busToUpdate).subscribe({
         next: () => {
           // Synchroniser les arrêts sur tous les bus du pack
           if (this.busForm.packId) {
@@ -1575,12 +1673,12 @@ this.reservations = this.reservations.filter(r => !archivedIds.includes(r.id));
     if (!this.searchTerm) return this.navettes;
     return this.navettes.filter(n => n.ligne?.toLowerCase().includes(this.searchTerm.toLowerCase()) || n.marque?.toLowerCase().includes(this.searchTerm.toLowerCase()) || n.immatriculation?.toLowerCase().includes(this.searchTerm.toLowerCase()));
   }
-get filteredReservations(): any[] {
-  if (this.reservationType === 'archive') {
-    return this.archivedReservations;
+  get filteredReservations(): any[] {
+    if (this.reservationType === 'archive') {
+      return this.archivedReservations;
+    }
+    return this.reservations.filter(r => r.type === this.reservationType);
   }
-  return this.reservations.filter(r => r.type === this.reservationType);
-}
   get totalStock(): number { return this.cadeaux.reduce((sum, c) => sum + c.stock, 0); }
 
   get stats() {
@@ -1631,7 +1729,7 @@ get filteredReservations(): any[] {
         navette: getTrend(resNavetteCur.length, resNavetteLast.length)
       },
       totalNavettes: this.navettes.length,
-        archiveValue: this.archivedReservations.length  // ← ici
+      archiveValue: this.archivedReservations.length  // ← ici
 
     };
   }
@@ -1711,7 +1809,7 @@ get filteredReservations(): any[] {
     const isPermanent = !date;
     const dialogRef = this._fuseConfirmationService.open({
       title: isPermanent ? 'Activation permanente' : 'Activation ponctuelle',
-      message: isPermanent 
+      message: isPermanent
         ? 'Voulez-vous activer ce bus de manière permanente ?'
         : `Confirmer l'activation de ce bus pour le ${new Date(date!).toLocaleDateString()} ?`,
       icon: { show: true, name: 'heroicons_outline:check-circle', color: 'success' },

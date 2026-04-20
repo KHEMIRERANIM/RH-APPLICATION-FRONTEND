@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, AfterViewInit, OnDestroy, ElementRef, Renderer2, ViewChild, ChangeDetectorRef, NgZone, ApplicationRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, ElementRef, Renderer2, ViewChild, ChangeDetectorRef, NgZone, ApplicationRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CovoiturageService, Vehicule, Trajet, ReservationResponse, ReservationRequest } from '../covoiturage.service';
@@ -260,23 +260,40 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
   // Onglet actif dans la section "Mes réservations" (employé)
   activeResTab: 'covoiturage' | 'navette' | 'archive' = 'covoiturage';
 
-  /** Covoiturage : toutes sauf archivées */
+  /** Statuts à masquer de la liste active (vont dans l'archive automatiquement) */
+  private readonly STATUTS_MASQUES = new Set(['ANNULE', 'INACTIF', 'EFFECTUE']);
+
+  /** Covoiturage : actives seulement (hors annulées, inactives, effectuées, archivées) */
   get visibleCovReservations(): ReservationResponse[] {
-    return this.mesReservations.filter(r => !this.archivedResIds.has(r.id!));
+    return this.mesReservations.filter(r =>
+      !this.archivedResIds.has(r.id!) &&
+      !this.STATUTS_MASQUES.has(String(r.statut || '').toUpperCase())
+    );
   }
 
-  /** Navette : toutes sauf archivées */
+  /** Navette : actives seulement (hors annulées, inactives, effectuées, archivées) */
   get visibleNavReservations(): any[] {
-    return this.myShuttleReservations.filter(r => !this.archivedResIds.has(r.id));
+    return this.myShuttleReservations.filter(r =>
+      !this.archivedResIds.has(r.id) &&
+      !this.STATUTS_MASQUES.has(String(r.statut || '').toUpperCase())
+    );
   }
 
-  /** Archive : réservations covoiturage + navette archivées manuellement */
+  /** Archive : réservations annulées/effectuées + archivées manuellement */
   get archiveReservations(): { type: 'cov' | 'nav'; data: any }[] {
+    // Covoiturage : archivées manuellement OU statut masqué (ANNULE, EFFECTUE...)
     const covArchive = this.mesReservations
-      .filter(r => this.archivedResIds.has(r.id!))
+      .filter(r =>
+        this.archivedResIds.has(r.id!) ||
+        this.STATUTS_MASQUES.has(String(r.statut || '').toUpperCase())
+      )
       .map(r => ({ type: 'cov' as const, data: r }));
+    // Navette : archivées manuellement OU statut masqué
     const navArchive = this.myShuttleReservations
-      .filter(r => this.archivedResIds.has(r.id))
+      .filter(r =>
+        this.archivedResIds.has(r.id) ||
+        this.STATUTS_MASQUES.has(String(r.statut || '').toUpperCase())
+      )
       .map(r => ({ type: 'nav' as const, data: r }));
     return [...covArchive, ...navArchive];
   }
@@ -296,7 +313,7 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
   trackingAdresseArrivee: string = '';
   openTracking(vehiculeId: string, isVoiture: boolean = false, adresseDepart: string = '', adresseArrivee: string = '') {
     if (!vehiculeId) {
-      alert("Erreur: ID de véhicule introuvable.");
+      this.showToast('❌ Erreur', 'ID de véhicule introuvable.', 'error');
       return;
     }
     this.trackingVehiculeId = vehiculeId;
@@ -317,7 +334,6 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
   }
   annulerEtNotifierPassagers(id?: string): void {
     if (!id) return;
-    if (!confirm('Annuler ce trajet ? Tous les passagers seront notifiés et remboursés si nécessaire !')) return;
 
     // Récupérer les réservations pour gérer les remboursements
     this.covoiturageService.getReservationsByTrajet(id).subscribe({
@@ -336,16 +352,19 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
 
             this.loadTrajets();
             this.loadAllTrajets();
-            alert('✅ Trajet annulé — passagers notifiés et remboursés !');
+            this.showToast('✅ Trajet annulé', 'Passagers notifiés et remboursés !', 'success');
             this.cdr.detectChanges();
           },
           error: (err) => {
             console.error('Erreur annulation', err);
-            alert('❌ Erreur lors de l\'annulation');
+            this.showToast('❌ Erreur', 'Erreur lors de l\'annulation', 'error');
           }
         });
       },
-      error: (err) => console.error('Erreur récupération réservations pour remboursement', err)
+      error: (err) => {
+        console.error('Erreur récupération réservations pour remboursement', err);
+        this.showToast('❌ Erreur', 'Erreur lors de la récupération des réservations', 'error');
+      }
     });
   }
 
@@ -570,18 +589,18 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
         // Vérification périodique des paiements expirés
         setInterval(() => this.checkPaiementsExpire(), 60000);
 
-     this.route.queryParams.subscribe(params => {
-  const tid = params['annulationTrajetId'];
-  if (tid) {
-    this.trajetAnnuleId = tid;
-    this.reservationAnnuleeId = params['reservationId'] || '';
-    this.notificationAnnulation = {
-      titre: 'Trajet annulé',
-      message: 'Votre conducteur a annulé le trajet. Consultez les alternatives disponibles.',
-      trajetAnnuleId: tid
-    };
-    this.showNotificationAnnulation = true;
-  }
+        this.route.queryParams.subscribe(params => {
+          const tid = params['annulationTrajetId'];
+          if (tid) {
+            this.trajetAnnuleId = tid;
+            this.reservationAnnuleeId = params['reservationId'] || '';
+            this.notificationAnnulation = {
+              titre: 'Trajet annulé',
+              message: 'Votre conducteur a annulé le trajet. Consultez les alternatives disponibles.',
+              trajetAnnuleId: tid
+            };
+            this.showNotificationAnnulation = true;
+          }
           if (params['paymentSuccess']) {
             this.showToast('✅ Paiement réussi !', 'Votre réservation a été confirmée avec succès.');
           }
@@ -630,11 +649,11 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
               this.showNotificationAnnulation = true;
               this.trajetAnnuleId = this.notificationAnnulation.trajetAnnuleId;
               this.reservationAnnuleeId = notif?.reservationId || this.getReservationIdByTrajetId(this.trajetAnnuleId);
-            // APRÈS
-if (this.trajetAnnuleId) {
-  // Rien — le banner s'affiche, l'utilisateur clique quand il veut
-}
-this.loadMesReservations();
+              // APRÈS
+              if (this.trajetAnnuleId) {
+                // Rien — le banner s'affiche, l'utilisateur clique quand il veut
+              }
+              this.loadMesReservations();
               this.cdr.detectChanges();
             } else if (notifType === 'CONFIRMATION_ALTERNATIVE') {
               this.loadMesReservations();
@@ -743,7 +762,19 @@ this.loadMesReservations();
     trajetAnnuleId: string,
     ref: Trajet | null
   ): any[] {
-    const out = [...(apiAlts || [])].filter(a => (a.placesRestantes ?? 0) > 0);
+    const STATUTS_EXCLUS = new Set(['ANNULE', 'INACTIF', 'EFFECTUE']);
+    const out = [...(apiAlts || [])].filter(a => {
+      // Priorité : vérifier le statut réel depuis allTrajets/lookupTrajets (source de vérité)
+      const localTrajet = this.allTrajets.find(t => t.id === a.id)
+                       || this.lookupTrajets.find(t => t.id === a.id);
+      const st = String(
+        localTrajet?.statut || a.statut || a.statut_trajet || ''
+      ).toUpperCase();
+      const places = (a.placesRestantes ?? a.places_restantes ?? localTrajet?.placesRestantes ?? 0);
+      // Exclure les trajets annulés/inactifs/effectués et sans places
+      if (STATUTS_EXCLUS.has(st)) return false;
+      return places > 0;
+    });
     const ids = new Set(out.map(a => a.id));
 
     if (!ref?.employeId) return out;
@@ -798,6 +829,18 @@ this.loadMesReservations();
 
     if (!refDep || !refArr) return false;
 
+    // ── Vérification du jour de la semaine ──────────────────────────
+    // Le trajet annulé avait des jours disponibles ; l'alternative doit
+    // couvrir au moins l'un des jours du trajet référence.
+    const joursRef   = this.normaliserJours(ref.joursDisponibles);
+    const joursAlt   = this.normaliserJours(alt.joursDisponibles || alt.jours_disponibles || '');
+    // Si les deux ont des jours renseignés → vérifier l'intersection
+    if (joursRef.length > 0 && joursAlt.length > 0) {
+      const intersection = joursRef.filter(j => joursAlt.includes(j));
+      if (intersection.length === 0) return false;
+    }
+    // Si l'un des deux n'a pas de jours renseignés → on ne filtre pas
+
     if (alt.type === 'COVOITURAGE') {
       const depOk = this.lieuCommeReference(String(alt.adresseDepart || ''), refDep);
       const arrOk = this.lieuCommeReference(String(alt.adresseArrivee || ''), refArr);
@@ -809,6 +852,25 @@ this.loadMesReservations();
     const busRouteOk = this.ligneBusCouvreTrajet(ligne, refDep, refArr);
     const hOk = this.heureNeDepassePasSouhaitee(alt.heureDepart, refMin);
     return busRouteOk && hOk;
+  }
+
+  /** Normalise les jours disponibles en tableau de clés courtes minuscules (ex: ['lun','mer','ven']) */
+  private normaliserJours(jours: string): string[] {
+    if (!jours) return [];
+    const MAP: Record<string, string> = {
+      'lundi': 'lun', 'monday': 'lun', 'mon': 'lun', 'lun': 'lun',
+      'mardi': 'mar', 'tuesday': 'mar', 'tue': 'mar', 'mar': 'mar',
+      'mercredi': 'mer', 'wednesday': 'mer', 'wed': 'mer', 'mer': 'mer',
+      'jeudi': 'jeu', 'thursday': 'jeu', 'thu': 'jeu', 'jeu': 'jeu',
+      'vendredi': 'ven', 'friday': 'ven', 'fri': 'ven', 'ven': 'ven',
+      'samedi': 'sam', 'saturday': 'sam', 'sat': 'sam', 'sam': 'sam',
+      'dimanche': 'dim', 'sunday': 'dim', 'sun': 'dim', 'dim': 'dim'
+    };
+    return jours
+      .split(/[,;\/\s]+/)
+      .map(j => j.trim().toLowerCase())
+      .map(j => MAP[j] || j)
+      .filter(Boolean);
   }
 
   private lieuCommeReference(altTexte: string, refNormalise: string): boolean {
@@ -831,15 +893,50 @@ this.loadMesReservations();
       .trim();
   }
 
+  /** Mots administratifs/génériques à ignorer dans la comparaison des adresses */
+  private readonly STOPWORDS_ADRESSE = new Set([
+    // Termes administratifs tunisiens
+    'gouvernorat', 'delegation', 'municipalite', 'commune', 'cite', 'quartier',
+    'immeuble', 'residence', 'lotissement', 'zone', 'nouvelle', 'nouveau',
+    // Articles et prépositions françaises
+    'du', 'de', 'des', 'la', 'le', 'les', 'un', 'une', 'au', 'aux',
+    'et', 'en', 'sur', 'sous', 'par', 'pour', 'avec', 'dans', 'chez',
+    // Termes géographiques génériques
+    'ville', 'nord', 'sud', 'est', 'ouest', 'vieux', 'vieille',
+    'rue', 'avenue', 'boulevard', 'route', 'chemin', 'impasse'
+  ]);
+
+  /** Extrait les tokens significatifs d'une adresse (sans stopwords, min 3 chars) */
+  private extraireTokensAdresse(texte: string): string[] {
+    return this.normaliserTexte(texte)
+      .split(/[\s,.\-\/()]+/)
+      .map(t => t.trim())
+      .filter(t => t.length >= 3 && !this.STOPWORDS_ADRESSE.has(t));
+  }
+
   private texteProcheStrict(a: string, ref: string): boolean {
     if (!ref) return true;
     const na = this.normaliserTexte(a);
     const nr = this.normaliserTexte(ref);
     if (!na || !nr) return true;
+
+    // Test 1 : l'un contient l'autre entièrement (match parfait)
     if (na.includes(nr) || nr.includes(na)) return true;
-    const ta = na.split(/[\s,]+/).filter(t => t.length > 2);
-    const tb = nr.split(/[\s,]+/).filter(t => t.length > 2);
-    return ta.some(t => nr.includes(t)) || tb.some(t => na.includes(t));
+
+    // Test 2 : intersection sur tokens significatifs (sans stopwords)
+    const tokA   = this.extraireTokensAdresse(a);
+    const tokRef = this.extraireTokensAdresse(ref);
+
+    // Si l'une des adresses n'a pas de token significatif → données insuffisantes
+    if (tokA.length === 0 || tokRef.length === 0) return false;
+
+    const setRef  = new Set(tokRef);
+    const communs = tokA.filter(t => setRef.has(t));
+
+    // Exige au moins 2 tokens communs si les deux adresses sont "riches"
+    // Sinon (address courte ≤ 2 tokens) → 1 token commun suffit
+    const minCommuns = (tokA.length >= 3 && tokRef.length >= 3) ? 2 : 1;
+    return communs.length >= minCommuns;
   }
 
   private heureDepartEnMinutes(h: string | undefined): number | null {
@@ -903,7 +1000,7 @@ this.loadMesReservations();
     }
 
     if (!this.reservationAnnuleeId || !alternative?.id) {
-      alert('Impossible de remplacer la réservation: données manquantes.');
+      this.showToast('❌ Erreur', 'Impossible de remplacer la réservation : données manquantes.', 'error');
       return;
     }
 
@@ -925,7 +1022,7 @@ this.loadMesReservations();
         this.remplacerEnCours = false;
         this.showAlternativesModal = false;
         this.showNotificationAnnulation = false;
-        alert('✅ Réservation navette confirmée — votre ancienne réservation a été remplacée.');
+        this.showToast('✅ Confirmée', 'Votre ancienne réservation a été remplacée.', 'success');
         this.loadMesReservations();
         this.loadTotalPoints();
         this.loadAllTrajets();
@@ -935,7 +1032,7 @@ this.loadMesReservations();
       },
       error: (err) => {
         this.remplacerEnCours = false;
-        alert('❌ ' + (err.error?.message || err.message || 'Erreur réservation'));
+        this.showToast('❌ Erreur', err.error?.message || err.message || 'Erreur réservation', 'error');
         this.cdr.detectChanges();
       }
     });
@@ -955,7 +1052,7 @@ this.loadMesReservations();
           this.remplacerEnCours = false;
           this.showAlternativesModal = false;
           this.showNotificationAnnulation = false;
-          alert('Demande envoyée au conducteur. Votre ancienne réservation sera remplacée lorsqu\'il acceptera.');
+          this.showToast('📨 Demande envoyée', 'Votre réservation sera remplacée dès acceptation du conducteur.', 'success');
           this.loadMesReservations();
           this.loadTotalPoints();
           this.loadAllTrajets();
@@ -964,7 +1061,7 @@ this.loadMesReservations();
         },
         error: (err) => {
           this.remplacerEnCours = false;
-          alert('❌ ' + (err.error?.message || err.message || 'Erreur demande'));
+          this.showToast('❌ Erreur', err.error?.message || err.message || 'Erreur demande', 'error');
           this.cdr.detectChanges();
         }
       });
@@ -1012,17 +1109,18 @@ this.loadMesReservations();
 
   deleteTrajet(id?: string): void {
     if (!id) return;
-    if (!confirm('Êtes-vous sûr ? Les passagers seront notifiés !')) return;
 
     this.covoiturageService.annulerTrajetConducteur(id).subscribe({
       next: () => {
         this.loadTrajets();
-        alert('Trajet annulé — passagers notifiés !');
+        this.showToast('✅ Trajet annulé', 'Passagers notifiés !', 'success');
       },
-      error: (err) => console.error('Erreur annulation', err)
+      error: (err) => {
+        console.error('Erreur annulation', err);
+        this.showToast('❌ Erreur', 'Erreur lors de l\'annulation du trajet', 'error');
+      }
     });
   }
-
   loadEmployees(): void {
     this.userService.getAllEmployees().subscribe({
       next: (users) => {
@@ -1166,7 +1264,7 @@ this.loadMesReservations();
       if (this.trajetForm.get('adresseArrivee')?.invalid) errorMsg += "\n- Adresse d'arrivée manquante";
       if (this.trajetForm.get('heureDepart')?.invalid) errorMsg += "\n- Heure de départ manquante";
       if (this.trajetForm.get('placesDisponibles')?.invalid) errorMsg += "\n- Places manquantes";
-      alert(errorMsg);
+      this.showToast('⚠️ Formulaire incomplet', errorMsg, 'error');
       return;
     }
 
@@ -1201,7 +1299,7 @@ this.loadMesReservations();
           this.pubDepMarker = null;
           this.pubDestMarker = null;
         }
-        alert(this.isEditingTrajet ? "✅ Trajet modifié avec succès !" : "✅ Trajet publié avec succès !");
+        this.showToast('✅ Succès', this.isEditingTrajet ? 'Trajet modifié avec succès !' : 'Trajet publié avec succès !', 'success');
         this.cdr.detectChanges();
       },
       error: (err) => console.error("Erreur action trajet", err)
@@ -1285,7 +1383,7 @@ this.loadMesReservations();
     // Safety check: Don't allow reserving own trip
     const trajet = this.allTrajets.find(t => t.id === trajetId);
     if (trajet && String(trajet.employeId).trim().toLowerCase() === String(this.employeId).trim().toLowerCase()) {
-      alert("Erreur: Vous ne pouvez pas réserver votre propre trajet.");
+      this.showToast('⛔ Interdit', 'Vous ne pouvez pas réserver votre propre trajet.', 'error');
       return;
     }
 
@@ -1376,21 +1474,23 @@ this.loadMesReservations();
     this.covoiturageService.updateReservationStatus(reservationId, update).subscribe({
       next: () => {
         this.loadTrajets();
-        alert('Réservation acceptée. Le passager a 15 minutes pour payer.');
+        this.showToast('✅ Acceptée', 'Le passager a 15 minutes pour payer.', 'success');
       },
       error: (err) => console.error('Erreur acceptation', err)
     });
   }
 
   refuserReservation(reservationId: string): void {
-    if (!confirm('Refuser cette réservation ?')) return;
     const update = { statut: 'ANNULE' };
     this.covoiturageService.updateReservationStatus(reservationId, update as any).subscribe({
       next: () => {
         this.loadTrajets();
-        alert('Réservation refusée.');
+        this.showToast('ℹ️ Refusée', 'Réservation refusée.', 'info');
       },
-      error: (err) => console.error('Erreur refus', err)
+      error: (err) => {
+        console.error('Erreur refus', err);
+        this.showToast('❌ Erreur', 'Erreur lors du refus de la réservation', 'error');
+      }
     });
   }
 
@@ -1463,7 +1563,7 @@ this.loadMesReservations();
 
   payerReservation(reservation: any): void {
     if (this.isPaiementExpire(reservation)) {
-      alert("Ce délai de paiement est dépassé. La réservation va être annulée.");
+      this.showToast('⏱️ Délai dépassé', 'La réservation va être annulée.', 'error');
       this.loadMesReservations();
       return;
     }
@@ -1474,7 +1574,7 @@ this.loadMesReservations();
       || null;
 
     if (!trajet) {
-      alert("Erreur: Informations du trajet introuvables. Veuillez rafraîchir la page.");
+      this.showToast('❌ Erreur', 'Informations du trajet introuvables. Veuillez rafraîchir la page.', 'error');
       return;
     }
 
@@ -1554,29 +1654,29 @@ this.loadMesReservations();
     if (!bus) return statut;
 
     const packId = bus.packId;
-if (packId) {
-  if (bus.statut !== 'ACTIF') {
-    // Bus de réserve : vérifier si au moins un jour est confirmé
-    // via activation du bus de réserve
-    const days = (reservation.joursSelectionnes || '').split(',')
-      .map((d: string) => d.trim()).filter(Boolean);
-    const hasConfirmed = days.some((day: string) => {
-      const targetBus = this.getBusForUserAndDay(packId, reservation.employeId, day);
-      return targetBus?.statut === 'ACTIF';
-    });
-    if (hasConfirmed) return 'CONFIRME';
-    return 'EN_ATTENTE_ACTIVATION';
-  }
-  // Bus principal ACTIF
-  const days = (reservation.joursSelectionnes || '').split(',')
-    .map((d: string) => d.trim()).filter(Boolean);
-  const hasConfirmed = days.some((day: string) => {
-    const targetBus = this.getBusForUserAndDay(packId, reservation.employeId, day);
-    return targetBus?.statut === 'ACTIF';
-  });
-  if (hasConfirmed) return 'CONFIRME';
-  return 'EN_ATTENTE_ACTIVATION';
-}
+    if (packId) {
+      if (bus.statut !== 'ACTIF') {
+        // Bus de réserve : vérifier si au moins un jour est confirmé
+        // via activation du bus de réserve
+        const days = (reservation.joursSelectionnes || '').split(',')
+          .map((d: string) => d.trim()).filter(Boolean);
+        const hasConfirmed = days.some((day: string) => {
+          const targetBus = this.getBusForUserAndDay(packId, reservation.employeId, day);
+          return targetBus?.statut === 'ACTIF';
+        });
+        if (hasConfirmed) return 'CONFIRME';
+        return 'EN_ATTENTE_ACTIVATION';
+      }
+      // Bus principal ACTIF
+      const days = (reservation.joursSelectionnes || '').split(',')
+        .map((d: string) => d.trim()).filter(Boolean);
+      const hasConfirmed = days.some((day: string) => {
+        const targetBus = this.getBusForUserAndDay(packId, reservation.employeId, day);
+        return targetBus?.statut === 'ACTIF';
+      });
+      if (hasConfirmed) return 'CONFIRME';
+      return 'EN_ATTENTE_ACTIVATION';
+    }
 
     return statut;
   }
@@ -1629,21 +1729,21 @@ if (packId) {
     if (!bus) return 'none';
 
     const packId = bus.packId;
-if (packId) {
-  if (bus.statut !== 'ACTIF') {
-    // Bus de réserve : confirmé seulement si l'admin a activé CE jour
-    // via joursConfirmes OU si le bus de réserve lui-même est devenu ACTIF
-    // On vérifie si l'admin a activé ce jour spécifiquement
-    const targetBus = this.getBusForUserAndDay(packId, reservation.employeId, day);
-    if (targetBus?.statut === 'ACTIF') return 'confirmed';
-    return 'waiting';
-  }
-  // Bus principal ACTIF → simulation normale
-  const targetBus = this.getBusForUserAndDay(packId, reservation.employeId, day);
-  if (targetBus) {
-    return targetBus.statut === 'ACTIF' ? 'confirmed' : 'waiting';
-  }
-}
+    if (packId) {
+      if (bus.statut !== 'ACTIF') {
+        // Bus de réserve : confirmé seulement si l'admin a activé CE jour
+        // via joursConfirmes OU si le bus de réserve lui-même est devenu ACTIF
+        // On vérifie si l'admin a activé ce jour spécifiquement
+        const targetBus = this.getBusForUserAndDay(packId, reservation.employeId, day);
+        if (targetBus?.statut === 'ACTIF') return 'confirmed';
+        return 'waiting';
+      }
+      // Bus principal ACTIF → simulation normale
+      const targetBus = this.getBusForUserAndDay(packId, reservation.employeId, day);
+      if (targetBus) {
+        return targetBus.statut === 'ACTIF' ? 'confirmed' : 'waiting';
+      }
+    }
     // PRIORITÉ 3: Fallback sur les listes d'attente du serveur
     if (reservation.joursEnAttente?.includes(day)) return 'waiting';
 
@@ -1870,14 +1970,14 @@ if (packId) {
     const tousJours = this.selectedNavetteDays[shuttle.id] || [];
 
     if (tousJours.length === 0) {
-this.showToast('ℹ️ Attention', 'Veuillez sélectionner au moins un jour.', 'info');      return;
+      this.showToast('ℹ️ Attention', 'Veuillez sélectionner au moins un jour.', 'info'); return;
     }
 
     // On ne réserve que les jours libres
     const joursLibres = this.getJoursLibres(shuttle.id);
 
     if (joursLibres.length === 0) {
-this.showToast('ℹ️ Déjà réservé', 'Tous les jours sélectionnés sont déjà réservés.', 'info');      return;
+      this.showToast('ℹ️ Déjà réservé', 'Tous les jours sélectionnés sont déjà réservés.', 'info'); return;
     }
 
     const joursSelectionnes = joursLibres.join(',');
@@ -1946,17 +2046,18 @@ this.showToast('ℹ️ Déjà réservé', 'Tous les jours sélectionnés sont d�
 
           msg = `${confStr}${waitStr}${thresholdMsg}`;
         }
-this.showToast(
-  wait.length === 0 ? '✅ Réservation confirmée' : '⚠️ Liste d\'attente',
-  msg,
-  wait.length === 0 ? 'success' : 'info'
-);        this.cdr.detectChanges();
+        this.showToast(
+          wait.length === 0 ? '✅ Réservation confirmée' : '⚠️ Liste d\'attente',
+          msg,
+          wait.length === 0 ? 'success' : 'info'
+        ); this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Erreur réservation', err);
         const body = err?.error;
         const msg = typeof body === 'string' ? body : (body?.message || err?.message || 'Erreur inconnue');
-this.showToast('❌ Erreur', msg, 'error');      }
+        this.showToast('❌ Erreur', msg, 'error');
+      }
     });
   }
 
@@ -1972,21 +2073,18 @@ this.showToast('❌ Erreur', msg, 'error');      }
   }
 
   annulerReservationNavette(reservationId: string) {
-    if (!confirm('Annuler cette réservation ?')) return;
-
     this.covoiturageService.annulerReservationNavette(reservationId).subscribe({
       next: () => {
         this.myShuttleReservations = this.myShuttleReservations.filter(r => r.id !== reservationId);
-        alert('Réservation annulée');
+        this.showToast('✅ Annulée', 'Réservation navette annulée.', 'success');
         this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Erreur annulation', err);
-        alert('Erreur lors de l\'annulation');
+        this.showToast('❌ Erreur', 'Erreur lors de l\'annulation.', 'error');
       }
     });
   }
-
   // ─────────────────────────────────────────────────────────────
   // SAISIE MANUELLE
   // ─────────────────────────────────────────────────────────────
@@ -2059,11 +2157,11 @@ this.showToast('❌ Erreur', msg, 'error');      }
       if (data && data.length > 0) {
         this.selectSuggestion(data[0]);
       } else {
-        alert('Aucun lieu trouvé pour "' + this.searchQuery + '"');
+        this.showToast('🔍 Introuvable', `Aucun lieu trouvé pour "${this.searchQuery}"`, 'info');
       }
     } catch (error) {
       console.error('Erreur recherche:', error);
-      alert('Erreur lors de la recherche');
+      this.showToast('❌ Erreur', 'Erreur lors de la recherche.', 'error');
     }
   }
 
@@ -2152,7 +2250,7 @@ this.showToast('❌ Erreur', msg, 'error');      }
 
   centerOnMyLocation() {
     if (!navigator.geolocation) {
-      alert('Géolocalisation non supportée');
+      this.showToast('❌ Erreur', 'Géolocalisation non supportée par votre navigateur.', 'error');
       return;
     }
 
@@ -2198,7 +2296,7 @@ this.showToast('❌ Erreur', msg, 'error');      }
           case error.POSITION_UNAVAILABLE: message = 'Position non disponible'; break;
           case error.TIMEOUT: message = 'Délai dépassé'; break;
         }
-        alert(message);
+        this.showToast('❌ Géolocalisation', message, 'error');
       },
       { enableHighAccuracy: false, maximumAge: Infinity, timeout: 15000 }
     );
@@ -2341,7 +2439,7 @@ this.showToast('❌ Erreur', msg, 'error');      }
     const hasActiveFilters = !!(depart || arrivee || targetTime || selectedDaysNorm.length > 0 || this.searchPrice !== null);
 
     if (!hasActiveFilters) {
-      alert('Veuillez renseigner au moins un critère de recherche (Départ, Destination, Jours, Heure ou Prix).');
+      this.showToast('ℹ️ Critères manquants', 'Veuillez renseigner au moins un critère de recherche.', 'info');
       return;
     }
 
@@ -2388,7 +2486,7 @@ this.showToast('❌ Erreur', msg, 'error');      }
 
     // 4. Mise à jour de l'affichage
     if (trajetsFiltres.length === 0) {
-      alert('Aucun covoiturage trouvé pour ces critères.');
+      this.showToast('🔍 Aucun résultat', 'Aucun covoiturage trouvé pour ces critères.', 'info');
       this.displayedTrajets = [];
     } else {
       this.displayedTrajets = trajetsFiltres;
@@ -2410,18 +2508,18 @@ this.showToast('❌ Erreur', msg, 'error');      }
     }
   }
 
-toastTitle: string = '';
-toastMessage: string = '';
-toastType: 'success' | 'error' | 'info' = 'success';
-toastVisible: boolean = false;
+  toastTitle: string = '';
+  toastMessage: string = '';
+  toastType: 'success' | 'error' | 'info' = 'success';
+  toastVisible: boolean = false;
 
-showToast(title: string, message: string, type: 'success' | 'error' | 'info' = 'success') {
-  this.toastTitle = title;
-  this.toastMessage = message;
-  this.toastType = type;
-  this.toastVisible = true;
-  this.cdr.detectChanges();
-}
+  showToast(title: string, message: string, type: 'success' | 'error' | 'info' = 'success') {
+    this.toastTitle = title;
+    this.toastMessage = message;
+    this.toastType = type;
+    this.toastVisible = true;
+    this.cdr.detectChanges();
+  }
 
   ngOnDestroy() {
     if (this.map) {

@@ -761,36 +761,82 @@
               </div>
             </div>
           </div>
-          <div class="space-y-4">
-            <div class="flex items-start gap-3">
-              <div class="mt-4">
-                <div class="w-3 h-3 rounded-full bg-[#1D9E75] shadow-sm"></div>
-              </div>
+          <!-- Hint : adresses par carte uniquement -->
+          <div class="flex items-start gap-2.5 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3">
+            <mat-icon svgIcon="feather:info" class="icon-size-4 text-blue-500 mt-0.5 shrink-0"></mat-icon>
+            <p class="text-xs text-blue-700 font-semibold leading-relaxed">
+              📍 Cliquez <strong>1× sur la carte</strong> pour le départ, puis <strong>2× pour l'arrivée</strong>.
+              Les adresses sont remplies automatiquement.
+            </p>
+          </div>
+
+          <div class="space-y-3">
+            <!-- Départ (readonly - filled by map) -->
+            <div class="flex items-center gap-3">
+              <div class="w-3 h-3 rounded-full bg-[#1D9E75] shadow-sm shrink-0"></div>
               <div class="flex-1">
-                <label class="block text-lg font-medium text-gray-700 mb-1.5">Point de départ</label>
-                <input type="text" formControlName="adresseDepart" placeholder="Adresse de départ"
-                  [class.border-red-500]="trajetForm.get('adresseDepart')?.invalid && trajetForm.get('adresseDepart')?.touched"
-                  class="w-full h-11 px-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#1D9E75] bg-gray-50 transition-colors" />
-                <p *ngIf="trajetForm.get('adresseDepart')?.touched && trajetForm.get('adresseDepart')?.errors?.['pattern']"
-                  class="text-[10px] text-red-500 mt-1 font-semibold">Pas de caractères spéciaux autorisés</p>
-                <p *ngIf="trajetForm.get('adresseDepart')?.touched && trajetForm.get('adresseDepart')?.errors?.['minLength']"
-                  class="text-[10px] text-red-500 mt-1 font-semibold">Min. 3 caractères</p>
+                <label class="block text-sm font-bold text-gray-600 mb-1">Point de départ</label>
+                <div class="relative">
+                  <mat-icon svgIcon="feather:map-pin"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 icon-size-4"
+                    [ngClass]="trajetForm.get('adresseDepart')?.value ? 'text-[#1D9E75]' : 'text-gray-300'">
+                  </mat-icon>
+                  <input type="text" formControlName="adresseDepart" readonly
+                    placeholder="Cliquez sur la carte pour définir le départ..."
+                    [ngClass]="{
+                      'border-[#1D9E75] bg-[#1D9E75]/5 text-[#1A1A2E]': trajetForm.get('adresseDepart')?.value,
+                      'border-gray-200 bg-gray-50 text-gray-400': !trajetForm.get('adresseDepart')?.value
+                    }"
+                    class="w-full h-11 pl-9 pr-10 rounded-xl border-2 focus:outline-none font-medium text-sm cursor-default transition-all" />
+                  <!-- Icône statut droite -->
+                  <div class="absolute right-3 top-1/2 -translate-y-1/2">
+                    <mat-icon *ngIf="trajetForm.get('adresseDepart')?.value"
+                      svgIcon="feather:check-circle" class="icon-size-4 text-[#1D9E75]"></mat-icon>
+                    <span *ngIf="!trajetForm.get('adresseDepart')?.value"
+                      class="inline-block w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
+                  </div>
+                </div>
               </div>
             </div>
-            <div class="flex items-start gap-3">
-              <div class="mt-4">
-                <div class="w-3 h-3 rounded-full bg-[#E94560] shadow-sm"></div>
-              </div>
+
+            <!-- Arrivée (readonly - filled by map) -->
+            <div class="flex items-center gap-3">
+              <div class="w-3 h-3 rounded-full bg-[#E94560] shadow-sm shrink-0"></div>
               <div class="flex-1">
-                <label class="block text-lg font-medium text-gray-700 mb-1.5">Destination</label>
-                <input type="text" formControlName="adresseArrivee" placeholder="Adresse d'arrivée"
-                  [class.border-red-500]="trajetForm.get('adresseArrivee')?.invalid && trajetForm.get('adresseArrivee')?.touched"
-                  class="w-full h-11 px-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#1D9E75] bg-gray-50 transition-colors" />
-                <p *ngIf="trajetForm.get('adresseArrivee')?.touched && trajetForm.get('adresseArrivee')?.errors?.['pattern']"
-                  class="text-[10px] text-red-500 mt-1 font-semibold">Pas de caractères spéciaux autorisés</p>
-                <p *ngIf="trajetForm.get('adresseArrivee')?.touched && trajetForm.get('adresseArrivee')?.errors?.['minLength']"
-                  class="text-[10px] text-red-500 mt-1 font-semibold">Min. 3 caractères</p>
+                <label class="block text-sm font-bold text-gray-600 mb-1">Destination</label>
+                <div class="relative">
+                  <mat-icon svgIcon="feather:flag"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 icon-size-4"
+                    [ngClass]="trajetForm.get('adresseArrivee')?.value ? 'text-[#E94560]' : 'text-gray-300'">
+                  </mat-icon>
+                  <input type="text" formControlName="adresseArrivee" readonly
+                    placeholder="Cliquez sur la carte pour définir la destination..."
+                    [ngClass]="{
+                      'border-[#E94560] bg-[#E94560]/5 text-[#1A1A2E]': trajetForm.get('adresseArrivee')?.value,
+                      'border-gray-200 bg-gray-50 text-gray-400': !trajetForm.get('adresseArrivee')?.value
+                    }"
+                    class="w-full h-11 pl-9 pr-10 rounded-xl border-2 focus:outline-none font-medium text-sm cursor-default transition-all" />
+                  <!-- Icône statut droite -->
+                  <div class="absolute right-3 top-1/2 -translate-y-1/2">
+                    <mat-icon *ngIf="trajetForm.get('adresseArrivee')?.value"
+                      svgIcon="feather:check-circle" class="icon-size-4 text-[#E94560]"></mat-icon>
+                    <span *ngIf="!trajetForm.get('adresseArrivee')?.value"
+                      class="inline-block w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
+                  </div>
+                </div>
               </div>
+            </div>
+
+            <!-- Erreur si formulaire soumis sans adresses -->
+            <div *ngIf="trajetForm.get('adresseDepart')?.touched && trajetForm.get('adresseDepart')?.invalid"
+              class="flex items-center gap-2 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+              <mat-icon svgIcon="feather:alert-circle" class="icon-size-4 text-red-500 shrink-0"></mat-icon>
+              <p class="text-xs text-red-600 font-semibold">Veuillez sélectionner le point de départ sur la carte</p>
+            </div>
+            <div *ngIf="trajetForm.get('adresseArrivee')?.touched && trajetForm.get('adresseArrivee')?.invalid"
+              class="flex items-center gap-2 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+              <mat-icon svgIcon="feather:alert-circle" class="icon-size-4 text-red-500 shrink-0"></mat-icon>
+              <p class="text-xs text-red-600 font-semibold">Veuillez sélectionner la destination sur la carte</p>
             </div>
           </div>
           <div class="grid grid-cols-3 gap-4">
@@ -916,15 +962,15 @@
                 <div class="flex items-center gap-2 text-gray-700"><mat-icon svgIcon="feather:truck"
                     class="text-[#1D9E75] icon-size-6"></mat-icon><span class="font-medium text-[15px] text-gray-600">{{
                     getVehicleName(transport.vehiculeId) }}</span></div>
-                <div class="flex gap-2">
-                  <span class="px-2 py-1 text-sm rounded-full font-semibold" [ngClass]="{
-                      'bg-green-100 text-green-700':  transport.statut === 'ACTIF',
-                      'bg-blue-100 text-blue-700':    transport.statut === 'EN_ROUTE',
-                      'bg-gray-200 text-gray-600':    transport.statut === 'EFFECTUE',
-                      'bg-purple-100 text-purple-700':transport.statut === 'COMPLET',
-                      'bg-orange-100 text-orange-700':transport.statut === 'INACTIF',
-                      'bg-red-100 text-red-700':      transport.statut === 'ANNULE'
-                    }">{{
+                <div class="flex items-center gap-1.5 flex-wrap justify-end">
+                  <span class="px-2 py-0.5 text-xs rounded-full font-bold" [ngClass]="{
+      'bg-green-100 text-green-700':  transport.statut === 'ACTIF',
+      'bg-blue-100 text-blue-700':    transport.statut === 'EN_ROUTE',
+      'bg-gray-200 text-gray-600':    transport.statut === 'EFFECTUE',
+      'bg-purple-100 text-purple-700':transport.statut === 'COMPLET',
+      'bg-orange-100 text-orange-700':transport.statut === 'INACTIF',
+      'bg-red-100 text-red-700':      transport.statut === 'ANNULE'
+    }">{{
                     transport.statut === 'ACTIF' ? 'Actif' :
                     transport.statut === 'EFFECTUE' ? 'Effectué' :
                     transport.statut === 'EN_ROUTE' ? 'En Cours' :
@@ -932,26 +978,27 @@
                     transport.statut === 'ANNULE' ? 'Annulé' : 'Inactif' }}</span>
                   <ng-container *ngIf="transport.statut !== 'EFFECTUE'">
                     <button (click)="editTrajet(transport)"
-                      class="px-3 py-1.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
+                      class="px-5 py-2.5 rounded-lg text-base font-semibold transition-all shadow-sm bg-blue-600 text-white hover:bg-blue-700">
                       Modifier
                     </button>
                     <button *ngIf="transport.statut !== 'EN_ROUTE'"
                       (click)="openConduiteModal(transport.vehiculeId, transport.id)"
-                      class="px-3 py-1.5 bg-[#1D9E75] text-white text-sm font-semibold rounded-lg hover:bg-[#168567] transition-colors shadow-sm">🚀
-                      Démarrer trajet</button>
+                      class="px-5 py-2.5 rounded-lg text-base font-semibold transition-all shadow-sm bg-[#1D9E75] text-white hover:bg-[#168567]">
+                      🚀 Démarrer
+                    </button>
                     <button (click)="annulerEtNotifierPassagers(transport.id)"
-                      class="px-4 py-1.5 bg-[#E94560] text-white text-base font-semibold rounded-lg hover:bg-red-600 transition-colors shadow-sm">Annuler
-                      trajet</button>
+                      class="px-5 py-2.5 rounded-lg text-base font-semibold transition-all shadow-sm bg-[#E94560] text-white hover:bg-red-600">
+                      Annuler
+                    </button>
                   </ng-container>
                   <div *ngIf="transport.statut === 'EFFECTUE'"
-                    class="flex items-center gap-1.5 text-gray-400 font-bold text-xs">
-                    <mat-icon class="icon-size-4" svgIcon="feather:check-circle"></mat-icon>
-                    <span>TRAJET TERMINÉ</span>
+                    class="flex items-center gap-1 text-gray-400 font-bold text-xs">
+                    <mat-icon class="icon-size-3.5" svgIcon="feather:check-circle"></mat-icon>
+                    <span>TERMINÉ</span>
                   </div>
-                  <!-- Bouton Archiver -->
                   <button (click)="archiverTrajet(transport.id)"
-                    class="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-500 text-sm font-semibold rounded-lg hover:bg-gray-200 hover:text-gray-700 transition-colors shadow-sm">
-                    <mat-icon svgIcon="feather:archive" class="icon-size-4"></mat-icon>
+                    class="flex items-center gap-1 px-5 py-2.5 rounded-lg text-base font-semibold transition-all shadow-sm bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700">
+                    <mat-icon svgIcon="feather:archive" class="icon-size-3.5"></mat-icon>
                     Archiver
                   </button>
                 </div>
@@ -1023,6 +1070,103 @@
                 }}
               </p>
             </div>
+          </div>
+
+          <!-- ═══════ SECTION ARCHIVE TRAJETS PROPOSÉS ═══════ -->
+          <div *ngIf="showTrajetArchive" id="trajet-archive-section"
+            class="mt-6 border-t-2 border-dashed border-gray-200 pt-6 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+
+            <!-- En-tête archive -->
+            <div class="flex items-center gap-3 mb-2">
+              <div class="w-8 h-8 bg-gray-700 rounded-lg flex items-center justify-center">
+                <mat-icon svgIcon="feather:archive" class="icon-size-4 text-white"></mat-icon>
+              </div>
+              <h4 class="text-base font-bold text-gray-700">
+                Trajets archivés
+                <span class="ml-2 px-2 py-0.5 bg-gray-200 text-gray-600 rounded-full text-xs font-black">
+                  {{ archivedTrajetsList.length }}
+                </span>
+              </h4>
+            </div>
+
+            <!-- Liste des trajets archivés -->
+            <ng-container *ngIf="archivedTrajetsList.length > 0; else noTrajetArchive">
+              <div *ngFor="let transport of archivedTrajetsList"
+                class="border border-gray-200 rounded-xl p-4 bg-gray-50/80 opacity-70 hover:opacity-100 transition-all relative">
+
+                <!-- Badge archivé -->
+                <span class="absolute -top-2.5 left-4 px-2 py-0.5 bg-gray-600 text-white text-[10px] font-black rounded-full tracking-wider flex items-center gap-1">
+                  <mat-icon svgIcon="feather:archive" class="icon-size-2.5"></mat-icon>
+                  ARCHIVÉ
+                </span>
+
+                <div class="flex justify-between items-start mt-1">
+                  <!-- Infos trajet -->
+                  <div class="flex items-center gap-3 flex-1 min-w-0">
+                    <mat-icon svgIcon="feather:truck" class="text-gray-400 icon-size-6 shrink-0"></mat-icon>
+                    <div class="min-w-0">
+                      <p class="font-semibold text-gray-500 text-sm">{{ getVehicleName(transport.vehiculeId) }}</p>
+                      <div class="flex items-center gap-1 text-xs text-gray-400 mt-0.5">
+                        <mat-icon svgIcon="feather:map-pin" class="icon-size-3.5 shrink-0"></mat-icon>
+                        <span class="truncate">{{ transport.adresseDepart }} → {{ transport.adresseArrivee }}</span>
+                      </div>
+                      <div class="flex items-center gap-3 text-xs text-gray-400 mt-1">
+                        <span class="flex items-center gap-1">
+                          <mat-icon svgIcon="feather:clock" class="icon-size-3.5"></mat-icon>
+                          {{ (transport.heureDepart | slice:0:5) || '--:--' }}
+                        </span>
+                        <span class="flex items-center gap-1">
+                          <mat-icon svgIcon="feather:users" class="icon-size-3.5"></mat-icon>
+                          {{ transport.placesRestantes }}/{{ transport.placesDisponibles }} places
+                        </span>
+                        <span class="flex items-center gap-1 text-[#1D9E75] font-bold">
+                          <mat-icon svgIcon="feather:tag" class="icon-size-3.5"></mat-icon>
+                          {{ transport.prix }} DT
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Statut + Actions -->
+                  <div class="flex flex-col items-end gap-2 shrink-0 ml-3">
+                    <span class="px-2 py-0.5 text-xs rounded-full font-bold" [ngClass]="{
+                      'bg-green-100 text-green-700':  transport.statut === 'ACTIF',
+                      'bg-blue-100 text-blue-700':    transport.statut === 'EN_ROUTE',
+                      'bg-gray-200 text-gray-600':    transport.statut === 'EFFECTUE',
+                      'bg-purple-100 text-purple-700':transport.statut === 'COMPLET',
+                      'bg-orange-100 text-orange-700':transport.statut === 'INACTIF',
+                      'bg-red-100 text-red-700':      transport.statut === 'ANNULE'
+                    }">
+                      {{ transport.statut === 'ACTIF' ? 'Actif' :
+                         transport.statut === 'EFFECTUE' ? 'Effectué' :
+                         transport.statut === 'EN_ROUTE' ? 'En Cours' :
+                         transport.statut === 'COMPLET' ? 'Complet' :
+                         transport.statut === 'ANNULE' ? 'Annulé' : 'Inactif' }}
+                    </span>
+                    <button (click)="desarchiverTrajet(transport.id)"
+                      class="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-300 text-gray-600 rounded-lg text-xs font-bold hover:bg-gray-100 hover:border-gray-400 transition-all shadow-sm">
+                      <mat-icon svgIcon="feather:corner-up-left" class="icon-size-3.5"></mat-icon>
+                      Désarchiver
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Jours -->
+                <div class="flex flex-wrap gap-1 mt-3 pt-2 border-t border-gray-100">
+                  <span *ngFor="let day of (transport.joursDisponibles || '').split(',')"
+                    class="px-2 py-0.5 bg-gray-200 text-gray-500 text-xs font-semibold rounded">
+                    {{ (day + '').trim() | slice:0:3 | titlecase }}
+                  </span>
+                </div>
+              </div>
+            </ng-container>
+
+            <ng-template #noTrajetArchive>
+              <div class="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                <mat-icon svgIcon="feather:archive" class="icon-size-8 text-gray-200 mb-2"></mat-icon>
+                <p class="text-gray-400 text-sm italic font-medium">Aucun trajet archivé.</p>
+              </div>
+            </ng-template>
           </div>
 
         </div>
@@ -1637,31 +1781,29 @@
     </div>
   </div>
   <!-- TOAST -->
-<div *ngIf="toastVisible" class="fixed bottom-6 right-6 z-[99999] max-w-sm w-full">
-  <div class="rounded-2xl shadow-2xl overflow-hidden"
-    [ngClass]="{
+  <div *ngIf="toastVisible" class="fixed bottom-6 right-6 z-[99999] max-w-sm w-full">
+    <div class="rounded-2xl shadow-2xl overflow-hidden" [ngClass]="{
       'bg-[#1D9E75] border border-[#168567]': toastType === 'success',
       'bg-red-500 border border-red-600':     toastType === 'error',
       'bg-[#0F3460] border border-[#0a2442]': toastType === 'info'
     }">
-    <div class="flex items-start gap-3 p-4">
-      <div class="shrink-0 w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center text-lg">
-        {{ toastType === 'success' ? '✅' : toastType === 'error' ? '❌' : 'ℹ️' }}
+      <div class="flex items-start gap-3 p-4">
+        <div class="shrink-0 w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center text-lg">
+          {{ toastType === 'success' ? '✅' : toastType === 'error' ? '❌' : 'ℹ️' }}
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-white font-bold text-sm">{{ toastTitle }}</p>
+          <p class="text-white/80 text-xs mt-0.5 leading-relaxed">{{ toastMessage }}</p>
+        </div>
+        <button (click)="toastVisible = false"
+          class="shrink-0 text-white/60 hover:text-white w-6 h-6 flex items-center justify-center rounded-full hover:bg-white/20 transition-colors">
+          ✕
+        </button>
       </div>
-      <div class="flex-1 min-w-0">
-        <p class="text-white font-bold text-sm">{{ toastTitle }}</p>
-        <p class="text-white/80 text-xs mt-0.5 leading-relaxed">{{ toastMessage }}</p>
-      </div>
-      <button (click)="toastVisible = false"
-        class="shrink-0 text-white/60 hover:text-white w-6 h-6 flex items-center justify-center rounded-full hover:bg-white/20 transition-colors">
-        ✕
-      </button>
-    </div>
-    <div class="h-1 bg-white/20">
-      <div class="h-full bg-white/60 rounded-full"
-        style="animation: toastShrink 4s linear forwards; width: 100%">
+      <div class="h-1 bg-white/20">
+        <div class="h-full bg-white/60 rounded-full" style="animation: toastShrink 4s linear forwards; width: 100%">
+        </div>
       </div>
     </div>
   </div>
-</div>
 </div>
