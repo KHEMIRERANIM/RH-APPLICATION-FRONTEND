@@ -11,11 +11,8 @@ import {
   ChartComponent
 } from "ng-apexcharts";
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatDialog } from '@angular/material/dialog';
 import { CandidatureService } from '../services/candidature.service';
 import { OffreService } from '../services/offre.service';
-import { EntretienService } from '../services/entretien.service';
-import { AuthService } from 'app/core/auth/auth.service';
 import {
   Candidature,
   Offre,
@@ -61,8 +58,9 @@ export class PipelineComponent implements OnInit {
   // Modernization: Sort & Analytics
   columnSortMap: Record<string, 'SCORE' | 'DATE'> = {
     'NOUVEAU': 'SCORE',
-    'SCREENING': 'SCORE',
-    'ENTRETIEN': 'SCORE',
+    'EN_COURS_ANALYSE': 'SCORE',
+    'ENTRETIEN_RH': 'DATE',
+    'ENTRETIEN_TECHNIQUE': 'DATE',
     'TEST_TECHNIQUE': 'SCORE',
     'OFFRE_ENVOYEE': 'SCORE',
     'ACCEPTE': 'DATE',
@@ -82,7 +80,6 @@ export class PipelineComponent implements OnInit {
     private router: Router,
     private candidatureService: CandidatureService,
     private offreService: OffreService,
-    private authService: AuthService,
   ) {
     this.initRadarChart();
   }

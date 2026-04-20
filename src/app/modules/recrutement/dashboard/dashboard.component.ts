@@ -62,6 +62,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   loading = true;
   offres: Offre[] = [];
   tousEntretiens: Entretien[] = [];
+  totalAcceptedCandidates = 0;
+  recruitmentEfficiency = 0;
   STATUT_LABELS = STATUT_LABELS;
   private _alertInterval: any;
 
@@ -70,6 +72,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   get offresPubliees(): number { return this.offres.filter(o => o.statut === 'PUBLIEE').length; }
   get offresBrouillon(): number { return this.offres.filter(o => o.statut === 'BROUILLON').length; }
   get totalCandidatures(): number { return this.offres.reduce((a, o) => a + o.nombreCandidatures, 0); }
+  // recruitmentEfficiency is now a property updated in initCharts
 
   // Entretiens filtrés
   get entretiensAVenir(): Entretien[] {
@@ -153,8 +156,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
           const candRequests = this.offres.slice(0, 5).map(o => this.candidatureService.getCandidaturesParOffre(o.id));
           forkJoin(candRequests).subscribe(allCands => {
             const flatCands = allCands.flat();
+            this.totalAcceptedCandidates = flatCands.filter((c: any) => c.statut === 'ACCEPTE').length;
             this.generateTopCandidatsReal(flatCands);
             this.generateSmartAlertsReal(flatCands);
+            this.initCharts();
           });
         }
 
@@ -171,7 +176,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     // On agrège les données : Candidats -> Entretiens (Planifiés/Réalisés) -> Acceptés
     const statsCandidats = this.totalCandidatures;
     const statsEntretiens = this.tousEntretiens.length;
-    const statsAcceptes = this.offres.reduce((acc, o) => acc + (o.nombreCandidatures > 0 ? Math.floor(o.nombreCandidatures * 0.2) : 0), 0); // Simulation
+    const statsAcceptes = this.totalAcceptedCandidates;
 
     this.funnelChartOptions = {
       series: [
@@ -229,7 +234,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
       }
     };
 
-    // 3. RADAR CHART (Soft Skills Initial State)
+    // 3. RECRUITMENT EFFICIENCY
+    this.recruitmentEfficiency = this.totalCandidatures > 0 
+      ? Math.round((this.totalAcceptedCandidates / this.totalCandidatures) * 100) 
+      : 0;
+
+    // 4. RADAR CHART (Soft Skills Initial State)
     this.radarChartOptions = {
       series: [{ name: 'Scores', data: [0, 0, 0, 0, 0] }],
       chart: { type: 'radar', height: 280, toolbar: { show: false } },
@@ -320,7 +330,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
         c.scoreEmpathie || 90,
         c.scoreAdaptabilite || 85,
         c.scoreCommunication || 70
-      ]
+      ],
+      explanation: c.comparaisonExplication || 'Profil pertinent, poursuivre l’évaluation RH.'
     }));
   }
 

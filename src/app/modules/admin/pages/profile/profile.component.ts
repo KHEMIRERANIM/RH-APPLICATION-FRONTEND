@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
 import { UserService } from 'app/core/user/user.service';
 import { User } from 'app/core/user/user.types';
+import { CandidatureService, CvExtractResponse } from 'app/modules/recrutement/services/candidature.service';
 
 @Component({
     selector: 'profile',
@@ -20,12 +21,18 @@ export class ProfileComponent implements OnInit {
     savingProfile: boolean = false;
     savingPassword: boolean = false;
     isAdmin: boolean = false;
+    isCandidate: boolean = false;
+    extractingProfile: boolean = false;
+    selectedCvFile: File | null = null;
+    missingFields: string[] = [];
+    profileExtractionConfidence: Record<string, number> = {};
 
     constructor(
         private _userService: UserService,
         private _formBuilder: FormBuilder,
         private _http: HttpClient,
         private _toastr: ToastrService,
+        private _candidatureService: CandidatureService,
         private _cdr: ChangeDetectorRef
     ) {}
 
@@ -38,7 +45,10 @@ export class ProfileComponent implements OnInit {
             adresse: [''],
             departement: [{value: '', disabled: true}],
             poste: [{value: '', disabled: true}],
-            role: [{value: '', disabled: true}]
+            role: [{value: '', disabled: true}],
+            skills: [''],
+            languages: [''],
+            anneesExperience: ['']
         });
 
         this.passwordForm = this._formBuilder.group({
@@ -65,7 +75,9 @@ export class ProfileComponent implements OnInit {
                 if (userStr) {
                     try {
                         const localUser = JSON.parse(userStr);
-                        this.isAdmin = localUser.role === 'ADMIN' || localUser.role === 'admin';
+                        const normalizedRole = (localUser.role || '').toUpperCase();
+                        this.isAdmin = normalizedRole === 'ADMIN';
+                        this.isCandidate = normalizedRole === 'CANDIDAT';
                         if (this.isAdmin) {
                             this.profileForm.get('departement')?.enable();
                             this.profileForm.get('poste')?.enable();
@@ -99,6 +111,84 @@ export class ProfileComponent implements OnInit {
             };
             reader.readAsDataURL(file);
         }
+    }
+
+    onCvSelected(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        if (!input.files || input.files.length === 0) return;
+
+        const file = input.files[0];
+        if (file.type !== 'application/pdf') {
+            this._toastr.error('Veuillez sélectionner un CV au format PDF.');
+            return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+            this._toastr.error('CV trop volumineux. Maximum 5 Mo.');
+            return;
+        }
+
+        this.selectedCvFile = file;
+        this.extractCandidateProfileFromCv();
+    }
+
+    private extractCandidateProfileFromCv(): void {
+        if (!this.selectedCvFile) return;
+        this.extractingProfile = true;
+        this.missingFields = [];
+        this.profileExtractionConfidence = {};
+
+        this._candidatureService.extractProfileFromCv(this.selectedCvFile).subscribe({
+            next: (result: CvExtractResponse) => {
+                this.applyExtractedProfile(result);
+                this.extractingProfile = false;
+                this._toastr.success('Profil pré-rempli depuis le CV. Vérifiez et complétez les champs manquants.');
+                this._cdr.markForCheck();
+            },
+            error: () => {
+                this.extractingProfile = false;
+                this._toastr.warning('Extraction IA indisponible. Vous pouvez compléter le profil manuellement.');
+                this._cdr.markForCheck();
+            }
+        });
+    }
+
+    private applyExtractedProfile(result: CvExtractResponse): void {
+        const profile = result?.profile || {};
+        this.missingFields = result?.missingFields || [];
+        this.profileExtractionConfidence = result?.confidence || {};
+
+        const parsed = this.parseName(profile.nomComplet || '');
+        const currentNom = this.profileForm.get('nom')?.value || '';
+        const currentPrenom = this.profileForm.get('prenom')?.value || '';
+
+        this.profileForm.patchValue({
+            prenom: parsed.prenom || currentPrenom,
+            nom: parsed.nom || currentNom,
+            telephone: profile.telephone || this.profileForm.get('telephone')?.value || '',
+            adresse: profile.adresse || this.profileForm.get('adresse')?.value || '',
+            skills: (profile.skills || []).join(', '),
+            languages: (profile.languages || []).join(', '),
+            anneesExperience: profile.anneesExperience ?? ''
+        });
+    }
+
+    private parseName(fullName: string): { prenom: string; nom: string } {
+        if (!fullName || !fullName.trim()) return { prenom: '', nom: '' };
+        const parts = fullName.trim().split(/\s+/);
+        if (parts.length === 1) return { prenom: parts[0], nom: '' };
+        return {
+            prenom: parts.slice(0, -1).join(' '),
+            nom: parts[parts.length - 1]
+        };
+    }
+
+    getMissingFieldLabels(): string[] {
+        const labels: Record<string, string> = {
+            nomComplet: 'Nom complet',
+            email: 'Email',
+            telephone: 'Téléphone'
+        };
+        return this.missingFields.map((f) => labels[f] || f);
     }
 
     getPhotoBase64(): Promise<string> {

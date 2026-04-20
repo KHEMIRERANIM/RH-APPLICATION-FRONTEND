@@ -7,6 +7,20 @@ import {
   KanbanData,
 } from '../models/recrutement.models';
 
+export interface CvExtractResponse {
+  profile: {
+    nomComplet?: string;
+    email?: string;
+    telephone?: string;
+    adresse?: string;
+    anneesExperience?: number;
+    skills?: string[];
+    languages?: string[];
+  };
+  missingFields: string[];
+  confidence: Record<string, number>;
+}
+
 @Injectable({ providedIn: 'root' })
 export class CandidatureService {
 
@@ -80,6 +94,12 @@ export class CandidatureService {
     return this.http.post<any>('http://localhost:5000/chat-coach', {
       message, fullname, offreTitle, missingSkills, history, isInterviewMode, extractedSkills
     });
+  }
+
+  extractProfileFromCv(cv: File): Observable<CvExtractResponse> {
+    const formData = new FormData();
+    formData.append('cv', cv);
+    return this.http.post<CvExtractResponse>('http://localhost:5000/extract-profile', formData);
   }
 
   telechargerCoachTipsPdf(id: string, tips: string): Observable<Blob> {
