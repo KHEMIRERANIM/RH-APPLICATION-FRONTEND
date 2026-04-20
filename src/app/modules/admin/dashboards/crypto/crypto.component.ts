@@ -14,7 +14,7 @@ import { CryptoService } from 'app/modules/admin/dashboards/crypto/crypto.servic
 })
 export class CryptoComponent implements OnInit, OnDestroy
 {
-    @ViewChild('btcChartComponent') btcChartComponent: ChartComponent;
+    @ViewChild('btcChartComponent') btcChartComponent!: ChartComponent;
     appConfig: any;
     btcOptions: ApexOptions = {};
     data: any;

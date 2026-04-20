@@ -90,7 +90,12 @@ export class AuthSignInComponent implements OnInit
             .subscribe(
                 () => {
                     const user = this._authService.currentUser;
-                    const redirectURL = this._activatedRoute.snapshot.queryParamMap.get('redirectURL') || '/signed-in-redirect';
+                    let redirectURL = this._activatedRoute.snapshot.queryParamMap.get('redirectURL') || '/signed-in-redirect';
+                    
+                    if (user?.role?.toUpperCase() === 'CANDIDAT') {
+                        redirectURL = '/recrutement/offres';
+                    }
+                    
                     this._router.navigateByUrl(redirectURL);
                 },
                 () => {

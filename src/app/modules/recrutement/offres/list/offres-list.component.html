@@ -8,11 +8,6 @@
       <p class="text-secondary mt-1 text-lg font-medium">{{ offres.length }} offre(s) disponible(s)</p>
     </div>
 
-    <!-- Bouton Mes candidatures pour candidat -->
-    <button *ngIf="!isAdmin" mat-stroked-button (click)="voirMesCandidatures()">
-      <mat-icon [svgIcon]="'heroicons_outline:collection'"></mat-icon>
-      <span class="ml-2">Mes candidatures</span>
-    </button>
 
     <!-- Boutons pour admin -->
     <div *ngIf="isAdmin" class="flex gap-3">

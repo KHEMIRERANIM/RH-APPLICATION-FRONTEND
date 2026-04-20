@@ -19,11 +19,11 @@ export class CreerOffreComponent implements OnInit {
 
   typesContrat: TypeContrat[] = ['CDI', 'CDD', 'STAGE', 'ALTERNANCE', 'FREELANCE'];
   departements = ['IT', 'RH', 'Finance', 'Marketing', 'Commercial', 'Logistique', 'Direction'];
-  niveauxExp   = ['Junior (0-2 ans)', 'Confirmé (3-5 ans)', 'Senior (5+ ans)', 'Expert'];
+  niveauxExp = ['Junior (0-2 ans)', 'Confirmé (3-5 ans)', 'Senior (5+ ans)', 'Expert'];
   niveauxEtudes = ['Bac', 'Bac+2', 'Bac+3', 'Bac+5', 'Doctorat'];
 
   competences: string[] = [];
-  avantages: string[]   = [];
+  avantages: string[] = [];
   readonly separatorKeysCodes = [ENTER, COMMA];
 
   // ANTI-BIAIS RSE
@@ -36,39 +36,39 @@ export class CreerOffreComponent implements OnInit {
     private router: Router,
     private offreService: OffreService,
     private authService: AuthService,
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     // Debug — vérifie le user connecté
     console.log('USER CONNECTÉ:', this.authService.currentUser);
 
     this.form = this.fb.group({
-      titre:            ['', Validators.required],
-      description:      ['', [Validators.required, Validators.minLength(50)]],
-      departement:      ['', Validators.required],
-      localisation:     ['', Validators.required],
-      typeContrat:      ['CDI', Validators.required],
+      titre: ['', Validators.required],
+      description: ['', [Validators.required, Validators.minLength(50)]],
+      departement: ['', Validators.required],
+      localisation: ['', Validators.required],
+      typeContrat: ['CDI', Validators.required],
       niveauExperience: ['', Validators.required],
-      niveauEtudes:     ['', Validators.required],
-      salaireMin:       [null, [Validators.required, Validators.min(0)]],
-      salaireMax:       [null, [Validators.required, Validators.min(0)]],
-      nombrePostes:     [1, [Validators.required, Validators.min(1)]],
-      dateExpiration:   ['', Validators.required],
+      niveauEtudes: ['', Validators.required],
+      salaireMin: [null, [Validators.required, Validators.min(0)]],
+      salaireMax: [null, [Validators.required, Validators.min(0)]],
+      nombrePostes: [1, [Validators.required, Validators.min(1)]],
+      dateExpiration: ['', Validators.required],
     });
 
     // ÉCOUTEUR TEMPS-RÉEL RSE
     this.form.get('description')?.valueChanges.subscribe(val => this.analyzeBias(val));
   }
 
-  analyzeBias(text: string) {
-     if (!text) { 
-        this.inclusionScore = 100; 
-        this.biasedWordsFound= []; 
-        return; 
-     }
-     const lower = text.toLowerCase();
-     this.biasedWordsFound = this.BIASED_WORDS.filter(w => lower.includes(w));
-     this.inclusionScore = Math.max(0, 100 - (this.biasedWordsFound.length * 20));
+  analyzeBias(text: string): void {
+    if (!text) {
+      this.inclusionScore = 100;
+      this.biasedWordsFound = [];
+      return;
+    }
+    const lower = text.toLowerCase();
+    this.biasedWordsFound = this.BIASED_WORDS.filter(w => lower.includes(w));
+    this.inclusionScore = Math.max(0, 100 - (this.biasedWordsFound.length * 20));
   }
 
   addCompetence(event: MatChipInputEvent): void {

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { cloneDeep } from 'lodash-es';
 import { FuseNavigationItem } from '@fuse/components/navigation';
 import { FuseMockApiService } from '@fuse/lib/mock-api';
-import { compactNavigation, defaultNavigation, futuristicNavigation, horizontalNavigation } from 'app/mock-api/common/navigation/data';
+import { compactNavigation, defaultNavigation, futuristicNavigation, horizontalNavigation, candidatNavigation } from 'app/mock-api/common/navigation/data';
 
 @Injectable({
     providedIn: 'root'
@@ -34,6 +34,18 @@ export class NavigationMockApi
                         const user = JSON.parse(userStr);
                         userRole = user.role;
                     } catch (e) {}
+                }
+
+                if (userRole?.toUpperCase() === 'CANDIDAT') {
+                    return [
+                        200,
+                        {
+                            compact   : cloneDeep(candidatNavigation),
+                            default   : cloneDeep(candidatNavigation),
+                            futuristic: cloneDeep(candidatNavigation),
+                            horizontal: cloneDeep(candidatNavigation)
+                        }
+                    ];
                 }
 
                 // Filtrer : cacher section admin si pas admin

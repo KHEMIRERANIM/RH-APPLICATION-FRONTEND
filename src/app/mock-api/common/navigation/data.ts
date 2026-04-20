@@ -98,6 +98,40 @@ export const defaultNavigation: FuseNavigationItem[] = [
         ]
     }
 ];
+
+export const candidatNavigation: FuseNavigationItem[] = [
+    {
+        id      : 'espace-candidat',
+        title   : 'ESPACE CANDIDAT',
+        subtitle: 'Recrutement',
+        type    : 'group',
+        icon    : 'heroicons_outline:briefcase',
+        children: [
+            {
+                id   : 'candidat.offres',
+                title: 'Offres',
+                type : 'basic',
+                icon : 'heroicons_outline:view-boards',
+                link : '/recrutement/offres'
+            },
+            {
+                id   : 'candidat.mes-candidatures',
+                title: 'Mes candidatures',
+                type : 'basic',
+                icon : 'heroicons_outline:document-text',
+                link : '/recrutement/mes-candidatures'
+            },
+            {
+                id   : 'candidat.calendrier',
+                title: 'Mon calendrier',
+                type : 'basic',
+                icon : 'heroicons_outline:calendar',
+                link : '/recrutement/calendrier'
+            }
+        ]
+    }
+];
+
 export const _legacyNavigation: FuseNavigationItem[] = [
     {
         id      : 'pages',

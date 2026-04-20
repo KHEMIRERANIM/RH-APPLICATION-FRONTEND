@@ -12,11 +12,11 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { TranslocoModule } from '@ngneat/transloco';
-import { NgApexchartsModule } from 'ng-apexcharts';
 import { SharedModule } from 'app/shared/shared.module';
 import { ProjectComponent } from 'app/modules/admin/dashboards/project/project.component';
 import { projectRoutes } from 'app/modules/admin/dashboards/project/project.routing';
 import { MaterialModule } from 'app/material.module';
+import { NgApexchartsModule } from 'ng-apexcharts';
 
 @NgModule({
     declarations: [
@@ -35,10 +35,10 @@ import { MaterialModule } from 'app/material.module';
         MatSortModule,
         MatTableModule,
         MatTabsModule,
-        NgApexchartsModule,
         TranslocoModule,
         MaterialModule,
-        SharedModule
+        SharedModule,
+        NgApexchartsModule
     ]
 })
 export class ProjectModule
