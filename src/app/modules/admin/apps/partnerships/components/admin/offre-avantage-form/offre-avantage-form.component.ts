@@ -5,17 +5,17 @@ import { Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
 import { ToastrService } from 'ngx-toastr';
 import { PartnershipsService } from '../../../services/partnerships.service';
-import { Offre, Partenaire } from '../../../models/partnerships.models';
+import { OffreAvantage, Partenaire } from '../../../models/partnerships.models';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 
 @Component({
-    selector   : 'offre-form',
-    templateUrl: './offre-form.component.html',
-    styleUrls  : ['./offre-form.component.scss']
+    selector   : 'offre-avantage-form',
+    templateUrl: './offre-avantage-form.component.html',
+    styleUrls  : ['./offre-avantage-form.component.scss']
 })
-export class OffreFormComponent implements OnInit, OnDestroy {
+export class OffreAvantageFormComponent implements OnInit, OnDestroy {
 
     @ViewChild('fileInput') fileInput: ElementRef<HTMLInputElement>;
 
@@ -205,7 +205,7 @@ export class OffreFormComponent implements OnInit, OnDestroy {
         const ref = this._dialog.open(ConfirmDialogComponent, {
             panelClass: 'partnerships-confirm-dialog',
             data: {
-                title: this.isEdit ? "Modifier l'Offre" : 'Nouvelle Offre',
+                title: this.isEdit ? "Modifier l'OffreAvantage" : 'Nouvelle OffreAvantage',
                 message: `Êtes-vous sûr de vouloir ${action} ?`,
                 confirmLabel: this.isEdit ? 'Oui, enregistrer' : 'Oui, créer',
                 cancelLabel: 'Non, annuler',
@@ -256,7 +256,7 @@ export class OffreFormComponent implements OnInit, OnDestroy {
                 .pipe(takeUntil(this._unsub), finalize(() => this.isSaving = false))
                 .subscribe({
                     next : () => {
-                        this._toastr.success('Offre modifiée avec succès');
+                        this._toastr.success('OffreAvantage modifiée avec succès');
                         this.annuler();
                     },
                     error: err => this._toastr.error(err?.error?.message || 'Erreur modification')
@@ -266,7 +266,7 @@ export class OffreFormComponent implements OnInit, OnDestroy {
                 .pipe(takeUntil(this._unsub), finalize(() => this.isSaving = false))
                 .subscribe({
                     next : () => {
-                        this._toastr.success('Offre créée avec succès');
+                        this._toastr.success('OffreAvantage créée avec succès');
                         this.annuler();
                     },
                     error: err => this._toastr.error(err?.error?.message || 'Erreur création')

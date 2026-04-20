@@ -4,7 +4,7 @@ import { MesReservationsComponent } from './components/mes-reservations/mes-rese
 import { MesFavorisComponent } from './components/mes-favoris/mes-favoris.component';
 import { AdminDashboardComponent } from './components/admin/admin-dashboard.component';
 import { PartenaireFormComponent } from './components/admin/partenaire-form/partenaire-form.component';
-import { OffreFormComponent } from './components/admin/offre-form/offre-form.component';
+import { OffreAvantageFormComponent } from './components/admin/offre-avantage-form/offre-avantage-form.component';
 import { StatAvantageComponent } from './components/stat-avantage/stat-avantage.component';
 
 export const partnershipsRoutes: Route[] = [
@@ -36,11 +36,11 @@ export const partnershipsRoutes: Route[] = [
     // ── Offres ──
     {
         path     : 'admin/offres/nouvelle',
-        component: OffreFormComponent
+        component: OffreAvantageFormComponent
     },
     {
         path     : 'admin/offres/modifier/:id',
-        component: OffreFormComponent
+        component: OffreAvantageFormComponent
     },
     // ── Statistiques ──
     {

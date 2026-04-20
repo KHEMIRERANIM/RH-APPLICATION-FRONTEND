@@ -1,15 +1,15 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+﻿import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
 import { ToastrService } from 'ngx-toastr';
 import { PartnershipsService } from '../../services/partnerships.service';
-import { Offre, Partenaire, CategorieOffre, CATEGORIE_LABELS } from '../../models/partnerships.models';
+import { OffreAvantage, Partenaire, CategorieOffreAvantage, CATEGORIE_LABELS } from '../../models/partnerships.models';
 import { AuthService } from 'app/core/auth/auth.service';
-import { OffreDetailDialogComponent } from '../offre-detail-dialog/offre-detail-dialog.component';
+import { OffreAvantageDetailDialogComponent } from '../offre-avantage-detail-dialog/offre-avantage-detail-dialog.component';
 
-type FilterType = CategorieOffre | 'TOUS';
+type FilterType = CategorieOffreAvantage | 'TOUS';
 
 @Component({
     selector   : 'partnerships-catalogue',
@@ -18,15 +18,15 @@ type FilterType = CategorieOffre | 'TOUS';
 })
 export class CatalogueComponent implements OnInit, OnDestroy {
 
-    offres: Offre[] = [];
+    offres: OffreAvantage[] = [];
     partenaires: Partenaire[] = [];
-    filteredOffres: Offre[] = [];
+    filteredOffres: OffreAvantage[] = [];
     activeFilter: FilterType = 'TOUS';
     isLoading = true;
     isAdmin = false;
-    favoriMap: { [idOffre: string]: boolean } = {};
-    isTogglingFavori: { [idOffre: string]: boolean } = {};
-    urgenceMap: { [idOffre: string]: number } = {}; // 🤖 Map de l'IA (Taux de rupture)
+    favoriMap: { [idOffreAvantage: string]: boolean } = {};
+    isTogglingFavori: { [idOffreAvantage: string]: boolean } = {};
+    urgenceMap: { [idOffreAvantage: string]: number } = {}; // 🤖 Map de l'IA (Taux de rupture)
 
     filters: { key: FilterType; label: string; icon: string }[] = [
         { key: 'TOUS',     label: 'Toutes',    icon: 'heroicons_outline:view-grid'        },
@@ -118,7 +118,7 @@ export class CatalogueComponent implements OnInit, OnDestroy {
                 next: (favoris) => {
                     this.favoriMap = {};
                     favoris.forEach(f => {
-                        this.favoriMap[f.idOffre] = true;
+                        this.favoriMap[f.idOffreAvantage] = true;
                     });
                 },
                 error: () => console.error('Erreur lors du chargement des favoris')
@@ -142,7 +142,7 @@ export class CatalogueComponent implements OnInit, OnDestroy {
 
     // ── Actions ───────────────────────────────────────────────
 
-    toggleFavori(offre: Offre, event: Event): void {
+    toggleFavori(offre: OffreAvantage, event: Event): void {
         event.stopPropagation(); // Empêche l'ouverture de la boîte de dialogue
         
         if (!offre.id || this.isTogglingFavori[offre.id]) return;
@@ -154,7 +154,7 @@ export class CatalogueComponent implements OnInit, OnDestroy {
             this._svc.retirerFavori(offre.id).subscribe({
                 next: () => {
                     this.favoriMap[offre.id] = false;
-                    this._toastr.info('Offre retirée de vos favoris', 'Favoris');
+                    this._toastr.info('OffreAvantage retirée de vos favoris', 'Favoris');
                     this.isTogglingFavori[offre.id] = false;
                 },
                 error: () => {
@@ -166,7 +166,7 @@ export class CatalogueComponent implements OnInit, OnDestroy {
             this._svc.ajouterFavori(offre.id).subscribe({
                 next: () => {
                     this.favoriMap[offre.id] = true;
-                    this._toastr.success('Offre ajoutée à vos favoris ❤', 'Favoris');
+                    this._toastr.success('OffreAvantage ajoutée à vos favoris ❤', 'Favoris');
                     this.isTogglingFavori[offre.id] = false;
                 },
                 error: (err) => {
@@ -177,8 +177,8 @@ export class CatalogueComponent implements OnInit, OnDestroy {
         }
     }
 
-    ouvrirReservation(offre: Offre): void {
-        const dialogRef = this._dialog.open(OffreDetailDialogComponent, {
+    ouvrirReservation(offre: OffreAvantage): void {
+        const dialogRef = this._dialog.open(OffreAvantageDetailDialogComponent, {
             width    : '640px',
             maxWidth : '95vw',
             panelClass: 'partnerships-dialog',
@@ -203,20 +203,20 @@ export class CatalogueComponent implements OnInit, OnDestroy {
 
     // ── Utilitaires UI ────────────────────────────────────────
 
-    getPlacesPercent(offre: Offre): number {
+    getPlacesPercent(offre: OffreAvantage): number {
         if (!offre.nbPlacesTotal || offre.nbPlacesTotal === 0) { return 0; }
         return (offre.nbPlacesDispo / offre.nbPlacesTotal) * 100;
     }
 
-    getPlacesColor(offre: Offre): string {
+    getPlacesColor(offre: OffreAvantage): string {
         const pct = this.getPlacesPercent(offre);
         if (pct <= 20) { return 'warn'; }
         if (pct <= 50) { return 'accent'; }
         return 'primary';
     }
 
-    getCategorieBadgeClass(cat: CategorieOffre): string {
-        const map: Record<CategorieOffre, string> = {
+    getCategorieBadgeClass(cat: CategorieOffreAvantage): string {
+        const map: Record<CategorieOffreAvantage, string> = {
             VOYAGE  : 'badge-voyage',
             HOTEL   : 'badge-hotel',
             FESTIVAL: 'badge-festival'
@@ -224,8 +224,8 @@ export class CatalogueComponent implements OnInit, OnDestroy {
         return map[cat] || '';
     }
 
-    getCategorieIcon(cat: CategorieOffre): string {
-        const map: Record<CategorieOffre, string> = {
+    getCategorieIcon(cat: CategorieOffreAvantage): string {
+        const map: Record<CategorieOffreAvantage, string> = {
             VOYAGE  : 'heroicons_outline:paper-airplane',
             HOTEL   : 'heroicons_outline:office-building',
             FESTIVAL: 'heroicons_outline:music-note'
@@ -233,16 +233,16 @@ export class CatalogueComponent implements OnInit, OnDestroy {
         return map[cat] || 'heroicons_outline:tag';
     }
 
-    getEconomie(offre: Offre): number {
+    getEconomie(offre: OffreAvantage): number {
         if (offre.categorie === 'HOTEL' && offre.detailsHotel) {
             return (offre.prixReel || 0) - (offre.detailsHotel.prixAdulte || 0);
         }
         return (offre.prixReel || 0) - (offre.prixConvention || 0);
     }
 
-    getDefaultImage(cat: CategorieOffre): string {
+    getDefaultImage(cat: CategorieOffreAvantage): string {
         // SVG data URI inline par catégorie (fallback si pas d'image)
-        const gradients: Record<CategorieOffre, string> = {
+        const gradients: Record<CategorieOffreAvantage, string> = {
             VOYAGE  : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
             HOTEL   : 'linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%)',
             FESTIVAL: 'linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)'
@@ -250,8 +250,8 @@ export class CatalogueComponent implements OnInit, OnDestroy {
         return '';
     }
 
-    getCardGradient(cat: CategorieOffre): string {
-        const map: Record<CategorieOffre, string> = {
+    getCardGradient(cat: CategorieOffreAvantage): string {
+        const map: Record<CategorieOffreAvantage, string> = {
             VOYAGE  : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
             HOTEL   : 'linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%)',
             FESTIVAL: 'linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)'
@@ -266,3 +266,4 @@ export class CatalogueComponent implements OnInit, OnDestroy {
         return this.offres.filter(o => o.categorie === filter).length;
     }
 }
+

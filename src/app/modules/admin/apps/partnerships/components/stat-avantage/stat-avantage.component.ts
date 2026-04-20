@@ -103,7 +103,7 @@ export class StatAvantageComponent implements OnInit {
     // 3. Top 5 Offres
     this.partnershipsService.getTopOffres().subscribe(data => {
       this.barChartData = {
-        labels: data.map(d => d.titreOffre || 'Non défini'),
+        labels: data.map(d => d.titreOffreAvantage || 'Non défini'),
         datasets: [{
           data: data.map(d => d.count),
           label: 'Réservations',

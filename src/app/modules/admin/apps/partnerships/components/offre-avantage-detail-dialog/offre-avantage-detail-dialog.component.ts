@@ -3,21 +3,21 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
 import { PartnershipsService } from '../../services/partnerships.service';
-import { Offre, CATEGORIE_ICONS } from '../../models/partnerships.models';
+import { OffreAvantage, CATEGORIE_ICONS } from '../../models/partnerships.models';
 
 export interface OffreDetailDialogData {
-    offre: Offre;
+    offre: OffreAvantage;
 }
 
 @Component({
-    selector   : 'offre-detail-dialog',
-    templateUrl: './offre-detail-dialog.component.html',
-    styleUrls  : ['./offre-detail-dialog.component.scss']
+    selector   : 'offre-avantage-detail-dialog',
+    templateUrl: './offre-avantage-detail-dialog.component.html',
+    styleUrls  : ['./offre-avantage-detail-dialog.component.scss']
 })
-export class OffreDetailDialogComponent implements OnInit {
+export class OffreAvantageDetailDialogComponent implements OnInit {
 
     form: FormGroup;
-    offre: Offre;
+    offre: OffreAvantage;
     isLoading = false;
     prixTotal  = 0;
     nuitsH = 0;
@@ -29,7 +29,7 @@ export class OffreDetailDialogComponent implements OnInit {
         private _fb      : FormBuilder,
         private _svc     : PartnershipsService,
         private _toastr  : ToastrService,
-        private _dialogRef: MatDialogRef<OffreDetailDialogComponent>,
+        private _dialogRef: MatDialogRef<OffreAvantageDetailDialogComponent>,
         @Inject(MAT_DIALOG_DATA) public data: OffreDetailDialogData
     ) {
         this.offre = data.offre;

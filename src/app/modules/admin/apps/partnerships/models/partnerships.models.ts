@@ -1,8 +1,8 @@
-// ============================================================
+﻿// ============================================================
 // Module Mutuelle & Avantages Sociaux — Modèles TypeScript
 // ============================================================
 
-export type CategorieOffre = 'VOYAGE' | 'HOTEL' | 'FESTIVAL';
+export type CategorieOffreAvantage = 'VOYAGE' | 'HOTEL' | 'FESTIVAL';
 export type StatutReservation = 'CONFIRMEE' | 'ANNULEE';
 export type StatutOffre = 'ACTIVE' | 'INACTIVE';
 export type FormulePension = 'PD' | 'DP' | 'PC';
@@ -24,7 +24,7 @@ export interface DetailsHotel {
 export interface Partenaire {
     id?: string;
     nom: string;
-    type: CategorieOffre;
+    type: CategorieOffreAvantage;
     logoUrl?: string;
     emailContact?: string;
     dateConvention?: string; // ISO date string (LocalDate)
@@ -34,21 +34,21 @@ export interface Partenaire {
 
 export interface CreatePartenaireRequest {
     nom: string;
-    type: CategorieOffre;
+    type: CategorieOffreAvantage;
     logoUrl?: string;
     emailContact?: string;
     dateConvention?: string;
 }
 
 // ─────────────────────────────────────────
-// Offre
+// OffreAvantage
 // ─────────────────────────────────────────
-export interface Offre {
+export interface OffreAvantage {
     id?: string;
     idPartenaire: string;
     titre: string;
     description?: string;
-    categorie: CategorieOffre;
+    categorie: CategorieOffreAvantage;
     prixReel: number;
     prixConvention?: number; // Optionnel pour les hôtels
 
@@ -70,7 +70,7 @@ export interface CreateOffreRequest {
     idPartenaire: string;
     titre: string;
     description?: string;
-    categorie: CategorieOffre;
+    categorie: CategorieOffreAvantage;
     prixReel: number;
     prixConvention?: number;
 
@@ -89,7 +89,7 @@ export interface CreateOffreRequest {
 export interface AvantageReservation {
     id?: string;
     idUser: string;
-    idOffre: string;
+    idOffreAvantage: string;
     nbPersonnes: number;
     prixUnitaire: number;
     prixTotal: number;
@@ -101,7 +101,7 @@ export interface AvantageReservation {
     formule?: string;
     checkIn?: string;
     checkOut?: string;
-    titreOffre?: string;
+    titreOffreAvantage?: string;
     nomUser?: string;
 }
 
@@ -113,29 +113,29 @@ export interface AvantageReservation {
 export interface Wishlist {
     id?: string;
     idUser: string;
-    idOffre: string;
+    idOffreAvantage: string;
     dateAjout?: string;
     dernierPrixConnu?: number;
 }
 
 export interface OffreFiltres {
-    categorie: CategorieOffre | 'TOUS';
+    categorie: CategorieOffreAvantage | 'TOUS';
 }
 
-export const CATEGORIE_LABELS: Record<CategorieOffre | 'TOUS', string> = {
+export const CATEGORIE_LABELS: Record<CategorieOffreAvantage | 'TOUS', string> = {
     TOUS: 'Toutes les offres',
     VOYAGE: 'Voyages',
     HOTEL: 'Hôtels',
     FESTIVAL: 'Festivals'
 };
 
-export const CATEGORIE_ICONS: Record<CategorieOffre, string> = {
+export const CATEGORIE_ICONS: Record<CategorieOffreAvantage, string> = {
     VOYAGE: 'heroicons_outline:paper-airplane',
     HOTEL: 'heroicons_outline:office-building',
     FESTIVAL: 'heroicons_outline:music-note'
 };
 
-export const CATEGORIE_COLORS: Record<CategorieOffre, string> = {
+export const CATEGORIE_COLORS: Record<CategorieOffreAvantage, string> = {
     VOYAGE: '#6366f1',
     HOTEL: '#0ea5e9',
     FESTIVAL: '#f59e0b'
@@ -159,8 +159,8 @@ export interface StatCategorie {
 }
 
 export interface StatTopOffre {
-    idOffre: string;
-    titreOffre: string;
+    idOffreAvantage: string;
+    titreOffreAvantage: string;
     count: number;
 }
 
@@ -174,3 +174,5 @@ export interface StatStatut {
     count: number;
     pourcentage: number;
 }
+
+

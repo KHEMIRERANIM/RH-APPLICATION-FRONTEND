@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
+﻿import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
@@ -7,7 +7,7 @@ import { Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
 import { ToastrService } from 'ngx-toastr';
 import { PartnershipsService } from '../../services/partnerships.service';
-import { Partenaire, Offre, AvantageReservation } from '../../models/partnerships.models';
+import { Partenaire, OffreAvantage, AvantageReservation } from '../../models/partnerships.models';
 
 @Component({
     selector: 'admin-dashboard',
@@ -22,8 +22,8 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     loadingP = true;
 
     // ── Offres ───────────────────────────────────────────
-    offresDS = new MatTableDataSource<Offre>();
-    offres: Offre[] = [];
+    offresDS = new MatTableDataSource<OffreAvantage>();
+    offres: OffreAvantage[] = [];
     partenaires: Partenaire[] = [];
     offresCols = ['titre', 'categorie', 'partenaire', 'prixConvention', 'nbPlacesDispo', 'statut', 'actions'];
     loadingO = true;
@@ -153,21 +153,21 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
             .pipe(takeUntil(this._unsub), finalize(() => delete this.deletingO[id]))
             .subscribe({
                 next: () => {
-                    this._toastr.success('Offre supprimée');
+                    this._toastr.success('OffreAvantage supprimée');
                     this._loadOffres();
                 },
                 error: () => this._toastr.error('Erreur lors de la suppression')
             });
     }
 
-    toggleOffre(offre: Offre): void {
+    toggleOffre(offre: OffreAvantage): void {
         this._svc.toggleStatutOffre(offre.id!)
             .pipe(takeUntil(this._unsub))
             .subscribe({
                 next: (updated) => {
                     const i = this.offres.findIndex(o => o.id === updated.id);
                     if (i !== -1) { this.offres[i] = updated; this.offresDS.data = [...this.offres]; }
-                    this._toastr.success(updated.statut === 'ACTIVE' ? 'Offre activée' : 'Offre désactivée');
+                    this._toastr.success(updated.statut === 'ACTIVE' ? 'OffreAvantage activée' : 'OffreAvantage désactivée');
                 },
                 error: () => this._toastr.error('Erreur mise à jour statut')
             });
@@ -212,9 +212,9 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
                     // Enrichir avec titre de l'offre et nom de l'utilisateur
                     data.forEach(r => {
                         // Titre de l'offre
-                        if (r.idOffre) {
-                            const o = this.offres.find(x => x.id === r.idOffre);
-                            if (o) r.titreOffre = o.titre;
+                        if (r.idOffreAvantage) {
+                            const o = this.offres.find(x => x.id === r.idOffreAvantage);
+                            if (o) r.titreOffreAvantage = o.titre;
                         }
                         // Nom de l'utilisateur
                         if (r.idUser) {
@@ -244,3 +244,5 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
         this._router.navigate(['/apps/partnerships']);
     }
 }
+
+

@@ -1,4 +1,4 @@
-<div class="reservations-page">
+﻿<div class="reservations-page">
 
     <!-- ═══════════════════════════════════════════════════════
          HERO HEADER
@@ -115,7 +115,7 @@
                 <div class="card-header-row">
                     <div class="offer-name">
                         <mat-icon svgIcon="heroicons_mini:tag" class="offer-icon"></mat-icon>
-                        <span>{{ r.titreOffre || ('Offre #' + r.idOffre?.slice(-6)) }}</span>
+                        <span>{{ r.titreOffreAvantage || ('OffreAvantage #' + r.idOffreAvantage?.slice(-6)) }}</span>
                     </div>
                     <span class="status-badge"
                         [class.badge-confirmee]="r.statut === 'CONFIRMEE'"
@@ -181,3 +181,4 @@
 
     </div>
 </div>
+

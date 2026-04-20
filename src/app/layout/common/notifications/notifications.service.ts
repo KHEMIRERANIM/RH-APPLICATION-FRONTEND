@@ -42,7 +42,7 @@ export class NotificationsService
                     id: bn.id,
                     icon: bn.type === 'PLACES_LIBEREES' ? 'heroicons_solid:ticket' : 
                           bn.type === 'PRIX_BAISSE' ? 'heroicons_solid:currency-dollar' : 'heroicons_solid:clock',
-                    title: bn.titreOffre,
+                    title: bn.titreOffreAvantage,
                     description: bn.message,
                     time: bn.dateCreation,
                     read: bn.lu,
@@ -79,7 +79,19 @@ export class NotificationsService
 
     delete(id: string): Observable<boolean>
     {
-        return this.notifications$.pipe(take(1), map(() => true));
+        return this.notifications$.pipe(
+            take(1),
+            switchMap(notifications => this._httpClient.delete<void>(`http://localhost:8081/api/notifications/${id}`).pipe(
+                map(() => {
+                    const index = notifications.findIndex(item => item.id === id);
+                    if (index > -1) {
+                        notifications.splice(index, 1);
+                        this._notifications.next(notifications);
+                    }
+                    return true;
+                })
+            ))
+        );
     }
 
     markAllAsRead(): Observable<boolean>

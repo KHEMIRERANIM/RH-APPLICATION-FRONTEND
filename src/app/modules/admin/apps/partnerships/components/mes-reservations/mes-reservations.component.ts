@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+﻿import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
@@ -53,12 +53,12 @@ export class MesReservationsComponent implements OnInit, OnDestroy {
 
     private _enrichirOffres(): void {
         this.reservations.forEach(r => {
-            if (r.idOffre && !r.titreOffre) {
-                this._svc.getOffreById(r.idOffre)
+            if (r.idOffreAvantage && !r.titreOffreAvantage) {
+                this._svc.getOffreById(r.idOffreAvantage)
                     .pipe(takeUntil(this._unsub))
                     .subscribe({
-                        next : (o) => { r.titreOffre = o.titre; },
-                        error: ()  => { r.titreOffre = 'Offre'; }
+                        next : (o) => { r.titreOffreAvantage = o.titre; },
+                        error: ()  => { r.titreOffreAvantage = 'OffreAvantage'; }
                     });
             }
         });
@@ -122,3 +122,5 @@ export class MesReservationsComponent implements OnInit, OnDestroy {
             .reduce((acc, r) => acc + (r.prixTotal || 0), 0);
     }
 }
+
+
