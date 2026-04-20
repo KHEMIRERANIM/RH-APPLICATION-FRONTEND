@@ -1,149 +1,165 @@
-<div class="flex flex-col flex-auto min-w-0">
+<div class="flex flex-col flex-auto min-w-0 bg-[#F8FAFC]">
 
-  <!-- Header -->
-  <div class="flex flex-col sm:flex-row items-start sm:items-center p-6 sm:p-10 pb-6 gap-4">
-    
-    <div class="flex-auto">
-      <h2 class="text-4xl font-extrabold tracking-tight leading-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-indigo-700">Offres d'emploi</h2>
-      <p class="text-secondary mt-1 text-lg font-medium">{{ offres.length }} offre(s) disponible(s)</p>
+  <div class="relative flex flex-col sm:flex-row items-start sm:items-center p-8 sm:p-16 pb-12 gap-8 overflow-hidden">
+    <div
+      class="absolute top-0 right-0 -mt-24 -mr-24 w-96 h-96 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full blur-3xl opacity-40">
     </div>
 
+    <div class="flex-auto relative">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 mb-4">
+        <span class="flex h-2 w-2 rounded-full bg-blue-600 animate-pulse"></span>
+        <span class="text-blue-700 font-bold uppercase tracking-widest text-[10px]">
+          {{ isAdmin ? 'Gestion du Recrutement' : 'Opportunités Tech en direct' }}
+        </span>
+      </div>
 
-    <!-- Boutons pour admin -->
-    <div *ngIf="isAdmin" class="flex gap-3">
-      <button mat-stroked-button class="rounded-full shadow-sm hover:bg-gray-50 transition-colors" (click)="allerAuDashboard()">
-        <mat-icon [svgIcon]="'heroicons_outline:chart-bar'"></mat-icon>
-        <span class="ml-2 font-medium">Dashboard</span>
+      <h2 class="text-5xl md:text-6xl font-black tracking-tighter leading-tight text-slate-900">
+        <span *ngIf="!isAdmin">Propulsez votre <span
+            class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">carrière IT</span></span>
+        <span *ngIf="isAdmin">Pilotez vos <span
+            class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-600">offres
+            actives</span></span>
+      </h2>
+
+      <p class="text-slate-500 mt-4 text-xl max-w-2xl font-medium">
+        <span *ngIf="!isAdmin">{{ offres.length }} postes sélectionnés pour leur excellence technique.</span>
+        <span *ngIf="isAdmin">Vous gérez actuellement {{ offres.length }} annonces sur la plateforme.</span>
+      </p>
+    </div>
+
+    <div *ngIf="isAdmin" class="flex gap-4 relative">
+      <button mat-flat-button
+        class="bg-white text-slate-700 rounded-2xl shadow-sm border border-slate-200 hover:bg-slate-50 transition-all h-14 px-8"
+        (click)="allerAuDashboard()">
+        <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:chart-bar'"></mat-icon>
+        <span class="ml-2 font-bold">Analytics</span>
       </button>
-      <button mat-flat-button class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 px-6" (click)="creerOffre()">
-        <mat-icon [svgIcon]="'heroicons_outline:plus'" class="text-white"></mat-icon>
-        <span class="ml-2 font-semibold text-white">Créer une offre</span>
+      <button mat-flat-button
+        class="bg-slate-900 text-white rounded-2xl shadow-xl shadow-blue-200 hover:scale-105 transition-all h-14 px-8"
+        (click)="creerOffre()">
+        <mat-icon class="icon-size-5 text-white" [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+        <span class="ml-2 font-bold">Nouvelle Offre</span>
       </button>
     </div>
-
   </div>
 
-  <!-- Filtres -->
-  <div class="flex flex-wrap gap-4 px-6 sm:px-10 pb-6 items-center">
-    <mat-form-field class="fuse-mat-dense flex-1 min-w-48" [subscriptSizing]="'dynamic'">
-      <mat-icon matPrefix [svgIcon]="'heroicons_solid:magnifying-glass'" class="icon-size-4"></mat-icon>
-      <input matInput [formControl]="searchCtrl" placeholder="Rechercher un poste...">
-    </mat-form-field>
+  <div class="sticky top-0 z-20 px-8 sm:px-16 py-4 bg-[#F8FAFC]/80 backdrop-blur-lg">
+    <div
+      class="flex flex-wrap gap-4 p-3 bg-white/90 border border-slate-200 shadow-2xl shadow-slate-200/40 rounded-[2rem] items-center">
 
-    <mat-form-field class="fuse-mat-dense w-40" [subscriptSizing]="'dynamic'">
-      <mat-select [formControl]="departementCtrl" placeholder="Département" (selectionChange)="applyFilters()">
-        <mat-option value="">Tous</mat-option>
-        <mat-option *ngFor="let d of departements" [value]="d">{{ d }}</mat-option>
-      </mat-select>
-    </mat-form-field>
+      <div
+        class="flex items-center flex-1 min-w-[280px] px-5 py-3 bg-slate-50/50 rounded-2xl border border-transparent focus-within:border-blue-400 focus-within:bg-white transition-all">
+        <mat-icon matPrefix [svgIcon]="'heroicons_solid:magnifying-glass'"
+          class="icon-size-5 text-slate-400"></mat-icon>
+        <input
+          class="ml-3 bg-transparent border-none outline-none w-full text-slate-700 font-semibold placeholder:text-slate-400"
+          [formControl]="searchCtrl" placeholder="Rechercher un métier, une stack technique...">
+      </div>
 
-    <mat-form-field class="fuse-mat-dense w-40" [subscriptSizing]="'dynamic'">
-      <mat-select [formControl]="typeContratCtrl" placeholder="Contrat" (selectionChange)="applyFilters()">
-        <mat-option value="">Tous</mat-option>
-        <mat-option *ngFor="let t of typesContrat" [value]="t">{{ t }}</mat-option>
-      </mat-select>
-    </mat-form-field>
+      <div class="h-10 w-[1px] bg-slate-200 hidden lg:block"></div>
 
-    <button mat-stroked-button (click)="resetFilters()" class="h-10">
-      <mat-icon [svgIcon]="'heroicons_outline:x-mark'" class="icon-size-4 mr-1"></mat-icon>
-      Réinitialiser
-    </button>
-  </div>
+      <mat-form-field class="fuse-mat-dense w-52" [subscriptSizing]="'dynamic'">
+        <mat-select [formControl]="departementCtrl" placeholder="Département" (selectionChange)="applyFilters()">
+          <mat-option value="">Tous les secteurs</mat-option>
+          <mat-option *ngFor="let d of departements" [value]="d">{{ d }}</mat-option>
+        </mat-select>
+      </mat-form-field>
 
-  <!-- Loading -->
-  <div *ngIf="loading" class="flex items-center justify-center h-64">
-    <mat-progress-spinner [diameter]="40" [mode]="'indeterminate'"></mat-progress-spinner>
-  </div>
-
-  <!-- Empty -->
-  <div *ngIf="!loading && offres.length === 0"
-    class="flex flex-col items-center justify-center p-12 mx-6 sm:mx-10 gap-4 bg-white/50 backdrop-blur rounded-3xl border border-dashed shadow-sm">
-    <div class="p-4 bg-gray-100 rounded-full">
-      <mat-icon class="icon-size-12 text-gray-400" [svgIcon]="'heroicons_outline:briefcase'"></mat-icon>
+      <button mat-flat-button (click)="resetFilters()"
+        class="text-slate-400 hover:text-red-500 rounded-2xl px-6 transition-all font-bold">
+        Réinitialiser
+      </button>
     </div>
-    <p class="text-xl font-medium text-secondary">Aucune offre disponible pour le moment.</p>
   </div>
 
-  <!-- Grille -->
   <div *ngIf="!loading && offres.length > 0"
-    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-6 sm:p-10 pt-0">
+    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-10 p-8 sm:p-16 pt-10">
 
     <div *ngFor="let offre of offres"
-      class="flex flex-col bg-white rounded-3xl shadow-lg ring-1 ring-black/5 overflow-hidden cursor-pointer hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 group"
+      class="group relative flex flex-col bg-white rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-blue-200/40 transition-all duration-500 cursor-pointer overflow-hidden"
       (click)="voirDetail(offre)">
 
-      <div class="h-2 w-full bg-gradient-to-r from-blue-500 to-indigo-600 opacity-80 group-hover:opacity-100 transition-opacity"></div>
+      <div class="relative h-48 w-full overflow-hidden">
+        <div
+          class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+        </div>
+        <img [src]="'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=600&auto=format&fit=crop'"
+          alt="Tech Workspace"
+          class="h-full w-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-in-out">
 
-      <div class="flex flex-col flex-auto p-6 gap-3">
-
-        <div class="flex items-center gap-2">
-          <span class="px-2.5 py-0.5 rounded-full text-xs font-medium"
-            [ngClass]="badgeContrat(offre.typeContrat)">
+        <div class="absolute bottom-4 left-6 z-20">
+          <span
+            class="px-4 py-1.5 rounded-xl bg-white/90 backdrop-blur text-blue-700 text-[11px] font-black uppercase tracking-widest shadow-lg">
             {{ offre.typeContrat }}
           </span>
-          <span class="text-xs text-secondary font-medium">{{ offre.departement }}</span>
+        </div>
+      </div>
+
+      <div class="flex flex-col flex-auto p-8">
+
+        <div class="flex items-center justify-between mb-4">
+          <span class="text-blue-600 font-bold text-[10px] uppercase tracking-widest bg-blue-50 px-2 py-1 rounded-md">{{
+            offre.departement }}</span>
+          <div
+            class="p-3 bg-slate-50 rounded-2xl border border-slate-100 group-hover:bg-blue-600 group-hover:text-white transition-all duration-500 group-hover:scale-110">
+            <mat-icon [svgIcon]="'heroicons_outline:briefcase'"></mat-icon>
+          </div>
         </div>
 
-        <h3 class="text-lg font-semibold leading-tight line-clamp-2">
+        <h3
+          class="text-2xl font-bold text-slate-800 leading-snug group-hover:text-blue-600 transition-colors line-clamp-2 mb-8 min-h-[4rem]">
           {{ offre.titre }}
         </h3>
 
-        <div class="flex flex-col gap-1.5 text-sm text-secondary">
-          <div class="flex items-center gap-1.5">
-            <mat-icon class="icon-size-4 text-hint" [svgIcon]="'heroicons_outline:map-pin'"></mat-icon>
-            {{ offre.localisation }}
+        <div class="grid grid-cols-2 gap-4 mb-8">
+          <div class="flex flex-col gap-1">
+            <span class="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Salaire (TND)</span>
+            <span class="text-sm font-bold text-slate-700 flex items-center gap-1.5">
+              <mat-icon class="icon-size-4 text-emerald-500" [svgIcon]="'heroicons_outline:banknotes'"></mat-icon>
+              {{ offre.salaireMin | number:'1.0-0' }}k - {{ offre.salaireMax | number:'1.0-0' }}k
+            </span>
           </div>
-          <div class="flex items-center gap-1.5">
-            <mat-icon class="icon-size-4 text-hint" [svgIcon]="'heroicons_outline:banknotes'"></mat-icon>
-            {{ offre.salaireMin | number }} – {{ offre.salaireMax | number }} TND
-          </div>
-          <div class="flex items-center gap-1.5">
-            <mat-icon class="icon-size-4 text-hint" [svgIcon]="'heroicons_outline:user-group'"></mat-icon>
-            {{ offre.nombreCandidatures }} candidature(s)
+          <div class="flex flex-col gap-1">
+            <span class="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Candidatures</span>
+            <span class="text-sm font-bold text-slate-700 flex items-center gap-1.5">
+              <mat-icon class="icon-size-4 text-orange-400" [svgIcon]="'heroicons_outline:user-group'"></mat-icon>
+              {{ offre.nombreCandidatures }}
+            </span>
           </div>
         </div>
 
-        <div class="flex flex-wrap gap-1.5 mt-1">
+        <div class="flex flex-wrap gap-2 mb-10">
           <span *ngFor="let comp of offre.competencesRequises | slice:0:3"
-            class="px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-700">
+            class="px-4 py-1.5 rounded-xl text-[11px] font-bold bg-slate-50 border border-slate-100 text-slate-500 group-hover:border-blue-200 group-hover:text-blue-600 group-hover:bg-blue-50/30 transition-all">
             {{ comp }}
           </span>
-          <span *ngIf="offre.competencesRequises?.length > 3"
-            class="px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-500">
-            +{{ offre.competencesRequises.length - 3 }}
-          </span>
         </div>
 
-        <div class="flex items-center gap-3 mt-auto pt-5 border-t">
+        <div class="flex items-center gap-4 mt-auto pt-6 border-t border-slate-50">
 
           <ng-container *ngIf="!isAdmin">
-            <button mat-flat-button class="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full hover:shadow-md transition-all font-semibold"
+            <button mat-flat-button
+              class="flex-1 bg-slate-900 text-white rounded-2xl h-14 hover:bg-blue-600 transition-all font-bold text-base shadow-xl shadow-slate-200 group-hover:shadow-blue-300/50"
               (click)="postuler(offre); $event.stopPropagation()">
               Postuler
-            </button>
-
-            <button mat-stroked-button class="rounded-full shadow-sm hover:bg-gray-50 transition-colors"
-              (click)="voirDetail(offre); $event.stopPropagation()">
-              Détails
             </button>
           </ng-container>
 
           <ng-container *ngIf="isAdmin">
-            <button mat-stroked-button class="flex-1 rounded-full shadow-sm hover:bg-gray-50 transition-colors"
+            <button mat-flat-button
+              class="flex-1 bg-blue-50 text-blue-700 rounded-2xl h-14 hover:bg-blue-100 transition-all font-bold"
               (click)="voirPipeline(offre); $event.stopPropagation()">
-              <mat-icon [svgIcon]="'heroicons_outline:view-columns'" class="icon-size-4 mr-1 text-blue-600"></mat-icon>
-              Pipeline
-            </button>
-
-            <button *ngIf="offre.statut === 'BROUILLON'" mat-flat-button class="bg-green-500 text-white rounded-full hover:bg-green-600 hover:shadow-md transition-all font-semibold"
-              (click)="publier(offre, $event)">
-              Publier
+              Voir la Pipeline
             </button>
           </ng-container>
 
+          <button mat-icon-button
+            class="w-14 h-14 rounded-2xl bg-slate-50 text-slate-400 hover:text-blue-600 hover:bg-white border border-transparent hover:border-blue-100 transition-all"
+            (click)="voirDetail(offre); $event.stopPropagation()">
+            <mat-icon [svgIcon]="'heroicons_outline:arrow-right'"></mat-icon>
+          </button>
         </div>
       </div>
     </div>
   </div>
-
 </div>
