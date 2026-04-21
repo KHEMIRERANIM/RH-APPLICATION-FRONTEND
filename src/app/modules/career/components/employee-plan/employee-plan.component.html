@@ -52,6 +52,7 @@
                     : (plan.scoreGlobal ?? 0) >= 40 ? '#d97706' : '#dc2626')">
       </div>
     </div>
+
     <!-- Tabs -->
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
       <button *ngFor="let t of tabs"
@@ -62,6 +63,7 @@
         {{ t.label }}
       </button>
     </div>
+
     <!-- ═══ TAB : Poste cible ═══ -->
     <div *ngIf="activeTab === 'poste'"
          style="background:white;border-radius:16px;padding:24px;
@@ -86,6 +88,7 @@
           </select>
         </div>
       </div>
+
       <div *ngIf="plan.gap?.length">
         <p style="font-size:13px;font-weight:700;color:#374151;margin:0 0 10px;">Gap de compétences</p>
         <div style="display:flex;flex-direction:column;gap:8px;">
@@ -101,6 +104,7 @@
           </div>
         </div>
       </div>
+
       <div *ngIf="plan.formationsRecommandees?.length">
         <p style="font-size:13px;font-weight:700;color:#374151;margin:0 0 8px;">
           💡 Formations recommandées par RH
@@ -111,12 +115,14 @@
                        border-radius:9999px;font-size:12px;font-weight:600;">{{ f }}</span>
         </div>
       </div>
+
       <div *ngIf="plan.commentaireAdmin"
            style="background:#f9fafb;border-radius:8px;padding:12px;border-left:3px solid #7c3aed;">
         <p style="font-size:12px;color:#6b7280;margin:0;">
           💬 <strong>RH :</strong> {{ plan.commentaireAdmin }}
         </p>
       </div>
+
       <button (click)="savePoste()"
               style="padding:10px 20px;border-radius:8px;border:none;background:#7c3aed;
                      color:white;cursor:pointer;font-size:14px;font-weight:600;
@@ -124,6 +130,7 @@
         Enregistrer
       </button>
     </div>
+
     <!-- ═══ TAB : Mes compétences ═══ -->
     <div *ngIf="activeTab === 'competences'"
          style="background:white;border-radius:16px;padding:24px;
@@ -150,10 +157,12 @@
           + Ajouter
         </button>
       </div>
+
       <div *ngIf="!plan.competencesActuelles?.length"
            style="text-align:center;padding:24px;color:#9ca3af;font-size:14px;">
         Aucune compétence déclarée
       </div>
+
       <div style="display:flex;flex-direction:column;gap:8px;">
         <div *ngFor="let c of plan.competencesActuelles; let i = index"
              style="display:flex;align-items:center;gap:10px;padding:10px 14px;
@@ -170,6 +179,7 @@
                   style="background:none;border:none;cursor:pointer;color:#dc2626;font-size:14px;">✕</button>
         </div>
       </div>
+
       <button (click)="saveCompetences()"
               style="padding:10px 20px;border-radius:8px;border:none;background:#7c3aed;
                      color:white;cursor:pointer;font-size:14px;font-weight:600;
@@ -177,6 +187,7 @@
         Enregistrer mes compétences
       </button>
     </div>
+
     <!-- ═══ TAB : Certifs Techniques ═══ -->
     <div *ngIf="activeTab === 'tech'"
          style="background:white;border-radius:16px;padding:24px;
@@ -191,7 +202,7 @@
           {{ showAddTech ? '✕ Annuler' : '+ Ajouter une certif' }}
         </button>
       </div>
-      <!-- Formulaire ajout technique -->
+
       <div *ngIf="showAddTech"
            style="background:#f9fafb;border-radius:12px;padding:16px;
                   border:1px solid #e5e7eb;display:flex;flex-direction:column;gap:12px;">
@@ -222,7 +233,7 @@
                           font-size:13px;font-family:inherit;outline:none;" />
           </div>
         </div>
-        <!-- Upload dans le formulaire d'ajout -->
+
         <div style="display:flex;flex-direction:column;gap:6px;">
           <label style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">
             Certificat (PDF, image) — optionnel
@@ -244,6 +255,7 @@
             <span *ngIf="!newCertifFileName" style="font-size:12px;color:#9ca3af;">Aucun fichier sélectionné</span>
           </div>
         </div>
+
         <button (click)="addExtraCertif('TECHNIQUE')"
                 style="padding:8px 20px;border-radius:8px;border:none;background:#7c3aed;
                        color:white;cursor:pointer;font-size:13px;font-weight:600;
@@ -251,11 +263,12 @@
           ✓ Confirmer
         </button>
       </div>
+
       <div *ngIf="!certifsTech.length && !showAddTech"
            style="text-align:center;padding:24px;color:#9ca3af;font-size:14px;">
         Aucune certification technique — cliquez "+ Ajouter une certif"
       </div>
-      <!-- Liste certifs techniques -->
+
       <div *ngFor="let c of certifsTech"
            style="border:1px solid #e5e7eb;border-radius:12px;padding:16px;
                   display:flex;flex-direction:column;gap:12px;">
@@ -274,6 +287,7 @@
             {{ statusLabel(c.statut) }}
           </span>
         </div>
+
         <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
           <div style="display:flex;flex-direction:column;gap:6px;">
             <label style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Statut</label>
@@ -302,7 +316,7 @@
                           font-size:13px;font-family:inherit;outline:none;" />
           </div>
         </div>
-        <!-- Upload fichier — disponible dès que statut = OBTENU -->
+
         <div *ngIf="c.statut === 'OBTENU'" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
           <span *ngIf="c.fichierNom"
                 style="font-size:12px;color:#16a34a;font-weight:600;">📎 {{ c.fichierNom }}</span>
@@ -316,15 +330,18 @@
                    (change)="uploadCertifFile($event, c)" style="display:none;" />
           </label>
         </div>
+
         <a *ngIf="c.organismeUrl" [href]="c.organismeUrl" target="_blank"
            style="font-size:12px;color:#7c3aed;text-decoration:none;">
           Voir l'organisme →
         </a>
+
         <div *ngIf="c.commentaireAdmin"
              style="font-size:12px;color:#6b7280;background:#f9fafb;
                     padding:8px 12px;border-radius:6px;border-left:3px solid #7c3aed;">
           💬 Admin : {{ c.commentaireAdmin }}
         </div>
+
         <button (click)="saveCertif(c)"
                 style="padding:6px 14px;border-radius:8px;border:none;background:#7c3aed;
                        color:white;cursor:pointer;font-size:12px;font-weight:600;
@@ -333,6 +350,7 @@
         </button>
       </div>
     </div>
+
     <!-- ═══ TAB : Soft Skills ═══ -->
     <div *ngIf="activeTab === 'soft'"
          style="background:white;border-radius:16px;padding:24px;
@@ -349,7 +367,7 @@
           {{ showAddSoft ? '✕ Annuler' : '+ Ajouter une certif' }}
         </button>
       </div>
-      <!-- Formulaire ajout soft skill -->
+
       <div *ngIf="showAddSoft"
            style="background:#f9fafb;border-radius:12px;padding:16px;
                   border:1px solid #e5e7eb;display:flex;flex-direction:column;gap:12px;">
@@ -378,7 +396,7 @@
                           font-size:13px;font-family:inherit;outline:none;" />
           </div>
         </div>
-        <!-- Upload dans formulaire soft skill -->
+
         <div style="display:flex;flex-direction:column;gap:6px;">
           <label style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">
             Certificat (PDF, image) — optionnel
@@ -400,6 +418,7 @@
             <span *ngIf="!newCertifFileName" style="font-size:12px;color:#9ca3af;">Aucun fichier sélectionné</span>
           </div>
         </div>
+
         <button (click)="addExtraCertif('SOFT_SKILL')"
                 style="padding:8px 20px;border-radius:8px;border:none;background:#7c3aed;
                        color:white;cursor:pointer;font-size:13px;font-weight:600;
@@ -407,11 +426,12 @@
           ✓ Confirmer
         </button>
       </div>
+
       <div *ngIf="!certifsSoft.length && !showAddSoft"
            style="text-align:center;padding:24px;color:#9ca3af;font-size:14px;">
         Aucune certification soft skill — cliquez "+ Ajouter une certif"
       </div>
-      <!-- Liste certifs soft skills -->
+
       <div *ngFor="let c of certifsSoft"
            style="border:1px solid #e5e7eb;border-radius:12px;padding:16px;
                   display:flex;flex-direction:column;gap:12px;">
@@ -434,6 +454,7 @@
             {{ statusLabel(c.statut) }}
           </span>
         </div>
+
         <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
           <div style="display:flex;flex-direction:column;gap:6px;">
             <label style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Statut</label>
@@ -464,7 +485,7 @@
                           font-size:13px;font-family:inherit;outline:none;" />
           </div>
         </div>
-        <!-- Auto-éval : zone de texte -->
+
         <textarea *ngIf="c.methodeEval === 'AUTO_EVAL'"
                   [(ngModel)]="c.commentaireEmploye"
                   placeholder="Décrivez votre niveau, vos expériences..."
@@ -472,7 +493,7 @@
                          font-size:13px;font-family:inherit;resize:vertical;
                          min-height:80px;width:100%;box-sizing:border-box;outline:none;">
         </textarea>
-        <!-- Upload fichier — disponible pour TOUS les soft skills -->
+
         <div *ngIf="c.statut === 'OBTENU'" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
           <span *ngIf="c.fichierNom"
                 style="font-size:12px;color:#16a34a;font-weight:600;">📎 {{ c.fichierNom }}</span>
@@ -486,11 +507,13 @@
                    (change)="uploadCertifFile($event, c)" style="display:none;" />
           </label>
         </div>
+
         <div *ngIf="c.commentaireAdmin"
              style="font-size:12px;color:#6b7280;background:#f9fafb;
                     padding:8px 12px;border-radius:6px;border-left:3px solid #7c3aed;">
           💬 Admin : {{ c.commentaireAdmin }}
         </div>
+
         <button (click)="saveCertif(c)"
                 style="padding:6px 14px;border-radius:8px;border:none;background:#7c3aed;
                        color:white;cursor:pointer;font-size:12px;font-weight:600;
@@ -499,5 +522,22 @@
         </button>
       </div>
     </div>
+
+    <!-- ═══ SECTION IA AJOUTÉE ═══ -->
+    <div style="background:white;border-radius:16px;padding:24px;
+                border:1px solid #f3f4f6;box-shadow:0 1px 3px rgba(0,0,0,.06);">
+      <div style="margin-bottom:16px;">
+        <h4 style="font-size:18px;font-weight:700;color:#111827;margin:0 0 4px 0;">
+          🎯 Recommandation IA de carrière
+        </h4>
+        <p style="font-size:13px;color:#6b7280;margin:0;">
+          Obtenez une recommandation personnalisée, identifiez vos compétences manquantes
+          et découvrez votre plan d’évolution.
+        </p>
+      </div>
+
+      <app-employee-ai-recommendation></app-employee-ai-recommendation>
+    </div>
+
   </ng-container>
 </div>

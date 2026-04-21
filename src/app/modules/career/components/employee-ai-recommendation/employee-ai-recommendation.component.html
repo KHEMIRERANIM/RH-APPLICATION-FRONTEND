@@ -1,0 +1,170 @@
+<div class="ai-career-page">
+
+  <div class="ai-hero">
+    <div>
+      <h2 class="ai-title">🎯 Recommandation IA de carrière</h2>
+      <p class="ai-subtitle">
+        Analysez votre profil, découvrez le poste recommandé, vos compétences manquantes
+        et un plan d’évolution personnalisé.
+      </p>
+    </div>
+  </div>
+
+  <div class="ai-grid">
+    <!-- FORMULAIRE -->
+    <div class="ai-card">
+      <div class="ai-card-header">
+        <h3>Votre profil</h3>
+        <p>Renseignez votre poste actuel et vos années d’expertise par compétence.</p>
+      </div>
+
+      <div class="ai-form">
+        <div class="form-group">
+          <label>Poste actuel</label>
+          <select [(ngModel)]="formData.currentJob">
+            <option *ngFor="let job of currentJobs" [value]="job">
+              {{ job }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Expérience totale</label>
+          <input type="number" min="0" max="20" [(ngModel)]="formData.experienceYears" />
+        </div>
+
+        <div class="skills-grid">
+          <div class="form-group">
+            <label>Python</label>
+            <input type="number" min="0" max="20" [(ngModel)]="formData.pythonYears" />
+          </div>
+
+          <div class="form-group">
+            <label>SQL</label>
+            <input type="number" min="0" max="20" [(ngModel)]="formData.sqlYears" />
+          </div>
+
+          <div class="form-group">
+            <label>Java</label>
+            <input type="number" min="0" max="20" [(ngModel)]="formData.javaYears" />
+          </div>
+
+          <div class="form-group">
+            <label>Angular</label>
+            <input type="number" min="0" max="20" [(ngModel)]="formData.angularYears" />
+          </div>
+
+          <div class="form-group">
+            <label>React</label>
+            <input type="number" min="0" max="20" [(ngModel)]="formData.reactYears" />
+          </div>
+
+          <div class="form-group">
+            <label>Cloud</label>
+            <input type="number" min="0" max="20" [(ngModel)]="formData.cloudYears" />
+          </div>
+
+          <div class="form-group">
+            <label>DevOps</label>
+            <input type="number" min="0" max="20" [(ngModel)]="formData.devopsYears" />
+          </div>
+
+          <div class="form-group">
+            <label>Security</label>
+            <input type="number" min="0" max="20" [(ngModel)]="formData.securityYears" />
+          </div>
+
+          <div class="form-group">
+            <label>Machine Learning</label>
+            <input type="number" min="0" max="20" [(ngModel)]="formData.mlYears" />
+          </div>
+
+          <div class="form-group">
+            <label>Testing</label>
+            <input type="number" min="0" max="20" [(ngModel)]="formData.testingYears" />
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn-primary" (click)="predictMobility()" [disabled]="isLoading">
+            {{ isLoading ? 'Analyse en cours...' : 'Lancer la recommandation IA' }}
+          </button>
+
+          <button class="btn-secondary" type="button" (click)="resetForm()">
+            Réinitialiser
+          </button>
+        </div>
+
+        <div *ngIf="errorMessage" class="error-box">
+          {{ errorMessage }}
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULTATS -->
+    <div class="ai-card" *ngIf="result">
+      <div class="ai-card-header">
+        <h3>Résultat IA</h3>
+        <p>Votre recommandation personnalisée basée sur votre profil.</p>
+      </div>
+
+      <div class="result-main">
+        <div class="result-badge">Poste recommandé</div>
+        <h2 class="recommended-job">{{ result.recommended_job }}</h2>
+        <div class="confidence-row">
+          <span>Score de confiance</span>
+          <strong>{{ percent(result.confidence_score) }}%</strong>
+        </div>
+        <div class="confidence-bar">
+          <div class="confidence-fill" [style.width.%]="percent(result.confidence_score)"></div>
+        </div>
+      </div>
+
+      <div class="result-section">
+        <h4>🏆 Top 3 des postes</h4>
+        <div class="top-jobs">
+          <div class="top-job" *ngFor="let job of result.top_3_jobs">
+            <div class="top-job-header">
+              <span>{{ job.job }}</span>
+              <strong>{{ percent(job.score) }}%</strong>
+            </div>
+            <div class="confidence-bar small">
+              <div class="confidence-fill" [style.width.%]="percent(job.score)"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="result-section">
+        <h4>📉 Skills gap</h4>
+
+        <div *ngIf="result.skills_gap.length; else noGap" class="gap-list">
+          <div class="gap-item" *ngFor="let gap of result.skills_gap">
+            <div class="gap-header">
+              <span>{{ formatSkill(gap.skill) }}</span>
+              <strong>Écart : {{ gap.gap }}</strong>
+            </div>
+            <div class="gap-meta">
+              Actuel : {{ gap.current }} an(s) · Requis : {{ gap.required }} an(s)
+            </div>
+          </div>
+        </div>
+
+        <ng-template #noGap>
+          <div class="success-box">
+            Aucun écart majeur détecté. Votre profil est déjà bien aligné avec le poste recommandé.
+          </div>
+        </ng-template>
+      </div>
+
+      <div class="result-section">
+        <h4>🚀 Plan d’évolution</h4>
+        <ul class="plan-list">
+          <li *ngFor="let item of result.evolution_plan">
+            {{ item }}
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

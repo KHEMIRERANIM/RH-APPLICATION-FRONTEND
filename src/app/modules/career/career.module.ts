@@ -33,6 +33,7 @@ import { EmployeePlanComponent } from './components/employee-plan/employee-plan.
 import { MotivationPreviewDialogComponent } from './components/motivation-preview-dialog/motivation-preview-dialog.component';
 import { MotivationAnalysisComponent } from './components/motivation-analysis/motivation-analysis.component';
 import { CareerAdminDashboardComponent } from './components/career-admin-dashboard/career-admin-dashboard.component';
+import { EmployeeAiRecommendationComponent } from './components/employee-ai-recommendation/employee-ai-recommendation.component';
 
 @NgModule({
   declarations: [
@@ -47,7 +48,8 @@ import { CareerAdminDashboardComponent } from './components/career-admin-dashboa
     EmployeePlanComponent,
     MotivationPreviewDialogComponent,
     MotivationAnalysisComponent,
-    CareerAdminDashboardComponent
+    CareerAdminDashboardComponent,
+    EmployeeAiRecommendationComponent
   ],
   imports: [
     CommonModule,
@@ -71,6 +73,6 @@ import { CareerAdminDashboardComponent } from './components/career-admin-dashboa
     MatDatepickerModule,
     MatNativeDateModule
   ],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA]   // ← Ajouté temporairement
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class CareerModule { }
