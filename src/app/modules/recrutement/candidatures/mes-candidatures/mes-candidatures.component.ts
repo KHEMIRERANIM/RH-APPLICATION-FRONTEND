@@ -125,6 +125,12 @@ export class MesCandidaturesComponent implements OnInit {
           });
           entretiens.forEach((e, i) => {
             this.entretiensMap[data[i].id] = e as Entretien[];
+            // Hydrate confirmed set from backend data
+            (e as Entretien[]).forEach(ent => {
+              if (ent?.confirmeParCandidat) {
+                this.entretiensConfirmes.add(ent.id);
+              }
+            });
           });
           this.loading = false;
         });
@@ -267,13 +273,22 @@ export class MesCandidaturesComponent implements OnInit {
   }
 
   confirmerPresence(entretien: Entretien): void {
-    // Dans une version réelle, on appellerait un endpoint de confirmation.
-    // Ici, we simulate the logic for the "WOW" effect of the professor.
-    entretien.statut = 'REALISE' as any; // Trick to show it's "Validated" in the UI for now
-    this.entretiensConfirmes.add(entretien.id);
-    
-    // Simuler un badge "Confirmé"
-    console.log("Présence confirmée pour l'entretien:", entretien.id);
+    this.entretienService.confirmerPresenceCandidat(entretien.id).subscribe({
+      next: (updated) => {
+        this.entretiensConfirmes.add(updated.id);
+        // Update local map instance for reactive UI
+        const list = this.entretiensMap[updated.candidatureId] || [];
+        const idx = list.findIndex(x => x.id === updated.id);
+        if (idx > -1) {
+          list[idx] = { ...list[idx], ...updated };
+        }
+        console.log("Présence confirmée pour l'entretien:", updated.id);
+        this.ajouterAgenda(updated);
+      },
+      error: () => {
+        alert("Impossible de confirmer l'entretien. Vérifiez votre connexion.");
+      }
+    });
   }
 
   isConfirme(entretienId: string): boolean {
@@ -281,13 +296,16 @@ export class MesCandidaturesComponent implements OnInit {
   }
 
   ajouterAgenda(e: Entretien): void {
+    const candidature = this.candidatures.find(c => c.id === e.candidatureId);
+    const titreOffre = candidature ? this.offresMap[candidature.offreId]?.titre : 'RH Evolution';
+
     const debut = new Date(e.dateHeure);
     const fin = new Date(debut.getTime() + (e.dureeMinutes || 60) * 60000);
     const fmt = (d: Date) => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
 
     const params = new URLSearchParams({
       action:   'TEMPLATE',
-      text:     `Entretien RH — ${this.offresMap[e.candidatureId]?.titre || 'RH Evolution'}`,
+      text:     `Entretien — ${titreOffre}`,
       dates:    `${fmt(debut)}/${fmt(fin)}`,
       details:  `Type: ${e.type}\nLien: ${e.lienVisio || 'Présentiel'}`,
       location: e.lieu || e.lienVisio || 'Bureau RH',

@@ -30,6 +30,10 @@ export class EntretienService {
     return this.http.get<Entretien[]>(`${this.api}/recruteur/${recruteurId}`);
   }
 
+  getEntretiensParCandidat(candidatId: string, confirmedOnly: boolean = true): Observable<Entretien[]> {
+    return this.http.get<Entretien[]>(`${this.api}/candidat/${candidatId}?confirmedOnly=${confirmedOnly}`);
+  }
+
   modifierEntretien(id: string, request: CreateEntretienRequest): Observable<Entretien> {
     return this.http.put<Entretien>(`${this.api}/${id}`, request);
   }
@@ -44,5 +48,9 @@ export class EntretienService {
 
   marquerRealise(id: string): Observable<void> {
     return this.http.patch<void>(`${this.api}/${id}/realise`, {});
+  }
+
+  confirmerPresenceCandidat(id: string): Observable<Entretien> {
+    return this.http.patch<Entretien>(`${this.api}/${id}/confirmer`, {});
   }
 }

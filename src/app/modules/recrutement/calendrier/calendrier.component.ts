@@ -42,8 +42,12 @@ export class CalendrierComponent implements OnInit {
   ngOnInit(): void {
     const user = this.authService.currentUser;
     const userId = user?.id || user?.['_id'];
+    const role = (user?.role || '').toUpperCase();
+    const source$ = role === 'CANDIDAT'
+      ? this.entretienService.getEntretiensParCandidat(userId, true)
+      : this.entretienService.getEntretiensParRecruteur(userId);
 
-    this.entretienService.getEntretiensParRecruteur(userId).subscribe({
+    source$.subscribe({
       next: (data) => {
         this.entretiens = data;
         this.genererCalendrier();

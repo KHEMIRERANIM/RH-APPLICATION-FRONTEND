@@ -34,6 +34,7 @@ export interface Entretien {
   dateHeure: string; dureeMinutes: number; lieu: string; lienVisio: string;
   statut: StatutEntretien; feedbackGlobal: string; noteGlobale: number;
   pointsForts: string[]; pointsFaibles: string[]; recommandeEmbauche: boolean; createdAt: string;
+  confirmeParCandidat?: boolean; dateConfirmationCandidat?: string;
 }
 export interface CreateEntretienRequest {
   candidatureId: string; recruteurId: string; type: TypeEntretien;

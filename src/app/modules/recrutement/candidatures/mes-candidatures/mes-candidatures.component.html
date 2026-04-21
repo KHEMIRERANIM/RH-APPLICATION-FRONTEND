@@ -227,9 +227,13 @@
                
                <!-- Video Test Card (Always visible, but locked if needed) -->
                <div class="relative p-8 rounded-[2.5rem] transition-all overflow-hidden border"
-                    [ngClass]="selectedCandidature.statut === 'ACCEPTE' && !selectedCandidature.testLanguePasse ? 
-                               'bg-gradient-to-br from-indigo-600 to-blue-700 text-white shadow-xl hover:translate-y-[-4px]' : 
-                               'bg-gray-50 text-gray-400 border-gray-100 grayscale opacity-60'">
+                    [ngClass]="selectedCandidature.statut !== 'ACCEPTE'
+                               ? 'bg-gray-50 text-gray-400 border-gray-100 grayscale opacity-60'
+                               : (selectedCandidature.testLanguePasse
+                                    ? (selectedCandidature.scoreLangue >= 60
+                                        ? 'bg-gradient-to-br from-emerald-600 to-teal-700 text-white shadow-xl'
+                                        : 'bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-xl')
+                                    : 'bg-gradient-to-br from-indigo-600 to-blue-700 text-white shadow-xl hover:translate-y-[-4px]')">
                    
                    <div class="flex items-center justify-between mb-6">
                        <div class="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-inner"
@@ -237,8 +241,12 @@
                            <mat-icon [svgIcon]="'heroicons_outline:language'" class="icon-size-8"></mat-icon>
                        </div>
                        <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest"
-                             [ngClass]="selectedCandidature.statut === 'ACCEPTE' ? 'bg-white/10 text-white' : 'bg-gray-200 text-gray-500'">
-                           {{ selectedCandidature.statut === 'ACCEPTE' ? 'Disponible' : 'Verrouillé' }}
+                             [ngClass]="selectedCandidature.statut !== 'ACCEPTE'
+                                        ? 'bg-gray-200 text-gray-500'
+                                        : (selectedCandidature.testLanguePasse ? 'bg-white/10 text-white' : 'bg-white/10 text-white')">
+                           {{ selectedCandidature.statut !== 'ACCEPTE'
+                              ? 'Verrouillé'
+                              : (selectedCandidature.testLanguePasse ? 'Résultat' : 'Disponible') }}
                        </span>
                    </div>
                    <h5 class="text-xl font-black mb-2" [class.text-white]="selectedCandidature.statut === 'ACCEPTE'">Test Vidéo IA</h5>
@@ -251,6 +259,29 @@
                            class="w-full bg-white text-indigo-700 rounded-2xl py-4 font-black shadow-lg">
                        Démarrer le Test
                    </button>
+                   <div *ngIf="selectedCandidature.statut === 'ACCEPTE' && selectedCandidature.testLanguePasse"
+                        class="mt-2 p-4 rounded-2xl bg-white/10 border border-white/10">
+                      <div class="flex items-center justify-between gap-4">
+                        <div>
+                          <p class="text-[10px] font-black uppercase tracking-widest text-white/70">Score Anglais</p>
+                          <p class="text-3xl font-black leading-none text-white">
+                            {{ selectedCandidature.scoreLangue | number:'1.0-0' }} / 100
+                          </p>
+                        </div>
+                        <div class="text-right">
+                          <p class="text-[10px] font-black uppercase tracking-widest text-white/70">Statut</p>
+                          <p class="text-sm font-black"
+                             [ngClass]="selectedCandidature.scoreLangue >= 60 ? 'text-emerald-200' : 'text-amber-200'">
+                            {{ selectedCandidature.scoreLangue >= 60 ? 'Validé' : 'À améliorer' }}
+                          </p>
+                        </div>
+                      </div>
+                      <button mat-stroked-button
+                              class="w-full mt-4 border-white/30 text-white rounded-2xl py-3 font-black"
+                              (click)="ouvrirTestVideo(selectedCandidature)">
+                        Refaire le test
+                      </button>
+                   </div>
                    <div *ngIf="selectedCandidature.statut !== 'ACCEPTE'" 
                         class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest italic">
                        <mat-icon [svgIcon]="'heroicons_solid:lock-closed'" class="icon-size-4"></mat-icon>
