@@ -107,8 +107,7 @@ export class CareerAdminDashboardComponent implements OnInit, OnDestroy {
     });
 
     // Charger mobilités
-    this.http.get<any[]>('http://localhost:8081/api/mobility-requests', { headers: this.getHeaders() })
-      .pipe(catchError(() => of([])))
+this.http.get<any[]>('http://localhost:8081/api/mobility', { headers: this.getHeaders() })      .pipe(catchError(() => of([])))
       .subscribe(requests => {
         this.totalMobilities  = requests.length;
         this.pendingRequests  = requests.filter(r => r.status === 'PENDING').length;
