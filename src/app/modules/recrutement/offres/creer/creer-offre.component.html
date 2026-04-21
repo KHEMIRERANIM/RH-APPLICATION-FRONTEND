@@ -101,19 +101,31 @@
               </div>
             </div>
 
-            <div *ngIf="biasedWordsFound.length > 0" class="flex flex-col gap-2">
-               <p class="text-xs text-red-700 font-bold uppercase">⚠️ Mots toxiques trouvés :</p>
-               <div class="flex flex-wrap gap-1">
-                 <span *ngFor="let w of biasedWordsFound" class="px-2 py-1 bg-white text-red-600 text-[10px] font-black uppercase tracking-widest rounded shadow-sm border border-red-200">
-                   {{ w }}
-                 </span>
-               </div>
-               <p class="text-[10px] text-gray-500 mt-2 font-medium">Conformément aux lois RSE, retirez ces discriminants pour débloquer le bouton "Créer".</p>
+            <!-- AI DEEP SUGGESTIONS -->
+            <div *ngIf="aiLoading" class="flex items-center gap-2 mt-4 text-secondary">
+              <mat-progress-spinner [diameter]="16" [mode]="'indeterminate'"></mat-progress-spinner>
+              <span class="text-[10px] animate-pulse">L'IA analyse les biais subtils...</span>
+            </div>
+
+            <div *ngIf="aiAnalysis && !aiLoading" class="mt-4 flex flex-col gap-3">
+              <p class="text-xs text-blue-700 font-bold uppercase flex items-center gap-1 border-t border-blue-100 pt-3">
+                <mat-icon class="icon-size-3" [svgIcon]="'heroicons_outline:sparkles'"></mat-icon>
+                Analyse Intelligente :
+              </p>
+              <div class="flex flex-col gap-2">
+                <div *ngFor="let sug of aiAnalysis.suggestions" class="p-2 bg-blue-50 rounded-lg border border-blue-100 text-[10px] leading-relaxed">
+                  <p class="text-gray-600 italic">"{{ sug.problem }}"</p>
+                  <p class="text-blue-700 font-bold mt-1">💡 Suggestion : {{ sug.suggestion }}</p>
+                </div>
+              </div>
+              <p class="text-[9px] text-gray-500 font-medium bg-white p-2 rounded-lg border border-gray-100 shadow-sm">
+                {{ aiAnalysis.conclusion }}
+              </p>
             </div>
             
-            <div *ngIf="biasedWordsFound.length === 0 && form.get('description')?.value" class="flex flex-col items-center justify-center p-3 text-center border border-green-200 rounded-xl bg-white mt-4">
+            <div *ngIf="!aiLoading && !aiAnalysis && form.get('description')?.value" class="flex flex-col items-center justify-center p-3 text-center border border-green-200 rounded-xl bg-white mt-4">
               <mat-icon [svgIcon]="'heroicons_outline:check-badge'" class="text-green-500 mb-1 icon-size-6"></mat-icon>
-              <span class="text-xs font-extrabold text-green-700 uppercase">Texte parfaitement neutre</span>
+              <span class="text-xs font-extrabold text-green-700 uppercase">En attente d'analyse IA...</span>
             </div>
           </div>
         </div>
