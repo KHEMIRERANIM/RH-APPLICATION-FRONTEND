@@ -46,20 +46,23 @@
               </label>
               <div class="flex items-center justify-center w-full">
                 <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                  [ngClass]="cvFile ? 'border-green-400 bg-green-50 dark:bg-green-900/20' : 'border-gray-300'">
+                  [ngClass]="cvFile ? 'border-green-400 bg-green-50' : (form.get('cvFile')?.invalid && form.get('cvFile')?.touched ? 'border-red-400 bg-red-50' : 'border-gray-300')">
                   <div class="flex flex-col items-center justify-center gap-2">
                     <mat-icon [svgIcon]="cvFile ? 'heroicons_outline:document-check' : 'heroicons_outline:document-arrow-up'"
-                      class="icon-size-8" [ngClass]="cvFile ? 'text-green-600' : 'text-secondary'">
+                      class="icon-size-8" [ngClass]="cvFile ? 'text-green-600' : (form.get('cvFile')?.invalid && form.get('cvFile')?.touched ? 'text-red-600' : 'text-secondary')">
                     </mat-icon>
-                    <p class="text-sm" [ngClass]="cvFile ? 'text-green-700 font-medium' : 'text-secondary'">
-                      {{ cvFile ? cvFile.name : 'Cliquez pour uploader votre CV (PDF)' }}
+                    <p class="text-sm" [ngClass]="cvFile ? 'text-green-700 font-medium' : (form.get('cvFile')?.invalid && form.get('cvFile')?.touched ? 'text-red-700 font-medium' : 'text-secondary')">
+                      {{ cvFile ? cvFile.name : 'Cliquez pour uploader votre CV (PDF, max 5Mo)' }}
                     </p>
                   </div>
                   <input type="file" accept=".pdf" class="hidden" (change)="onCvChange($event)">
                 </label>
               </div>
               <p *ngIf="form.get('cvFile')?.invalid && form.get('cvFile')?.touched"
-                class="text-red-500 text-xs mt-1">Le CV est obligatoire</p>
+                class="text-red-500 text-xs mt-2 font-semibold flex items-center gap-1">
+                <mat-icon class="icon-size-4" [svgIcon]="'heroicons_outline:exclamation-triangle'"></mat-icon>
+                Le CV est obligatoire (Format PDF uniquement)
+              </p>
             </div>
 
             <!-- Upload Lettre -->
@@ -69,13 +72,13 @@
               </label>
               <div class="flex items-center justify-center w-full">
                 <label class="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-xl cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                  [ngClass]="lettreFile ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300'">
+                  [ngClass]="lettreFile ? 'border-blue-400 bg-blue-50' : 'border-gray-300'">
                   <div class="flex flex-col items-center justify-center gap-1">
                     <mat-icon [svgIcon]="lettreFile ? 'heroicons_outline:document-check' : 'heroicons_outline:document-plus'"
                       class="icon-size-6" [ngClass]="lettreFile ? 'text-blue-600' : 'text-secondary'">
                     </mat-icon>
                     <p class="text-sm" [ngClass]="lettreFile ? 'text-blue-700 font-medium' : 'text-secondary'">
-                      {{ lettreFile ? lettreFile.name : 'Lettre de motivation (optionnel)' }}
+                      {{ lettreFile ? lettreFile.name : 'Lettre de motivation (optionnel, PDF max 5Mo)' }}
                     </p>
                   </div>
                   <input type="file" accept=".pdf" class="hidden" (change)="onLettreChange($event)">

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { Router } from '@angular/router';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { MatChipInputEvent } from '@angular/material/chips';
@@ -43,22 +43,42 @@ export class CreerOffreComponent implements OnInit {
     console.log('USER CONNECTÉ:', this.authService.currentUser);
 
     this.form = this.fb.group({
-      titre: ['', Validators.required],
+      titre: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(100)]],
       description: ['', [Validators.required, Validators.minLength(50)]],
       departement: ['', Validators.required],
-      localisation: ['', Validators.required],
+      localisation: ['', [Validators.required, Validators.minLength(3)]],
       typeContrat: ['CDI', Validators.required],
       niveauExperience: ['', Validators.required],
       niveauEtudes: ['', Validators.required],
       salaireMin: [null, [Validators.required, Validators.min(0)]],
       salaireMax: [null, [Validators.required, Validators.min(0)]],
       nombrePostes: [1, [Validators.required, Validators.min(1)]],
-      dateExpiration: ['', Validators.required],
-    });
+      dateExpiration: ['', [Validators.required, this.futureDateValidator()]],
+    }, { validators: this.salaryRangeValidator });
 
     // ÉCOUTEUR TEMPS-RÉEL RSE
     this.form.get('description')?.valueChanges.subscribe(val => this.analyzeBias(val));
   }
+
+  // --- VALIDATEURS PERSONNALISÉS ---
+
+  private futureDateValidator(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      if (!control.value) return null;
+      const date = new Date(control.value);
+      const today = new Date();
+      return date > today ? null : { pastDate: true };
+    };
+  }
+
+  private salaryRangeValidator: ValidatorFn = (group: AbstractControl): ValidationErrors | null => {
+    const min = group.get('salaireMin')?.value;
+    const max = group.get('salaireMax')?.value;
+    if (min !== null && max !== null && max < min) {
+      return { salaryInconsistent: true };
+    }
+    return null;
+  };
 
   analyzeBias(text: string): void {
     if (!text) {

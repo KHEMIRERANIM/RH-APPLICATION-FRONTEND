@@ -1,394 +1,261 @@
-<div class="flex flex-col flex-auto min-w-0 p-6 sm:p-10 bg-[#f8fafc]">
+<div class="flex flex-col flex-auto min-w-0 bg-[#f8fafc]">
 
-  <!-- HEADER : PREMIUM GREETING -->
-  <div class="flex flex-col md:flex-row items-end justify-between mb-10 gap-6">
-    <div class="flex items-center gap-6">
-      <div class="relative">
-        <div
-          class="w-16 h-16 rounded-[1.5rem] bg-indigo-600 flex items-center justify-center shadow-2xl shadow-indigo-200">
-          <mat-icon [svgIcon]="'heroicons_outline:academic-cap'" class="text-white icon-size-8"></mat-icon>
-        </div>
-        <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 border-4 border-white rounded-full"></div>
-      </div>
-      <div>
-        <h2 class="text-4xl font-black tracking-tighter text-slate-900 leading-tight">
-          Recruitement <span class="text-indigo-600">Command Center</span>
-        </h2>
-        <p class="text-slate-500 font-bold text-sm uppercase tracking-[0.2em] mt-1 flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-indigo-600 animate-pulse"></span>
-          Systéme de Pilotage Intelligent Actif
-        </p>
-      </div>
-    </div>
-
-    <div class="flex items-center gap-3">
-      <button mat-flat-button
-        class="bg-white text-slate-700 rounded-2xl px-6 py-7 shadow-sm border border-slate-200 hover:shadow-md transition-all font-black text-xs uppercase tracking-widest"
-        routerLink="/recrutement/calendrier">
-        <mat-icon [svgIcon]="'heroicons_outline:calendar'" class="icon-size-5 mr-2 text-indigo-600"></mat-icon>
-        Calendrier
-      </button>
-      <button mat-flat-button
-        class="bg-white text-slate-700 rounded-2xl px-6 py-7 shadow-sm border border-slate-200 hover:shadow-md transition-all font-black text-xs uppercase tracking-widest"
-        (click)="exporterRapportIA()">
-        Rapport Analytique
-      </button>
-      <button mat-flat-button
-        class="bg-indigo-600 text-white rounded-2xl px-10 py-7 shadow-2xl shadow-indigo-100 hover:shadow-indigo-300 transition-all font-black uppercase tracking-widest flex items-center"
-        (click)="creerOffre()">
-        <mat-icon [svgIcon]="'heroicons_outline:plus-circle'" class="mr-2"></mat-icon>
-        Nouvelle Offre
-      </button>
-    </div>
-  </div>
-
-  <ng-container *ngIf="!loading; else skeleton">
-
-    <!-- LEVEL 1: KPI QUICK BAR -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-      <div
-        class="bg-white p-5 rounded-[1.8rem] shadow-sm border border-slate-100 flex items-center gap-4 transition-transform hover:scale-105">
-        <div
-          class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 font-black text-lg">
-          {{ totalOffres }}</div>
+    <header class="flex flex-col sm:flex-row items-center justify-between px-8 py-10 bg-white border-b border-slate-200">
         <div>
-          <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Offres</p>
-          <p class="text-xs font-black text-slate-900">Actives</p>
+            <h2 class="text-3xl font-bold text-slate-900 tracking-tight">
+                Dashboard <span class="text-indigo-600 font-medium">Recrutement</span>
+            </h2>
+            <p class="text-slate-500 mt-1 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                Système de pilotage intelligent actif
+            </p>
         </div>
-      </div>
-      <div
-        class="bg-white p-5 rounded-[1.8rem] shadow-sm border border-slate-100 flex items-center gap-4 transition-transform hover:scale-105">
-        <div
-          class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 font-black text-lg">
-          {{ totalCandidatures }}</div>
-        <div>
-          <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Candidats</p>
-          <p class="text-xs font-black text-slate-900">Pipeline</p>
-        </div>
-      </div>
-      <div
-        class="bg-white p-5 rounded-[1.8rem] shadow-sm border border-slate-100 flex items-center gap-4 transition-transform hover:scale-105">
-        <div
-          class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600 font-black text-lg">{{
-          entretiensAVenir.length }}</div>
-        <div>
-          <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Rendez-vous</p>
-          <p class="text-xs font-black text-slate-900">À Venir</p>
-        </div>
-      </div>
-      <div class="bg-indigo-900 p-5 rounded-[1.8rem] shadow-xl flex items-center gap-4">
-        <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white font-black text-lg">{{ recruitmentEfficiency }}%
-        </div>
-        <div>
-          <p class="text-[8px] font-black text-white/40 uppercase tracking-widest leading-none mb-1">Efficacité</p>
-          <p class="text-xs font-black text-white">Recrutement</p>
-        </div>
-      </div>
-    </div>
 
-    <!-- LEVEL 2: TOP TALENTS SPOTLIGHT (Strategic Row) -->
-    <section class="mb-10 bg-white/50 border border-indigo-50 p-6 rounded-[2.5rem] backdrop-blur-sm">
-      <div class="flex items-center justify-between mb-6 px-2">
-        <h3 class="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
-          <mat-icon [svgIcon]="'heroicons_outline:star'" class="icon-size-5 text-indigo-600"></mat-icon>
-          Top Talents <span class="text-indigo-600">Elite Mapping</span>
-        </h3>
-        <button
-          class="text-[9px] font-black text-indigo-500 uppercase tracking-widest border-b border-indigo-100 hover:border-indigo-600 transition-all">Voir
-          le classement complet</button>
-      </div>
-      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-        <div *ngFor="let t of topCandidats" (click)="openCandidatDetails(t)"
-          class="group relative bg-white rounded-[2rem] p-4 text-center border border-slate-100 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1 cursor-pointer overflow-hidden">
-          <div
-            class="absolute top-1 right-2 px-1.5 py-0.5 bg-indigo-600 text-white text-[7px] font-black rounded-md shadow-lg">
-            {{ t.score }}%</div>
-          <img [src]="t.avatar"
-            class="w-12 h-12 rounded-xl mx-auto mb-3 border-2 border-slate-50 shadow-inner grayscale group-hover:grayscale-0 transition-all">
-          <h4 class="text-[10px] font-black text-slate-950 truncate max-w-full px-1">{{ t.name }}</h4>
+        <div class="flex items-center gap-3 mt-6 sm:mt-0">
+            <button mat-flat-button class="rounded-xl bg-indigo-600 text-white h-12 px-8 shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all font-bold" (click)="creerOffre()">
+                <mat-icon [svgIcon]="'heroicons_outline:plus'" class="icon-size-5 mr-2"></mat-icon>
+                Nouvelle Offre
+            </button>
         </div>
-        <!-- Mock filler for visual balance -->
-        <div
-          class="bg-slate-50/50 border border-dashed border-slate-200 rounded-[2rem] flex flex-col items-center justify-center p-4">
-          <mat-icon [svgIcon]="'heroicons_outline:plus-circle'" class="text-slate-300 icon-size-6 mb-1"></mat-icon>
-          <span class="text-[8px] font-black text-slate-400 uppercase tracking-tighter">New Match Soon</span>
-        </div>
-        <div
-          class="bg-indigo-50/30 border border-dashed border-indigo-100 rounded-[2rem] flex flex-col items-center justify-center p-4">
-          <p class="text-[12px] font-black text-indigo-600">AI</p>
-          <span class="text-[7px] font-black text-indigo-400 uppercase tracking-widest">Calculé</span>
-        </div>
-      </div>
-    </section>
+    </header>
 
-    <!-- LEVEL 3: MAIN OPERATIONAL GRID (70/30) -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="p-8 sm:p-10">
+        <ng-container *ngIf="!loading; else skeleton">
 
-      <!-- LEFT PRIMARY COLUMN (70%) -->
-      <div class="lg:col-span-2 space-y-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm cursor-pointer hover:border-indigo-400 transition-colors" routerLink="/recrutement/offres">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Offres Actives</p>
+                    <div class="flex items-end justify-between mt-2">
+                        <span class="text-3xl font-bold text-slate-900">{{ totalOffres }}</span>
+                        <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+                            <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:briefcase'"></mat-icon>
+                        </div>
+                    </div>
+                </div>
 
-        <!-- VISUAL IMPACT: THE FUNNEL -->
-        <section class="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-100 transition-all hover:shadow-md">
-          <div class="flex items-center justify-between mb-8">
-            <h3 class="text-xl font-black text-slate-900 tracking-tight">Efficacité du <span
-                class="text-indigo-600">Pipeline Global</span></h3>
-            <div
-              class="flex items-center gap-2 px-3 py-1 bg-slate-50 rounded-full text-[9px] font-black text-slate-400 uppercase tracking-widest">
-              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-              Live Tracking
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Pipeline Global</p>
+                    <div class="flex items-end justify-between mt-2">
+                        <span class="text-3xl font-bold text-slate-900">{{ totalCandidatures }}</span>
+                        <div class="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
+                            <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:users'"></mat-icon>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm cursor-pointer hover:border-indigo-400 transition-colors" routerLink="/recrutement/calendrier">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Entretiens</p>
+                    <div class="flex items-end justify-between mt-2">
+                        <span class="text-3xl font-bold text-slate-900">{{ entretiensAVenir.length }}</span>
+                        <div class="p-2 bg-amber-50 text-amber-600 rounded-lg">
+                            <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:video-camera'"></mat-icon>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Efficacité</p>
+                    <div class="flex items-end justify-between mt-2">
+                        <span class="text-3xl font-bold text-slate-900">{{ recruitmentEfficiency }}%</span>
+                        <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+                            <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:trending-up'"></mat-icon>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-          <apx-chart [series]="funnelChartOptions.series!" [chart]="funnelChartOptions.chart!"
-            [plotOptions]="funnelChartOptions.plotOptions!" [colors]="['#6366f1', '#f59e0b', '#10b981']"
-            [xaxis]="funnelChartOptions.xaxis!" [dataLabels]="funnelChartOptions.dataLabels!"
-            [legend]="{ show: true, position: 'bottom' }">
-          </apx-chart>
-        </section>
 
-        <!-- ACTIVE MISSIONS (Job Offers) -->
-        <section>
-          <div class="flex items-center justify-between mb-6">
-            <h3 class="text-xl font-black text-slate-900 tracking-tight">Pilotage des <span
-                class="text-indigo-600">Offres en Cours</span></h3>
-            <span class="px-3 py-1 bg-indigo-50 text-indigo-600 text-[10px] font-black rounded-lg">{{ offres.length }}
-              Missions actives</span>
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div *ngFor="let o of offres"
-              class="group bg-white rounded-[2.2rem] p-6 border border-slate-100 shadow-sm transition-all hover:shadow-2xl hover:bg-slate-900 hover:border-slate-800">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                
+                <div class="lg:col-span-8 space-y-8">
+                    
+                    <section class="bg-white rounded-3xl border border-slate-200 shadow-sm p-8">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-bold text-slate-900">Conversion du Pipeline</h3>
+                            <button (click)="exporterRapportIA()" class="text-indigo-600 text-sm font-semibold hover:bg-indigo-50 px-3 py-1 rounded-lg transition-colors">
+                                Exporter Rapport
+                            </button>
+                        </div>
+                        <div class="h-80">
+                            <apx-chart 
+                                [series]="funnelChartOptions.series!" 
+                                [chart]="funnelChartOptions.chart!"
+                                [plotOptions]="funnelChartOptions.plotOptions!" 
+                                [colors]="funnelChartOptions.colors!"
+                                [xaxis]="funnelChartOptions.xaxis!" 
+                                [dataLabels]="funnelChartOptions.dataLabels!">
+                            </apx-chart>
+                        </div>
+                    </section>
 
-              <div class="flex items-start justify-between mb-8">
-                <div
-                  class="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-900 font-black text-lg group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-inner">
-                  {{ o.titre.substring(0, 1) }}
+                    <section>
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-bold text-slate-900">Missions en cours</h3>
+                            <button (click)="showMissionDrawer = true" class="text-indigo-600 text-sm font-bold hover:underline">Gérer tout ({{ offres.length }})</button>
+                        </div>
+                        
+                        <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+                            <div *ngFor="let o of offres.slice(0,3); let last = last" class="flex items-center p-5 hover:bg-slate-50 transition-colors cursor-pointer border-b border-slate-100" [class.border-b-0]="last" (click)="voirPipeline(o)">
+                                <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mr-4">
+                                    <mat-icon class="icon-size-5">work_outline</mat-icon>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="font-bold text-slate-900 truncate">{{ o.titre }}</p>
+                                    <p class="text-xs text-slate-500">{{ o.departement }} • {{ o.typeContrat }}</p>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <span *ngIf="o.statut === 'PUBLIEE'" class="px-2 py-1 rounded-md bg-emerald-50 text-emerald-600 text-[10px] font-bold">PUBLIÉE</span>
+                                    <span *ngIf="o.statut === 'BROUILLON'" class="px-2 py-1 rounded-md bg-amber-50 text-amber-600 text-[10px] font-bold">BROUILLON</span>
+                                    <mat-icon class="icon-size-4 text-slate-300">chevron_right</mat-icon>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <button mat-stroked-button class="w-full rounded-2xl h-12 border-slate-200 text-slate-600 font-bold" (click)="showMissionDrawer = true">
+                                <mat-icon class="icon-size-5 mr-2" [svgIcon]="'heroicons_outline:adjustments-horizontal'"></mat-icon>
+                                Centre de Gestion des Missions
+                            </button>
+                        </div>
+                    </section>
                 </div>
-                <div class="flex -space-x-2 overflow-hidden">
-                  <img class="inline-block h-6 w-6 rounded-full ring-2 ring-white group-hover:ring-slate-800"
-                    src="https://i.pravatar.cc/150?u=1" alt="">
-                  <img class="inline-block h-6 w-6 rounded-full ring-2 ring-white group-hover:ring-slate-800"
-                    src="https://i.pravatar.cc/150?u=2" alt="">
-                  <div
-                    class="flex items-center justify-center h-6 w-6 rounded-full ring-2 ring-white group-hover:ring-slate-800 bg-slate-100 text-[8px] font-bold text-slate-500">
-                    {{ o.nombreCandidatures }}</div>
+
+                <div class="lg:col-span-4 space-y-8">
+                    
+                    <section class="bg-gradient-to-br from-indigo-600 to-indigo-800 rounded-3xl p-8 text-white shadow-xl relative overflow-hidden">
+                        <mat-icon class="absolute -right-4 -bottom-4 icon-size-24 text-white/10">auto_awesome</mat-icon>
+                        <p class="text-xs font-bold text-indigo-200 uppercase tracking-widest mb-3">Conseil Stratégique IA</p>
+                        <p class="text-sm font-medium leading-relaxed italic">"{{ aiInsight }}"</p>
+                    </section>
+
+                    <section class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6">
+                        <h3 class="font-bold text-slate-900 mb-6">Top Talents (Elite)</h3>
+                        <div class="space-y-4">
+                            <div *ngFor="let t of topCandidats" (click)="openCandidatDetails(t)" class="flex items-center gap-4 p-3 rounded-2xl hover:bg-slate-50 cursor-pointer transition-colors border border-transparent hover:border-slate-100">
+                                <img [src]="t.avatar" class="w-12 h-12 rounded-xl object-cover shadow-sm">
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-bold text-slate-900 truncate">{{ t.name }}</p>
+                                    <p class="text-xs text-slate-500 truncate">{{ t.role }}</p>
+                                </div>
+                                <div class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-lg">{{ t.score }}%</div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6">
+                        <h3 class="font-bold text-slate-900 mb-6">Prochains Entretiens</h3>
+                        <div class="space-y-4" *ngIf="entretiensAVenir.length > 0">
+                            <div *ngFor="let e of entretiensAVenir.slice(0,3)" class="flex gap-4">
+                                <div class="flex flex-col items-center min-w-[40px]">
+                                    <span class="text-xs font-bold text-indigo-600">{{ e.dateHeure | date:'HH:mm' }}</span>
+                                    <span class="text-[10px] text-slate-400 uppercase font-medium">{{ e.dateHeure | date:'dd MMM' }}</span>
+                                </div>
+                                <div class="flex-1 border-l-2 border-slate-100 pl-4 pb-4">
+                                    <p class="text-sm font-bold text-slate-800">{{ e.type }}</p>
+                                    <p class="text-xs text-slate-500">Candidat ID: {{ e.id.substring(0,6) }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div *ngIf="entretiensAVenir.length === 0" class="text-center py-4">
+                            <p class="text-xs text-slate-400 italic">Aucun entretien prévu</p>
+                        </div>
+                    </section>
                 </div>
-              </div>
-
-              <h4 class="text-md font-black text-slate-900 group-hover:text-white transition-colors mb-2 leading-tight">
-                {{ o.titre }}
-              </h4>
-
-              <div
-                class="flex items-center gap-3 text-[9px] font-black text-slate-400 group-hover:text-slate-500 uppercase tracking-widest mb-6">
-                <span>{{ o.departement }}</span>
-                <span>•</span>
-                <span>{{ o.typeContrat }}</span>
-              </div>
-
-              <div class="flex items-center gap-2 pt-4 border-t border-slate-100 group-hover:border-slate-800">
-                <button mat-flat-button
-                  class="bg-indigo-600 text-white rounded-xl text-[9px] font-black px-4 py-2 flex-auto"
-                  (click)="voirPipeline(o)">
-                  Explorer Pipeline
-                </button>
-                <button mat-icon-button class="bg-slate-50 text-slate-400 rounded-xl group-hover:bg-slate-800"
-                  (click)="voirDetail(o)">
-                  <mat-icon [svgIcon]="'heroicons_outline:eye'" class="icon-size-4"></mat-icon>
-                </button>
-                <button mat-icon-button
-                  class="bg-red-50 text-red-400 rounded-xl group-hover:bg-red-900 group-hover:text-red-100"
-                  (click)="supprimerOffre(o, $event)">
-                  <mat-icon [svgIcon]="'heroicons_outline:trash'" class="icon-size-4"></mat-icon>
-                </button>
-              </div>
             </div>
-          </div>
-        </section>
 
-      </div>
+            <!-- PANEL GESTION MISSIONS (Drawer-style) -->
+            <div *ngIf="showMissionDrawer" class="fixed inset-0 z-[1000] flex justify-end bg-slate-900/40 backdrop-blur-sm" (click)="showMissionDrawer = false">
+                <div class="w-full max-w-[500px] bg-slate-50 h-full shadow-2xl flex flex-col" (click)="$event.stopPropagation()">
+                    <div class="p-8 bg-white border-b border-slate-200 flex items-center justify-between">
+                        <div>
+                            <h3 class="text-xl font-black text-slate-900 tracking-tight">Gestion des Missions</h3>
+                            <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">{{ offres.length }} Postes actifs</p>
+                        </div>
+                        <button (click)="showMissionDrawer = false" class="p-2 hover:bg-slate-100 rounded-full transition-colors flex items-center justify-center">
+                            <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+                        </button>
+                    </div>
 
-      <!-- RIGHT OPERATIONAL SIDEBAR (30%) -->
-      <div class="space-y-8">
+                    <div class="flex-1 overflow-y-auto p-6 space-y-4">
+                        <div *ngFor="let o of offres" class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:border-indigo-400 transition-all group">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="font-bold text-slate-900 text-lg leading-tight">{{ o.titre }}</h4>
+                                    <p class="text-xs text-slate-500 mt-1 uppercase font-bold tracking-tighter">{{ o.departement }} • {{ o.typeContrat }}</p>
+                                </div>
+                                <div class="flex -space-x-1">
+                                    <span class="px-2 py-1 rounded bg-slate-100 text-slate-600 text-[9px] font-black">{{ o.nombreCandidatures }} CANDIDATS</span>
+                                </div>
+                            </div>
 
-        <!-- SMART ALERTS HUB (Urgency) -->
-        <section>
-          <div class="flex items-center gap-2 mb-6">
-            <h3 class="text-lg font-black text-slate-900 tracking-tight">Centre de <span
-                class="text-indigo-600">Priorité</span></h3>
-            <span class="px-2 py-0.5 bg-red-100 text-red-600 text-[8px] font-black rounded-full shadow-sm">AI
-              LIVE</span>
-          </div>
-          <div class="space-y-4">
-            <div *ngFor="let s of smartAlerts"
-              class="relative p-5 bg-white rounded-[1.8rem] border border-slate-100 shadow-sm transition-all hover:shadow-lg hover:-translate-y-1">
-              <div class="flex items-start gap-4">
-                <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                  [ngClass]="s.color + ' bg-opacity-10 ' + s.textColor">
-                  <mat-icon [svgIcon]="s.icon" class="icon-size-5"></mat-icon>
+                            <div class="flex items-center gap-2">
+                                <button mat-flat-button class="flex-1 bg-indigo-50 text-indigo-700 rounded-xl h-10 px-0 font-bold text-xs" (click)="voirPipeline(o)">
+                                    Explorer
+                                </button>
+                                <button mat-flat-button class="w-10 h-10 bg-slate-50 text-slate-600 rounded-xl px-0 min-w-10 flex items-center justify-center" (click)="editerOffre(o)">
+                                    <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:pencil'"></mat-icon>
+                                </button>
+                                <button *ngIf="o.statut === 'BROUILLON'" mat-flat-button class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl px-0 min-w-10 flex items-center justify-center" (click)="publierOffre(o)">
+                                    <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:check-circle'"></mat-icon>
+                                </button>
+                                <button mat-flat-button class="w-10 h-10 bg-red-50 text-red-500 rounded-xl px-0 min-w-10 flex items-center justify-center" (click)="supprimerOffre(o, $event)">
+                                    <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:trash'"></mat-icon>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                  <h5 class="text-xs font-black text-slate-900 leading-tight uppercase">{{ s.title }}</h5>
-                  <p class="text-[10px] font-medium text-slate-500 mt-1 leading-relaxed">{{ s.message }}</p>
-                </div>
-              </div>
             </div>
-          </div>
-        </section>
 
-        <!-- LIVE PULSE & AGENDA (Timeline) -->
-        <section class="bg-indigo-900/5 backdrop-blur-md rounded-[2.5rem] p-8 border border-indigo-100 shadow-inner">
-          <h3 class="text-lg font-black text-slate-900 tracking-tight mb-8">Agenda <span
-              class="text-indigo-600">Pro</span></h3>
+            <div *ngIf="selectedCandidat && showDetails" class="fixed inset-0 z-[1000] flex justify-end bg-slate-900/20 backdrop-blur-sm" (click)="closeDetails()">
+                <div class="w-full max-w-[450px] bg-white h-full shadow-2xl p-10 flex flex-col overflow-y-auto" (click)="$event.stopPropagation()">
+                    <button (click)="closeDetails()" class="self-start p-2 bg-slate-100 rounded-full mb-8 hover:bg-slate-200 transition-colors">
+                        <mat-icon>close</mat-icon>
+                    </button>
+                    
+                    <div class="text-center mb-10">
+                        <img [src]="selectedCandidat.avatar" class="w-24 h-24 rounded-3xl mx-auto shadow-xl mb-4 border-4 border-white">
+                        <h3 class="text-2xl font-bold text-slate-900">{{ selectedCandidat.name }}</h3>
+                        <p class="text-sm font-bold text-indigo-600 uppercase tracking-widest">{{ selectedCandidat.role }}</p>
+                    </div>
 
-          <div *ngIf="entretiensAVenir.length > 0" class="space-y-6">
-            <div *ngFor="let e of entretiensAVenir.slice(0, 3)"
-              class="relative pl-6 border-l-2 border-indigo-200 ml-2 group">
-              <div
-                class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-white border-4 border-indigo-600 shadow-sm">
-              </div>
+                    <div class="space-y-8">
+                        <section>
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Profil Psychométrique</p>
+                            <div class="h-64">
+                                <apx-chart 
+                                    [series]="radarChartOptions.series!" 
+                                    [chart]="radarChartOptions.chart!"
+                                    [xaxis]="radarChartOptions.xaxis!" 
+                                    [colors]="radarChartOptions.colors!"
+                                    [fill]="radarChartOptions.fill!">
+                                </apx-chart>
+                            </div>
+                        </section>
 
-              <div class="flex items-start justify-between gap-2">
-                <div>
-                  <p class="text-[10px] font-black text-indigo-500 uppercase tracking-widest">{{ e.dateHeure |
-                    date:'HH:mm' }}</p>
-                  <p class="text-xs font-black text-slate-900 leading-tight mt-1">Entretien {{ e.type }}</p>
-                  <p class="text-[9px] font-bold text-slate-400 mt-0.5 truncate max-w-[120px]">Réf: {{
-                    e.id.substring(0,8) }}</p>
+                        <section class="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                            <p class="text-xs font-bold text-indigo-600 uppercase mb-2">Verdict IA</p>
+                            <p class="text-sm text-slate-600 leading-relaxed italic">"{{ selectedCandidat.explanation }}"</p>
+                        </section>
+
+                        <button mat-flat-button class="w-full bg-indigo-600 text-white rounded-xl py-6 font-bold" (click)="voirPipeline(selectedCandidat.original.offreId)">
+                            Consulter Dossier Complet
+                        </button>
+                    </div>
                 </div>
-
-                <!-- Quick Actions for Interview -->
-                <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button mat-icon-button
-                    class="w-7 h-7 min-w-0 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-600 hover:text-white transition-all"
-                    (click)="marquerRealise(e, $event)" matTooltip="Marquer comme réalisé">
-                    <mat-icon [svgIcon]="'heroicons_outline:check'" class="icon-size-3.5"></mat-icon>
-                  </button>
-                  <button mat-icon-button
-                    class="w-7 h-7 min-w-0 bg-red-50 text-red-600 rounded-lg hover:bg-red-600 hover:text-white transition-all"
-                    (click)="annulerEntretien(e, $event)" matTooltip="Annuler">
-                    <mat-icon [svgIcon]="'heroicons_outline:x-mark'" class="icon-size-3.5"></mat-icon>
-                  </button>
-                </div>
-              </div>
             </div>
-          </div>
 
-          <div *ngIf="entretiensAVenir.length === 0" class="text-center py-6">
-            <mat-icon [svgIcon]="'heroicons_outline:calendar'" class="icon-size-10 text-slate-200 mb-2"></mat-icon>
-            <p class="text-xs font-bold text-slate-400">Aucun entretien prévu aujourd'hui</p>
-          </div>
+        </ng-container>
 
-          <button mat-flat-button
-            class="w-full mt-8 bg-white text-indigo-600 border border-indigo-100 rounded-xl font-black text-[10px] shadow-sm uppercase tracking-widest py-5"
-            routerLink="/recrutement/calendrier">
-            Calendrier Complet
-          </button>
-        </section>
-
-        <!-- AI ADVISOR BRIEFING (The Insight) -->
-        <section
-          class="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-[2.2rem] p-7 text-white shadow-xl relative overflow-hidden group">
-          <mat-icon [svgIcon]="'heroicons_outline:light-bulb'"
-            class="absolute -bottom-4 -right-4 icon-size-24 text-white/5 group-hover:scale-110 transition-transform"></mat-icon>
-          <p class="text-[9px] font-black text-indigo-400 uppercase tracking-widest mb-3">Conseil Stratégique IA</p>
-          <p class="text-xs font-medium leading-relaxed italic text-indigo-50/80">
-            "{{ aiInsight }}"
-          </p>
-        </section>
-
-      </div>
-
+        <ng-template #skeleton>
+            <div class="animate-pulse space-y-10">
+                <div class="grid grid-cols-4 gap-6">
+                    <div *ngFor="let i of [1,2,3,4]" class="h-32 bg-white rounded-2xl border border-slate-100"></div>
+                </div>
+                <div class="grid grid-cols-3 gap-8">
+                    <div class="col-span-2 h-96 bg-white rounded-3xl border border-slate-100"></div>
+                    <div class="h-96 bg-white rounded-3xl border border-slate-100"></div>
+                </div>
+            </div>
+        </ng-template>
     </div>
-
-    <!-- ELITE TALENT DETAIL PANEL (Deep-Dive) -->
-    <div class="fixed inset-y-0 right-0 w-[400px] glass-effect shadow-2xl z-[999] p-8 detail-panel flex flex-col"
-      [ngClass]="{'open': showDetails}" *ngIf="selectedCandidat">
-
-      <div class="flex items-center justify-between mb-10">
-        <button mat-icon-button class="bg-slate-100 rounded-xl" (click)="closeDetails()">
-          <mat-icon [svgIcon]="'heroicons_outline:arrow-right'" class="icon-size-5"></mat-icon>
-        </button>
-        <span
-          class="text-[10px] font-black text-indigo-600 uppercase tracking-widest bg-indigo-50 px-3 py-1 rounded-full">Elite
-          Analysis</span>
-      </div>
-
-      <div class="text-center mb-10">
-        <div class="relative inline-block">
-          <img [src]="selectedCandidat.avatar" class="w-24 h-24 rounded-[2rem] border-4 border-white shadow-2xl mb-4">
-          <div
-            class="absolute -bottom-2 -right-2 w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-black text-xs shadow-lg">
-            {{ selectedCandidat.score }}%
-          </div>
-        </div>
-        <h3 class="text-2xl font-black text-slate-900 tracking-tight mt-4">{{ selectedCandidat.name }}</h3>
-        <p class="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mt-1">{{ selectedCandidat.role }}</p>
-      </div>
-
-      <div class="flex-auto overflow-y-auto space-y-10 pr-2">
-
-        <!-- RADAR CHART -->
-        <section>
-          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6">Profil Psychométrique (Radar)
-          </p>
-          <apx-chart [series]="radarChartOptions.series!" [chart]="radarChartOptions.chart!"
-            [xaxis]="radarChartOptions.xaxis!" [colors]="radarChartOptions.colors!" [fill]="radarChartOptions.fill!"
-            [markers]="radarChartOptions.markers!">
-          </apx-chart>
-        </section>
-
-        <!-- EXTRACTED SKILLS -->
-        <section>
-          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6">Compétences Détectées</p>
-          <div class="flex flex-wrap gap-2">
-            <span *ngFor="let s of selectedCandidat.original.competencesExtraites"
-              class="px-3 py-1.5 bg-white border border-slate-100 rounded-xl text-[10px] font-black text-slate-700 shadow-sm">
-              {{ s }}
-            </span>
-            <span *ngIf="!selectedCandidat.original.competencesExtraites?.length"
-              class="text-xs text-slate-400 italic">Aucune compétence isolée</span>
-          </div>
-        </section>
-
-        <!-- AI FEEDBACK -->
-        <section class="bg-slate-900 rounded-[1.5rem] p-5 text-white">
-          <p class="text-[8px] font-black text-indigo-400 uppercase tracking-widest mb-2">Verdict IA</p>
-          <p class="text-[11px] leading-relaxed italic text-indigo-50">
-            "{{ selectedCandidat.explanation }}"
-          </p>
-        </section>
-      </div>
-
-      <div class="pt-8 border-t border-slate-100 mt-auto">
-        <button mat-flat-button
-          class="w-full bg-indigo-600 text-white rounded-2xl py-7 font-black text-xs uppercase tracking-widest shadow-xl shadow-indigo-100"
-          (click)="voirPipeline(selectedCandidat.original.offreId)">
-          Consulter Dossier Complet
-        </button>
-      </div>
-
-    </div>
-
-  </ng-container>
-
-  <!-- SKELETON LOADING STATE -->
-  <ng-template #skeleton>
-    <div class="grid grid-cols-4 gap-6 mb-8">
-      <div *ngFor="let i of [1,2,3,4]" class="bg-white p-5 rounded-[1.8rem] border border-slate-100 h-20 skeleton">
-      </div>
-    </div>
-    <div class="bg-white/50 p-6 rounded-[2.5rem] h-48 mb-10 skeleton"></div>
-    <div class="grid grid-cols-3 gap-8">
-      <div class="col-span-2 space-y-8">
-        <div class="bg-white h-[400px] rounded-[2.5rem] skeleton"></div>
-        <div class="grid grid-cols-2 gap-6">
-          <div class="bg-white h-48 rounded-[2.2rem] skeleton"></div>
-          <div class="bg-white h-48 rounded-[2.2rem] skeleton"></div>
-        </div>
-      </div>
-      <div class="space-y-8">
-        <div class="bg-white h-64 rounded-[1.8rem] skeleton"></div>
-        <div class="bg-white h-80 rounded-[2.5rem] skeleton"></div>
-      </div>
-    </div>
-  </ng-template>
 </div>

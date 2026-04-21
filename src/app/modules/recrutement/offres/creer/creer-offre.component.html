@@ -28,10 +28,13 @@
               <mat-select formControlName="departement">
                 <mat-option *ngFor="let d of departements" [value]="d">{{ d }}</mat-option>
               </mat-select>
+              <mat-error *ngIf="form.get('departement')?.hasError('required')">Département requis</mat-error>
             </mat-form-field>
             <mat-form-field>
               <mat-label>Localisation</mat-label>
               <input matInput formControlName="localisation" placeholder="Tunis, Sfax...">
+              <mat-error *ngIf="form.get('localisation')?.hasError('required')">La localisation est requise</mat-error>
+              <mat-error *ngIf="form.get('localisation')?.hasError('minlength')">Minimum 3 caractères</mat-error>
             </mat-form-field>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -40,18 +43,21 @@
               <mat-select formControlName="typeContrat">
                 <mat-option *ngFor="let t of typesContrat" [value]="t">{{ t }}</mat-option>
               </mat-select>
+              <mat-error>Type requis</mat-error>
             </mat-form-field>
             <mat-form-field>
               <mat-label>Niveau d'expérience</mat-label>
               <mat-select formControlName="niveauExperience">
                 <mat-option *ngFor="let n of niveauxExp" [value]="n">{{ n }}</mat-option>
               </mat-select>
+              <mat-error>Niveau requis</mat-error>
             </mat-form-field>
             <mat-form-field>
               <mat-label>Niveau d'études</mat-label>
               <mat-select formControlName="niveauEtudes">
                 <mat-option *ngFor="let n of niveauxEtudes" [value]="n">{{ n }}</mat-option>
               </mat-select>
+              <mat-error>Niveau requis</mat-error>
             </mat-form-field>
           </div>
         </div>
@@ -159,18 +165,26 @@
           <mat-form-field>
             <mat-label>Salaire minimum (TND)</mat-label>
             <input matInput type="number" formControlName="salaireMin" min="0">
+            <mat-error *ngIf="form.get('salaireMin')?.hasError('required')">Salaire min requis</mat-error>
           </mat-form-field>
           <mat-form-field>
             <mat-label>Salaire maximum (TND)</mat-label>
             <input matInput type="number" formControlName="salaireMax" min="0">
+            <mat-error *ngIf="form.get('salaireMax')?.hasError('required')">Salaire max requis</mat-error>
           </mat-form-field>
+          <div class="sm:col-span-2 -mt-4 mb-2" *ngIf="form.hasError('salaryInconsistent')">
+            <p class="text-red-500 text-xs font-semibold">Le salaire maximum doit être supérieur ou égal au salaire minimum.</p>
+          </div>
           <mat-form-field>
             <mat-label>Nombre de postes</mat-label>
             <input matInput type="number" formControlName="nombrePostes" min="1">
+            <mat-error *ngIf="form.get('nombrePostes')?.hasError('min')">Minimum 1 poste</mat-error>
           </mat-form-field>
           <mat-form-field>
             <mat-label>Date d'expiration</mat-label>
             <input matInput type="datetime-local" formControlName="dateExpiration">
+            <mat-error *ngIf="form.get('dateExpiration')?.hasError('required')">Date requise</mat-error>
+            <mat-error *ngIf="form.get('dateExpiration')?.hasError('pastDate')">La date doit être dans le futur</mat-error>
           </mat-form-field>
         </div>
       </div>

@@ -19,6 +19,7 @@ export class PostulerComponent implements OnInit {
   loading = false;
   submitted = false;
   errorMsg = '';
+  readonly MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
   constructor(
     private fb: FormBuilder,
@@ -47,14 +48,42 @@ export class PostulerComponent implements OnInit {
   onCvChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files?.length) {
-      this.cvFile = input.files[0];
+      const file = input.files[0];
+      if (file.type !== 'application/pdf') {
+        this.errorMsg = 'Le CV doit être un fichier PDF.';
+        this.cvFile = null;
+        this.form.patchValue({ cvFile: null });
+        return;
+      }
+      if (file.size > this.MAX_FILE_SIZE) {
+        this.errorMsg = 'Le fichier est trop volumineux (max 5 Mo).';
+        this.cvFile = null;
+        this.form.patchValue({ cvFile: null });
+        return;
+      }
+      this.cvFile = file;
       this.form.patchValue({ cvFile: this.cvFile });
+      this.errorMsg = '';
     }
   }
 
   onLettreChange(event: Event): void {
     const input = event.target as HTMLInputElement;
-    if (input.files?.length) this.lettreFile = input.files[0];
+    if (input.files?.length) {
+      const file = input.files[0];
+      if (file.type !== 'application/pdf') {
+        this.errorMsg = 'La lettre de motivation doit être un fichier PDF.';
+        this.lettreFile = null;
+        return;
+      }
+      if (file.size > this.MAX_FILE_SIZE) {
+        this.errorMsg = 'La lettre est trop volumineuse (max 5 Mo).';
+        this.lettreFile = null;
+        return;
+      }
+      this.lettreFile = file;
+      this.errorMsg = '';
+    }
   }
 
   submit(): void {
