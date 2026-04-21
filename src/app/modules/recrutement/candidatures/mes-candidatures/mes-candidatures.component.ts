@@ -56,9 +56,25 @@ export class MesCandidaturesComponent implements OnInit {
   // CRUD: Update
   showEditModal = false;
   editingCandidature: Candidature | null = null;
+  expandedId: string | null = null;
+  selectedCandidature: Candidature | null = null;
   newCv: File | null = null;
   newLettre: File | null = null;
   updating = false;
+
+  // INNOVATIVE: Insider Network
+  ambassadeurs = [
+    { 
+      name: 'Thomas Durant', role: 'Tech Lead Fullstack', dept: 'IT & Développement', 
+      avatar: 'https://i.pravatar.cc/150?u=thomas', bio: 'Expert en architecture Cloud & Agile.',
+      quote: 'On adore les profils curieux, hâte de voir tes idées !'
+    },
+    { 
+      name: 'Sarah Lemoine', role: 'Talent Acquisition', dept: 'Ressources Humaines', 
+      avatar: 'https://i.pravatar.cc/150?u=sarah', bio: 'Garante du bien-être et de la culture RSE.',
+      quote: 'L\'authenticité est notre valeur n°1.'
+    }
+  ];
 
   // Video Test
   showVideoModal = false;
@@ -121,6 +137,18 @@ export class MesCandidaturesComponent implements OnInit {
     this.stats.total = this.candidatures.length;
     this.stats.enCours = this.candidatures.filter(c => !['ACCEPTE', 'REFUSE'].includes(c.statut)).length;
     this.stats.acceptes = this.candidatures.filter(c => c.statut === 'ACCEPTE').length;
+  }
+
+  toggleExpand(id: string): void {
+    this.expandedId = this.expandedId === id ? null : id;
+  }
+
+  selectCandidature(c: Candidature): void {
+    this.selectedCandidature = c;
+  }
+
+  closeDrawer(): void {
+    this.selectedCandidature = null;
   }
 
   applyFilter(filter: string): void {
