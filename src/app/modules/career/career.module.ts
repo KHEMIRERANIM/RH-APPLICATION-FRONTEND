@@ -1,6 +1,7 @@
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
 
 // Angular Material
 import { MatTableModule } from '@angular/material/table';
@@ -21,42 +22,53 @@ import { MatNativeDateModule } from '@angular/material/core';
 
 import { CareerRoutingModule } from './career-routing.module';
 
+// Career
 import { CareerListComponent } from './components/career-list/career-list.component';
 import { CareerFormComponent } from './components/career-form/career-form.component';
+import { CareerAdminDashboardComponent } from './components/career-admin-dashboard/career-admin-dashboard.component';
+import { CareerEmployeesDialogComponent } from './components/career-employees-dialog/career-employees-dialog.component';
+
+// Mobility
 import { MobilityDashboardComponent } from './components/mobility-dashboard/mobility-dashboard.component';
 import { MobilityRequestFormComponent } from './components/mobility-request-form/mobility-request-form.component';
-import { CareerPlanDashboardComponent } from './components/career-plan-dashboard/career-plan-dashboard.component';
-import { CareerPlanFormComponent } from './components/career-plan-form/career-plan-form.component';
-import { CareerEmployeesDialogComponent } from './components/career-employees-dialog/career-employees-dialog.component';
 import { EmployeeMobilityComponent } from './components/employee-mobility/employee-mobility.component';
-import { EmployeePlanComponent } from './components/employee-plan/employee-plan.component';
 import { MotivationPreviewDialogComponent } from './components/motivation-preview-dialog/motivation-preview-dialog.component';
 import { MotivationAnalysisComponent } from './components/motivation-analysis/motivation-analysis.component';
-import { CareerAdminDashboardComponent } from './components/career-admin-dashboard/career-admin-dashboard.component';
+
+// Plan
+import { CareerPlanDashboardComponent } from './components/career-plan-dashboard/career-plan-dashboard.component';
+import { CareerPlanFormComponent } from './components/career-plan-form/career-plan-form.component';
+import { EmployeePlanComponent } from './components/employee-plan/employee-plan.component';
 import { EmployeeAiRecommendationComponent } from './components/employee-ai-recommendation/employee-ai-recommendation.component';
+
+// RSE
+import { RseActionFormComponent } from './components/rse-action-form/rse-action-form.component';
+import { RseAdminDashboardComponent } from './components/rse-action-form/rse-admin-dashboard.component';
 
 @NgModule({
   declarations: [
     CareerListComponent,
     CareerFormComponent,
+    CareerAdminDashboardComponent,
+    CareerEmployeesDialogComponent,
     MobilityDashboardComponent,
     MobilityRequestFormComponent,
-    CareerPlanDashboardComponent,
-    CareerPlanFormComponent,
-    CareerEmployeesDialogComponent,
     EmployeeMobilityComponent,
-    EmployeePlanComponent,
     MotivationPreviewDialogComponent,
     MotivationAnalysisComponent,
-    CareerAdminDashboardComponent,
-    EmployeeAiRecommendationComponent
+    CareerPlanDashboardComponent,
+    CareerPlanFormComponent,
+    EmployeePlanComponent,
+    EmployeeAiRecommendationComponent,
+    RseActionFormComponent,
+    RseAdminDashboardComponent
   ],
   imports: [
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
+    HttpClientModule,
     CareerRoutingModule,
-
     MatTableModule,
     MatPaginatorModule,
     MatSortModule,
@@ -75,4 +87,4 @@ import { EmployeeAiRecommendationComponent } from './components/employee-ai-reco
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
-export class CareerModule { }
+export class CareerModule {}

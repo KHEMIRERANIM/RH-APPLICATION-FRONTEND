@@ -1,209 +1,235 @@
 <div class="career-dashboard">
 
-  <!-- Loading -->
-  <div *ngIf="isLoading" class="career-dashboard__loading">
-    <mat-spinner diameter="32" class="career-dashboard__spinner"></mat-spinner>
+  <!-- Tabs admin -->
+  <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+    <button (click)="setAdminTab('overview')" [style]="getAdminTabStyle('overview')">
+      📊 Vue globale
+    </button>
+
+    <button (click)="setAdminTab('mobility')" [style]="getAdminTabStyle('mobility')">
+      🔄 Demandes mobilité
+    </button>
+
+    <button (click)="setAdminTab('plans')" [style]="getAdminTabStyle('plans')">
+      📈 Plans d’évolution
+    </button>
+
+    <button (click)="setAdminTab('rse')" [style]="getAdminTabStyle('rse')">
+      🌱 RSE
+    </button>
   </div>
 
-  <ng-container *ngIf="!isLoading">
+  <!-- ===== VUE GLOBALE ===== -->
+  <ng-container *ngIf="adminTab === 'overview'">
 
-    <!-- ── KPI Cards ─────────────────────────────────────────────────── -->
-    <div class="kpi-grid">
-
-      <div class="kpi-card kpi-card--neutral">
-        <div class="kpi-card__orb kpi-card__orb--purple"></div>
-        <div class="kpi-card__icon">💼</div>
-        <p class="kpi-card__value">{{ totalPositions }}</p>
-        <p class="kpi-card__label">Postes disponibles</p>
-      </div>
-
-      <div class="kpi-card kpi-card--neutral">
-        <div class="kpi-card__orb kpi-card__orb--blue"></div>
-        <div class="kpi-card__icon">👥</div>
-        <p class="kpi-card__value">{{ totalEmployees }}</p>
-        <p class="kpi-card__label">Employés actifs</p>
-      </div>
-
-      <div class="kpi-card kpi-card--neutral">
-        <div class="kpi-card__orb kpi-card__orb--green"></div>
-        <div class="kpi-card__icon">📈</div>
-        <p class="kpi-card__value">{{ totalPlans }}</p>
-        <p class="kpi-card__label">Plans d'évolution</p>
-      </div>
-
-      <div class="kpi-card kpi-card--neutral">
-        <div class="kpi-card__orb kpi-card__orb--amber"></div>
-        <div class="kpi-card__icon">🔄</div>
-        <p class="kpi-card__value">{{ totalMobilities }}</p>
-        <p class="kpi-card__label">Demandes mobilité</p>
-      </div>
-
-      <div class="kpi-card kpi-card--primary">
-        <div class="kpi-card__icon">🎯</div>
-        <p class="kpi-card__value kpi-card__value--on-primary">{{ avgProgress }}%</p>
-        <p class="kpi-card__label kpi-card__label--on-primary">Progression moyenne</p>
-        <div class="kpi-progress">
-          <div class="kpi-progress__bar" [style.width]="avgProgress + '%'"></div>
-        </div>
-      </div>
-
-      <div class="kpi-card kpi-card--warning">
-        <div class="kpi-card__icon">⏳</div>
-        <p class="kpi-card__value kpi-card__value--warning">{{ pendingRequests }}</p>
-        <p class="kpi-card__label kpi-card__label--warning">En attente de décision</p>
-      </div>
-
+    <div *ngIf="isLoading" class="career-dashboard__loading">
+      <mat-spinner diameter="32" class="career-dashboard__spinner"></mat-spinner>
     </div>
 
-    <!-- ── Graphes row ────────────────────────────────────────────────── -->
-    <div class="charts-grid">
+    <ng-container *ngIf="!isLoading">
 
-      <!-- Statut des plans -->
-      <div class="panel">
-        <p class="panel__title">📊 Plans par statut</p>
-        <div class="stack">
-          <div *ngFor="let s of plansByStatus" class="stack__item">
-            <div class="row row--space">
-              <span class="meta">{{ s.label }}</span>
+      <div class="kpi-grid">
+
+        <div class="kpi-card kpi-card--neutral">
+          <div class="kpi-card__orb kpi-card__orb--purple"></div>
+          <div class="kpi-card__icon">💼</div>
+          <p class="kpi-card__value">{{ totalPositions }}</p>
+          <p class="kpi-card__label">Postes disponibles</p>
+        </div>
+
+        <div class="kpi-card kpi-card--neutral">
+          <div class="kpi-card__orb kpi-card__orb--blue"></div>
+          <div class="kpi-card__icon">👥</div>
+          <p class="kpi-card__value">{{ totalEmployees }}</p>
+          <p class="kpi-card__label">Employés actifs</p>
+        </div>
+
+        <div class="kpi-card kpi-card--neutral">
+          <div class="kpi-card__orb kpi-card__orb--green"></div>
+          <div class="kpi-card__icon">📈</div>
+          <p class="kpi-card__value">{{ totalPlans }}</p>
+          <p class="kpi-card__label">Plans d'évolution</p>
+        </div>
+
+        <div class="kpi-card kpi-card--neutral">
+          <div class="kpi-card__orb kpi-card__orb--amber"></div>
+          <div class="kpi-card__icon">🔄</div>
+          <p class="kpi-card__value">{{ totalMobilities }}</p>
+          <p class="kpi-card__label">Demandes mobilité</p>
+        </div>
+
+        <div class="kpi-card kpi-card--primary">
+          <div class="kpi-card__icon">🎯</div>
+          <p class="kpi-card__value kpi-card__value--on-primary">{{ avgProgress }}%</p>
+          <p class="kpi-card__label kpi-card__label--on-primary">Progression moyenne</p>
+          <div class="kpi-progress">
+            <div class="kpi-progress__bar" [style.width]="avgProgress + '%'"></div>
+          </div>
+        </div>
+
+        <div class="kpi-card kpi-card--warning">
+          <div class="kpi-card__icon">⏳</div>
+          <p class="kpi-card__value kpi-card__value--warning">{{ pendingRequests }}</p>
+          <p class="kpi-card__label kpi-card__label--warning">En attente de décision</p>
+        </div>
+
+      </div>
+
+      <div class="charts-grid">
+
+        <div class="panel">
+          <p class="panel__title">📊 Plans par statut</p>
+          <div class="stack">
+            <div *ngFor="let s of plansByStatus" class="stack__item">
+              <div class="row row--space">
+                <span class="meta">{{ s.label }}</span>
+                <span class="meta meta--strong">{{ s.count }}</span>
+              </div>
+              <div class="bar">
+                <div
+                  class="bar__fill"
+                  [style.background]="s.color"
+                  [style.width]="getBarWidth(s.count, getMaxCount(plansByStatus))">
+                </div>
+              </div>
+            </div>
+            <div *ngIf="!totalPlans" class="empty">
+              Aucun plan
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <p class="panel__title">🔄 Demandes de mobilité</p>
+
+          <div class="gauge-wrap">
+            <div class="gauge">
+              <svg width="100" height="100" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40" fill="none" stroke="#f3f4f6" stroke-width="10"/>
+                <circle cx="50" cy="50" r="40" fill="none" stroke="#16a34a" stroke-width="10"
+                        stroke-dasharray="251.2"
+                        [attr.stroke-dashoffset]="totalMobilities ? 251.2 * (1 - approvedRequests / totalMobilities) : 251.2"
+                        stroke-linecap="round"
+                        transform="rotate(-90 50 50)"/>
+              </svg>
+              <div class="gauge__center">
+                <p class="gauge__value">
+                  {{ totalMobilities ? Math.round(approvedRequests / totalMobilities * 100) : 0 }}%
+                </p>
+                <p class="gauge__label">approuvé</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="stack stack--tight">
+            <div *ngFor="let s of mobilityByStatus" class="pill-row">
+              <div class="row row--gap">
+                <div class="dot" [style.background]="s.color"></div>
+                <span class="meta">{{ s.label }}</span>
+              </div>
               <span class="meta meta--strong">{{ s.count }}</span>
             </div>
-            <div class="bar">
-              <div
-                class="bar__fill"
-                [style.background]="s.color"
-                [style.width]="getBarWidth(s.count, getMaxCount(plansByStatus))"
-              ></div>
-            </div>
-          </div>
-          <div *ngIf="!totalPlans"
-               class="empty">
-            Aucun plan
           </div>
         </div>
-      </div>
 
-      <!-- Statut des mobilités -->
-      <div class="panel">
-        <p class="panel__title">🔄 Demandes de mobilité</p>
-
-        <!-- Jauge circulaire simple -->
-        <div class="gauge-wrap">
-          <div class="gauge">
-            <svg width="100" height="100" viewBox="0 0 100 100">
-              <circle cx="50" cy="50" r="40" fill="none" stroke="#f3f4f6" stroke-width="10"/>
-              <circle cx="50" cy="50" r="40" fill="none" stroke="#16a34a" stroke-width="10"
-                      stroke-dasharray="251.2"
-                      [attr.stroke-dashoffset]="totalMobilities ? 251.2 * (1 - approvedRequests / totalMobilities) : 251.2"
-                      stroke-linecap="round"
-                      transform="rotate(-90 50 50)"/>
-            </svg>
-            <div class="gauge__center">
-              <p class="gauge__value">
-                {{ totalMobilities ? Math.round(approvedRequests / totalMobilities * 100) : 0 }}%
-              </p>
-              <p class="gauge__label">approuvé</p>
+        <div class="panel">
+          <p class="panel__title">📉 Distribution progression</p>
+          <div class="mini-bars">
+            <div *ngFor="let p of progressDistribution" class="mini-bars__col">
+              <span class="mini-bars__count">{{ p.count }}</span>
+              <div class="mini-bars__bar"
+                   [style.background]="p.color"
+                   [style.height]="getBarWidth(p.count, getMaxCount(progressDistribution))"></div>
+            </div>
+          </div>
+          <div class="mini-bars__labels">
+            <div *ngFor="let p of progressDistribution" class="mini-bars__label">
+              <span class="hint">{{ p.range }}</span>
             </div>
           </div>
         </div>
 
-        <div class="stack stack--tight">
-          <div *ngFor="let s of mobilityByStatus"
-               class="pill-row">
-            <div class="row row--gap">
-              <div class="dot" [style.background]="s.color"></div>
-              <span class="meta">{{ s.label }}</span>
-            </div>
-            <span class="meta meta--strong">{{ s.count }}</span>
-          </div>
-        </div>
       </div>
 
-      <!-- Distribution progression -->
-      <div class="panel">
-        <p class="panel__title">📉 Distribution progression</p>
-        <div class="mini-bars">
-          <div *ngFor="let p of progressDistribution"
-               class="mini-bars__col">
-            <span class="mini-bars__count">{{ p.count }}</span>
-            <div class="mini-bars__bar" [style.background]="p.color"
-                 [style.height]="getBarWidth(p.count, getMaxCount(progressDistribution))"></div>
-          </div>
-        </div>
-        <div class="mini-bars__labels">
-          <div *ngFor="let p of progressDistribution" class="mini-bars__label">
-            <span class="hint">{{ p.range }}</span>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- ── Top postes demandés ─────────────────────────────────────────── -->
-    <div *ngIf="topTargetCareers.length"
-         class="panel">
-      <p class="panel__title">🏆 Postes les plus demandés</p>
-      <div class="stack">
-        <div *ngFor="let c of topTargetCareers; let i = index"
-             class="top-row">
-          <span class="rank" [ngClass]="{
+      <div *ngIf="topTargetCareers.length" class="panel">
+        <p class="panel__title">🏆 Postes les plus demandés</p>
+        <div class="stack">
+          <div *ngFor="let c of topTargetCareers; let i = index" class="top-row">
+            <span class="rank" [ngClass]="{
               'rank--gold': i === 0,
               'rank--silver': i === 1,
               'rank--pink': i === 2
             }">
-            {{ i + 1 }}
-          </span>
-          <span class="top-row__title">{{ c.title }}</span>
-          <div class="row row--gap">
-            <div class="bar bar--sm">
-              <div class="bar__fill bar__fill--accent"
-                   [style.width]="getBarWidth(c.count, getMaxCount(topTargetCareers))"></div>
+              {{ i + 1 }}
+            </span>
+            <span class="top-row__title">{{ c.title }}</span>
+            <div class="row row--gap">
+              <div class="bar bar--sm">
+                <div class="bar__fill bar__fill--accent"
+                     [style.width]="getBarWidth(c.count, getMaxCount(topTargetCareers))"></div>
+              </div>
+              <span class="accent">{{ c.count }}</span>
             </div>
-            <span class="accent">{{ c.count }}</span>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- ── Résumé rapide ──────────────────────────────────────────────── -->
-    <div class="summary-grid">
+      <div class="summary-grid">
 
-      <div class="panel">
-        <p class="panel__title">✅ Taux d'approbation mobilité</p>
-        <div class="row row--gap-lg">
-          <div class="row__grow">
-            <div class="bar bar--lg">
-              <div class="bar__fill bar__fill--success"
-                   [style.width]="(totalMobilities ? Math.round(approvedRequests / totalMobilities * 100) : 0) + '%'"></div>
+        <div class="panel">
+          <p class="panel__title">✅ Taux d'approbation mobilité</p>
+          <div class="row row--gap-lg">
+            <div class="row__grow">
+              <div class="bar bar--lg">
+                <div class="bar__fill bar__fill--success"
+                     [style.width]="(totalMobilities ? Math.round(approvedRequests / totalMobilities * 100) : 0) + '%'"></div>
+              </div>
             </div>
+            <span class="big big--success">
+              {{ totalMobilities ? Math.round(approvedRequests / totalMobilities * 100) : 0 }}%
+            </span>
           </div>
-          <span class="big big--success">
-            {{ totalMobilities ? Math.round(approvedRequests / totalMobilities * 100) : 0 }}%
-          </span>
+          <p class="hint hint--mt">
+            {{ approvedRequests }} approuvées sur {{ totalMobilities }} demandes
+          </p>
         </div>
-        <p class="hint hint--mt">
-          {{ approvedRequests }} approuvées sur {{ totalMobilities }} demandes
-        </p>
+
+        <div class="panel">
+          <p class="panel__title">📋 Plans avec progression &gt; 50%</p>
+          <div class="row row--gap-lg">
+            <div class="row__grow">
+              <div class="bar bar--lg">
+                <div class="bar__fill bar__fill--accent"
+                     [style.width]="(totalPlans ? Math.round((progressDistribution[3]?.count + progressDistribution[4]?.count || 0) / totalPlans * 100) : 0) + '%'"></div>
+              </div>
+            </div>
+            <span class="big big--accent">
+              {{ totalPlans ? Math.round((progressDistribution[3]?.count + progressDistribution[4]?.count || 0) / totalPlans * 100) : 0 }}%
+            </span>
+          </div>
+          <p class="hint hint--mt">
+            {{ (progressDistribution[3]?.count || 0) + (progressDistribution[4]?.count || 0) }} plans sur {{ totalPlans }}
+          </p>
+        </div>
+
       </div>
 
-      <div class="panel">
-        <p class="panel__title">📋 Plans avec progression &gt; 50%</p>
-        <div class="row row--gap-lg">
-          <div class="row__grow">
-            <div class="bar bar--lg">
-              <div class="bar__fill bar__fill--accent"
-                   [style.width]="(totalPlans ? Math.round((progressDistribution[3]?.count + progressDistribution[4]?.count || 0) / totalPlans * 100) : 0) + '%'"></div>
-            </div>
-          </div>
-          <span class="big big--accent">
-            {{ totalPlans ? Math.round((progressDistribution[3]?.count + progressDistribution[4]?.count || 0) / totalPlans * 100) : 0 }}%
-          </span>
-        </div>
-        <p class="hint hint--mt">
-          {{ (progressDistribution[3]?.count || 0) + (progressDistribution[4]?.count || 0) }} plans sur {{ totalPlans }}
-        </p>
-      </div>
-
-    </div>
-
+    </ng-container>
   </ng-container>
+
+  <!-- ===== DEMANDES MOBILITÉ ===== -->
+  <ng-container *ngIf="adminTab === 'mobility'">
+    <app-mobility-dashboard></app-mobility-dashboard>
+  </ng-container>
+
+  <!-- ===== PLANS D'ÉVOLUTION ===== -->
+  <ng-container *ngIf="adminTab === 'plans'">
+    <app-career-plan-dashboard></app-career-plan-dashboard>
+  </ng-container>
+
+  <!-- ===== RSE ===== -->
+  <ng-container *ngIf="adminTab === 'rse'">
+    <app-rse-admin-dashboard></app-rse-admin-dashboard>
+  </ng-container>
+
 </div>

@@ -1,0 +1,181 @@
+<div class="rse-admin-page">
+
+  <div class="rse-admin-hero">
+    <div>
+      <h2 class="rse-admin-hero__title">🌍 Dashboard RSE Admin</h2>
+      <p class="rse-admin-hero__subtitle">
+        Gérez les actions RSE, validez les soumissions et suivez la progression globale.
+      </p>
+    </div>
+  </div>
+
+  <div class="rse-admin-kpis">
+    <div class="rse-kpi-card rse-kpi-card--green">
+      <p class="rse-kpi-card__icon">📥</p>
+      <p class="rse-kpi-card__value">{{ pendingCount }}</p>
+      <p class="rse-kpi-card__label">Actions en attente</p>
+    </div>
+
+    <div class="rse-kpi-card rse-kpi-card--blue">
+      <p class="rse-kpi-card__icon">✅</p>
+      <p class="rse-kpi-card__value">{{ latestPointsAdded }}</p>
+      <p class="rse-kpi-card__label">Derniers points attribués</p>
+    </div>
+
+    <div class="rse-kpi-card rse-kpi-card--amber">
+      <p class="rse-kpi-card__icon">🏆</p>
+      <p class="rse-kpi-card__value">{{ latestBadgesCount }}</p>
+      <p class="rse-kpi-card__label">Badges gagnés récemment</p>
+    </div>
+
+    <div class="rse-kpi-card rse-kpi-card--purple">
+      <p class="rse-kpi-card__icon">🌱</p>
+      <p class="rse-kpi-card__value">{{ latestTotalPoints }}</p>
+      <p class="rse-kpi-card__label">Total points utilisateur</p>
+    </div>
+  </div>
+
+  <!-- Actions en attente -->
+  <div class="rse-admin-card">
+    <div class="rse-admin-card__header">
+      <h3>Actions en attente</h3>
+      <p>Validez les actions déclarées par les employés.</p>
+    </div>
+
+    <div *ngIf="loading" class="rse-loading">
+      <mat-spinner diameter="36"></mat-spinner>
+    </div>
+
+    <ng-container *ngIf="!loading">
+      <div *ngFor="let action of actions" class="rse-action-row">
+        <div class="rse-action-row__content">
+          <div class="rse-chip">{{ action.type }}</div>
+
+          <p class="rse-action-row__employee"
+             *ngIf="action.nom || action.prenom || action.email">
+            <strong>Employé :</strong>
+            {{ ((action.prenom || '') + ' ' + (action.nom || '')).trim() || '—' }}
+            <span *ngIf="action.email"> — {{ action.email }}</span>
+          </p>
+
+          <p class="rse-action-row__title">{{ action.description }}</p>
+          <p class="rse-action-row__meta">Statut : {{ action.status }}</p>
+        </div>
+
+        <button class="rse-validate-btn" (click)="validateAction(action.id)">
+          Valider
+        </button>
+      </div>
+
+      <div *ngIf="actions.length === 0" class="rse-empty">
+        Aucune action en attente.
+      </div>
+    </ng-container>
+  </div>
+
+  <!-- Dernier résultat -->
+  <div *ngIf="validationResult" class="rse-admin-card">
+    <div class="rse-admin-card__header">
+      <h3>Dernier résultat de validation</h3>
+    </div>
+
+    <p class="rse-action-row__employee"
+       *ngIf="validationResult.nom || validationResult.prenom || validationResult.email">
+      <strong>Employé :</strong>
+      {{ ((validationResult.prenom || '') + ' ' + (validationResult.nom || '')).trim() || '—' }}
+      <span *ngIf="validationResult.email"> — {{ validationResult.email }}</span>
+    </p>
+
+    <div class="rse-result-grid">
+      <div class="rse-result-box">
+        <span>Points ajoutés</span>
+        <strong>{{ validationResult.pointsAdded }}</strong>
+      </div>
+
+      <div class="rse-result-box">
+        <span>Total points</span>
+        <strong>{{ validationResult.totalPoints }}</strong>
+      </div>
+
+      <div class="rse-result-box">
+        <span>Niveau</span>
+        <strong>{{ validationResult.level }}</strong>
+      </div>
+    </div>
+
+    <div class="badge-list" *ngIf="validationResult.badges?.length">
+      <div class="badge-pill" *ngFor="let badge of validationResult.badges">
+        🏅 {{ badge }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Demandes déjà approuvées -->
+  <div class="rse-admin-card rse-admin-card--history" *ngIf="validatedActions.length">
+    <div class="rse-admin-card__header">
+      <h3>Demandes déjà approuvées</h3>
+      <p>Historique des demandes validées.</p>
+    </div>
+
+    <div class="validated-grid">
+      <div *ngFor="let action of validatedActions" class="validated-card">
+
+        <div class="validated-card__top">
+          <div class="validated-card__type-chip">
+            {{ action.type }}
+          </div>
+
+          <div class="validated-card__status">
+            ✅ {{ action.status }}
+          </div>
+        </div>
+
+        <div class="validated-card__employee">
+          <div class="validated-card__avatar">
+            {{ ((action.prenom || '?') | slice:0:1) }}{{ ((action.nom || '?') | slice:0:1) }}
+          </div>
+
+          <div class="validated-card__employee-info">
+            <p class="validated-card__employee-label">Employé</p>
+            <p class="validated-card__employee-name">
+              {{ ((action.prenom || '') + ' ' + (action.nom || '')).trim() || '—' }}
+            </p>
+            <p class="validated-card__employee-email" *ngIf="action.email">
+              {{ action.email }}
+            </p>
+          </div>
+        </div>
+
+        <div class="validated-card__description">
+          {{ action.description }}
+        </div>
+
+        <div class="validated-card__stats">
+          <div class="validated-stat">
+            <span class="validated-stat__label">Points</span>
+            <span class="validated-stat__value">{{ action.rsePoints }}</span>
+          </div>
+
+          <div class="validated-stat">
+            <span class="validated-stat__label">Niveau</span>
+            <span class="validated-stat__value validated-stat__value--level">
+              {{ action.rseLevel }}
+            </span>
+          </div>
+        </div>
+
+        <div class="validated-card__badges" *ngIf="action.badges?.length">
+          <div class="validated-badge" *ngFor="let badge of action.badges">
+            🏅 {{ badge }}
+          </div>
+        </div>
+
+        <div class="validated-card__footer" *ngIf="action.createdAt">
+          <span>🕒 {{ action.createdAt | date:'short' }}</span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
