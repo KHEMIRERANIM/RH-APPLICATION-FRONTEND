@@ -932,6 +932,12 @@
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
             <h3 class="text-2xl font-semibold text-[#0F3460]">Mes trajets</h3>
             <div class="flex items-center gap-2">
+              <!-- Bouton Revenus -->
+              <button (click)="openEarningsModal()"
+                class="flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm transition-all shadow-sm bg-gradient-to-r from-amber-400 to-amber-500 text-white hover:from-amber-500 hover:to-amber-600 hover:shadow-md active:scale-[0.98]">
+                <span class="text-base">💰</span>
+                Revenus gagnés
+              </button>
               <!-- Filtre statut : liste déroulante -->
               <select [(ngModel)]="trajetFilter"
                 class="px-3 py-2 rounded-lg border border-gray-200 text-sm font-semibold text-gray-600 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1D9E75]/30 focus:border-[#1D9E75] transition-colors cursor-pointer">
@@ -1193,6 +1199,219 @@
     </div>
   </div>
   <!-- ===================== FIN SECTION PROPOSES ===================== -->
+
+  <!-- ══════════════ MODALE REVENUS GAGNÉS ══════════════ -->
+  <div *ngIf="showEarningsModal"
+    class="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+    style="background: rgba(10,20,40,0.65); backdrop-filter: blur(6px);">
+
+    <div class="relative w-full max-w-4xl max-h-[92vh] overflow-y-auto bg-white rounded-3xl shadow-2xl flex flex-col"
+      style="animation: slideUpModal .3s cubic-bezier(.22,.68,0,1.2) both;">
+
+      <!-- Header -->
+      <div class="sticky top-0 z-10 bg-gradient-to-r from-[#0F3460] to-[#1D9E75] rounded-t-3xl px-8 py-6 flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center text-2xl shadow-inner">💰</div>
+          <div>
+            <h2 class="text-white font-black text-xl tracking-tight">Tableau de bord des revenus</h2>
+            <p class="text-white/70 text-sm font-medium">Statistiques de vos trajets proposés</p>
+          </div>
+        </div>
+        <button (click)="showEarningsModal = false"
+          class="w-10 h-10 bg-white/20 hover:bg-white/30 text-white rounded-xl flex items-center justify-center transition-all">
+          <mat-icon svgIcon="feather:x" class="icon-size-5"></mat-icon>
+        </button>
+      </div>
+
+      <!-- KPI Cards -->
+      <div class="px-8 pt-6 pb-2 grid grid-cols-2 md:grid-cols-4 gap-4">
+        <!-- Total revenus -->
+        <div class="bg-gradient-to-br from-amber-50 to-amber-100/60 border border-amber-200/60 rounded-2xl p-5 flex flex-col gap-1.5">
+          <div class="flex items-center gap-2 mb-1">
+            <div class="w-8 h-8 bg-amber-400/20 rounded-xl flex items-center justify-center text-base">💰</div>
+            <span class="text-xs font-bold text-amber-700 tracking-wider uppercase">Revenus totaux</span>
+          </div>
+          <p class="text-3xl font-black text-amber-600">{{ totalRevenus | number:'1.0-0' }}</p>
+          <p class="text-xs text-amber-500 font-semibold">DT</p>
+        </div>
+        <!-- Trajets effectués -->
+        <div class="bg-gradient-to-br from-[#1D9E75]/5 to-[#1D9E75]/10 border border-[#1D9E75]/20 rounded-2xl p-5 flex flex-col gap-1.5">
+          <div class="flex items-center gap-2 mb-1">
+            <div class="w-8 h-8 bg-[#1D9E75]/15 rounded-xl flex items-center justify-center text-base">🚗</div>
+            <span class="text-xs font-bold text-[#1D9E75] tracking-wider uppercase">Trajets effectués</span>
+          </div>
+          <p class="text-3xl font-black text-[#1D9E75]">{{ totalTrajetsEffectues }}</p>
+          <p class="text-xs text-[#1D9E75]/70 font-semibold">trajets</p>
+        </div>
+        <!-- Passagers -->
+        <div class="bg-gradient-to-br from-indigo-50 to-indigo-100/60 border border-indigo-200/60 rounded-2xl p-5 flex flex-col gap-1.5">
+          <div class="flex items-center gap-2 mb-1">
+            <div class="w-8 h-8 bg-indigo-400/20 rounded-xl flex items-center justify-center text-base">👥</div>
+            <span class="text-xs font-bold text-indigo-600 tracking-wider uppercase">Passagers</span>
+          </div>
+          <p class="text-3xl font-black text-indigo-600">{{ totalPassagers }}</p>
+          <p class="text-xs text-indigo-400 font-semibold">transportés</p>
+        </div>
+        <!-- Revenu moyen -->
+        <div class="bg-gradient-to-br from-[#0F3460]/5 to-[#0F3460]/10 border border-[#0F3460]/20 rounded-2xl p-5 flex flex-col gap-1.5">
+          <div class="flex items-center gap-2 mb-1">
+            <div class="w-8 h-8 bg-[#0F3460]/15 rounded-xl flex items-center justify-center text-base">📈</div>
+            <span class="text-xs font-bold text-[#0F3460] tracking-wider uppercase">Revenu moyen</span>
+          </div>
+          <p class="text-3xl font-black text-[#0F3460]">{{ revenuMoyenParTrajet | number:'1.1-1' }}</p>
+          <p class="text-xs text-[#0F3460]/60 font-semibold">DT / trajet</p>
+        </div>
+      </div>
+
+      <!-- Tab switcher -->
+      <div class="px-8 pt-4 pb-2">
+        <div class="flex gap-1 bg-gray-100 p-1 rounded-2xl w-fit">
+          <button (click)="earningsSelectedTab = 'overview'"
+            [class]="'px-5 py-2.5 rounded-xl text-sm font-bold transition-all ' + (earningsSelectedTab === 'overview' ? 'bg-white text-[#0F3460] shadow-sm' : 'text-gray-500 hover:text-gray-700')">
+            📊 Vue d'ensemble
+          </button>
+          <button (click)="earningsSelectedTab = 'byDay'"
+            [class]="'px-5 py-2.5 rounded-xl text-sm font-bold transition-all ' + (earningsSelectedTab === 'byDay' ? 'bg-white text-[#1D9E75] shadow-sm' : 'text-gray-500 hover:text-gray-700')">
+            📅 Par jour
+          </button>
+          <button (click)="earningsSelectedTab = 'byPassenger'"
+            [class]="'px-5 py-2.5 rounded-xl text-sm font-bold transition-all ' + (earningsSelectedTab === 'byPassenger' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-700')">
+            👤 Par passager
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab: Overview -->
+      <div *ngIf="earningsSelectedTab === 'overview'" class="px-8 pb-8 space-y-5">
+        <h3 class="text-base font-bold text-[#0F3460] mt-2">Revenus par trajet</h3>
+        <ng-container *ngIf="revenuParTrajet.length > 0; else noData">
+          <div class="space-y-3">
+            <div *ngFor="let item of revenuParTrajet; let i = index"
+              class="group flex items-center gap-4 p-4 rounded-2xl border border-gray-100 bg-gray-50/60 hover:bg-white hover:shadow-sm transition-all">
+              <!-- Rank -->
+              <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-black shrink-0"
+                [ngClass]="i === 0 ? 'bg-amber-400 text-white' : i === 1 ? 'bg-gray-300 text-gray-700' : i === 2 ? 'bg-amber-700/40 text-amber-900' : 'bg-gray-100 text-gray-500'">
+                {{ i + 1 }}
+              </div>
+              <!-- Info -->
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-bold text-[#0F3460] truncate">{{ item.trajet.adresseDepart }} → {{ item.trajet.adresseArrivee }}</p>
+                <p class="text-xs text-gray-500 font-medium mt-0.5">
+                  {{ item.passagers }} passager(s) · {{ item.trajet.prix }} DT/pers · {{ (item.trajet.heureDepart | slice:0:5) || '--:--' }}
+                </p>
+              </div>
+              <!-- Bar -->
+              <div class="hidden sm:flex flex-col items-end gap-1 w-32">
+                <div class="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+                  <div class="h-2.5 rounded-full bg-gradient-to-r from-[#1D9E75] to-amber-400 transition-all duration-700"
+                    [style.width.%]="(item.revenu / maxRevenuTrajet) * 100"></div>
+                </div>
+              </div>
+              <!-- Revenue -->
+              <div class="shrink-0 text-right">
+                <p class="text-lg font-black text-amber-600">{{ item.revenu | number:'1.0-0' }}</p>
+                <p class="text-[11px] text-gray-400 font-semibold">DT</p>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+        <ng-template #noData>
+          <div class="text-center py-16">
+            <div class="text-5xl mb-4">💸</div>
+            <p class="text-gray-400 font-semibold text-sm">Aucun revenu enregistré pour le moment.</p>
+            <p class="text-gray-300 text-xs mt-1">Les revenus apparaissent lorsque des réservations sont confirmées.</p>
+          </div>
+        </ng-template>
+      </div>
+
+      <!-- Tab: By Day -->
+      <div *ngIf="earningsSelectedTab === 'byDay'" class="px-8 pb-8">
+        <h3 class="text-base font-bold text-[#0F3460] mt-2 mb-5">Revenus par jour de la semaine</h3>
+        <div class="space-y-4">
+          <div *ngFor="let item of revenuParJour"
+            class="flex items-center gap-4">
+            <!-- Day label -->
+            <div class="w-10 text-sm font-bold text-gray-500 shrink-0">{{ item.jour }}</div>
+            <!-- Bar container -->
+            <div class="flex-1 relative">
+              <div class="w-full bg-gray-100 rounded-full h-9 overflow-hidden">
+                <div class="h-9 rounded-full transition-all duration-700 flex items-center px-4 gap-2"
+                  [class]="item.revenu > 0 ? 'bg-gradient-to-r from-[#0F3460] to-[#1D9E75]' : 'bg-gray-100'"
+                  [style.width.%]="item.revenu > 0 ? ((item.revenu / maxRevenuJour) * 90 + 10) : 0">
+                  <span *ngIf="item.revenu > 0" class="text-white text-xs font-black whitespace-nowrap">
+                    {{ item.revenu | number:'1.0-0' }} DT
+                  </span>
+                </div>
+              </div>
+            </div>
+            <!-- Trajets count -->
+            <div class="w-20 text-right shrink-0">
+              <span class="text-xs font-bold text-gray-400">{{ item.trajets }} trajet(s)</span>
+            </div>
+          </div>
+        </div>
+        <!-- Summary -->
+        <div class="mt-6 grid grid-cols-3 gap-4">
+          <div class="bg-[#1D9E75]/5 border border-[#1D9E75]/20 rounded-2xl p-4 text-center">
+            <p class="text-xs font-bold text-[#1D9E75] tracking-wider uppercase mb-1">Jour le plus rentable</p>
+            <p class="text-lg font-black text-[#0F3460]">{{ bestEarningDay.jour }}</p>
+            <p class="text-xs text-gray-400">{{ bestEarningDay.revenu | number:'1.0-0' }} DT</p>
+          </div>
+          <div class="bg-amber-50 border border-amber-200/60 rounded-2xl p-4 text-center">
+            <p class="text-xs font-bold text-amber-600 tracking-wider uppercase mb-1">Jours actifs</p>
+            <p class="text-lg font-black text-[#0F3460]">{{ activeDaysCount }}</p>
+            <p class="text-xs text-gray-400">sur 7 jours</p>
+          </div>
+          <div class="bg-indigo-50 border border-indigo-200/60 rounded-2xl p-4 text-center">
+            <p class="text-xs font-bold text-indigo-600 tracking-wider uppercase mb-1">Revenu total</p>
+            <p class="text-lg font-black text-[#0F3460]">{{ totalRevenus | number:'1.0-0' }}</p>
+            <p class="text-xs text-gray-400">DT</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: By Passenger -->
+      <div *ngIf="earningsSelectedTab === 'byPassenger'" class="px-8 pb-8">
+        <h3 class="text-base font-bold text-[#0F3460] mt-2 mb-5">Revenus par passager</h3>
+        <ng-container *ngIf="revenuParPassager.length > 0; else noPassData">
+          <div class="space-y-3">
+            <div *ngFor="let p of revenuParPassager; let i = index"
+              class="flex items-center gap-4 p-4 rounded-2xl border border-gray-100 hover:bg-gray-50 transition-all">
+              <!-- Avatar -->
+              <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-black text-sm shrink-0"
+                [ngClass]="i === 0 ? 'bg-amber-400' : i === 1 ? 'bg-gray-400' : i === 2 ? 'bg-amber-700/60' : 'bg-[#1D9E75]'">
+                {{ p.nom.charAt(0) | uppercase }}
+              </div>
+              <!-- Name + bar -->
+              <div class="flex-1 min-w-0">
+                <div class="flex items-baseline justify-between mb-1">
+                  <p class="text-sm font-bold text-[#0F3460] truncate">{{ p.nom }}</p>
+                  <span class="text-xs text-gray-400 font-semibold ml-2 shrink-0">{{ p.trajets }} trajet(s)</span>
+                </div>
+                <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                  <div class="h-2.5 rounded-full bg-gradient-to-r from-indigo-500 to-[#1D9E75] transition-all duration-700"
+                    [style.width.%]="(p.revenu / maxRevenuPassager) * 100"></div>
+                </div>
+              </div>
+              <!-- Revenue -->
+              <div class="shrink-0 text-right ml-2">
+                <p class="text-lg font-black text-indigo-600">{{ p.revenu | number:'1.0-0' }}</p>
+                <p class="text-[11px] text-gray-400 font-semibold">DT</p>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+        <ng-template #noPassData>
+          <div class="text-center py-16">
+            <div class="text-5xl mb-4">👤</div>
+            <p class="text-gray-400 font-semibold text-sm">Aucun passager enregistré.</p>
+          </div>
+        </ng-template>
+      </div>
+
+    </div>
+  </div>
+  <!-- ══════════════ FIN MODALE REVENUS ══════════════ -->
 
   <!-- ===================== SECTION RECOMPENSES ===================== -->
   <div *ngIf="activeSection === 'recompenses'" class="space-y-6 max-w-7xl mx-auto">
@@ -1807,3 +2026,10 @@
     </div>
   </div>
 </div>
+
+<style>
+  @keyframes slideUpModal {
+    from { opacity: 0; transform: translateY(32px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+</style>

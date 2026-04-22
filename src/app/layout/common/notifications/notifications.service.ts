@@ -7,7 +7,7 @@ import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { getWsTrackingSockJsUrl } from 'src/environments/environment';
 
-const NOTIF_API = 'http://10.188.81.174:8081/api/notifications';
+const NOTIF_API = 'http://10.252.246.174:8081/api/notifications';
 
 @Injectable({
     providedIn: 'root'

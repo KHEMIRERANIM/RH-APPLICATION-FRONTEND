@@ -61,7 +61,7 @@ export interface ReservationResponse {
   providedIn: 'root'
 })
 export class CovoiturageService {
-  private apiUrl = 'http://10.188.81.174:8081/api'; // Same base URL used in UserService
+  private apiUrl = 'http://10.252.246.174:8081/api'; // Same base URL used in UserService
 
   constructor(private http: HttpClient) { }
 
@@ -105,8 +105,8 @@ export class CovoiturageService {
     return this.http.delete<void>(`${this.apiUrl}/trajets/${id}`);
   }
 
-  private reservationsUrl = 'http://10.188.81.174:8081/api/reservations';
-  private empreintesUrl = 'http://10.188.81.174:8081/api/empreintes';
+  private reservationsUrl = 'http://10.252.246.174:8081/api/reservations';
+  private empreintesUrl = 'http://10.252.246.174:8081/api/empreintes';
 
   getAllReservations(): Observable<ReservationResponse[]> {
     return this.http.get<ReservationResponse[]>(this.reservationsUrl);
@@ -169,8 +169,8 @@ getTotalPointsNavette(employeId: string): Observable<number> {
   return this.http.get<number>(`${this.apiUrl}/reservations-navette/employe/${employeId}/points`);
 }
 annulerTrajetConducteur(trajetId: string): Observable<void> {
-  return this.http.post<void>(
-    `${this.apiUrl}/alternatives/annuler-trajet/${trajetId}`, {}
+  return this.http.put<void>(
+    `${this.apiUrl}/trajets/${trajetId}/annuler-conducteur`, {}
   );
 }
 

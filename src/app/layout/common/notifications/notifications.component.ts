@@ -11,7 +11,6 @@ import { UserService } from 'app/services/user.service';
 import { Router } from '@angular/router';
 import { CovoiturageService } from 'app/modules/admin/apps/covoiturage/covoiturage.service';
 import { ToastrService } from 'ngx-toastr';
-
 @Component({
     selector: 'notifications',
     templateUrl: './notifications.component.html',
@@ -59,7 +58,6 @@ export class NotificationsComponent implements OnInit, OnDestroy {
                 employees.forEach((emp: any) => {
                     this.employesMap.set(String(emp.id), `${emp.prenom || emp.firstName || ''} ${emp.nom || emp.lastName || ''}`.trim());
                 });
-
                 // Si les notifications ont déjà été chargées, on met à jour les descriptions avec les noms
                 if (this.notifications) {
                     this.notifications = this.notifications.map(notif => {
@@ -77,7 +75,6 @@ export class NotificationsComponent implements OnInit, OnDestroy {
                 this._changeDetectorRef.markForCheck();
             }
         });
-
                 // Subscribe to notification changes
                 this._notificationsService.notifications$
                     .pipe(takeUntil(this._unsubscribeAll))
@@ -95,17 +92,14 @@ export class NotificationsComponent implements OnInit, OnDestroy {
                                 const nom = this._getEmployeeName(notif.expediteurId);
                                 notif.description = notif.contenu ? `${nom} : ${notif.contenu}` : 'Des alternatives sont disponibles.';
                             }
-
                             // Suppression des IDs techniques (UUID) dans les titres et descriptions
                             if (notif.title) notif.title = notif.title.replace(uuidRegex, '');
                             if (notif.description) notif.description = notif.description.replace(uuidRegex, '');
-                            
                             return notif;
                         });
 
                         // Load the notifications
                         this.notifications = processed;
-
                 // Calculate the unread count
                 this._calculateUnreadCount();
 
@@ -113,7 +107,6 @@ export class NotificationsComponent implements OnInit, OnDestroy {
                 this._changeDetectorRef.markForCheck();
             });
     }
-
     private _getEmployeeName(id?: string): string {
         if (!id) return 'Inconnu';
         return this.employesMap.get(String(id)) || `Employé ${String(id).substring(0, 6)}`;
@@ -145,7 +138,6 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         if (!this._notificationsPanel || !this._notificationsOrigin) {
             return;
         }
-
         // Create the overlay if it doesn't exist
         if (!this._overlayRef) {
             this._createOverlay();
@@ -161,7 +153,6 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     closePanel(): void {
         this._overlayRef.detach();
     }
-
     /**
      * Mark all notifications as read
      */
@@ -169,7 +160,6 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         // Mark all as read
         this._notificationsService.markAllAsRead().subscribe();
     }
-
     /**
      * Toggle read status of the given notification
      */
@@ -193,13 +183,12 @@ export class NotificationsComponent implements OnInit, OnDestroy {
      * Répond à une demande de covoiturage depuis la notification
      */
     repondreReservation(notification: Notification, statut: 'EN_ATTENTE_PAIEMENT' | 'ANNULE', event: Event): void {
-        event.stopPropagation(); // Évite de déclencher le toggleRead parent
+        event.stopPropagation(); // Ãvite de déclencher le toggleRead parent
 
         if (!notification.reservationId) {
             this._toastrService.warning("Cette ancienne notification ne possède pas d'identifiant de réservation. Vous devez créer une nouvelle demande.");
             return;
         }
-
         // Appel via CovoiturageService pour update le statut
         const update = { statut: statut };
 
@@ -208,9 +197,9 @@ export class NotificationsComponent implements OnInit, OnDestroy {
                 next: () => {
                     // Supprimer la notification ou la marquer comme lue
                     this.delete(notification);
-                    const msg = statut === 'EN_ATTENTE_PAIEMENT' 
-                        ? 'Acceptée ✅. Le passager a 15 min pour payer.' 
-                        : 'Refusée ❌';
+           const msg = statut === 'EN_ATTENTE_PAIEMENT'
+    ? 'Accept\u00e9e \u2705. Le passager a 15 min pour payer.'
+    : 'Refus\u00e9e \u274c';
                     this._toastrService.success(`Demande de réservation ${msg}`);
                 },
                 error: (err) => {
@@ -221,22 +210,39 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     }
 
     /**
+
      * Trouver une alternative suite à une annulation
+
      */
+
     trouverAlternative(notification: Notification, event: Event): void {
+
         event.stopPropagation();
+
         event.preventDefault();
+
         const trajetId = notification.trajetAnnuleId || notification.trajetId;
+
         if (!trajetId) {
+
             this._toastrService.error('Identifiant du trajet annulé introuvable.');
+
             return;
+
         }
+
         this.closePanel();
+
         const q: Record<string, string> = { annulationTrajetId: trajetId };
+
         if (notification.reservationId) {
+
             q['reservationId'] = notification.reservationId;
+
         }
+
         this._router.navigate(['/apps/covoiturage/user'], { queryParams: q });
+
     }
 
     /**
@@ -250,7 +256,9 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     }
 
     // -----------------------------------------------------------------------------------------------------
+
     // @ Private methods
+
     // -----------------------------------------------------------------------------------------------------
 
     /**
@@ -295,9 +303,13 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         });
 
         // Detach the overlay from the portal on backdrop click
+
         this._overlayRef.backdropClick().subscribe(() => {
+
             this._overlayRef.detach();
+
         });
+
     }
 
     /**
@@ -309,7 +321,9 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         let count = 0;
 
         if (this.notifications && this.notifications.length) {
+
             count = this.notifications.filter(notification => !notification.read).length;
+
         }
 
         this.unreadCount = count;

@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, OnDestroy, ElementRef, Renderer2, ViewChild, ChangeDetectorRef, NgZone, ApplicationRef } from '@angular/core';
+﻿import { Component, OnInit, AfterViewInit, OnDestroy, ElementRef, Renderer2, ViewChild, ChangeDetectorRef, NgZone, ApplicationRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CovoiturageService, Vehicule, Trajet, ReservationResponse, ReservationRequest } from '../covoiturage.service';
@@ -180,6 +180,147 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
   /** Afficher/masquer la section archive des trajets */
   showTrajetArchive: boolean = false;
 
+  // ─── Modale Revenus Gagnés ──────────────────────────────────────────────────
+  showEarningsModal: boolean = false;
+  earningsSelectedTab: 'overview' | 'byDay' | 'byPassenger' = 'overview';
+
+  /** Ouvrir la modale des revenus */
+  openEarningsModal() {
+    this.earningsSelectedTab = 'overview';
+    this.showEarningsModal = true;
+  }
+
+  /** Revenus totaux calculés sur les trajets effectués avec réservations confirmées/effectuées */
+  get totalRevenus(): number {
+    let total = 0;
+    for (const t of this.backendTrajets) {
+      const prix = t.prix ?? 0;
+      const confirmedCount = (t.reservations || []).filter(
+        r => ['CONFIRME', 'EFFECTUE'].includes(String(r.statut || '').toUpperCase())
+      ).length;
+      total += prix * confirmedCount;
+    }
+    return total;
+  }
+
+  /** Nombre total de trajets effectués (statut EFFECTUE) */
+  get totalTrajetsEffectues(): number {
+    return this.backendTrajets.filter(t => String(t.statut || '').toUpperCase() === 'EFFECTUE').length;
+  }
+
+  /** Nombre total de passagers transportés (réservations confirmées/effectuées) */
+  get totalPassagers(): number {
+    let total = 0;
+    for (const t of this.backendTrajets) {
+      total += (t.reservations || []).filter(
+        r => ['CONFIRME', 'EFFECTUE'].includes(String(r.statut || '').toUpperCase())
+      ).length;
+    }
+    return total;
+  }
+
+  /** Revenu moyen par trajet effectué */
+  get revenuMoyenParTrajet(): number {
+    const effectues = this.backendTrajets.filter(t => String(t.statut || '').toUpperCase() === 'EFFECTUE');
+    if (effectues.length === 0) return 0;
+    let total = 0;
+    for (const t of effectues) {
+      const prix = t.prix ?? 0;
+      const n = (t.reservations || []).filter(
+        r => ['CONFIRME', 'EFFECTUE'].includes(String(r.statut || '').toUpperCase())
+      ).length;
+      total += prix * n;
+    }
+    return Math.round((total / effectues.length) * 100) / 100;
+  }
+
+  /** Revenus par jour de la semaine */
+  get revenuParJour(): { jour: string; revenu: number; trajets: number }[] {
+    const JOURS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+    const mapRevenu: Record<string, { revenu: number; trajets: number }> = {};
+    JOURS.forEach(j => { mapRevenu[j] = { revenu: 0, trajets: 0 }; });
+    for (const t of this.backendTrajets) {
+      const prix = t.prix ?? 0;
+      const passagers = (t.reservations || []).filter(
+        r => ['CONFIRME', 'EFFECTUE'].includes(String(r.statut || '').toUpperCase())
+      ).length;
+      const jours = (t.joursDisponibles || '').split(',').map(j => j.trim().substring(0, 3));
+      for (const j of jours) {
+        const key = JOURS.find(k => k.toLowerCase() === j.toLowerCase());
+        if (key && passagers > 0) {
+          mapRevenu[key].revenu += prix * passagers;
+          mapRevenu[key].trajets += 1;
+        }
+      }
+    }
+    return JOURS.map(j => ({ jour: j, revenu: mapRevenu[j].revenu, trajets: mapRevenu[j].trajets }));
+  }
+
+  /** Valeur max pour le graphique en barres des jours */
+  get maxRevenuJour(): number {
+    return Math.max(...this.revenuParJour.map(r => r.revenu), 1);
+  }
+
+  /** Revenus par trajet (détail) */
+  get revenuParTrajet(): { trajet: any; revenu: number; passagers: number }[] {
+    return this.backendTrajets
+      .map(t => {
+        const prix = t.prix ?? 0;
+        const passagers = (t.reservations || []).filter(
+          r => ['CONFIRME', 'EFFECTUE'].includes(String(r.statut || '').toUpperCase())
+        ).length;
+        return { trajet: t, revenu: prix * passagers, passagers };
+      })
+      .filter(x => x.revenu > 0)
+      .sort((a, b) => b.revenu - a.revenu)
+      .slice(0, 10);
+  }
+
+  /** Valeur max pour le graphique barres par trajet */
+  get maxRevenuTrajet(): number {
+    return Math.max(...this.revenuParTrajet.map(r => r.revenu), 1);
+  }
+
+  /** Revenus par passager */
+  get revenuParPassager(): { nom: string; revenu: number; trajets: number }[] {
+    const map: Record<string, { revenu: number; trajets: number }> = {};
+    for (const t of this.backendTrajets) {
+      const prix = t.prix ?? 0;
+      const confirmed = (t.reservations || []).filter(
+        r => ['CONFIRME', 'EFFECTUE'].includes(String(r.statut || '').toUpperCase())
+      );
+      for (const r of confirmed) {
+        const nom = this.getEmployeeName(r.employeId) || r.employeId || 'Inconnu';
+        if (!map[nom]) map[nom] = { revenu: 0, trajets: 0 };
+        map[nom].revenu += prix;
+        map[nom].trajets += 1;
+      }
+    }
+    return Object.entries(map)
+      .map(([nom, v]) => ({ nom, ...v }))
+      .sort((a, b) => b.revenu - a.revenu)
+      .slice(0, 8);
+  }
+
+  /** Valeur max pour le graphique par passager */
+  get maxRevenuPassager(): number {
+    return Math.max(...this.revenuParPassager.map(r => r.revenu), 1);
+  }
+
+  /** Jour avec le revenu le plus élevé */
+  get bestEarningDay(): { jour: string; revenu: number } {
+    const best = this.revenuParJour.reduce(
+      (acc, cur) => cur.revenu > acc.revenu ? cur : acc,
+      { jour: '-', revenu: 0, trajets: 0 }
+    );
+    return best;
+  }
+
+  /** Nombre de jours avec revenus > 0 */
+  get activeDaysCount(): number {
+    return this.revenuParJour.filter(r => r.revenu > 0).length;
+  }
+
   /** Faire défiler vers la section archive après l'ouverture */
   scrollToArchive() {
     setTimeout(() => {
@@ -261,7 +402,7 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
   activeResTab: 'covoiturage' | 'navette' | 'archive' = 'covoiturage';
 
   /** Statuts à masquer de la liste active (vont dans l'archive automatiquement) */
-  private readonly STATUTS_MASQUES = new Set(['ANNULE', 'INACTIF', 'EFFECTUE']);
+private readonly STATUTS_MASQUES = new Set(['INACTIF']);
 
   /** Covoiturage : actives seulement (hors annulées, inactives, effectuées, archivées) */
   get visibleCovReservations(): ReservationResponse[] {
@@ -280,23 +421,18 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
   }
 
   /** Archive : réservations annulées/effectuées + archivées manuellement */
-  get archiveReservations(): { type: 'cov' | 'nav'; data: any }[] {
-    // Covoiturage : archivées manuellement OU statut masqué (ANNULE, EFFECTUE...)
-    const covArchive = this.mesReservations
-      .filter(r =>
-        this.archivedResIds.has(r.id!) ||
-        this.STATUTS_MASQUES.has(String(r.statut || '').toUpperCase())
-      )
-      .map(r => ({ type: 'cov' as const, data: r }));
-    // Navette : archivées manuellement OU statut masqué
-    const navArchive = this.myShuttleReservations
-      .filter(r =>
-        this.archivedResIds.has(r.id) ||
-        this.STATUTS_MASQUES.has(String(r.statut || '').toUpperCase())
-      )
-      .map(r => ({ type: 'nav' as const, data: r }));
-    return [...covArchive, ...navArchive];
-  }
+// APRÈS ✅
+get archiveReservations(): { type: 'cov' | 'nav'; data: any }[] {
+  const covArchive = this.mesReservations
+    .filter(r => this.archivedResIds.has(r.id!))
+    .map(r => ({ type: 'cov' as const, data: r }));
+
+  const navArchive = this.myShuttleReservations
+    .filter(r => this.archivedResIds.has(r.id))
+    .map(r => ({ type: 'nav' as const, data: r }));
+
+  return [...covArchive, ...navArchive];
+}
 
   userLevel: string = 'OR';
   totalPointsEco: number = 425;
@@ -352,6 +488,8 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
 
             this.loadTrajets();
             this.loadAllTrajets();
+              this.loadMesReservations(); // ← AJOUTER ICI
+
             this.showToast('✅ Trajet annulé', 'Passagers notifiés et remboursés !', 'success');
             this.cdr.detectChanges();
           },
@@ -1361,13 +1499,21 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     });
   }
 
-  private getReservationIdByTrajetId(trajetId: string): string {
-    if (!trajetId) return '';
-    const reservation = this.mesReservations.find(
-      r => r.trajetId === trajetId && r.statut !== 'ANNULE'
-    );
-    return reservation?.id || '';
-  }
+ 
+// APRÈS ✅
+private getReservationIdByTrajetId(trajetId: string): string {
+  if (!trajetId) return '';
+  // Cherche d'abord une réservation non annulée
+  const active = this.mesReservations.find(
+    r => r.trajetId === trajetId && r.statut !== 'ANNULE'
+  );
+  if (active) return active.id;
+  // Sinon accepte aussi l'annulée (cas annulation conducteur)
+  const annulee = this.mesReservations.find(
+    r => r.trajetId === trajetId
+  );
+  return annulee?.id || '';
+}
 
   loadTotalPoints(): void {
     if (!this.employeId) return;
@@ -1447,8 +1593,7 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
       ? 'Annuler cette réservation ? Un remboursement sera effectué car vous avez déjà payé.'
       : 'Annuler cette réservation ?';
 
-    if (!confirm(message)) return;
-
+this.showToast('ℹ️ Info', message, 'info');
     const update: Partial<ReservationRequest> = { statut: 'ANNULE' };
     this.covoiturageService.updateReservationStatus(reservationId, update).subscribe({
       next: () => {

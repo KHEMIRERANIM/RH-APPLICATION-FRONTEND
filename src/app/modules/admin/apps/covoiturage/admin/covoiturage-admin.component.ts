@@ -105,7 +105,7 @@ export class CovoiturageAdminComponent implements OnInit {
   createBusPack = false;
   packBusList: PackBusEntry[] = [];
   packDates: string[] = [];
-  minDate: string = ''; // Bornes semaine
+  minDate: string = '';
   maxDate: string = '';
   arretInput = '';
   searchSuggestions: any[] = [];
@@ -145,7 +145,6 @@ export class CovoiturageAdminComponent implements OnInit {
   syncWithFleet: boolean = false;
   relatedBuses: Bus[] = [];
 
-  // Nouveaux graphiques pour le design user
   co2Chart: any;
   departureZonesChart: any;
   departureZonesData: any[] = [];
@@ -187,7 +186,7 @@ export class CovoiturageAdminComponent implements OnInit {
   isLoadingPrediction: boolean = false;
 
   // Sunday Alert
-  sundayAlertMessage: string = '📅 Rappel : Pensez à activer les bus pour la semaine prochaine !';
+  sundayAlertMessage: string = '🔔 Rappel : Pensez à activer les bus pour la semaine prochaine !';
 
   constructor(
     private busService: BusService,
@@ -202,16 +201,13 @@ export class CovoiturageAdminComponent implements OnInit {
     private _fuseConfirmationService: FuseConfirmationService
   ) { }
 
-  // ─────────────────────────────────────────────────────────────
-  // SUNDAY ALERT SCHEDULER (Reminder to activate buses)
-  // ─────────────────────────────────────────────────────────────
-
   private initSundayScheduler(): void {
     setInterval(() => {
       this.checkSundayCondition();
     }, 30000);
     this.checkSundayCondition();
   }
+
   archiveReservation(res: any): void {
     const dialogRef = this._fuseConfirmationService.open({
       title: 'Archiver la réservation',
@@ -224,13 +220,8 @@ export class CovoiturageAdminComponent implements OnInit {
       if (result === 'confirmed') {
         const archived = { ...res, archivedAt: new Date().toISOString() };
         this.archivedReservations.push(archived);
-
-        // Sauvegarder dans localStorage
         localStorage.setItem('archivedReservations', JSON.stringify(this.archivedReservations));
-
-        // Retirer de la liste active
         this.reservations = this.reservations.filter(r => r.id !== res.id);
-
         this._toastrService.success('Réservation archivée');
         this._changeDetectorRef.detectChanges();
       }
@@ -247,7 +238,6 @@ export class CovoiturageAdminComponent implements OnInit {
       const alreadyShown = localStorage.getItem(todayKey);
 
       if (!alreadyShown) {
-        // Add to notification icon list
         this.notificationsService.addLocalNotification({
           id: 'sunday-bus-activation',
           icon: 'heroicons_outline:truck',
@@ -264,11 +254,9 @@ export class CovoiturageAdminComponent implements OnInit {
     }
   }
 
-  dismissSundayAlert(): void {
-    // Logic for banner removal no longer needed as banner was removed
-  }
+  dismissSundayAlert(): void { }
 
-ngOnInit(): void {
+  ngOnInit(): void {
     const saved = localStorage.getItem('archivedReservations');
     if (saved) {
       this.archivedReservations = JSON.parse(saved);
@@ -282,7 +270,6 @@ ngOnInit(): void {
     this.currentWeather.date = now.toLocaleDateString('fr-FR', options);
     this.initSundayScheduler();
     this.initWeekBoundaries();
-
     this.loadAllData();
     this.loadWeeklyPrediction();
   }
@@ -312,15 +299,12 @@ ngOnInit(): void {
         this.reservationsNavette = results.resNavette || [];
         this.reclamations = results.reclamations || [];
 
-        // Calculer les stats après avoir chargé navettes ET réclamations
         this.calculateReclamationStats();
 
-        // Rafraîchir la carte si on est sur la section réclamations
         if (this.activeSection === 'reclamations') {
           this.initHeatmap();
         }
 
-        // Extraire les packDates existants pour checkWaitlists
         const allPackDates: string[] = [];
         this.navettes.forEach(b => {
           if (b.packDates && b.packDates.length) {
@@ -331,12 +315,10 @@ ngOnInit(): void {
         });
         this.packDates = allPackDates.sort();
 
-        // 3. Fusionner les réservations pour l'onglet Admin
+        // 3. Fusionner les réservations
         const merged: any[] = [];
 
-        // Navettes
         results.resNavette.forEach((rn: any) => {
-          // Recherche robuste incluant shuttleId (utilisé parfois en interne)
           const bus = this.navettes.find(b =>
             String(b.id) === String(rn.busId || rn.trajetId || rn.shuttleId)
           );
@@ -366,16 +348,15 @@ ngOnInit(): void {
           });
         });
 
-        // Covoiturage
         results.resCovoit.forEach((rc: any) => {
           const trajet = this.trajets.find(t => t.id === rc.trajetId);
           const dateStr = rc.dateReservation ? rc.dateReservation.split('T')[0] : '';
           merged.push({
             id: rc.id,
             employeId: rc.employeId,
-            employeNom: this.getNomEmploye(rc.employeId), // Passager
+            employeNom: this.getNomEmploye(rc.employeId),
             employePhoto: `https://ui-avatars.com/api/?name=${this.getNomEmploye(rc.employeId)}&background=random`,
-            conducteurNom: trajet ? this.getNomEmploye(trajet.employeId) : 'Conducteur Inconnu', // Conducteur
+            conducteurNom: trajet ? this.getNomEmploye(trajet.employeId) : 'Conducteur Inconnu',
             type: 'covoiturage',
             trajet: trajet ? `${trajet.adresseDepart} -> ${trajet.adresseArrivee}` : 'Covoiturage',
             adresseDepart: trajet ? (trajet.adresseDepart || '—').split(',')[0] : 'Inconnue',
@@ -393,7 +374,6 @@ ngOnInit(): void {
         const archivedIds = this.archivedReservations.map(a => a.id);
         this.reservations = this.reservations.filter(r => !archivedIds.includes(r.id));
 
-        // Calculer la fréquence d'utilisation par employé
         this.employeUsageFreq.clear();
         this.reservations.forEach(r => {
           if (r.employeId) {
@@ -405,7 +385,7 @@ ngOnInit(): void {
         this.isLoading = false;
         this.initCharts();
         this.initNewCharts();
-        this.initWeather(); // Initialisation de la météo
+        this.initWeather();
         this.checkWaitlists();
       },
       error: (err) => {
@@ -416,9 +396,6 @@ ngOnInit(): void {
   }
 
   private initNewCharts(): void {
-    const validRes = this.reservations.filter(r => r.date && r.date !== '—');
-
-    // 1. Zones de Départ Réelles
     const zoneCounts = new Map<string, number>();
     this.reservations.forEach(r => {
       const z = r.adresseDepart || 'Inconnue';
@@ -442,10 +419,9 @@ ngOnInit(): void {
         percentage: totalKnown > 0 ? Math.round((value / totalKnown) * 100) : 0
       }));
 
-    // --- Logique Semaine Glissante ---
     const now = new Date();
-    const day = now.getDay(); // 0 (Dim) à 6 (Sam)
-    const diff = (day === 0 ? -6 : 1) - day; // Ajustement pour trouver le Lundi
+    const day = now.getDay();
+    const diff = (day === 0 ? -6 : 1) - day;
     const monday = new Date(now);
     monday.setDate(now.getDate() + diff);
     monday.setHours(0, 0, 0, 0);
@@ -457,7 +433,6 @@ ngOnInit(): void {
       currentWeekDates.push(d.toISOString().split('T')[0]);
     }
 
-    // 2. Distribution des réservations (Cette Semaine uniquement)
     const weekCounts = currentWeekDates.map(date => {
       return this.reservations.filter(r => r.date === date).length;
     });
@@ -472,7 +447,6 @@ ngOnInit(): void {
       tooltip: { theme: 'light' }
     };
 
-    // 3. Évolution CO2 Réelle (Cette Semaine uniquement)
     const weekCo2 = currentWeekDates.map(date => {
       const dailySum = this.reservations
         .filter(r => r.date === date)
@@ -491,7 +465,6 @@ ngOnInit(): void {
       dataLabels: { enabled: false }
     };
 
-    // 4. Graphique zones départ (Actualisé)
     this.departureZonesChart = {
       series: this.departureZonesData.map(d => d.value),
       chart: { type: 'donut', height: 240, toolbar: { show: false } },
@@ -502,7 +475,6 @@ ngOnInit(): void {
       dataLabels: { enabled: false }
     };
 
-    // 5. Usage Hebdomadaire Réel (Par jour de la semaine)
     const countsByType = {
       covoiturage: [0, 0, 0, 0, 0, 0, 0],
       navette: [0, 0, 0, 0, 0, 0, 0]
@@ -515,7 +487,6 @@ ngOnInit(): void {
       }
     });
 
-    // On réorganise pour commencer par Lun (JS: 0=Dim, 1=Lun...)
     const reorder = (arr: number[]) => [...arr.slice(1), arr[0]];
     const categoriesLabels = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
 
@@ -532,7 +503,6 @@ ngOnInit(): void {
       tooltip: { theme: 'light' }
     };
 
-    // Graphique Performance Flotte
     this.fleetPerformanceChart = {
       series: [{
         name: 'Occupation',
@@ -557,11 +527,11 @@ ngOnInit(): void {
 
   private mapStatut(s: string): string {
     const st = String(s || '').toUpperCase();
-    if (st === 'CONFIRME' || st === 'CONFIRMÉE') return 'Confirmée';
-    if (st === 'ANNULE' || st === 'ANNULÉE') return 'Annulée';
-    if (st === 'EFFECTUE' || st === 'EFFECTUÉE') return 'Effectuée';
+    if (st === 'CONFIRME') return 'Confirmée';
+    if (st === 'ANNULE')   return 'Annulée';
+    if (st === 'EFFECTUE') return 'Effectuée';
     if (st === 'EN_ROUTE') return 'En Route';
-    if (st === 'COMPLET') return 'Complet';
+    if (st === 'COMPLET')  return 'Complet';
     return 'En attente';
   }
 
@@ -588,7 +558,7 @@ ngOnInit(): void {
 
   getNomEmploye(id: string | undefined): string {
     if (!id) return '—';
-    return this.employesMap.get(String(id)) || `Employé ${String(id).slice(0, 8)}…`;
+    return this.employesMap.get(String(id)) || `Employé ${String(id).slice(0, 8)}`;
   }
 
   reservantsParJour(busId: string | undefined, date: string): { id: string; employeId: string; statut: string; isWaitlisted: boolean }[] {
@@ -598,9 +568,7 @@ ngOnInit(): void {
     if (!bus) return [];
 
     const packId = bus.packId;
-    const capacity = bus.capacite || 0;
 
-    // Charger TOUTES les réservations du pack pour ce jour
     const packReservations = this.reservationsNavette
       .filter(r => {
         const rBus = this.navettes.find(b => b.id === r.busId);
@@ -611,7 +579,6 @@ ngOnInit(): void {
       })
       .sort((a, b) => new Date(a.dateCreation || 0).getTime() - new Date(b.dateCreation || 0).getTime());
 
-    // Identifier les bus du pack (Ordre : ACTIF en premier, puis date de création)
     const packBuses = this.navettes
       .filter(b => b.packId === packId)
       .sort((a, b) => {
@@ -623,7 +590,6 @@ ngOnInit(): void {
     const distribution = new Map<string, any[]>();
     packBuses.forEach(b => distribution.set(b.id!, []));
 
-    // Distribution finale avec application des statuts de groupe
     let currentBusIndex = 0;
     packReservations.forEach(r => {
       while (currentBusIndex < packBuses.length && distribution.get(packBuses[currentBusIndex].id!)!.length >= packBuses[currentBusIndex].capacite) {
@@ -634,7 +600,6 @@ ngOnInit(): void {
       const targetBusId = targetBus.id!;
 
       if (targetBusId) {
-        // Règle de groupe : Le statut "isWaitlisted" dépend de l'activation du bus
         const confirmedDays = Array.isArray(r.joursConfirmes)
           ? r.joursConfirmes
           : (r.joursConfirmes || '').split(',').map((d: any) => String(d).trim()).filter(Boolean);
@@ -671,20 +636,17 @@ ngOnInit(): void {
 
   private initWeekBoundaries(): void {
     const now = new Date();
-    const day = now.getDay(); // 0 = Dimanche, 1 = Lundi...
+    const day = now.getDay();
 
     let monday = new Date(now);
 
     if (day === 0) {
-      // Si on est dimanche, on bascule déjà sur la semaine suivante (demain)
       monday.setDate(now.getDate() + 1);
     } else {
-      // Sinon, on reste sur le lundi de la semaine actuelle
       const diff = 1 - day;
       monday.setDate(now.getDate() + diff);
     }
 
-    // Capture des bornes
     this.minDate = monday.toISOString().split('T')[0];
 
     const sunday = new Date(monday);
@@ -719,8 +681,8 @@ ngOnInit(): void {
     this.packBusList = [];
     this.packDates = [];
     this.submitted = false;
- this.showModal = true;
-setTimeout(() => this.initStopPickerMap(), 100);
+    this.showModal = true;
+    setTimeout(() => this.initStopPickerMap(), 100);
   }
 
   openEditModal(bus: Bus): void {
@@ -738,14 +700,13 @@ setTimeout(() => this.initStopPickerMap(), 100);
     }
     this.joursSelectionnes = bus.joursDisponibles ? bus.joursDisponibles.split(',').map(j => j.trim()) : [];
 
-    // Identifier les bus de la même flotte (même ligne)
     this.relatedBuses = this.navettes.filter(b => b.ligne === bus.ligne && b.id !== bus.id);
     this.syncWithFleet = false;
 
     this.packDates = Array.isArray(bus.packDates) ? [...bus.packDates] : [];
     if (!this.busForm.arrets) this.busForm.arrets = [];
     this.showModal = true;
-setTimeout(() => this.initStopPickerMap(), 100);
+    setTimeout(() => this.initStopPickerMap(), 100);
   }
 
   toggleJour(jour: string): void {
@@ -773,12 +734,8 @@ setTimeout(() => this.initStopPickerMap(), 100);
   activateForDay(busId: string | undefined, date: string): void {
     if (!busId) return;
     this.busService.activateForDay(busId, date).subscribe({
-      next: () => {
-        this.loadBus();
-        // Optionnel: Notification de succès
-      },
+      next: () => { this.loadBus(); },
       error: () => this._toastrService.error('Erreur lors de l\'activation du jour')
-
     });
   }
 
@@ -818,7 +775,6 @@ setTimeout(() => this.initStopPickerMap(), 100);
 
       this.busForm.arrets.push(newArret);
 
-      // ✅ Propager au reste du pack (si le bus fait partie d'un pack)
       if (this.busForm.packId) {
         const packBuses = this.navettes.filter(
           b => b.packId === this.busForm.packId && b.id !== this.busForm.id
@@ -826,7 +782,6 @@ setTimeout(() => this.initStopPickerMap(), 100);
 
         packBuses.forEach(bus => {
           if (!bus.arrets) bus.arrets = [];
-          // Éviter les doublons
           const alreadyExists = bus.arrets.some(
             a => a.name.toLowerCase() === newArret.name.toLowerCase()
           );
@@ -836,7 +791,6 @@ setTimeout(() => this.initStopPickerMap(), 100);
         });
       }
 
-      // Reset du formulaire
       this.arretInput = '';
       this.selectedLat = null;
       this.selectedLng = null;
@@ -865,7 +819,6 @@ setTimeout(() => this.initStopPickerMap(), 100);
     this.isSearching = true;
     this.searchSuggestions = [];
 
-    // 1. Suggestions de la Heatmap (Réclamations) — field is stopName, not stop
     const heatmapSuggestions = this.reclamationStats
       .filter(s => s.stopName && s.stopName.toLowerCase().includes(query.toLowerCase()))
       .map(s => {
@@ -880,7 +833,6 @@ setTimeout(() => this.initStopPickerMap(), 100);
 
     this.searchSuggestions.push(...heatmapSuggestions);
 
-    // 2. Recherche Nominatim (Tunisie uniquement) avec timeout de 5s
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000);
 
@@ -899,7 +851,6 @@ setTimeout(() => this.initStopPickerMap(), 100);
           type: 'address'
         }));
 
-        // Éviter les doublons
         const existingNames = new Set(this.searchSuggestions.map(s => s.name.toLowerCase()));
         nominatimResults.forEach((nr: any) => {
           if (!existingNames.has(nr.name.toLowerCase())) {
@@ -939,42 +890,42 @@ setTimeout(() => this.initStopPickerMap(), 100);
     this._changeDetectorRef.detectChanges();
   }
 
- initStopPickerMap(): void {
-  const mapDiv = document.getElementById('stopPickerMap');
-  if (!mapDiv) {
-    setTimeout(() => this.initStopPickerMap(), 200);
-    return;
-  }
-
-  if (this.stopPickerMap) {
-    this.stopPickerMap.off();
-    this.stopPickerMap.remove();
-    this.stopPickerMap = null;
-    this.stopPickerMarker = null;
-  }
-
-  this.stopPickerMap = L.map('stopPickerMap').setView([36.8065, 10.1815], 11);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap'
-  }).addTo(this.stopPickerMap);
-
-  this.stopPickerMap.on('click', (e: any) => {
-    this.selectedLat = e.latlng.lat;
-    this.selectedLng = e.latlng.lng;
-    if (this.stopPickerMarker) {
-      this.stopPickerMarker.setLatLng(e.latlng);
-    } else {
-      this.stopPickerMarker = L.marker(e.latlng).addTo(this.stopPickerMap);
+  initStopPickerMap(): void {
+    const mapDiv = document.getElementById('stopPickerMap');
+    if (!mapDiv) {
+      setTimeout(() => this.initStopPickerMap(), 200);
+      return;
     }
-  });
 
-  setTimeout(() => {
-    if (this.stopPickerMap) this.stopPickerMap.invalidateSize();
-  }, 50);
-}
+    if (this.stopPickerMap) {
+      this.stopPickerMap.off();
+      this.stopPickerMap.remove();
+      this.stopPickerMap = null;
+      this.stopPickerMarker = null;
+    }
+
+    this.stopPickerMap = L.map('stopPickerMap').setView([36.8065, 10.1815], 11);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap'
+    }).addTo(this.stopPickerMap);
+
+    this.stopPickerMap.on('click', (e: any) => {
+      this.selectedLat = e.latlng.lat;
+      this.selectedLng = e.latlng.lng;
+      if (this.stopPickerMarker) {
+        this.stopPickerMarker.setLatLng(e.latlng);
+      } else {
+        this.stopPickerMarker = L.marker(e.latlng).addTo(this.stopPickerMap);
+      }
+    });
+
+    setTimeout(() => {
+      if (this.stopPickerMap) this.stopPickerMap.invalidateSize();
+    }, 50);
+  }
 
   private calculateHaversine(lat1: number, lon1: number, lat2: number, lon2: number): { distance: number, time: number } {
-    const R = 6371; // Rayon de la Terre en km
+    const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
     const a =
@@ -982,9 +933,9 @@ setTimeout(() => this.initStopPickerMap(), 100);
       Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
       Math.sin(dLon / 2) * Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const d = R * c; // Distance à vol d'oiseau en km
-    const distanceReelle = d * 1.3; // Facteur de correction pour les rues (trajet réel)
-    const t = Math.round((distanceReelle / 6) * 60); // Estimation temps de marche à 6 km/h
+    const d = R * c;
+    const distanceReelle = d * 1.3;
+    const t = Math.round((distanceReelle / 6) * 60);
     return { distance: Math.round(distanceReelle * 100) / 100, time: t };
   }
 
@@ -1010,19 +961,11 @@ setTimeout(() => this.initStopPickerMap(), 100);
     }>();
 
     this.reclamations.forEach(r => {
-      // Clé combinée : Arrêt + Quartier pour le graphique d'écart
       const stopName = (r.stopName || 'Non spécifié').trim();
       const neighborhood = (r.neighborhood || 'Inconnu').trim();
       const key = `${stopName}|${neighborhood}`;
 
       if (r.latitude && r.longitude) {
-        console.log(`[RECLAMATION-DEBUG] ${neighborhood} -> ${stopName}`, {
-          lat: r.latitude,
-          lng: r.longitude,
-          distStored: r.walkingDistance,
-          timeStored: r.walkingTime
-        });
-        // Fallback distance/time si 0
         let effectiveDist = r.walkingDistance || 0;
         let effectiveTime = r.walkingTime || 0;
 
@@ -1036,7 +979,6 @@ setTimeout(() => this.initStopPickerMap(), 100);
             }
           }
           if (stopCoords.lat !== 0) {
-            console.log(`[STOP-FOUND] ${stopName}`, stopCoords);
             const h = this.calculateHaversine(r.latitude, r.longitude, stopCoords.lat, stopCoords.lng);
             effectiveDist = h.distance;
             effectiveTime = h.time;
@@ -1070,7 +1012,6 @@ setTimeout(() => this.initStopPickerMap(), 100);
       const avgTime = Math.round(data.totalTime / count);
       const status = avgTime > 30 ? 'critical' : (avgTime >= 15 ? 'warning' : 'ok');
 
-      // Compter les employés réguliers (>= 3 réservations) et actifs
       const regularEmployees = Array.from(data.employeeIds).filter(id => {
         const isDetailPresent = this.employeDetailsMap.has(id);
         const freq = this.employeUsageFreq.get(id) || 0;
@@ -1082,7 +1023,6 @@ setTimeout(() => this.initStopPickerMap(), 100);
         freq: this.employeUsageFreq.get(id) || 0
       }));
 
-      // Trouver un bus potentiel pour cet arrêt
       const targetBus = this.navettes.find(b =>
         (b.depart || '').toLowerCase().includes(stopName.toLowerCase()) ||
         (b.arrivee || '').toLowerCase().includes(stopName.toLowerCase()) ||
@@ -1103,140 +1043,136 @@ setTimeout(() => this.initStopPickerMap(), 100);
         isRecommended: regularEmployees.length >= 3 && status !== 'ok',
         regularEmployeesDetails,
         targetBusId: targetBus?.id,
-        showDetails: false // Flag pour l'affichage UI
+        showDetails: false
       };
     }).sort((a, b) => b.avgTime - a.avgTime);
 
-    // Déclencher les mises à jour ORS pour les données manquantes (Optimisé par paires Quartier|Arrêt)
     this.fetchMissingRealMetrics();
   }
 
   private _pendingOrsUpdates = new Set<string>();
 
- private fetchMissingRealMetrics(): void {
-  this.reclamations.forEach(r => {
-    if ((!r.walkingTime || r.walkingTime === 0) && r.latitude && r.longitude) {
-      const stopName = (r.stopName || '').trim();
-      const neighborhood = (r.neighborhood || '').trim();
-      const key = `${stopName}|${neighborhood}`;
+  private fetchMissingRealMetrics(): void {
+    this.reclamations.forEach(r => {
+      if ((!r.walkingTime || r.walkingTime === 0) && r.latitude && r.longitude) {
+        const stopName = (r.stopName || '').trim();
+        const neighborhood = (r.neighborhood || '').trim();
+        const key = `${stopName}|${neighborhood}`;
 
-      if (this._pendingOrsUpdates.has(key)) return;
+        if (this._pendingOrsUpdates.has(key)) return;
 
-      let stopCoords = { lat: 0, lng: 0 };
-      for (const bus of this.navettes) {
-        const s = bus.arrets?.find(a => a.name.trim().toLowerCase() === stopName.toLowerCase());
-        if (s) {
-          stopCoords = { lat: s.latitude, lng: s.longitude };
-          break;
-        }
-      }
-
-      if (stopCoords.lat !== 0) {
-        this._pendingOrsUpdates.add(key);
-
-        this._walkingService.getWalkingMetrics(r.latitude, r.longitude, stopCoords.lat, stopCoords.lng)
-          .subscribe({
-            next: (metrics) => {
-              this.reclamations.forEach(rec => {
-                if (rec.stopName?.trim() === stopName && rec.neighborhood?.trim() === neighborhood) {
-                  rec.walkingDistance = metrics.distance;
-                  rec.walkingTime = metrics.time;
-                }
-              });
-              this._recalcStatsOnly();
-              this._changeDetectorRef.detectChanges();
-            },
-            error: () => {
-              // clé gardée dans _pendingOrsUpdates = pas de retry
-            }
-          });
-      }
-    }
-  });
-}
-private _recalcStatsOnly(): void {
-  const statsMap = new Map<string, any>();
-
-  this.reclamations.forEach(r => {
-    const stopName = (r.stopName || 'Non spécifié').trim();
-    const neighborhood = (r.neighborhood || 'Inconnu').trim();
-    const key = `${stopName}|${neighborhood}`;
-
-    if (r.latitude && r.longitude) {
-      let effectiveDist = r.walkingDistance || 0;
-      let effectiveTime = r.walkingTime || 0;
-
-      if (effectiveDist === 0) {
         let stopCoords = { lat: 0, lng: 0 };
         for (const bus of this.navettes) {
           const s = bus.arrets?.find(a => a.name.trim().toLowerCase() === stopName.toLowerCase());
-          if (s) { stopCoords = { lat: s.latitude, lng: s.longitude }; break; }
+          if (s) {
+            stopCoords = { lat: s.latitude, lng: s.longitude };
+            break;
+          }
         }
+
         if (stopCoords.lat !== 0) {
-          const h = this.calculateHaversine(r.latitude, r.longitude, stopCoords.lat, stopCoords.lng);
-          effectiveDist = h.distance;
-          effectiveTime = h.time;
+          this._pendingOrsUpdates.add(key);
+
+          this._walkingService.getWalkingMetrics(r.latitude, r.longitude, stopCoords.lat, stopCoords.lng)
+            .subscribe({
+              next: (metrics) => {
+                this.reclamations.forEach(rec => {
+                  if (rec.stopName?.trim() === stopName && rec.neighborhood?.trim() === neighborhood) {
+                    rec.walkingDistance = metrics.distance;
+                    rec.walkingTime = metrics.time;
+                  }
+                });
+                this._recalcStatsOnly();
+                this._changeDetectorRef.detectChanges();
+              },
+              error: () => { }
+            });
         }
       }
+    });
+  }
 
-      if (!statsMap.has(key)) {
-        statsMap.set(key, {
-          lat: r.latitude, lng: r.longitude,
-          employeeIds: new Set([r.employeId]),
-          employees: new Set([this.getNomEmploye(r.employeId)]),
-          totalDistance: effectiveDist,
-          totalTime: effectiveTime
-        });
-      } else {
-        const entry = statsMap.get(key)!;
-        entry.employeeIds.add(r.employeId);
-        entry.employees.add(this.getNomEmploye(r.employeId));
-        entry.totalDistance += effectiveDist;
-        entry.totalTime += effectiveTime;
+  private _recalcStatsOnly(): void {
+    const statsMap = new Map<string, any>();
+
+    this.reclamations.forEach(r => {
+      const stopName = (r.stopName || 'Non spécifié').trim();
+      const neighborhood = (r.neighborhood || 'Inconnu').trim();
+      const key = `${stopName}|${neighborhood}`;
+
+      if (r.latitude && r.longitude) {
+        let effectiveDist = r.walkingDistance || 0;
+        let effectiveTime = r.walkingTime || 0;
+
+        if (effectiveDist === 0) {
+          let stopCoords = { lat: 0, lng: 0 };
+          for (const bus of this.navettes) {
+            const s = bus.arrets?.find(a => a.name.trim().toLowerCase() === stopName.toLowerCase());
+            if (s) { stopCoords = { lat: s.latitude, lng: s.longitude }; break; }
+          }
+          if (stopCoords.lat !== 0) {
+            const h = this.calculateHaversine(r.latitude, r.longitude, stopCoords.lat, stopCoords.lng);
+            effectiveDist = h.distance;
+            effectiveTime = h.time;
+          }
+        }
+
+        if (!statsMap.has(key)) {
+          statsMap.set(key, {
+            lat: r.latitude, lng: r.longitude,
+            employeeIds: new Set([r.employeId]),
+            employees: new Set([this.getNomEmploye(r.employeId)]),
+            totalDistance: effectiveDist,
+            totalTime: effectiveTime
+          });
+        } else {
+          const entry = statsMap.get(key)!;
+          entry.employeeIds.add(r.employeId);
+          entry.employees.add(this.getNomEmploye(r.employeId));
+          entry.totalDistance += effectiveDist;
+          entry.totalTime += effectiveTime;
+        }
       }
-    }
-  });
+    });
 
-  this.reclamationStats = Array.from(statsMap.entries()).map(([key, data]) => {
-    const [stopName, neighborhood] = key.split('|');
-    const count = data.employeeIds.size;
-    const avgTime = Math.round(data.totalTime / count);
-    const status = avgTime > 30 ? 'critical' : (avgTime >= 15 ? 'warning' : 'ok');
+    this.reclamationStats = Array.from(statsMap.entries()).map(([key, data]) => {
+      const [stopName, neighborhood] = key.split('|');
+      const count = data.employeeIds.size;
+      const avgTime = Math.round(data.totalTime / count);
+      const status = avgTime > 30 ? 'critical' : (avgTime >= 15 ? 'warning' : 'ok');
 
-    const regularEmployees = Array.from(data.employeeIds).filter((id: string) =>
-      this.employeDetailsMap.has(id) && (this.employeUsageFreq.get(id) || 0) >= 3
-    );
+      const regularEmployees = Array.from(data.employeeIds).filter((id: string) =>
+        this.employeDetailsMap.has(id) && (this.employeUsageFreq.get(id) || 0) >= 3
+      );
 
-    const targetBus = this.navettes.find(b =>
-      b.arrets?.some(ar => ar.name.toLowerCase().includes(stopName.toLowerCase()))
-    );
+      const targetBus = this.navettes.find(b =>
+        b.arrets?.some(ar => ar.name.toLowerCase().includes(stopName.toLowerCase()))
+      );
 
-    return {
-      stopName, neighborhood,
-      count: data.employees.size,
-      regularCount: regularEmployees.length,
-      latitude: data.lat, longitude: data.lng,
-      avgDistance: Math.round((data.totalDistance / count) * 10) / 10,
-      avgTime, employeeList: Array.from(data.employees).join(', '),
-      status,
-      isRecommended: regularEmployees.length >= 3 && status !== 'ok',
-      regularEmployeesDetails: regularEmployees.map((id: string) => ({
-        name: this.getNomEmploye(id),
-        freq: this.employeUsageFreq.get(id) || 0
-      })),
-      targetBusId: targetBus?.id,
-      showDetails: false
-    };
-  }).sort((a, b) => b.avgTime - a.avgTime);
-}
+      return {
+        stopName, neighborhood,
+        count: data.employees.size,
+        regularCount: regularEmployees.length,
+        latitude: data.lat, longitude: data.lng,
+        avgDistance: Math.round((data.totalDistance / count) * 10) / 10,
+        avgTime, employeeList: Array.from(data.employees).join(', '),
+        status,
+        isRecommended: regularEmployees.length >= 3 && status !== 'ok',
+        regularEmployeesDetails: regularEmployees.map((id: string) => ({
+          name: this.getNomEmploye(id),
+          freq: this.employeUsageFreq.get(id) || 0
+        })),
+        targetBusId: targetBus?.id,
+        showDetails: false
+      };
+    }).sort((a, b) => b.avgTime - a.avgTime);
+  }
 
-  // Calcul dynamique des métriques pour l'affichage (si 0 dans la base)
   getMetrics(r: Reclamation): { time: number, dist: number } {
     if (r.walkingTime && r.walkingTime > 0) {
       return { time: r.walkingTime, dist: r.walkingDistance || 0 };
     }
 
-    // Sinon recalcul via Haversine (Secours temporaire)
     let stopCoords = { lat: 0, lng: 0 };
     const stopName = (r.stopName || '').trim().toLowerCase();
 
@@ -1261,39 +1197,41 @@ private _recalcStatsOnly(): void {
     if (time >= 15) return 'bg-orange-50 text-orange-600 border-orange-100';
     return 'bg-emerald-50 text-emerald-600 border-emerald-100';
   }
-archivedReclamations: any[] = [];
 
-archiveReclamation(r: Reclamation): void {
-  const archived = { ...r, archivedAt: new Date().toISOString() };
-  this.archivedReclamations.push(archived);
-  localStorage.setItem('archivedReclamations', JSON.stringify(this.archivedReclamations));
-  this.reclamations = this.reclamations.filter(rec => rec.id !== r.id);
-  this.calculateReclamationStats();
-  this._toastrService.success('Réclamation archivée');
-  this._changeDetectorRef.detectChanges();
-}
+  archivedReclamations: any[] = [];
 
-deleteReclamation(id: string): void {
-  const dialogRef = this._fuseConfirmationService.open({
-    title: 'Confirmer la suppression',
-    message: 'Voulez-vous vraiment supprimer cette réclamation ? Cette action est irréversible.',
-    icon: { show: true, name: 'heroicons_outline:exclamation', color: 'warn' },
-    actions: { confirm: { label: 'Supprimer', color: 'warn' } }
-  });
+  archiveReclamation(r: Reclamation): void {
+    const archived = { ...r, archivedAt: new Date().toISOString() };
+    this.archivedReclamations.push(archived);
+    localStorage.setItem('archivedReclamations', JSON.stringify(this.archivedReclamations));
+    this.reclamations = this.reclamations.filter(rec => rec.id !== r.id);
+    this.calculateReclamationStats();
+    this._toastrService.success('Réclamation archivée');
+    this._changeDetectorRef.detectChanges();
+  }
 
-  dialogRef.afterClosed().subscribe((result) => {
-    if (result === 'confirmed') {
-      this.reclamationService.delete(id).subscribe({
-        next: () => {
-          this._toastrService.success('Réclamation supprimée');
-          this.loadReclamations();
-          this._changeDetectorRef.detectChanges();
-        },
-        error: (err) => this._toastrService.error('Erreur lors de la suppression')
-      });
-    }
-  });
-}
+  deleteReclamation(id: string): void {
+    const dialogRef = this._fuseConfirmationService.open({
+      title: 'Confirmer la suppression',
+      message: 'Voulez-vous vraiment supprimer cette réclamation ? Cette action est irréversible.',
+      icon: { show: true, name: 'heroicons_outline:exclamation', color: 'warn' },
+      actions: { confirm: { label: 'Supprimer', color: 'warn' } }
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result === 'confirmed') {
+        this.reclamationService.delete(id).subscribe({
+          next: () => {
+            this._toastrService.success('Réclamation supprimée');
+            this.loadReclamations();
+            this._changeDetectorRef.detectChanges();
+          },
+          error: () => this._toastrService.error('Erreur lors de la suppression')
+        });
+      }
+    });
+  }
+
   initHeatmap(): void {
     setTimeout(() => {
       const mapContainer = document.getElementById('heatmapMap');
@@ -1311,12 +1249,10 @@ deleteReclamation(id: string): void {
         attribution: '© OpenStreetMap'
       }).addTo(this.heatmapMap);
 
-      // Forcer le rafraîchissement des dimensions
       setTimeout(() => {
         if (this.heatmapMap) this.heatmapMap.invalidateSize();
       }, 100);
 
-      // 1. Plot Heatmap Underlay (Density)
       const points = this.reclamations
         .filter(r => r.latitude && r.longitude)
         .map(r => [r.latitude, r.longitude, 0.5]);
@@ -1325,7 +1261,6 @@ deleteReclamation(id: string): void {
         L.heatLayer(points, { radius: 25, blur: 15, maxZoom: 17 }).addTo(this.heatmapMap);
       }
 
-      // 2. Plot Fixed Bus Stops (Standard Blue Pins)
       const stopIcon = L.divIcon({
         html: `
           <div class="flex flex-col items-center">
@@ -1342,7 +1277,6 @@ deleteReclamation(id: string): void {
         iconAnchor: [16, 45]
       });
 
-      // Collect unique stops across all buses
       const uniqueStops = new Map<string, { lat: number, lng: number, name: string }>();
 
       this.navettes.forEach(bus => {
@@ -1360,15 +1294,12 @@ deleteReclamation(id: string): void {
         }
       });
 
-      // console.log(`[Heatmap] Affichage de ${uniqueStops.size} arrêts uniques pour ${this.navettes.length} bus.`);
-
       uniqueStops.forEach(stop => {
         L.marker([stop.lat, stop.lng], { icon: stopIcon })
           .bindPopup(`<div class="font-bold text-[#1A1A2E] uppercase text-[10px] tracking-wider mb-1 border-b pb-1">${stop.name}</div><div class="text-[9px] text-gray-500 italic">Point d'arrêt réseau RH</div>`)
           .addTo(this.heatmapMap);
       });
 
-      // 3. Plot Neighborhood Clusters (Green Proportional Numbered Circles)
       const usedCoords = new Map<string, number>();
 
       this.reclamationStats.forEach(stat => {
@@ -1377,15 +1308,13 @@ deleteReclamation(id: string): void {
           const baseLng = parseFloat(stat.longitude.toString());
           const coordKey = `${baseLat.toFixed(5)}|${baseLng.toFixed(5)}`;
 
-          // Compter les superpositions pour décaler légèrement chaque point
           const overlapCount = usedCoords.get(coordKey) || 0;
           usedCoords.set(coordKey, overlapCount + 1);
 
-          // Appliquer un petit décalage en spirale si superposition
           const jitterLat = baseLat + (overlapCount > 0 ? (Math.sin(overlapCount) * 0.0006) : 0);
           const jitterLng = baseLng + (overlapCount > 0 ? (Math.cos(overlapCount) * 0.0006) : 0);
 
-          const color = '#10B981'; // Vert par défaut pour les quartiers
+          const color = '#10B981';
           const pulsingColor = 'rgba(16, 185, 129, 0.3)';
           const size = Math.min(70, 35 + (stat.count * 3));
 
@@ -1393,7 +1322,7 @@ deleteReclamation(id: string): void {
             html: `
               <div class="relative flex items-center justify-center">
                 <div class="absolute w-full h-full rounded-full animate-ping" style="background-color: ${pulsingColor}"></div>
-                <div class="relative flex items-center justify-center rounded-full text-white font-bold shadow-xl border-2 border-white transition-all duration-500 hover:scale-110" 
+                <div class="relative flex items-center justify-center rounded-full text-white font-bold shadow-xl border-2 border-white transition-all duration-500 hover:scale-110"
                      style="background-color: ${color}; width: ${size}px; height: ${size}px; font-size: ${size / 3}px">
                   ${stat.count}
                 </div>
@@ -1410,20 +1339,13 @@ deleteReclamation(id: string): void {
                   <span>${stat.neighborhood}</span>
                   <span class="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded text-[9px]">${stat.count} pers.</span>
                 </div>
-                
                 <div class="text-[9px] text-gray-400 mb-2 italic">Destination : ${stat.stopName}</div>
-
-                <!-- Marche Info -->
                 <div class="bg-blue-50/50 rounded-lg p-2 mb-3 border border-blue-100 flex items-center gap-3">
-                  <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm">
-                    <i class="fas fa-walking text-blue-500 text-xs"></i>
-                  </div>
                   <div>
                     <div class="text-[10px] font-bold text-blue-900">${stat.avgTime} min de marche</div>
                     <div class="text-[9px] text-blue-700">${stat.avgDistance} km de distance</div>
                   </div>
                 </div>
-
                 <div class="space-y-2">
                   <div class="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">Profils concernés :</div>
                   <div class="text-[10px] text-gray-600 leading-relaxed italic border-l-2 border-emerald-500 pl-2">
@@ -1480,7 +1402,6 @@ deleteReclamation(id: string): void {
       };
       this.busService.update(this.busForm.id, busToUpdate).subscribe({
         next: () => {
-          // Synchroniser les arrêts sur tous les bus du pack
           if (this.busForm.packId) {
             const packBuses = this.navettes.filter(
               b => b.packId === this.busForm.packId && b.id !== this.busForm.id
@@ -1591,24 +1512,18 @@ deleteReclamation(id: string): void {
 
   applyStopRecommendation(stat: any): void {
     if (!stat.targetBusId) {
-      this._toastrService.warning("Impossible de trouver un bus correspondant à cet arrêt.");
+      this._toastrService.warning('Impossible de trouver un bus correspondant à cet arrêt.');
       return;
     }
 
     const bus = this.navettes.find(b => b.id === stat.targetBusId);
     if (!bus) return;
 
-    // 1. Ouvrir le modal pour ce bus
     this.openEditModal(bus);
-
-    // 2. Pré-remplir le nouvel arrêt
     this.arretInput = stat.neighborhood;
-
-    // 3. Pré-remplir les coordonnées
     this.selectedLat = stat.latitude;
     this.selectedLng = stat.longitude;
 
-    // 4. Mettre à jour le marqueur sur la mini-map du modal
     if (this.stopPickerMap && this.selectedLat && this.selectedLng) {
       if (this.stopPickerMarker) {
         this.stopPickerMap.removeLayer(this.stopPickerMarker);
@@ -1617,7 +1532,6 @@ deleteReclamation(id: string): void {
       this.stopPickerMap.setView([this.selectedLat, this.selectedLng], 15);
     }
 
-    // Défiler vers le haut pour voir le modal si besoin
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -1667,25 +1581,27 @@ deleteReclamation(id: string): void {
       this.initHeatmap();
     }
   }
+
   setReservationType(type: ReservationType): void { this.reservationType = type; }
 
   get filteredNavettes(): Bus[] {
     if (!this.searchTerm) return this.navettes;
     return this.navettes.filter(n => n.ligne?.toLowerCase().includes(this.searchTerm.toLowerCase()) || n.marque?.toLowerCase().includes(this.searchTerm.toLowerCase()) || n.immatriculation?.toLowerCase().includes(this.searchTerm.toLowerCase()));
   }
+
   get filteredReservations(): any[] {
     if (this.reservationType === 'archive') {
       return this.archivedReservations;
     }
     return this.reservations.filter(r => r.type === this.reservationType);
   }
+
   get totalStock(): number { return this.cadeaux.reduce((sum, c) => sum + c.stock, 0); }
 
   get stats() {
     const resNavette = this.reservations.filter(r => r.type === 'navette');
     const resCovoit = this.reservations.filter(r => r.type === 'covoiturage');
 
-    // SOMME RÉELLE DES DONNÉES SANS CALCULS FICTIFS
     const sumField = (list: any[], field: string) => Math.round(list.reduce((sum, r) => sum + (r[field] || 0), 0));
 
     const co2Total = sumField(this.reservations, 'co2Economise');
@@ -1729,46 +1645,45 @@ deleteReclamation(id: string): void {
         navette: getTrend(resNavetteCur.length, resNavetteLast.length)
       },
       totalNavettes: this.navettes.length,
-      archiveValue: this.archivedReservations.length  // ← ici
-
+      archiveValue: this.archivedReservations.length
     };
   }
 
   private initCharts(): void {
     this.chartMobility = {
       series: [
-        { name: "Covoiturages", data: [12, 18, 15, 25, 22, 30, 28] },
-        { name: "Navettes", data: [10, 15, 20, 18, 30, 45, 42] }
+        { name: 'Covoiturages', data: [12, 18, 15, 25, 22, 30, 28] },
+        { name: 'Navettes', data: [10, 15, 20, 18, 30, 45, 42] }
       ],
-      chart: { height: 300, type: "area", toolbar: { show: false }, fontFamily: 'inherit' },
-      colors: ["#1D9E75", "#0F3460"],
+      chart: { height: 300, type: 'area', toolbar: { show: false }, fontFamily: 'inherit' },
+      colors: ['#1D9E75', '#0F3460'],
       dataLabels: { enabled: false },
-      stroke: { curve: "smooth", width: 3 },
+      stroke: { curve: 'smooth', width: 3 },
       grid: { padding: { left: 0, right: 0 }, strokeDashArray: 4, yaxis: { lines: { show: true } } },
-      xaxis: { type: "category", categories: ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"], labels: { style: { colors: "#64748B", fontSize: '12px' } } },
-      yaxis: { labels: { style: { colors: "#64748B", fontSize: '12px' } } },
-      fill: { type: "gradient", gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.1, stops: [0, 90, 100] } },
-      legend: { position: "top", horizontalAlign: "right" }
+      xaxis: { type: 'category', categories: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'], labels: { style: { colors: '#64748B', fontSize: '12px' } } },
+      yaxis: { labels: { style: { colors: '#64748B', fontSize: '12px' } } },
+      fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.1, stops: [0, 90, 100] } },
+      legend: { position: 'top', horizontalAlign: 'right' }
     };
 
     this.chartEco = {
       series: [45, 30, 25],
-      chart: { type: "donut", height: 280 },
-      labels: ["CO2 Économisé", "Eco Points", "Utilisateurs Actifs"],
-      colors: ["#1D9E75", "#F5A623", "#0F3460"],
+      chart: { type: 'donut', height: 280 },
+      labels: ['CO2 économisé', 'Eco Points', 'Utilisateurs Actifs'],
+      colors: ['#1D9E75', '#F5A623', '#0F3460'],
       plotOptions: { pie: { donut: { size: '75%', labels: { show: true, total: { show: true, label: 'Global Impact', formatter: () => 'Top' } } } } },
-      legend: { position: "bottom" },
+      legend: { position: 'bottom' },
       dataLabels: { enabled: false }
     };
 
     this.chartDaily = {
-      series: [{ name: "Réservations", data: [44, 55, 41, 67, 22, 43, 21] }],
-      chart: { height: 300, type: "bar", toolbar: { show: false } },
+      series: [{ name: 'Réservations', data: [44, 55, 41, 67, 22, 43, 21] }],
+      chart: { height: 300, type: 'bar', toolbar: { show: false } },
       plotOptions: { bar: { columnWidth: '45%', distributed: true, borderRadius: 8 } },
-      colors: ["#1D9E75", "#F5A623", "#0F3460", "#E94560", "#1D9E75", "#F5A623", "#0F3460"],
+      colors: ['#1D9E75', '#F5A623', '#0F3460', '#E94560', '#1D9E75', '#F5A623', '#0F3460'],
       dataLabels: { enabled: false },
       legend: { show: false },
-      xaxis: { categories: ["L", "M", "M", "J", "V", "S", "D"], labels: { style: { fontSize: '12px' } } }
+      xaxis: { categories: ['L', 'M', 'M', 'J', 'V', 'S', 'D'], labels: { style: { fontSize: '12px' } } }
     };
   }
 
@@ -1784,7 +1699,7 @@ deleteReclamation(id: string): void {
           this.addNotification({
             id: `notif-${bus.id}-${date}`,
             type: 'warning',
-            title: '⚡ Occupation Critique',
+            title: '⚠️ Occupation Critique',
             message: `Le jour ${new Date(date).toLocaleDateString()} a atteint ${Math.round(ratio * 100)}% de la capacité sur ${bus.marque}.`,
             busId: bus.id,
             date: date,
@@ -1864,9 +1779,6 @@ deleteReclamation(id: string): void {
     this.isLoadingPrediction = true;
     this.predictionService.getWeeklyPrediction().subscribe({
       next: (data) => {
-        // console.log('Données reçues:', data);
-
-        // 1. Déterminer la structure (Objet ou Tableau + Gestion des accents)
         let predictionsRaw = [];
         let todayRaw = null;
         let totalVal = 0;
@@ -1875,14 +1787,12 @@ deleteReclamation(id: string): void {
         if (Array.isArray(data)) {
           predictionsRaw = data;
         } else if (data) {
-          // Support pour "predictions" ou "prédictions" (accent)
           predictionsRaw = data.predictions || data['prédictions'] || [];
           todayRaw = data.today || null;
-          totalVal = data.total || data['total'] || 0;
+          totalVal = data.total || 0;
           avgVal = data.average || data['moyenne'] || 0;
         }
 
-        // 2. Météo du jour (Fallback si absent)
         if (todayRaw) {
           this.currentWeather = {
             temp: Math.round(todayRaw.temp || 24),
@@ -1895,13 +1805,11 @@ deleteReclamation(id: string): void {
           };
         }
 
-        // 3. Prédictions (Gestion de 'prédit' et calcul des dates/météo si absent)
         const daysOrder = ['LUNDI', 'MARDI', 'MERCREDI', 'JEUDI', 'VENDREDI', 'SAMEDI', 'DIMANCHE'];
         const conditions = ['Ensoleillé', 'Nuageux', 'Beau temps', 'Nuageux', 'Ensoleillé', 'Pluie', 'Beau temps'];
 
-        // Trouver le lundi de cette semaine pour aligner les dates
         const now = new Date();
-        const currentDay = now.getDay(); // 0=Dim, 1=Lun...
+        const currentDay = now.getDay();
         const diff = (currentDay === 0 ? -6 : 1) - currentDay;
         const monday = new Date(now);
         monday.setDate(now.getDate() + diff);
@@ -1911,7 +1819,6 @@ deleteReclamation(id: string): void {
           let dayIdx = daysOrder.indexOf(itemDay);
           if (dayIdx === -1) dayIdx = i;
 
-          // Calcul de la date basée sur l'index du jour dans la semaine (Lundi+idx)
           const d = new Date(monday);
           d.setDate(monday.getDate() + dayIdx);
 
@@ -1925,38 +1832,22 @@ deleteReclamation(id: string): void {
           };
         });
 
-        // 4. Totaux et Synchronisation de la carte principale
         const total = totalVal || this.weeklyPredictions.reduce((sum, p) => sum + (p.predicted || 0), 0);
         this.predictionAverage = avgVal || (this.weeklyPredictions.length > 0 ? Math.round(total / this.weeklyPredictions.length) : 0);
         this.predictionTotal = total;
 
-        // S'assurer que la carte principale (Aujourd'hui) reflete TOUJOURS le premier jour de prédiction
         if (this.weeklyPredictions && this.weeklyPredictions.length > 0) {
           const pToday = this.weeklyPredictions[0];
-          // console.log('Tentative de synchro Hero Card avec:', pToday.temp);
-
-          // On remplace les valeurs par défaut (0 ou 24) par les données réelles
-          // On force la mise à jour si la valeur actuelle est 0, 24 ou si todayRaw est absent
           if (!todayRaw || this.currentWeather.temp <= 0 || this.currentWeather.temp === 24) {
             this.currentWeather.temp = Math.round(Number(pToday.temp) || 28);
             this.currentWeather.condition = pToday.meteo || 'Ensoleillé';
             this.currentWeather.icon = this.getWeatherIcon(pToday.meteo);
             this.currentWeather.location = 'Tunis, TN';
-            console.log('✅ Synchronisation forcée réussie:', this.currentWeather.temp);
           }
         }
 
         this.isLoadingPrediction = false;
         this._changeDetectorRef.detectChanges();
-
-        // Hook pour le debug via subagent
-        (window as any).DEBUG_WEATHER = {
-          current: this.currentWeather,
-          weekly: this.weeklyPredictions,
-          todayRaw: todayRaw
-        };
-
-        // console.log('--- DEBUG WEATHER HOOK UPDATED ---');
       },
       error: (err) => {
         console.error('Erreur:', err);

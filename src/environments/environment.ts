@@ -7,7 +7,7 @@ export const environment = {
    * Si vide, on calcule automatiquement à partir de l'API (ou de l'origine navigateur en dev).
    */
   //wsTrackingUrl: '' as string
-  wsTrackingUrl: 'http://10.188.81.174:8081/ws-tracking'
+  wsTrackingUrl: 'http://10.252.246.174:8081/ws-tracking'
 };
 
 /**

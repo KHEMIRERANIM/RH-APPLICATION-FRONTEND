@@ -82,7 +82,7 @@ export class TeamAdminComponent implements OnInit {
     // ========== CHARGEMENT ==========
     
     loadUsers(): void {
-        this.http.get<UserItem[]>('http://10.188.81.174:8081/api/users')
+        this.http.get<UserItem[]>('http://10.252.246.174:8081/api/users')
             .subscribe({
                 next: (data) => {
                     this.originalData = data;
@@ -252,7 +252,7 @@ export class TeamAdminComponent implements OnInit {
             formData.append('file', this.selectedFile);
             formData.append('type', 'user_avatar');
             
-            this.http.post<{ url: string }>('http://10.188.81.174:8081/api/upload', formData)
+            this.http.post<{ url: string }>('http://10.252.246.174:8081/api/upload', formData)
                 .subscribe({
                     next: (response) => {
                         this.uploading = false;
@@ -281,7 +281,7 @@ export class TeamAdminComponent implements OnInit {
             const data = { ...this.userFormValue };
             
             if (this.isEditMode) {
-                this.http.put(`http://10.188.81.174:8081/api/users/${data.id}`, data)
+                this.http.put(`http://10.252.246.174:8081/api/users/${data.id}`, data)
                     .subscribe({
                         next: () => {
                             this.toastr.success('Membre modifié avec succès', 'Succès');
@@ -293,7 +293,7 @@ export class TeamAdminComponent implements OnInit {
                         }
                     });
             } else {
-                this.http.post('http://10.188.81.174:8081/api/users', data)
+                this.http.post('http://10.252.246.174:8081/api/users', data)
                     .subscribe({
                         next: () => {
                             this.toastr.success('Membre ajouté avec succès', 'Succès');
@@ -320,7 +320,7 @@ export class TeamAdminComponent implements OnInit {
 
         dialogRef.afterClosed().subscribe((result) => {
             if (result === 'confirmed') {
-                this.http.delete(`http://10.188.81.174:8081/api/users/${u.id}`)
+                this.http.delete(`http://10.252.246.174:8081/api/users/${u.id}`)
                     .subscribe({
                         next: () => {
                             this.toastr.success('Membre supprimé', 'Succès');
