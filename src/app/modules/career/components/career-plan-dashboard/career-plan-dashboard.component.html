@@ -251,8 +251,13 @@
 
             <div *ngIf="c.fichierNom || c.fichierUrl" class="file-box">
               <span>📎 {{ c.fichierNom || 'Fichier joint' }}</span>
-              <a *ngIf="c.fichierUrl" [href]="'http://localhost:8081' + c.fichierUrl" target="_blank">👁️ Voir</a>
-            </div>
+<button
+  *ngIf="c.fichierUrl"
+  type="button"
+  class="file-link-btn"
+  (click)="openCertificationFile(c.fichierUrl)">
+  👁️ Voir
+</button>            </div>
 
             <div *ngIf="!c.fichierNom && !c.fichierUrl" class="subtle-line">
               Aucun fichier uploadé

@@ -7,7 +7,7 @@
       class="admin-tab-btn"
       [ngClass]="{ 'active': adminTab === 'overview' }"
       (click)="setAdminTab('overview')">
-      <span class="admin-tab-btn__icon">📊</span>
+      <span class="admin-tab-btn__indicator"></span>
       <span>Vue globale</span>
     </button>
 
@@ -16,8 +16,8 @@
       class="admin-tab-btn"
       [ngClass]="{ 'active': adminTab === 'mobility' }"
       (click)="setAdminTab('mobility')">
-      <span class="admin-tab-btn__icon">🔄</span>
-      <span>Demandes mobilité</span>
+      <span class="admin-tab-btn__indicator"></span>
+      <span>Mobilité</span>
     </button>
 
     <button
@@ -25,8 +25,8 @@
       class="admin-tab-btn"
       [ngClass]="{ 'active': adminTab === 'plans' }"
       (click)="setAdminTab('plans')">
-      <span class="admin-tab-btn__icon">📈</span>
-      <span>Plans d’évolution</span>
+      <span class="admin-tab-btn__indicator"></span>
+      <span>Plans</span>
     </button>
 
     <button
@@ -34,7 +34,7 @@
       class="admin-tab-btn"
       [ngClass]="{ 'active': adminTab === 'rse' }"
       (click)="setAdminTab('rse')">
-      <span class="admin-tab-btn__icon">🌱</span>
+      <span class="admin-tab-btn__indicator"></span>
       <span>RSE</span>
     </button>
   </div>
@@ -48,38 +48,54 @@
 
     <ng-container *ngIf="!isLoading">
 
+      <div class="dashboard-hero">
+        <div class="dashboard-hero__content">
+          <p class="dashboard-hero__eyebrow">Administration RH</p>
+          <h2 class="dashboard-hero__title">Pilotage de la carrière et de la mobilité</h2>
+          <p class="dashboard-hero__subtitle">
+            Suivez les indicateurs clés, les demandes en attente et l’évolution globale des collaborateurs.
+          </p>
+        </div>
+
+        <div class="dashboard-hero__badge">
+          <span class="dashboard-hero__badge-label">Progression moyenne</span>
+          <span class="dashboard-hero__badge-value">{{ avgProgress }}%</span>
+        </div>
+      </div>
+
       <div class="kpi-grid">
 
-        <div class="kpi-card kpi-card--neutral">
-          <div class="kpi-card__orb kpi-card__orb--purple"></div>
-          <div class="kpi-card__icon">💼</div>
+        <div class="kpi-card kpi-card--positions">
+          <div class="kpi-card__topline"></div>
+          <p class="kpi-card__eyebrow">Talent</p>
           <p class="kpi-card__value">{{ totalPositions }}</p>
           <p class="kpi-card__label">Postes disponibles</p>
         </div>
 
-        <div class="kpi-card kpi-card--neutral">
-          <div class="kpi-card__orb kpi-card__orb--blue"></div>
-          <div class="kpi-card__icon">👥</div>
+        <div class="kpi-card kpi-card--employees">
+          <div class="kpi-card__topline"></div>
+          <p class="kpi-card__eyebrow">Effectif</p>
           <p class="kpi-card__value">{{ totalEmployees }}</p>
           <p class="kpi-card__label">Employés actifs</p>
         </div>
 
-        <div class="kpi-card kpi-card--neutral">
-          <div class="kpi-card__orb kpi-card__orb--green"></div>
-          <div class="kpi-card__icon">📈</div>
+        <div class="kpi-card kpi-card--plans">
+          <div class="kpi-card__topline"></div>
+          <p class="kpi-card__eyebrow">Développement</p>
           <p class="kpi-card__value">{{ totalPlans }}</p>
           <p class="kpi-card__label">Plans d'évolution</p>
         </div>
 
-        <div class="kpi-card kpi-card--neutral">
-          <div class="kpi-card__orb kpi-card__orb--amber"></div>
-          <div class="kpi-card__icon">🔄</div>
+        <div class="kpi-card kpi-card--mobility">
+          <div class="kpi-card__topline"></div>
+          <p class="kpi-card__eyebrow">Mobilité</p>
           <p class="kpi-card__value">{{ totalMobilities }}</p>
           <p class="kpi-card__label">Demandes mobilité</p>
         </div>
 
         <div class="kpi-card kpi-card--primary">
-          <div class="kpi-card__icon">🎯</div>
+          <div class="kpi-card__topline"></div>
+          <p class="kpi-card__eyebrow kpi-card__eyebrow--light">Performance</p>
           <p class="kpi-card__value kpi-card__value--on-primary">{{ avgProgress }}%</p>
           <p class="kpi-card__label kpi-card__label--on-primary">Progression moyenne</p>
           <div class="kpi-progress">
@@ -88,9 +104,10 @@
         </div>
 
         <div class="kpi-card kpi-card--warning">
-          <div class="kpi-card__icon">⏳</div>
+          <div class="kpi-card__topline"></div>
+          <p class="kpi-card__eyebrow">Décision</p>
           <p class="kpi-card__value kpi-card__value--warning">{{ pendingRequests }}</p>
-          <p class="kpi-card__label kpi-card__label--warning">En attente de décision</p>
+          <p class="kpi-card__label kpi-card__label--warning">En attente</p>
         </div>
 
       </div>
@@ -98,13 +115,15 @@
       <div class="charts-grid">
 
         <div class="panel">
-          <p class="panel__title">📊 Plans par statut</p>
+          <p class="panel__title">Plans par statut</p>
+
           <div class="stack">
             <div *ngFor="let s of plansByStatus" class="stack__item">
               <div class="row row--space">
                 <span class="meta">{{ s.label }}</span>
                 <span class="meta meta--strong">{{ s.count }}</span>
               </div>
+
               <div class="bar">
                 <div
                   class="bar__fill"
@@ -121,12 +140,12 @@
         </div>
 
         <div class="panel">
-          <p class="panel__title">🔄 Demandes de mobilité</p>
+          <p class="panel__title">Demandes de mobilité</p>
 
           <div class="gauge-wrap">
             <div class="gauge">
-              <svg width="100" height="100" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="40" fill="none" stroke="#f3f4f6" stroke-width="10"></circle>
+              <svg width="112" height="112" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40" fill="none" stroke="#e2e8f0" stroke-width="10"></circle>
                 <circle
                   cx="50"
                   cy="50"
@@ -145,7 +164,7 @@
                 <p class="gauge__value">
                   {{ totalMobilities ? Math.round((approvedRequests / totalMobilities) * 100) : 0 }}%
                 </p>
-                <p class="gauge__label">approuvé</p>
+                <p class="gauge__label">Approuvé</p>
               </div>
             </div>
           </div>
@@ -162,7 +181,7 @@
         </div>
 
         <div class="panel">
-          <p class="panel__title">📉 Distribution progression</p>
+          <p class="panel__title">Distribution de progression</p>
 
           <div class="mini-bars">
             <div *ngFor="let p of progressDistribution" class="mini-bars__col">
@@ -185,7 +204,7 @@
       </div>
 
       <div *ngIf="topTargetCareers.length" class="panel">
-        <p class="panel__title">🏆 Postes les plus demandés</p>
+        <p class="panel__title">Postes les plus demandés</p>
 
         <div class="stack">
           <div *ngFor="let c of topTargetCareers; let i = index" class="top-row">
@@ -215,7 +234,7 @@
       <div class="summary-grid">
 
         <div class="panel">
-          <p class="panel__title">✅ Taux d'approbation mobilité</p>
+          <p class="panel__title">Taux d'approbation mobilité</p>
           <div class="row row--gap-lg">
             <div class="row__grow">
               <div class="bar bar--lg">
@@ -237,7 +256,7 @@
         </div>
 
         <div class="panel">
-          <p class="panel__title">📋 Plans avec progression &gt; 50%</p>
+          <p class="panel__title">Plans avec progression &gt; 50%</p>
           <div class="row row--gap-lg">
             <div class="row__grow">
               <div class="bar bar--lg">

@@ -17,25 +17,21 @@ import { Career } from '../../models/career.model';
   styleUrls: ['./employee-plan.component.scss']
 })
 export class EmployeePlanComponent implements OnInit {
-
   plan!: EvolutionPlan;
   careers: Career[] = [];
   isLoading = true;
   user: any = {};
   activeTab: string = 'poste';
-
   tabs = [
     { key: 'poste',       label: '🎯 Poste cible'       },
     { key: 'competences', label: '🧠 Mes compétences'    },
     { key: 'tech',        label: '⚙️ Certifs Techniques' },
     { key: 'soft',        label: '🤝 Soft Skills'        },
   ];
-
   newComp: Partial<Competence> = { niveau: 'INTERMEDIAIRE' };
   newCertif: Partial<EmployeeCertification> = { statut: CertificationStatus.NON_COMMENCE };
   newCertifFile: File | null = null;
   newCertifFileName: string = '';
-
   showAddTech = false;
   showAddSoft = false;
 
@@ -47,7 +43,26 @@ export class EmployeePlanComponent implements OnInit {
 
   ngOnInit(): void {
     this.user = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    // DEBUG : affiche le contenu complet de currentUser pour voir le bon champ
+    console.log('[EmployeePlan] currentUser:', this.user);
     this.loadData();
+  }
+
+  /**
+   * Retourne le poste actuel de l'utilisateur en cherchant dans tous
+   * les champs possibles du profil stocké en localStorage.
+   */
+  private getUserPoste(): string {
+    const u = this.user;
+    const raw = u?.poste
+      || u?.jobTitle
+      || u?.position
+      || u?.currentPosition
+      || u?.titre
+      || u?.role_metier
+      || '';
+    console.log('[EmployeePlan] getUserPoste() =>', raw);
+    return raw;
   }
 
   private loadData(): void {
@@ -55,28 +70,40 @@ export class EmployeePlanComponent implements OnInit {
     this.careerService.getAll().subscribe({
       next: careers => {
         this.careers = careers;
-        const userPoste = this.user?.poste?.toLowerCase()?.trim() || '';
+
+        const userPoste = this.getUserPoste();
+        const userPosteLower = userPoste.toLowerCase().trim();
 
         let currentCareer: Career | undefined;
-        if (userPoste) {
-          currentCareer = careers.find((c: Career) =>
-            c.title?.toLowerCase().trim() === userPoste
-          ) || careers.find((c: Career) =>
-            c.title?.toLowerCase().includes(userPoste)
-          );
+        if (userPosteLower) {
+          currentCareer =
+            careers.find((c: Career) => c.title?.toLowerCase().trim() === userPosteLower) ||
+            careers.find((c: Career) => c.title?.toLowerCase().includes(userPosteLower)) ||
+            careers.find((c: Career) => userPosteLower.includes(c.title?.toLowerCase().trim() ?? ''));
         }
+
+        console.log('[EmployeePlan] currentCareer matché:', currentCareer);
+
+        // Titre résolu : priorité 1 = user.poste (le vrai poste), 2 = career matché
+        const resolvedCurrentTitle: string =
+          userPoste ||
+          currentCareer?.title ||
+          '';
 
         this.planService.getMyPlan().subscribe({
           next: plans => {
             if (plans && plans.length > 0) {
               const raw = plans[0];
+              // On refuse d'utiliser raw.currentCareerTitle s'il contient 'Poste non défini' ou est vide
+              const backendTitle = (raw.currentCareerTitle && raw.currentCareerTitle !== 'Poste non défini')
+                ? raw.currentCareerTitle
+                : '';
               this.plan = {
                 ...raw,
                 competencesActuelles: parseCompetences(raw),
                 currentCareerId: currentCareer?.id ?? raw.currentCareerId ?? '',
-                currentCareerTitle: currentCareer?.title ?? this.user?.poste ?? raw.currentCareerTitle ?? 'Poste non défini'
+                currentCareerTitle: resolvedCurrentTitle || backendTitle || 'Non défini'
               };
-
               if (this.plan.targetCareerId && !this.plan.targetCareerTitle) {
                 const target = careers.find(c => c.id === this.plan.targetCareerId);
                 if (target) this.plan.targetCareerTitle = target.title;
@@ -89,9 +116,10 @@ export class EmployeePlanComponent implements OnInit {
                 competencesActuelles: [],
                 certifications: [],
                 currentCareerId: currentCareer?.id ?? '',
-                currentCareerTitle: currentCareer?.title ?? this.user?.poste ?? 'Poste non défini'
+                currentCareerTitle: resolvedCurrentTitle || 'Non défini'
               };
             }
+            console.log('[EmployeePlan] plan.currentCareerTitle =>', this.plan.currentCareerTitle);
             this.isLoading = false;
           },
           error: () => {
@@ -102,7 +130,7 @@ export class EmployeePlanComponent implements OnInit {
               competencesActuelles: [],
               certifications: [],
               currentCareerId: currentCareer?.id ?? '',
-              currentCareerTitle: currentCareer?.title ?? this.user?.poste ?? 'Poste non défini'
+              currentCareerTitle: resolvedCurrentTitle || 'Non défini'
             };
             this.isLoading = false;
           }
@@ -120,8 +148,9 @@ export class EmployeePlanComponent implements OnInit {
     return (this.plan?.certifications ?? []).filter(c => c.type === CertificationType.SOFT_SKILL);
   }
 
+  // Priorité : user.poste → plan.currentCareerTitle → 'Non défini'
   get posteActuel(): string {
-    return this.plan?.currentCareerTitle || this.user?.poste || 'Non défini';
+    return this.getUserPoste() || this.plan?.currentCareerTitle || 'Non défini';
   }
 
   onTargetCareerChange(): void {
@@ -164,7 +193,6 @@ export class EmployeePlanComponent implements OnInit {
     const obs = c.id
       ? this.planService.updateCertification(this.plan.id, c.id, c)
       : this.planService.addCertification(this.plan.id, c);
-
     obs.subscribe({
       next: p => {
         this.plan = {
@@ -181,7 +209,6 @@ export class EmployeePlanComponent implements OnInit {
   uploadCertifFile(event: Event, certif: EmployeeCertification): void {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file || !this.plan.id || !certif.id) return;
-
     this.planService.uploadCertifFile(this.plan.id, certif.id, file).subscribe({
       next: (res: any) => {
         certif.fichierNom = res.fileName ?? certif.fichierNom;
@@ -212,7 +239,6 @@ export class EmployeePlanComponent implements OnInit {
       this.snack('Veuillez saisir un nom pour la certification', true);
       return;
     }
-
     const certif: EmployeeCertification = {
       nom: this.newCertif.nom!,
       type: type as CertificationType,
@@ -223,7 +249,6 @@ export class EmployeePlanComponent implements OnInit {
       dateObtention: this.newCertif.dateObtention,
       fichierNom: this.newCertifFileName || undefined
     };
-
     if (!this.plan.id) {
       if (!this.plan.certifications) this.plan.certifications = [];
       this.plan.certifications.push(certif);
@@ -231,7 +256,6 @@ export class EmployeePlanComponent implements OnInit {
       this.resetNewCertifForm();
       return;
     }
-
     this.planService.addCertification(this.plan.id, certif).subscribe({
       next: (updatedPlan) => {
         this.plan = {
@@ -239,9 +263,7 @@ export class EmployeePlanComponent implements OnInit {
           competencesActuelles: parseCompetences(updatedPlan),
           currentCareerTitle: this.posteActuel
         };
-
         const createdCertif = this.plan.certifications[this.plan.certifications.length - 1];
-
         if (this.newCertifFile && createdCertif?.id) {
           this.planService.uploadCertifFile(this.plan.id!, createdCertif.id, this.newCertifFile)
             .subscribe({
@@ -267,18 +289,14 @@ export class EmployeePlanComponent implements OnInit {
     });
   }
 
-  // ✅ CORRECTION : ouverture directe sans fetch ni token
-  // L'endpoint /api/evolution_plans/files/** est maintenant public dans SecurityConfig
   openFile(fileUrl: string): void {
     if (!fileUrl) {
       this.snack('Fichier introuvable', true);
       return;
     }
-
     const fullUrl = fileUrl.startsWith('http')
       ? fileUrl
       : `http://localhost:8081${fileUrl}`;
-
     window.open(fullUrl, '_blank');
   }
 
@@ -294,7 +312,6 @@ export class EmployeePlanComponent implements OnInit {
     const obs = this.plan.id
       ? this.planService.update(this.plan.id, this.plan)
       : this.planService.create(this.plan);
-
     obs.subscribe({
       next: p => {
         this.plan = {

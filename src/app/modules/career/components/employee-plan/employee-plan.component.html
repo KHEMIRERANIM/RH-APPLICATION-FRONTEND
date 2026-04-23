@@ -320,8 +320,12 @@
         <div *ngIf="c.statut === 'OBTENU'" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
           <span *ngIf="c.fichierNom"
                 style="font-size:12px;color:#16a34a;font-weight:600;">📎 {{ c.fichierNom }}</span>
-          <a *ngIf="c.fichierUrl" [href]="c.fichierUrl" target="_blank"
-             style="font-size:12px;color:#7c3aed;text-decoration:none;">👁️ Voir</a>
+          <button
+  *ngIf="c.fichierUrl"
+  type="button"
+  (click)="openFile(c.fichierUrl)">
+  👁️ Voir
+</button>
           <label style="padding:6px 14px;border-radius:8px;border:1px solid #16a34a;
                         background:white;color:#16a34a;cursor:pointer;font-size:12px;font-weight:600;
                         font-family:inherit;">
@@ -497,8 +501,12 @@
         <div *ngIf="c.statut === 'OBTENU'" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
           <span *ngIf="c.fichierNom"
                 style="font-size:12px;color:#16a34a;font-weight:600;">📎 {{ c.fichierNom }}</span>
-          <a *ngIf="c.fichierUrl" [href]="c.fichierUrl" target="_blank"
-             style="font-size:12px;color:#7c3aed;text-decoration:none;">👁️ Voir</a>
+          <button *ngIf="c.fichierUrl"
+                  type="button"
+                  (click)="openFile(c.fichierUrl)"
+                  style="font-size:12px;color:#7c3aed;background:none;border:none;cursor:pointer;padding:0;">
+            👁️ Voir
+          </button>
           <label style="padding:6px 14px;border-radius:8px;border:1px solid #16a34a;
                         background:white;color:#16a34a;cursor:pointer;font-size:12px;font-weight:600;
                         font-family:inherit;">
