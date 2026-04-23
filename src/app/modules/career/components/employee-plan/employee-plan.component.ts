@@ -176,15 +176,34 @@ export class EmployeePlanComponent implements OnInit {
   removeCompetence(i: number): void {
     this.plan.competencesActuelles.splice(i, 1);
   }
-
-  saveCompetences(): void {
-    if (!this.plan.competencesActuelles?.length) {
-      this.snack('Ajoutez au moins une compétence', true);
-      return;
-    }
-    this.save('Compétences enregistrées');
+saveCompetences(): void {
+  if (!this.plan.competencesActuelles?.length) {
+    this.snack('Ajoutez au moins une compétence', true);
+    return;
   }
 
+  if (!this.plan.id) {
+    this.snack('Plan introuvable', true);
+    return;
+  }
+
+  this.planService.saveCompetences(this.plan.id, this.plan.competencesActuelles)
+    .subscribe({
+      next: (p) => {
+        this.plan = {
+          ...p,
+          competencesActuelles: parseCompetences(p),
+          currentCareerTitle: this.posteActuel,
+          currentCareerId: this.plan.currentCareerId
+        };
+        this.snack('Compétences enregistrées');
+      },
+      error: (err) => {
+        console.error('Erreur saveCompetences:', err);
+        this.snack('Erreur lors de la sauvegarde des compétences', true);
+      }
+    });
+}
   saveCertif(c: EmployeeCertification): void {
     if (!this.plan.id) {
       this.save('Plan enregistré');
