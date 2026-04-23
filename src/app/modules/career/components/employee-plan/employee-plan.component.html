@@ -15,7 +15,7 @@
                 display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;">
       <div>
         <p style="font-size:15px;font-weight:700;color:#111827;margin:0;">
-          {{ plan.currentCareerTitle || user?.poste || '—' }}
+{{ posteActuel }}
           <span style="color:#9ca3af;margin:0 6px;">→</span>
           <span style="color:#7c3aed;">{{ plan.targetCareerTitle || 'Poste cible non défini' }}</span>
         </p>
@@ -74,7 +74,7 @@
           <label style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;">Poste actuel</label>
           <div style="padding:10px 14px;border-radius:8px;border:1.5px solid #e5e7eb;
                       background:#f3f4f6;font-size:14px;color:#374151;">
-            {{ plan.currentCareerTitle || user?.poste || 'Non défini' }}
+{{ posteActuel }}
           </div>
         </div>
         <div style="display:flex;flex-direction:column;gap:6px;">
