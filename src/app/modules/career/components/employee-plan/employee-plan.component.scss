@@ -301,3 +301,16 @@
 :host ::ng-deep .employee-plan-shell textarea {
   @include career.career-focus-ring;
 }
+.file-link-btn {
+  border: none;
+  background: transparent;
+  color: #7c3aed;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}

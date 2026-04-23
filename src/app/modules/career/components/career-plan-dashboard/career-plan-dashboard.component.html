@@ -1,349 +1,437 @@
-<div class="career-plan-admin" style="padding:24px;display:flex;flex-direction:column;gap:20px;">
+<div class="career-plan-admin">
 
   <!-- Header -->
-  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
-    <div>
-      <h2 style="font-size:22px;font-weight:700;color:#111827;margin:0;">📈 Plans d'évolution</h2>
-      <p style="font-size:13px;color:#6b7280;margin:4px 0 0;">Gérez et validez les plans de carrière des employés</p>
-    </div>
-    <div style="display:flex;gap:10px;">
-      <div style="padding:10px 16px;border-radius:12px;background:#ede9fe;text-align:center;">
-        <p style="font-size:20px;font-weight:700;color:#7c3aed;margin:0;">{{ totalActive }}</p>
-        <p style="font-size:11px;color:#7c3aed;margin:2px 0 0;">Plans actifs</p>
-      </div>
-      <div style="padding:10px 16px;border-radius:12px;background:#dcfce7;text-align:center;">
-        <p style="font-size:20px;font-weight:700;color:#16a34a;margin:0;">{{ totalCompleted }}</p>
-        <p style="font-size:11px;color:#16a34a;margin:2px 0 0;">Complétés</p>
-      </div>
-      <div style="padding:10px 16px;border-radius:12px;background:#fef9c3;text-align:center;">
-        <p style="font-size:20px;font-weight:700;color:#854d0e;margin:0;">{{ avgProgress }}%</p>
-        <p style="font-size:11px;color:#854d0e;margin:2px 0 0;">Moy. progression</p>
+  <section class="plans-hero">
+    <div class="plans-hero__left">
+      <div class="plans-hero__icon">📈</div>
+      <div>
+        <h2>Plans d'évolution</h2>
+        <p>Gérez et validez les plans de carrière des employés</p>
       </div>
     </div>
-  </div>
 
-  <div style="display:flex;gap:20px;align-items:flex-start;">
-
-    <!-- ── Liste des plans ───────────────────────────────────────────── -->
-    <div style="flex:0 0 340px;display:flex;flex-direction:column;gap:10px;">
-      <div *ngIf="!evolutionPlans.length"
-           style="padding:32px;text-align:center;color:#9ca3af;font-size:13px;
-                  background:white;border-radius:16px;border:1px solid #f3f4f6;">
-        Aucun plan d'évolution trouvé
+    <div class="plans-hero__stats">
+      <div class="hero-stat hero-stat--violet">
+        <p class="hero-stat__value">{{ totalActive }}</p>
+        <p class="hero-stat__label">Plans actifs</p>
       </div>
-      <div *ngFor="let p of evolutionPlans"
-           (click)="openEvolutionPlan(p)"
-           [style]="'border-radius:16px;padding:16px;cursor:pointer;transition:all 0.15s;' +
-                    (selectedPlan?.id === p.id
-                      ? 'background:#ede9fe;border:2px solid #7c3aed;'
-                      : 'background:white;border:1px solid #f3f4f6;')">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
-          <div style="flex:1;min-width:0;">
-            <p style="font-size:14px;font-weight:700;color:#111827;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+
+      <div class="hero-stat hero-stat--green">
+        <p class="hero-stat__value">{{ totalCompleted }}</p>
+        <p class="hero-stat__label">Complétés</p>
+      </div>
+
+      <div class="hero-stat hero-stat--amber">
+        <p class="hero-stat__value">{{ avgProgress }}%</p>
+        <p class="hero-stat__label">Moy. progression</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="plans-layout">
+
+    <!-- Liste des plans -->
+    <aside class="plans-sidebar">
+      <div *ngIf="!evolutionPlans.length" class="empty-list-card">
+        <div class="empty-list-card__icon">📂</div>
+        <p>Aucun plan d'évolution trouvé</p>
+      </div>
+
+      <div
+        *ngFor="let p of evolutionPlans"
+        class="plan-card"
+        [class.active]="selectedPlan?.id === p.id"
+        (click)="openEvolutionPlan(p)">
+        <div class="plan-card__top">
+          <div class="plan-card__identity">
+            <p class="plan-card__name">
               {{ p.employeeName || p.employeeId }}
             </p>
-            <p style="font-size:12px;color:#6b7280;margin:3px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+            <p class="plan-card__career">
               {{ p.currentCareerTitle || '—' }} → {{ p.targetCareerTitle || '—' }}
             </p>
           </div>
-          <span [style]="evolutionStatusStyle(p.status)"
-                style="padding:3px 10px;border-radius:9999px;font-size:11px;font-weight:700;white-space:nowrap;flex-shrink:0;">
+
+          <span class="status-pill" [ngClass]="statusClass(p.status)">
             {{ evolutionStatusLabel(p.status) }}
           </span>
         </div>
-        <div style="margin-top:10px;">
-          <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
-            <span style="font-size:11px;color:#6b7280;">Progression globale</span>
-            <span style="font-size:11px;font-weight:700;" [style.color]="getProgressColor(p.scoreGlobal ?? 0)">
+
+        <div class="plan-card__progress">
+          <div class="plan-card__progress-head">
+            <span>Progression globale</span>
+            <span class="plan-card__progress-value"
+                  [style.color]="getProgressColor(p.scoreGlobal ?? 0)">
               {{ p.scoreGlobal ?? 0 }}%
             </span>
           </div>
-          <div style="height:6px;background:#f3f4f6;border-radius:9999px;overflow:hidden;">
-            <div [style]="'height:100%;border-radius:9999px;background:' + getProgressColor(p.scoreGlobal ?? 0) + ';width:' + (p.scoreGlobal ?? 0) + '%'"></div>
+
+          <div class="progress-bar">
+            <div
+              class="progress-bar__fill"
+              [style.background]="getProgressColor(p.scoreGlobal ?? 0)"
+              [style.width.%]="p.scoreGlobal ?? 0">
+            </div>
           </div>
         </div>
-        <div style="display:flex;gap:8px;margin-top:8px;">
-          <span style="font-size:11px;color:#6b7280;">⚙️ {{ p.certifications?.length || 0 }} certif(s)</span>
-          <span style="font-size:11px;color:#6b7280;">🧠 {{ p.competencesActuelles?.length || 0 }} compétence(s)</span>
+
+        <div class="plan-card__meta">
+          <span>⚙️ {{ p.certifications?.length || 0 }} certif(s)</span>
+          <span>🧠 {{ p.competencesActuelles?.length || 0 }} compétence(s)</span>
         </div>
       </div>
-    </div>
+    </aside>
 
-    <!-- ── Détail du plan sélectionné ────────────────────────────────── -->
-    <div style="flex:1;min-width:0;">
+    <!-- Détail -->
+    <main class="plans-detail">
 
-      <div *ngIf="!selectedPlan"
-           style="padding:60px;text-align:center;color:#9ca3af;
-                  background:white;border-radius:16px;border:1px solid #f3f4f6;">
-        <p style="font-size:48px;margin:0;">👈</p>
-        <p style="font-size:14px;margin:8px 0 0;">Sélectionnez un plan pour voir le détail</p>
+      <div *ngIf="!selectedPlan" class="empty-state">
+        <div class="empty-state__illustration">
+          <div class="empty-state__pulse"></div>
+          <div class="empty-state__icon">👉</div>
+        </div>
+        <h3>Sélectionnez un plan</h3>
+        <p>Choisissez un plan dans la liste à gauche pour afficher le détail, les compétences et les validations.</p>
       </div>
 
-      <div *ngIf="selectedPlan" style="display:flex;flex-direction:column;gap:16px;">
+      <div *ngIf="selectedPlan" class="detail-stack">
 
-        <!-- En-tête + scores -->
-        <div style="background:white;border-radius:16px;padding:20px;border:1px solid #f3f4f6;">
-          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+        <!-- En-tête -->
+        <section class="detail-card detail-card--header">
+          <div class="detail-header">
             <div>
-              <p style="font-size:16px;font-weight:700;color:#111827;margin:0;">
+              <p class="detail-header__name">
                 {{ selectedPlan.employeeName || selectedPlan.employeeId }}
               </p>
-              <p style="font-size:13px;color:#6b7280;margin:4px 0 0;">
+              <p class="detail-header__career">
                 {{ selectedPlan.currentCareerTitle || '—' }} → {{ selectedPlan.targetCareerTitle || '—' }}
               </p>
             </div>
-            <span [style]="evolutionStatusStyle(selectedPlan.status)"
-                  style="padding:4px 14px;border-radius:9999px;font-size:12px;font-weight:700;">
+
+            <span class="status-pill status-pill--large" [ngClass]="statusClass(selectedPlan.status)">
               {{ evolutionStatusLabel(selectedPlan.status) }}
             </span>
           </div>
-          <div style="display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;">
-            <div *ngFor="let s of planScores()"
-                 style="flex:1;min-width:80px;padding:10px;border-radius:10px;background:#f9fafb;text-align:center;">
-              <p style="font-size:18px;font-weight:700;margin:0;" [style.color]="s.color">{{ s.value }}%</p>
-              <p style="font-size:11px;color:#6b7280;margin:2px 0 0;">{{ s.label }}</p>
+
+          <div class="score-grid">
+            <div *ngFor="let s of planScores()" class="score-box">
+              <p class="score-box__value" [style.color]="s.color">{{ s.value }}%</p>
+              <p class="score-box__label">{{ s.label }}</p>
             </div>
           </div>
-        </div>
+        </section>
 
-        <!-- ✅ Certifications requises du poste cible -->
-        <div *ngIf="certifRequisesDuPoste().length"
-             style="background:white;border-radius:16px;padding:20px;border:1px solid #e9d5ff;">
-          <p style="font-size:14px;font-weight:700;color:#7c3aed;margin:0 0 4px;">
-            📋 Certifications requises pour « {{ selectedPlan.targetCareerTitle }} »
-          </p>
-          <p style="font-size:12px;color:#9ca3af;margin:0 0 12px;">
-            Définies sur le poste — copiées automatiquement dans le plan de l'employé.
-          </p>
-          <div style="display:flex;flex-wrap:wrap;gap:8px;">
-            <div *ngFor="let c of certifRequisesDuPoste()"
-                 style="display:flex;align-items:center;gap:8px;padding:6px 12px;
-                        border-radius:8px;background:#faf5ff;border:1px solid #e9d5ff;">
-              <span [style]="c.type === 'TECHNIQUE'
-                      ? 'font-size:10px;background:#dbeafe;color:#1d4ed8;padding:2px 7px;border-radius:9999px;font-weight:600;'
-                      : 'font-size:10px;background:#fed7aa;color:#c2410c;padding:2px 7px;border-radius:9999px;font-weight:600;'">
+        <!-- Certifications requises -->
+        <section *ngIf="certifRequisesDuPoste().length" class="detail-card detail-card--required">
+          <div class="section-head">
+            <h4>📋 Certifications requises pour « {{ selectedPlan.targetCareerTitle }} »</h4>
+            <p>Définies sur le poste — copiées automatiquement dans le plan de l'employé.</p>
+          </div>
+
+          <div class="tag-list">
+            <div *ngFor="let c of certifRequisesDuPoste()" class="tag-card tag-card--required">
+              <span class="mini-badge" [ngClass]="c.type === 'TECHNIQUE' ? 'mini-badge--blue' : 'mini-badge--orange'">
                 {{ c.type === 'TECHNIQUE' ? '⚙️ Tech' : '🧠 Soft' }}
               </span>
-              <span style="font-size:13px;font-weight:600;color:#111827;">{{ c.nom }}</span>
-              <span style="font-size:10px;background:#fee2e2;color:#991b1b;padding:1px 7px;border-radius:9999px;font-weight:700;">★ Requise</span>
+              <span class="tag-card__title">{{ c.nom }}</span>
+              <span class="mini-badge mini-badge--red">★ Requise</span>
             </div>
           </div>
-        </div>
+        </section>
 
-        <!-- ✅ Compétences déclarées par l'employé -->
-        <div *ngIf="competencesEmploye().length"
-             style="background:white;border-radius:16px;padding:20px;border:1px solid #f3f4f6;">
-          <p style="font-size:14px;font-weight:700;color:#111827;margin:0 0 12px;">
-            🧠 Compétences déclarées par l'employé ({{ competencesEmploye().length }})
-          </p>
-          <div style="display:flex;flex-wrap:wrap;gap:8px;">
-            <div *ngFor="let c of competencesEmploye()"
-                 style="display:flex;align-items:center;gap:8px;padding:6px 12px;
-                        border-radius:8px;background:#f9fafb;border:1px solid #e5e7eb;">
-              <span style="font-size:13px;font-weight:600;color:#111827;">{{ c.nom }}</span>
-              <span [style]="c.niveau === 'EXPERT'
-                      ? 'font-size:10px;background:#dcfce7;color:#166534;padding:2px 7px;border-radius:9999px;font-weight:600;'
-                      : c.niveau === 'INTERMEDIAIRE'
-                        ? 'font-size:10px;background:#e0e7ff;color:#3730a3;padding:2px 7px;border-radius:9999px;font-weight:600;'
-                        : 'font-size:10px;background:#fef9c3;color:#854d0e;padding:2px 7px;border-radius:9999px;font-weight:600;'">
+        <!-- Compétences employé -->
+        <section *ngIf="competencesEmploye().length" class="detail-card">
+          <div class="section-head">
+            <h4>🧠 Compétences déclarées par l'employé ({{ competencesEmploye().length }})</h4>
+          </div>
+
+          <div class="tag-list">
+            <div *ngFor="let c of competencesEmploye()" class="tag-card">
+              <span class="tag-card__title">{{ c.nom }}</span>
+
+              <span
+                class="mini-badge"
+                [ngClass]="{
+                  'mini-badge--green': c.niveau === 'EXPERT',
+                  'mini-badge--indigo': c.niveau === 'INTERMEDIAIRE',
+                  'mini-badge--amber': c.niveau !== 'EXPERT' && c.niveau !== 'INTERMEDIAIRE'
+                }">
                 {{ c.niveau }}
               </span>
-              <span *ngIf="c.annees" style="font-size:11px;color:#9ca3af;">{{ c.annees }} ans</span>
+
+              <span *ngIf="c.annees" class="tag-card__years">{{ c.annees }} ans</span>
             </div>
           </div>
-        </div>
-        <div *ngIf="!competencesEmploye().length"
-             style="background:white;border-radius:16px;padding:16px 20px;border:1px solid #f3f4f6;">
-          <p style="font-size:13px;color:#9ca3af;margin:0;font-style:italic;">
-            🧠 Aucune compétence déclarée par l'employé
-          </p>
-        </div>
+        </section>
 
-        <!-- Formations recommandées + commentaire -->
-        <div style="background:white;border-radius:16px;padding:20px;border:1px solid #f3f4f6;">
-          <p style="font-size:15px;font-weight:700;color:#111827;margin:0 0 12px;">📚 Formations recommandées</p>
-          <div *ngFor="let f of selectedPlan.formationsRecommandees; let i = index"
-               style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #f9fafb;">
-            <span style="flex:1;font-size:13px;color:#374151;">{{ f }}</span>
-            <button (click)="removeFormation(i)"
-                    style="padding:2px 8px;border-radius:6px;border:1px solid #fee2e2;background:white;
-                           color:#dc2626;cursor:pointer;font-size:12px;font-family:inherit;">✕</button>
+        <section *ngIf="!competencesEmploye().length" class="detail-card detail-card--muted">
+          <p class="empty-line">🧠 Aucune compétence déclarée par l'employé</p>
+        </section>
+
+        <!-- Formations recommandées -->
+        <section class="detail-card">
+          <div class="section-head">
+            <h4>📚 Formations recommandées</h4>
           </div>
-          <div style="display:flex;gap:8px;margin-top:12px;">
-            <input [(ngModel)]="newFormation"
-                   placeholder="Ajouter une formation..."
-                   style="flex:1;padding:8px 12px;border-radius:8px;border:1px solid #e5e7eb;
-                          font-size:13px;font-family:inherit;outline:none;" />
-            <button (click)="addFormation()"
-                    style="padding:8px 16px;border-radius:8px;border:none;background:#7c3aed;
-                           color:white;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;">
-              + Ajouter
-            </button>
+
+          <div class="formation-list" *ngIf="selectedPlan.formationsRecommandees?.length; else noFormation">
+            <div *ngFor="let f of selectedPlan.formationsRecommandees; let i = index" class="formation-row">
+              <span>{{ f }}</span>
+              <button type="button" class="btn btn--danger-outline" (click)="removeFormation(i)">✕</button>
+            </div>
           </div>
-          <div style="margin-top:14px;">
-            <p style="font-size:13px;font-weight:600;color:#374151;margin:0 0 6px;">Commentaire admin</p>
-            <div style="display:flex;align-items:flex-end;gap:10px;">
-              <textarea [(ngModel)]="selectedPlan.commentaireAdmin"
-                        rows="2"
-                        placeholder="Commentaire visible par l'employé..."
-                        style="flex:1;padding:8px 12px;border-radius:8px;border:1px solid #e5e7eb;
-                               font-size:13px;font-family:inherit;outline:none;resize:vertical;"></textarea>
-              <button (click)="saveEnrichissement()"
-                      style="padding:8px 20px;border-radius:8px;border:none;background:#7c3aed;
-                             color:white;cursor:pointer;font-size:13px;font-weight:600;
-                             font-family:inherit;white-space:nowrap;">
-                💾 Enregistrer
+
+          <ng-template #noFormation>
+            <p class="empty-line">Aucune formation recommandée pour le moment.</p>
+          </ng-template>
+
+          <div class="inline-form">
+            <input
+              [(ngModel)]="newFormation"
+              placeholder="Ajouter une formation..."
+              class="form-input"
+            />
+            <button type="button" class="btn btn--primary" (click)="addFormation()">+ Ajouter</button>
+          </div>
+
+          <div class="admin-comment-box">
+            <label>Commentaire admin</label>
+            <div class="admin-comment-box__row">
+              <textarea
+                [(ngModel)]="selectedPlan.commentaireAdmin"
+                rows="2"
+                placeholder="Commentaire visible par l'employé..."
+                class="form-textarea"
+              ></textarea>
+
+              <button type="button" class="btn btn--primary btn--save" (click)="saveEnrichissement()">
+                Enregistrer
               </button>
             </div>
           </div>
-        </div>
+        </section>
 
-        <!-- Certifications de l'employé -->
-        <div style="background:white;border-radius:16px;padding:20px;border:1px solid #f3f4f6;">
-          <p style="font-size:15px;font-weight:700;color:#111827;margin:0 0 6px;">
-            Certifications de l'employé
-          </p>
-          <p style="font-size:12px;color:#6b7280;margin:0 0 16px;">
-            Cliquez sur le badge <strong>Personnelle</strong> pour le marquer comme <strong>Requise</strong> — seules les certifications requises impactent le score.
-          </p>
+        <!-- Certifications techniques -->
+        <section class="detail-card">
+          <div class="section-head">
+            <h4>⚙️ Certifications techniques ({{ certifsTech().length }})</h4>
+          </div>
 
-          <!-- Techniques -->
-          <p style="font-size:12px;font-weight:700;color:#2563eb;text-transform:uppercase;margin:0 0 10px;">
-            ⚙️ Techniques ({{ certifsTech().length }})
-          </p>
-          <div *ngIf="!certifsTech().length"
-               style="font-size:13px;color:#9ca3af;font-style:italic;margin-bottom:16px;">
+          <div *ngIf="!certifsTech().length" class="empty-line">
             Aucune certification technique
           </div>
-          <div *ngFor="let c of certifsTech()"
-               style="padding:14px 0;border-bottom:1px solid #f3f4f6;">
-            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-              <span style="flex:1;font-size:13px;font-weight:600;color:#111827;">{{ c.nom }}</span>
-              <span [style]="certifStatusStyle(c.statut)"
-                    style="padding:3px 10px;border-radius:9999px;font-size:11px;font-weight:700;">
+
+          <div *ngFor="let c of certifsTech()" class="certif-row">
+            <div class="certif-row__top">
+              <span class="certif-row__name">{{ c.nom }}</span>
+
+              <span class="status-pill" [ngClass]="certifStatusClass(c.statut)">
                 {{ certifStatusLabel(c.statut) }}
               </span>
-              <span (click)="toggleObligatoire(c)"
-                    [style]="c.obligatoire
-                      ? 'font-size:10px;background:#fee2e2;color:#991b1b;padding:3px 10px;border-radius:9999px;font-weight:700;cursor:pointer;border:1px solid #fca5a5;'
-                      : 'font-size:10px;background:#f3f4f6;color:#374151;padding:3px 10px;border-radius:9999px;cursor:pointer;border:1px solid #e5e7eb;'">
+
+              <span
+                class="toggle-pill"
+                [class.toggle-pill--required]="c.obligatoire"
+                (click)="toggleObligatoire(c)">
                 {{ c.obligatoire ? '★ Requise' : '☆ Personnelle' }}
               </span>
-              <span *ngIf="c.valideParAdmin === true"
-                    style="font-size:11px;background:#dcfce7;color:#166534;padding:3px 10px;border-radius:9999px;font-weight:700;">
+
+              <span *ngIf="c.valideParAdmin === true" class="mini-badge mini-badge--green-strong">
                 ✓ Validé
               </span>
-              <span *ngIf="c.valideParAdmin !== true"
-                    style="font-size:11px;background:#fef9c3;color:#854d0e;padding:3px 10px;border-radius:9999px;font-weight:700;">
+
+              <span *ngIf="c.valideParAdmin === false" class="mini-badge mini-badge--red-soft">
+                ✗ Rejeté
+              </span>
+
+              <span *ngIf="c.valideParAdmin === null || c.valideParAdmin === undefined" class="mini-badge mini-badge--amber">
                 ⏳ En attente
               </span>
             </div>
-            <div *ngIf="c.fichierNom || c.fichierUrl"
-                 style="display:flex;align-items:center;gap:10px;margin-top:8px;padding:8px 12px;background:#f9fafb;border-radius:8px;">
-              <span style="font-size:12px;color:#374151;">📎 {{ c.fichierNom || 'Fichier joint' }}</span>
-              <a *ngIf="c.fichierUrl" [href]="'http://localhost:8081' + c.fichierUrl" target="_blank"
-                 style="font-size:12px;color:#7c3aed;text-decoration:none;font-weight:600;">👁️ Voir</a>
+
+            <div *ngIf="c.fichierNom || c.fichierUrl" class="file-box">
+              <span>📎 {{ c.fichierNom || 'Fichier joint' }}</span>
+              <a *ngIf="c.fichierUrl" [href]="'http://localhost:8081' + c.fichierUrl" target="_blank">👁️ Voir</a>
             </div>
-            <div *ngIf="!c.fichierNom && !c.fichierUrl"
-                 style="font-size:12px;color:#9ca3af;margin-top:6px;font-style:italic;">
+
+            <div *ngIf="!c.fichierNom && !c.fichierUrl" class="subtle-line">
               Aucun fichier uploadé
             </div>
-            <div style="display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap;">
-              <button (click)="validateCertif(c, true)"
-                      [style]="c.valideParAdmin === true
-                        ? 'padding:6px 14px;border-radius:8px;border:none;background:#16a34a;color:white;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;'
-                        : 'padding:6px 14px;border-radius:8px;border:1px solid #16a34a;background:white;color:#16a34a;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;'">
-                ✓ Valider
-              </button>
-              <button (click)="validateCertif(c, false)"
-                      [style]="c.valideParAdmin === false
-                        ? 'padding:6px 14px;border-radius:8px;border:none;background:#dc2626;color:white;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;'
-                        : 'padding:6px 14px;border-radius:8px;border:1px solid #dc2626;background:white;color:#dc2626;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;'">
-                ✗ Rejeter
-              </button>
-              <input [(ngModel)]="c.commentaireAdmin"
-                     placeholder="Commentaire admin..."
-                     style="flex:1;min-width:120px;padding:6px 10px;border-radius:8px;
-                            border:1px solid #e5e7eb;font-size:12px;font-family:inherit;outline:none;" />
-              <button (click)="saveCertifAdmin(c)"
-                      style="padding:6px 12px;border-radius:8px;border:none;background:#7c3aed;
-                             color:white;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;">
-                💾
+
+            <div class="certif-row__actions">
+              <ng-container *ngIf="c.valideParAdmin === null || c.valideParAdmin === undefined">
+                <button
+                  type="button"
+                  class="btn btn--success-solid"
+                  (click)="validateCertif(c, true)">
+                  ✓ Valider
+                </button>
+
+                <button
+                  type="button"
+                  class="btn btn--danger-outline"
+                  (click)="validateCertif(c, false)">
+                  ✗ Rejeter
+                </button>
+              </ng-container>
+
+              <ng-container *ngIf="c.valideParAdmin === true">
+                <div class="action-state action-state--success">
+                  ✓ Certification validée
+                </div>
+
+                <button
+                  type="button"
+                  class="btn btn--neutral-outline"
+                  (click)="validateCertif(c, false)">
+                  Changer
+                </button>
+              </ng-container>
+
+              <ng-container *ngIf="c.valideParAdmin === false">
+                <div class="action-state action-state--danger">
+                  ✗ Certification rejetée
+                </div>
+
+                <button
+                  type="button"
+                  class="btn btn--neutral-outline"
+                  (click)="validateCertif(c, true)">
+                  Réviser
+                </button>
+              </ng-container>
+
+              <input
+                [(ngModel)]="c.commentaireAdmin"
+                placeholder="Commentaire admin..."
+                class="form-input form-input--small"
+              />
+
+              <button
+                type="button"
+                class="btn btn--primary-soft"
+                (click)="saveCertifAdmin(c)">
+                Enregistrer
               </button>
             </div>
+          </div>
+        </section>
+
+        <!-- Certifications soft -->
+        <section class="detail-card">
+          <div class="section-head">
+            <h4>🧠 Soft Skills ({{ certifsSoft().length }})</h4>
           </div>
 
-          <!-- Soft Skills -->
-          <p style="font-size:12px;font-weight:700;color:#ea580c;text-transform:uppercase;margin:20px 0 10px;">
-            🧠 Soft Skills ({{ certifsSoft().length }})
-          </p>
-          <div *ngIf="!certifsSoft().length"
-               style="font-size:13px;color:#9ca3af;font-style:italic;margin-bottom:16px;">
+          <div *ngIf="!certifsSoft().length" class="empty-line">
             Aucune certification soft skill
           </div>
-          <div *ngFor="let c of certifsSoft()"
-               style="padding:14px 0;border-bottom:1px solid #f3f4f6;">
-            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-              <span style="flex:1;font-size:13px;font-weight:600;color:#111827;">{{ c.nom }}</span>
-              <span [style]="certifStatusStyle(c.statut)"
-                    style="padding:3px 10px;border-radius:9999px;font-size:11px;font-weight:700;">
+
+          <div *ngFor="let c of certifsSoft()" class="certif-row">
+            <div class="certif-row__top">
+              <span class="certif-row__name">{{ c.nom }}</span>
+
+              <span class="status-pill" [ngClass]="certifStatusClass(c.statut)">
                 {{ certifStatusLabel(c.statut) }}
               </span>
-              <span style="font-size:10px;background:#f3f4f6;color:#374151;padding:2px 8px;border-radius:9999px;">
+
+              <span class="mini-badge mini-badge--gray">
                 {{ c.methodeEval === 'AUTO_EVAL' ? 'Auto-éval' : 'Certif' }}
               </span>
-              <span (click)="toggleObligatoire(c)"
-                    [style]="c.obligatoire
-                      ? 'font-size:10px;background:#fee2e2;color:#991b1b;padding:3px 10px;border-radius:9999px;font-weight:700;cursor:pointer;border:1px solid #fca5a5;'
-                      : 'font-size:10px;background:#f3f4f6;color:#374151;padding:3px 10px;border-radius:9999px;cursor:pointer;border:1px solid #e5e7eb;'">
+
+              <span
+                class="toggle-pill"
+                [class.toggle-pill--required]="c.obligatoire"
+                (click)="toggleObligatoire(c)">
                 {{ c.obligatoire ? '★ Requise' : '☆ Personnelle' }}
               </span>
-              <span *ngIf="c.valideParAdmin === true"
-                    style="font-size:11px;background:#dcfce7;color:#166534;padding:3px 10px;border-radius:9999px;font-weight:700;">✓ Validé</span>
-              <span *ngIf="c.valideParAdmin !== true"
-                    style="font-size:11px;background:#fef9c3;color:#854d0e;padding:3px 10px;border-radius:9999px;font-weight:700;">⏳ En attente</span>
+
+              <span *ngIf="c.valideParAdmin === true" class="mini-badge mini-badge--green-strong">
+                ✓ Validé
+              </span>
+
+              <span *ngIf="c.valideParAdmin === false" class="mini-badge mini-badge--red-soft">
+                ✗ Rejeté
+              </span>
+
+              <span *ngIf="c.valideParAdmin === null || c.valideParAdmin === undefined" class="mini-badge mini-badge--amber">
+                ⏳ En attente
+              </span>
             </div>
-            <div *ngIf="c.commentaireEmploye"
-                 style="font-size:12px;color:#6b7280;background:#f9fafb;margin-top:8px;
-                        padding:8px 12px;border-radius:6px;font-style:italic;">
+
+            <div *ngIf="c.commentaireEmploye" class="employee-comment">
               "{{ c.commentaireEmploye }}"
             </div>
-            <div *ngIf="c.fichierNom || c.fichierUrl"
-                 style="display:flex;align-items:center;gap:10px;margin-top:8px;padding:8px 12px;background:#f9fafb;border-radius:8px;">
-              <span style="font-size:12px;color:#374151;">📎 {{ c.fichierNom || 'Fichier joint' }}</span>
-              <a *ngIf="c.fichierUrl" [href]="'http://localhost:8081' + c.fichierUrl" target="_blank"
-                 style="font-size:12px;color:#7c3aed;text-decoration:none;font-weight:600;">👁️ Voir</a>
+
+            <div *ngIf="c.fichierNom || c.fichierUrl" class="file-box">
+              <span>📎 {{ c.fichierNom || 'Fichier joint' }}</span>
+              <a *ngIf="c.fichierUrl" [href]="'http://localhost:8081' + c.fichierUrl" target="_blank">👁️ Voir</a>
             </div>
-            <div *ngIf="!c.fichierNom && !c.fichierUrl"
-                 style="font-size:12px;color:#9ca3af;margin-top:6px;font-style:italic;">
+
+            <div *ngIf="!c.fichierNom && !c.fichierUrl" class="subtle-line">
               Aucun fichier uploadé
             </div>
-            <div style="display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap;">
-              <button (click)="validateCertif(c, true)"
-                      [style]="c.valideParAdmin === true
-                        ? 'padding:6px 14px;border-radius:8px;border:none;background:#16a34a;color:white;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;'
-                        : 'padding:6px 14px;border-radius:8px;border:1px solid #16a34a;background:white;color:#16a34a;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;'">
-                ✓ Valider
-              </button>
-              <button (click)="validateCertif(c, false)"
-                      [style]="c.valideParAdmin === false
-                        ? 'padding:6px 14px;border-radius:8px;border:none;background:#dc2626;color:white;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;'
-                        : 'padding:6px 14px;border-radius:8px;border:1px solid #dc2626;background:white;color:#dc2626;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;'">
-                ✗ Rejeter
-              </button>
-              <input [(ngModel)]="c.commentaireAdmin"
-                     placeholder="Commentaire admin..."
-                     style="flex:1;min-width:120px;padding:6px 10px;border-radius:8px;
-                            border:1px solid #e5e7eb;font-size:12px;font-family:inherit;outline:none;" />
-              <button (click)="saveCertifAdmin(c)"
-                      style="padding:6px 12px;border-radius:8px;border:none;background:#7c3aed;
-                             color:white;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;">
-                💾
+
+            <div class="certif-row__actions">
+              <ng-container *ngIf="c.valideParAdmin === null || c.valideParAdmin === undefined">
+                <button
+                  type="button"
+                  class="btn btn--success-solid"
+                  (click)="validateCertif(c, true)">
+                  ✓ Valider
+                </button>
+
+                <button
+                  type="button"
+                  class="btn btn--danger-outline"
+                  (click)="validateCertif(c, false)">
+                  ✗ Rejeter
+                </button>
+              </ng-container>
+
+              <ng-container *ngIf="c.valideParAdmin === true">
+                <div class="action-state action-state--success">
+                  ✓ Certification validée
+                </div>
+
+                <button
+                  type="button"
+                  class="btn btn--neutral-outline"
+                  (click)="validateCertif(c, false)">
+                  Changer
+                </button>
+              </ng-container>
+
+              <ng-container *ngIf="c.valideParAdmin === false">
+                <div class="action-state action-state--danger">
+                  ✗ Certification rejetée
+                </div>
+
+                <button
+                  type="button"
+                  class="btn btn--neutral-outline"
+                  (click)="validateCertif(c, true)">
+                  Réviser
+                </button>
+              </ng-container>
+
+              <input
+                [(ngModel)]="c.commentaireAdmin"
+                placeholder="Commentaire admin..."
+                class="form-input form-input--small"
+              />
+
+              <button
+                type="button"
+                class="btn btn--primary-soft"
+                (click)="saveCertifAdmin(c)">
+                Enregistrer
               </button>
             </div>
           </div>
-        </div>
+        </section>
+
       </div>
-    </div>
-  </div>
+    </main>
+  </section>
 </div>

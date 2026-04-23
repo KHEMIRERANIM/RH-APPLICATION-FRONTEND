@@ -19,14 +19,12 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
   styleUrls: ['./career-plan-dashboard.component.scss']
 })
 export class CareerPlanDashboardComponent implements OnInit {
-
   plans: CareerPlan[] = [];
   careers: Career[] = [];
   PlanStatus = PlanStatus;
 
   evolutionPlans: EvolutionPlan[] = [];
   selectedPlan: EvolutionPlan | null = null;
-  // ✅ Poste cible du plan sélectionné (pour afficher certifRequises)
   selectedCareer: Career | null = null;
 
   newFormation = '';
@@ -38,17 +36,17 @@ export class CareerPlanDashboardComponent implements OnInit {
   private usersCache: Record<string, any> = {};
 
   constructor(
-    private planService:          CareerPlanService,
+    private planService: CareerPlanService,
     private evolutionPlanService: EvolutionPlanService,
-    private careerService:        CareerService,
-    private snackBar:             MatSnackBar,
-    private dialog:               MatDialog,
-    private http:                 HttpClient
+    private careerService: CareerService,
+    private snackBar: MatSnackBar,
+    private dialog: MatDialog,
+    private http: HttpClient
   ) {}
 
   ngOnInit(): void {
     this.careerService.getAll().subscribe(data => {
-      this.careers = data;
+      this.careers = data || [];
       this.loadAll();
       this.loadEvolutionPlans();
     });
@@ -60,154 +58,195 @@ export class CareerPlanDashboardComponent implements OnInit {
   }
 
   private getUserName(userId: string): string {
-    const u = this.usersCache[userId];
-    if (!u) return userId;
-    return `${u.prenom ?? ''} ${u.nom ?? ''}`.trim() || u.email || userId;
+    const user = this.usersCache[userId];
+    if (!user) {
+      return userId;
+    }
+    return `${user.prenom ?? ''} ${user.nom ?? ''}`.trim() || user.email || userId;
   }
 
   private getCareerTitle(careerId: string): string {
-    if (!careerId) return '—';
-    const c = this.careers.find(c => c.id === careerId);
-    return c?.title ?? '—';
+    if (!careerId) {
+      return '—';
+    }
+    const career = this.careers.find(c => c.id === careerId);
+    return career?.title ?? '—';
   }
 
-  // ✅ Trouver le Career complet par id
   private getCareer(careerId: string): Career | null {
     return this.careers.find(c => c.id === careerId) ?? null;
   }
 
   private enrichPlans(plans: EvolutionPlan[]): EvolutionPlan[] {
-    return plans.map(p => ({
-      ...p,
-      competencesActuelles: parseCompetences(p),
-      employeeName:         this.getUserName(p.employeeId),
-      currentCareerTitle:   this.getCareerTitle(p.currentCareerId ?? ''),
-      targetCareerTitle:    this.getCareerTitle(p.targetCareerId)
+    return plans.map(plan => ({
+      ...plan,
+      competencesActuelles: parseCompetences(plan),
+      employeeName: this.getUserName(plan.employeeId),
+      currentCareerTitle: this.getCareerTitle(plan.currentCareerId ?? ''),
+      targetCareerTitle: this.getCareerTitle(plan.targetCareerId)
     }));
   }
 
   loadAll(): void {
     this.isLoading = true;
+
     this.planService.getAll().subscribe({
-      next:  data => { this.plans = data; this.isLoading = false; },
-      error: ()   => { this.isLoading = false; }
+      next: data => {
+        this.plans = data || [];
+        this.isLoading = false;
+      },
+      error: () => {
+        this.isLoading = false;
+      }
     });
   }
 
-  get totalActive(): number { return this.evolutionPlans.length; }
+  get totalActive(): number {
+    return this.evolutionPlans.length;
+  }
 
   get totalCompleted(): number {
-    return this.evolutionPlans.filter(p => (p.scoreGlobal ?? 0) >= 100).length;
+    return this.evolutionPlans.filter(plan => (plan.scoreGlobal ?? 0) >= 100).length;
   }
 
   get avgProgress(): number {
-    if (!this.evolutionPlans.length) return 0;
+    if (!this.evolutionPlans.length) {
+      return 0;
+    }
+
     return Math.round(
-      this.evolutionPlans.reduce((s, p) => s + (p.scoreGlobal ?? 0), 0) / this.evolutionPlans.length
+      this.evolutionPlans.reduce((sum, plan) => sum + (plan.scoreGlobal ?? 0), 0) / this.evolutionPlans.length
     );
   }
 
   openForm(): void {
     const ref = this.dialog.open(CareerPlanFormComponent, {
-      width: '640px', maxWidth: '95vw',
-      data: { careers: this.careers }, panelClass: 'career-dialog'
+      width: '640px',
+      maxWidth: '95vw',
+      data: { careers: this.careers },
+      panelClass: 'career-dialog'
     });
-    ref.afterClosed().subscribe(result => { if (result) this.loadAll(); });
+
+    ref.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadAll();
+      }
+    });
   }
 
   delete(plan: CareerPlan): void {
-    if (!confirm(`Supprimer le plan de ${plan.employeeName} ?`)) return;
+    if (!confirm(`Supprimer le plan de ${plan.employeeName} ?`)) {
+      return;
+    }
+
     this.planService.delete(plan.id!).subscribe({
-      next: () => { this.snackBar.open('Supprimé', 'OK', { duration: 3000 }); this.loadAll(); }
+      next: () => {
+        this.snackBar.open('Supprimé', 'OK', { duration: 3000 });
+        this.loadAll();
+      }
     });
   }
 
-  getProgressColor(p: number): string {
-    return p >= 80 ? '#16a34a' : p >= 50 ? '#d97706' : '#dc2626';
+  getProgressColor(progress: number): string {
+    return progress >= 80 ? '#16a34a' : progress >= 50 ? '#d97706' : '#dc2626';
   }
 
   loadEvolutionPlans(): void {
     this.evolutionPlanService.getAll().subscribe({
       next: data => {
-        const missingIds = [...new Set(data.map(p => p.employeeId))]
+        const safeData = data || [];
+
+        const missingIds = [...new Set(safeData.map(plan => plan.employeeId))]
           .filter(id => id && !this.usersCache[id]);
 
         if (missingIds.length === 0) {
-          this.evolutionPlans = this.enrichPlans(data);
+          this.evolutionPlans = this.enrichPlans(safeData);
           return;
         }
 
         this.http.get<any[]>('http://localhost:8081/api/users', { headers: this.getHeaders() })
           .pipe(catchError(() => of([])))
           .subscribe(users => {
-            users.forEach(u => { this.usersCache[u.id] = u; });
-            this.evolutionPlans = this.enrichPlans(data);
+            (users || []).forEach(user => {
+              this.usersCache[user.id] = user;
+            });
+            this.evolutionPlans = this.enrichPlans(safeData);
           });
       },
       error: () => {}
     });
   }
 
-  openEvolutionPlan(p: EvolutionPlan): void {
+  openEvolutionPlan(plan: EvolutionPlan): void {
     this.selectedPlan = {
-      ...p,
-      competencesActuelles:   parseCompetences(p),
-      formationsRecommandees: p.formationsRecommandees ?? [],
-      employeeName:           this.getUserName(p.employeeId),
-      currentCareerTitle:     this.getCareerTitle(p.currentCareerId ?? ''),
-      targetCareerTitle:      this.getCareerTitle(p.targetCareerId)
+      ...plan,
+      competencesActuelles: parseCompetences(plan),
+      formationsRecommandees: plan.formationsRecommandees ?? [],
+      employeeName: this.getUserName(plan.employeeId),
+      currentCareerTitle: this.getCareerTitle(plan.currentCareerId ?? ''),
+      targetCareerTitle: this.getCareerTitle(plan.targetCareerId)
     };
-    // ✅ Charger le Career cible pour afficher ses certifRequises
-    this.selectedCareer = this.getCareer(p.targetCareerId);
+
+    this.selectedCareer = this.getCareer(plan.targetCareerId);
   }
 
   certifsTech(): EmployeeCertification[] {
     return (this.selectedPlan?.certifications ?? [])
-      .filter(c => c.type === CertificationType.TECHNIQUE);
+      .filter(certif => certif.type === CertificationType.TECHNIQUE);
   }
 
   certifsSoft(): EmployeeCertification[] {
     return (this.selectedPlan?.certifications ?? [])
-      .filter(c => c.type === CertificationType.SOFT_SKILL);
+      .filter(certif => certif.type === CertificationType.SOFT_SKILL);
   }
 
-  // ✅ Certifs requises définies sur le poste cible
   certifRequisesDuPoste(): EmployeeCertification[] {
     return this.selectedCareer?.certifRequises ?? [];
   }
 
   planScores(): { label: string; value: number; color: string }[] {
-    if (!this.selectedPlan) return [];
+    if (!this.selectedPlan) {
+      return [];
+    }
+
     return [
-      { label: 'Global',    value: this.selectedPlan.scoreGlobal    ?? 0, color: '#7c3aed' },
+      { label: 'Global', value: this.selectedPlan.scoreGlobal ?? 0, color: '#7c3aed' },
       { label: 'Technique', value: this.selectedPlan.scoreTechnique ?? 0, color: '#2563eb' },
-      { label: 'Soft',      value: this.selectedPlan.scoreSoftSkill ?? 0, color: '#ea580c' }
+      { label: 'Soft', value: this.selectedPlan.scoreSoftSkill ?? 0, color: '#ea580c' }
     ];
   }
 
-  // ✅ Compétences parsées pour affichage admin
   competencesEmploye(): { nom: string; niveau: string; annees?: number }[] {
-    if (!this.selectedPlan) return [];
+    if (!this.selectedPlan) {
+      return [];
+    }
+
     return parseCompetences(this.selectedPlan);
   }
 
   addFormation(): void {
-    if (!this.newFormation.trim() || !this.selectedPlan) return;
+    if (!this.newFormation.trim() || !this.selectedPlan) {
+      return;
+    }
+
     this.selectedPlan.formationsRecommandees!.push(this.newFormation.trim());
     this.newFormation = '';
   }
 
-  removeFormation(i: number): void {
-    this.selectedPlan?.formationsRecommandees?.splice(i, 1);
+  removeFormation(index: number): void {
+    this.selectedPlan?.formationsRecommandees?.splice(index, 1);
   }
 
   saveEnrichissement(): void {
-    if (!this.selectedPlan?.id) return;
+    if (!this.selectedPlan?.id) {
+      return;
+    }
+
     this.evolutionPlanService.enrichPlan(this.selectedPlan.id, {
       formationsRecommandees: this.selectedPlan.formationsRecommandees,
-      commentaireAdmin:       this.selectedPlan.commentaireAdmin
+      commentaireAdmin: this.selectedPlan.commentaireAdmin
     }).subscribe({
-      next:  () => this.snackBar.open('Plan enrichi ✓', 'OK', { duration: 3000 }),
+      next: () => this.snackBar.open('Plan enrichi ✓', 'OK', { duration: 3000 }),
       error: () => this.snackBar.open('Erreur', 'Fermer', { duration: 3000 })
     });
   }
@@ -223,67 +262,116 @@ export class CareerPlanDashboardComponent implements OnInit {
   }
 
   saveCertifAdmin(certif: EmployeeCertification): void {
-    if (!this.selectedPlan?.id || !certif.id) return;
+    if (!this.selectedPlan?.id || !certif.id) {
+      return;
+    }
+
     const payload: any = {
-      valideParAdmin:   certif.valideParAdmin,
+      valideParAdmin: certif.valideParAdmin,
       commentaireAdmin: certif.commentaireAdmin,
-      obligatoire:      certif.obligatoire,
-      nom:              certif.nom,
-      type:             certif.type,
-      statut:           certif.statut,
-      methodeEval:      certif.methodeEval,
-      niveauRequis:     certif.niveauRequis
+      obligatoire: certif.obligatoire,
+      nom: certif.nom,
+      type: certif.type,
+      statut: certif.statut,
+      methodeEval: certif.methodeEval,
+      niveauRequis: certif.niveauRequis
     };
 
     if (certif.valideParAdmin === true) {
       payload.statut = 'OBTENU';
-      certif.statut  = 'OBTENU' as any;
+      certif.statut = 'OBTENU' as any;
     }
 
     this.evolutionPlanService.updateCertification(
-      this.selectedPlan.id, certif.id, payload
+      this.selectedPlan.id,
+      certif.id,
+      payload
     ).subscribe({
       next: updatedPlan => {
         this.selectedPlan = {
           ...updatedPlan,
           competencesActuelles: parseCompetences(updatedPlan),
-          employeeName:         this.getUserName(updatedPlan.employeeId),
-          currentCareerTitle:   this.getCareerTitle(updatedPlan.currentCareerId ?? ''),
-          targetCareerTitle:    this.getCareerTitle(updatedPlan.targetCareerId)
+          employeeName: this.getUserName(updatedPlan.employeeId),
+          currentCareerTitle: this.getCareerTitle(updatedPlan.currentCareerId ?? ''),
+          targetCareerTitle: this.getCareerTitle(updatedPlan.targetCareerId)
         };
-        // ✅ Garder selectedCareer inchangé
-        const idx = this.evolutionPlans.findIndex(p => p.id === updatedPlan.id);
-        if (idx !== -1) this.evolutionPlans[idx] = this.enrichPlans([updatedPlan])[0];
+
+        const index = this.evolutionPlans.findIndex(plan => plan.id === updatedPlan.id);
+        if (index !== -1) {
+          this.evolutionPlans[index] = this.enrichPlans([updatedPlan])[0];
+        }
+
         this.snackBar.open('Certif mise à jour ✓', 'OK', { duration: 2500 });
       },
       error: () => this.snackBar.open('Erreur', 'Fermer', { duration: 3000 })
     });
   }
 
-  evolutionStatusLabel(s: string): string {
-    return ({ DRAFT: 'Brouillon', SUBMITTED: 'Soumis', REVIEWED: 'Examiné',
-              ACTIVE: 'Actif', COMPLETED: 'Complété' } as any)[s] ?? s;
-  }
-
-  evolutionStatusStyle(s: string): string {
+  evolutionStatusLabel(status: string): string {
     return ({
-      DRAFT:     'background:#f3f4f6;color:#374151;',
-      SUBMITTED: 'background:#fef9c3;color:#854d0e;',
-      REVIEWED:  'background:#dcfce7;color:#166534;',
-      ACTIVE:    'background:#ede9fe;color:#7c3aed;',
-      COMPLETED: 'background:#dcfce7;color:#166534;'
-    } as any)[s] ?? '';
+      DRAFT: 'Brouillon',
+      SUBMITTED: 'Soumis',
+      REVIEWED: 'Examiné',
+      ACTIVE: 'Actif',
+      COMPLETED: 'Complété'
+    } as any)[status] ?? status;
   }
 
-  certifStatusLabel(s: string): string {
-    return ({ NON_COMMENCE: 'Non commencé', EN_COURS: 'En cours', OBTENU: 'Obtenu' } as any)[s] ?? s;
-  }
-
-  certifStatusStyle(s: string): string {
+  certifStatusLabel(status: string): string {
     return ({
-      NON_COMMENCE: 'background:#f3f4f6;color:#6b7280;',
-      EN_COURS:     'background:#fef9c3;color:#854d0e;',
-      OBTENU:       'background:#dcfce7;color:#166534;'
-    } as any)[s] ?? '';
+      NON_COMMENCE: 'Non commencé',
+      EN_COURS: 'En cours',
+      OBTENU: 'Obtenu'
+    } as any)[status] ?? status;
   }
+
+  statusClass(status: string): string {
+    return ({
+      DRAFT: 'status-draft',
+      SUBMITTED: 'status-submitted',
+      REVIEWED: 'status-reviewed',
+      ACTIVE: 'status-active',
+      COMPLETED: 'status-completed'
+    } as any)[status] ?? 'status-draft';
+  }
+
+  certifStatusClass(status: string): string {
+    return ({
+      NON_COMMENCE: 'certif-not-started',
+      EN_COURS: 'certif-in-progress',
+      OBTENU: 'certif-obtained'
+    } as any)[status] ?? 'certif-not-started';
+  }
+  openCertificationFile(fileUrl: string): void {
+  if (!fileUrl) {
+    this.snackBar.open('Fichier introuvable', 'Fermer', { duration: 3000 });
+    return;
+  }
+
+  const fullUrl = `http://localhost:8081${fileUrl}`;
+
+  this.http.get(fullUrl, {
+    headers: this.getHeaders(),
+    responseType: 'blob',
+    observe: 'response'
+  }).subscribe({
+    next: (response) => {
+      const blob = response.body;
+      if (!blob) {
+        this.snackBar.open('Impossible d’ouvrir le fichier', 'Fermer', { duration: 3000 });
+        return;
+      }
+
+      const blobUrl = window.URL.createObjectURL(blob);
+      window.open(blobUrl, '_blank');
+
+      setTimeout(() => {
+        window.URL.revokeObjectURL(blobUrl);
+      }, 10000);
+    },
+    error: () => {
+      this.snackBar.open('Accès refusé ou fichier indisponible', 'Fermer', { duration: 3000 });
+    }
+  });
+}
 }

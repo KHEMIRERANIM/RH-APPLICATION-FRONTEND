@@ -1,9 +1,11 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { of, Subscription, interval } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { CareerService } from '../../services/career.service';
 import { EvolutionPlanService } from '../../services/evolution-plan.service';
-import { of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+
+type AdminTab = 'overview' | 'mobility' | 'plans' | 'rse';
 
 @Component({
   selector: 'app-career-admin-dashboard',
@@ -11,7 +13,6 @@ import { catchError } from 'rxjs/operators';
   styleUrls: ['./career-admin-dashboard.component.scss']
 })
 export class CareerAdminDashboardComponent implements OnInit, OnDestroy {
-
   totalPositions = 0;
   totalPlans = 0;
   totalMobilities = 0;
@@ -29,9 +30,9 @@ export class CareerAdminDashboardComponent implements OnInit, OnDestroy {
   progressDistribution: { range: string; count: number; color: string }[] = [];
 
   isLoading = true;
-  adminTab: 'overview' | 'mobility' | 'plans' | 'rse' = 'overview';
+  adminTab: AdminTab = 'overview';
 
-  private refreshInterval: any;
+  private refreshSubscription?: Subscription;
 
   constructor(
     private careerService: CareerService,
@@ -41,89 +42,112 @@ export class CareerAdminDashboardComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadStats();
-    this.refreshInterval = setInterval(() => this.loadStats(), 60000);
+
+    this.refreshSubscription = interval(60000).subscribe(() => {
+      this.loadStats();
+    });
   }
 
   ngOnDestroy(): void {
-    if (this.refreshInterval) {
-      clearInterval(this.refreshInterval);
-    }
+    this.refreshSubscription?.unsubscribe();
   }
 
   private getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('accessToken');
-    return new HttpHeaders({ Authorization: `Bearer ${token || ''}` });
+    const token = localStorage.getItem('accessToken') || '';
+    return new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
   }
 
   loadStats(): void {
     this.isLoading = true;
 
     this.careerService.getAll().subscribe({
-      next: careers => {
-        this.totalPositions = careers.length;
+      next: (careers: any[]) => {
+        this.totalPositions = careers?.length || 0;
+      },
+      error: () => {
+        this.totalPositions = 0;
       }
     });
 
     this.evolutionPlanService.getAll().subscribe({
-      next: plans => {
-        this.totalPlans = plans.length;
-        this.avgProgress = plans.length
-          ? Math.round(plans.reduce((s, p) => s + (p.scoreGlobal ?? 0), 0) / plans.length)
+      next: (plans: any[]) => {
+        const safePlans = plans || [];
+
+        this.totalPlans = safePlans.length;
+        this.avgProgress = safePlans.length
+          ? Math.round(
+              safePlans.reduce((sum, plan) => sum + (plan.scoreGlobal ?? 0), 0) / safePlans.length
+            )
           : 0;
 
         const statusMap: Record<string, number> = {};
-        plans.forEach(p => {
-          statusMap[p.status] = (statusMap[p.status] || 0) + 1;
+        safePlans.forEach((plan: any) => {
+          const status = plan?.status || 'UNKNOWN';
+          statusMap[status] = (statusMap[status] || 0) + 1;
         });
 
         this.plansByStatus = [
           { label: 'Brouillon', count: statusMap['DRAFT'] || 0, color: '#6b7280' },
           { label: 'Soumis', count: statusMap['SUBMITTED'] || 0, color: '#d97706' },
-          { label: 'Examiné', count: statusMap['REVIEWED'] || 0, color: '#16a34a' },
+          { label: 'Examiné', count: statusMap['REVIEWED'] || 0, color: '#16a34a' }
         ];
 
-        const p0 = plans.filter(p => (p.scoreGlobal ?? 0) === 0).length;
-        const p25 = plans.filter(p => (p.scoreGlobal ?? 0) > 0 && (p.scoreGlobal ?? 0) <= 25).length;
-        const p50 = plans.filter(p => (p.scoreGlobal ?? 0) > 25 && (p.scoreGlobal ?? 0) <= 50).length;
-        const p75 = plans.filter(p => (p.scoreGlobal ?? 0) > 50 && (p.scoreGlobal ?? 0) <= 75).length;
-        const p100 = plans.filter(p => (p.scoreGlobal ?? 0) > 75).length;
+        const p0 = safePlans.filter((p: any) => (p.scoreGlobal ?? 0) === 0).length;
+        const p25 = safePlans.filter((p: any) => (p.scoreGlobal ?? 0) > 0 && (p.scoreGlobal ?? 0) <= 25).length;
+        const p50 = safePlans.filter((p: any) => (p.scoreGlobal ?? 0) > 25 && (p.scoreGlobal ?? 0) <= 50).length;
+        const p75 = safePlans.filter((p: any) => (p.scoreGlobal ?? 0) > 50 && (p.scoreGlobal ?? 0) <= 75).length;
+        const p100 = safePlans.filter((p: any) => (p.scoreGlobal ?? 0) > 75).length;
 
         this.progressDistribution = [
           { range: '0%', count: p0, color: '#dc2626' },
           { range: '1–25%', count: p25, color: '#ea580c' },
           { range: '26–50%', count: p50, color: '#d97706' },
           { range: '51–75%', count: p75, color: '#65a30d' },
-          { range: '76–100%', count: p100, color: '#16a34a' },
+          { range: '76–100%', count: p100, color: '#16a34a' }
         ];
 
         this.isLoading = false;
       },
       error: () => {
+        this.totalPlans = 0;
+        this.avgProgress = 0;
+        this.plansByStatus = [];
+        this.progressDistribution = [];
         this.isLoading = false;
       }
     });
 
-    this.http.get<any[]>('http://localhost:8081/api/mobility', { headers: this.getHeaders() })
+    this.http
+      .get<any[]>('http://localhost:8081/api/mobility', { headers: this.getHeaders() })
       .pipe(catchError(() => of([])))
-      .subscribe(requests => {
-        this.totalMobilities = requests.length;
-        this.pendingRequests = requests.filter(r => r.status === 'PENDING').length;
-        this.approvedRequests = requests.filter(r => r.status === 'APPROVED').length;
-        this.rejectedRequests = requests.filter(r => r.status === 'REJECTED').length;
+      .subscribe((requests: any[]) => {
+        const safeRequests = requests || [];
+
+        this.totalMobilities = safeRequests.length;
+        this.pendingRequests = safeRequests.filter(r => r.status === 'PENDING').length;
+        this.approvedRequests = safeRequests.filter(r => r.status === 'APPROVED').length;
+        this.rejectedRequests = safeRequests.filter(r => r.status === 'REJECTED').length;
 
         this.mobilityByStatus = [
           { label: 'En attente', count: this.pendingRequests, color: '#d97706' },
           { label: 'Approuvées', count: this.approvedRequests, color: '#16a34a' },
-          { label: 'Refusées', count: this.rejectedRequests, color: '#dc2626' },
+          { label: 'Refusées', count: this.rejectedRequests, color: '#dc2626' }
         ];
 
         const careerCount: Record<string, { title: string; count: number }> = {};
-        requests.forEach((r: any) => {
-          if (r.targetCareerTitle) {
-            if (!careerCount[r.targetCareerTitle]) {
-              careerCount[r.targetCareerTitle] = { title: r.targetCareerTitle, count: 0 };
+
+        safeRequests.forEach((request: any) => {
+          if (request?.targetCareerTitle) {
+            if (!careerCount[request.targetCareerTitle]) {
+              careerCount[request.targetCareerTitle] = {
+                title: request.targetCareerTitle,
+                count: 0
+              };
             }
-            careerCount[r.targetCareerTitle].count++;
+
+            careerCount[request.targetCareerTitle].count++;
           }
         });
 
@@ -132,38 +156,33 @@ export class CareerAdminDashboardComponent implements OnInit, OnDestroy {
           .slice(0, 5);
       });
 
-    this.http.get<any[]>('http://localhost:8081/api/users', { headers: this.getHeaders() })
+    this.http
+      .get<any[]>('http://localhost:8081/api/users', { headers: this.getHeaders() })
       .pipe(catchError(() => of([])))
-      .subscribe(users => {
-        this.totalEmployees = users.filter(
-          u => u.role === 'EMPLOYE' || u.role === 'EMPLOYEE' || u.role === 'USER'
+      .subscribe((users: any[]) => {
+        const safeUsers = users || [];
+
+        this.totalEmployees = safeUsers.filter(
+          user => user.role === 'EMPLOYE' || user.role === 'EMPLOYEE' || user.role === 'USER'
         ).length;
       });
   }
 
   getBarWidth(count: number, max: number): string {
-    if (!max) return '0%';
+    if (!max || count <= 0) {
+      return '0%';
+    }
     return Math.round((count / max) * 100) + '%';
   }
 
   getMaxCount(items: { count: number }[]): number {
-    return Math.max(...items.map(i => i.count), 1);
+    if (!items?.length) {
+      return 1;
+    }
+    return Math.max(...items.map(item => item.count), 1);
   }
 
-  setAdminTab(tab: 'overview' | 'mobility' | 'plans' | 'rse'): void {
+  setAdminTab(tab: AdminTab): void {
     this.adminTab = tab;
-  }
-
-  getAdminTabStyle(tab: 'overview' | 'mobility' | 'plans' | 'rse'): string {
-    const active = this.adminTab === tab;
-    return `
-      padding: 12px 18px;
-      border: none;
-      background: ${active ? '#f5f3ff' : 'white'};
-      color: ${active ? '#6d28d9' : '#4b5563'};
-      font-weight: ${active ? '700' : '500'};
-      border-radius: 10px;
-      cursor: pointer;
-    `;
   }
 }

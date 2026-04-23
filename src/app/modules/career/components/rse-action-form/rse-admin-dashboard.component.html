@@ -130,22 +130,30 @@
           </div>
         </div>
 
-        <div class="validated-card__employee">
-          <div class="validated-card__avatar">
-            {{ ((action.prenom || '?') | slice:0:1) }}{{ ((action.nom || '?') | slice:0:1) }}
-          </div>
+       <div class="validated-card__employee">
+  <div class="validated-card__avatar-wrapper">
+    <img
+      *ngIf="action.photoUrl"
+      [src]="action.photoUrl"
+      [alt]="((action.prenom || '') + ' ' + (action.nom || '')).trim()"
+      class="validated-card__avatar-image"
+    />
 
-          <div class="validated-card__employee-info">
-            <p class="validated-card__employee-label">Employé</p>
-            <p class="validated-card__employee-name">
-              {{ ((action.prenom || '') + ' ' + (action.nom || '')).trim() || '—' }}
-            </p>
-            <p class="validated-card__employee-email" *ngIf="action.email">
-              {{ action.email }}
-            </p>
-          </div>
-        </div>
+    <div class="validated-card__avatar" *ngIf="!action.photoUrl">
+      {{ ((action.prenom || '?') | slice:0:1) }}{{ ((action.nom || '?') | slice:0:1) }}
+    </div>
+  </div>
 
+  <div class="validated-card__employee-info">
+    <p class="validated-card__employee-label">Employé</p>
+    <p class="validated-card__employee-name">
+      {{ ((action.prenom || '') + ' ' + (action.nom || '')).trim() || '—' }}
+    </p>
+    <p class="validated-card__employee-email" *ngIf="action.email">
+      {{ action.email }}
+    </p>
+  </div>
+</div>
         <div class="validated-card__description">
           {{ action.description }}
         </div>

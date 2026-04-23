@@ -1,5 +1,3 @@
-/* Modern blue dashboard theme (scoped to component) */
-
 @use '../../styles/career-theme' as career;
 
 :host {
@@ -11,8 +9,6 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-
-  /* Subtle blue background */
   background:
     radial-gradient(1200px 400px at 10% -10%, rgba(59, 130, 246, 0.18), transparent 55%),
     radial-gradient(900px 380px at 90% 0%, rgba(37, 99, 235, 0.12), transparent 55%),
@@ -20,12 +16,65 @@
   border-radius: 18px;
 }
 
+/* ===== TABS ===== */
+.admin-tabs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+
+.admin-tab-btn {
+  border: none;
+  outline: none;
+  background: rgba(255, 255, 255, 0.92);
+  color: #475569;
+  font-weight: 700;
+  border-radius: 14px;
+  cursor: pointer;
+  padding: 13px 18px;
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow:
+    0 10px 24px rgba(15, 23, 42, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  transition: all 0.22s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    background: #ffffff;
+    color: #1e293b;
+    box-shadow:
+      0 16px 28px rgba(15, 23, 42, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  }
+
+  &.active {
+    background: linear-gradient(135deg, #f5f3ff 0%, #eef2ff 100%);
+    color: #6d28d9;
+    border: 1px solid rgba(167, 139, 250, 0.45);
+    box-shadow:
+      0 14px 28px rgba(124, 58, 237, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
+}
+
+.admin-tab-btn__icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* ===== LOADING ===== */
 .career-dashboard__loading {
   display: flex;
   justify-content: center;
   padding: 32px;
 }
 
+/* ===== GRIDS ===== */
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -54,14 +103,23 @@
   .summary-grid {
     grid-template-columns: 1fr;
   }
+
+  .admin-tabs {
+    gap: 10px;
+  }
+
+  .admin-tab-btn {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
+/* ===== PANELS ===== */
 .panel {
   padding: 20px;
   @include career.career-glass-panel;
   @include career.career-hover-lift;
 }
-
 
 .panel__title {
   font-size: 14px;
@@ -71,6 +129,7 @@
   letter-spacing: 0.2px;
 }
 
+/* ===== KPI CARDS ===== */
 .kpi-card {
   position: relative;
   overflow: hidden;
@@ -79,7 +138,6 @@
   @include career.career-glass-panel;
   @include career.career-hover-lift;
 }
-
 
 .kpi-card__orb {
   position: absolute;
@@ -159,6 +217,7 @@
 .kpi-card__value--warning { color: #92400e; }
 .kpi-card__label--warning { color: #b45309; }
 
+/* ===== COMMON ===== */
 .stack {
   display: flex;
   flex-direction: column;
@@ -225,6 +284,7 @@
   font-style: italic;
 }
 
+/* ===== BARS ===== */
 .bar {
   background: rgba(148, 163, 184, 0.20);
   border-radius: 9999px;
@@ -255,6 +315,7 @@
   background: linear-gradient(90deg, #16a34a, #22c55e);
 }
 
+/* ===== MOBILITY STATUS ===== */
 .pill-row {
   display: flex;
   align-items: center;
@@ -306,6 +367,7 @@
   margin: 2px 0 0;
 }
 
+/* ===== MINI BARS ===== */
 .mini-bars {
   display: flex;
   align-items: flex-end;
@@ -345,6 +407,7 @@
   text-align: center;
 }
 
+/* ===== TOP CAREERS ===== */
 .top-row {
   display: flex;
   align-items: center;
@@ -413,8 +476,8 @@
   .kpi-card,
   .bar__fill,
   .mini-bars__bar,
-  .kpi-progress__bar {
+  .kpi-progress__bar,
+  .admin-tab-btn {
     transition: none !important;
   }
 }
-
