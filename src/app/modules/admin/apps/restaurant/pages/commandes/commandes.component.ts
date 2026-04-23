@@ -523,4 +523,11 @@ export class CommandesComponent implements OnInit, OnDestroy {
       error: () => {}
     });
   }
+
+  // ─── EXPORT PDF ───────────────────────────────────────────────
+  exportPdf(): void {
+    this.commandeService.exportPdf();
+  }
+
 }
+

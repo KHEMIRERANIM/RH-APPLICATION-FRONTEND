@@ -15,10 +15,16 @@
         </p>
       </div>
     </div>
-    <button *ngIf="roleService.isEmploye()" mat-flat-button [color]="'primary'" (click)="ouvrirFormulaire()" class="mt-4 sm:mt-0">
-      <mat-icon svgIcon="heroicons_outline:plus" class="icon-size-5 mr-1"></mat-icon>
-      Nouvelle Commande
-    </button>
+    <div class="flex items-center gap-3 mt-4 sm:mt-0">
+      <button *ngIf="roleService.isAdmin()" (click)="exportPdf()" mat-stroked-button class="text-sm">
+        <mat-icon svgIcon="heroicons_outline:arrow-down-tray" class="icon-size-5 mr-1"></mat-icon>
+        Exporter PDF
+      </button>
+      <button *ngIf="roleService.isEmploye()" mat-flat-button [color]="'primary'" (click)="ouvrirFormulaire()">
+        <mat-icon svgIcon="heroicons_outline:plus" class="icon-size-5 mr-1"></mat-icon>
+        Nouvelle Commande
+      </button>
+    </div>
   </div>
 
   <!-- CONTENU -->

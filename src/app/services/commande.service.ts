@@ -32,7 +32,7 @@ export class CommandeService {
   }
 
   updateCommande(id: string, commande: Partial<Commande>): Observable<Commande> {
-    return this.http.patch<Commande>(this.apiUrl + '/' + id + '/plats', commande['plats']);
+    return this.http.put<Commande>(this.apiUrl + '/' + id, commande);
   }
 
   payerCommande(id: string, modePaiement: string): Observable<any> {
@@ -49,5 +49,9 @@ export class CommandeService {
 
   getStatsPlats(): Observable<any> {
     return this.http.get<any>(this.apiUrl + '/stats/plats');
+  }
+
+  exportPdf(): void {
+    window.open(this.apiUrl + '/export/pdf', '_blank');
   }
 }
