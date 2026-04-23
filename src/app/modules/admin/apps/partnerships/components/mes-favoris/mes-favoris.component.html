@@ -1,0 +1,96 @@
+<div class="favoris-page">
+
+    <!-- ═══ HEADER ════════════════════════════════════════════ -->
+    <div class="page-header">
+        <div class="header-content">
+            <button mat-icon-button class="back-btn" (click)="allerCatalogue()" matTooltip="Retour au catalogue">
+                <mat-icon svgIcon="heroicons_outline:arrow-left"></mat-icon>
+            </button>
+            <div class="header-titles">
+                <div class="page-badge">
+                    <mat-icon svgIcon="heroicons_solid:heart"></mat-icon>
+                    <span>Mes Favoris</span>
+                </div>
+                <h1 class="page-title">Offres sauvegardées</h1>
+                <p class="page-desc">Retrouvez ici toutes les offres que vous avez ajoutées à vos favoris.</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button mat-flat-button class="btn-reservations" (click)="allerMesReservations()">
+                <mat-icon svgIcon="heroicons_outline:bookmark"></mat-icon>
+                <span>Mes Réservations</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ═══ LOADER ════════════════════════════════════════════ -->
+    <div class="loader-container" *ngIf="isLoading">
+        <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+    </div>
+
+    <!-- ═══ EMPTY STATE ═══════════════════════════════════════ -->
+    <div class="empty-state" *ngIf="!isLoading && offresFavorites.length === 0">
+        <div class="empty-icon">
+            <mat-icon svgIcon="heroicons_outline:heart"></mat-icon>
+        </div>
+        <h2>Aucun favori pour le moment</h2>
+        <p>Explorez notre catalogue et cliquez sur le cœur pour sauvegarder les offres qui vous plaisent.</p>
+        <button mat-flat-button color="primary" (click)="allerCatalogue()" style="margin-top: 20px;">
+            Explorer le catalogue
+        </button>
+    </div>
+
+    <!-- ═══ LISTE DES FAVORIS ═════════════════════════════════ -->
+    <div class="offres-grid" *ngIf="!isLoading && offresFavorites.length > 0">
+        <div class="offre-card" *ngFor="let offre of offresFavorites; let i = index" [style.animation-delay]="i * 80 + 'ms'">
+            
+            <!-- Banner -->
+            <div class="card-banner" [style.background]="getCardGradient(offre.categorie)">
+                <img *ngIf="offre.imageUrl" [src]="offre.imageUrl" [alt]="offre.titre" class="card-img" (error)="offre.imageUrl = null">
+                <div class="banner-icon-overlay" *ngIf="!offre.imageUrl">
+                    <mat-icon [svgIcon]="getCategorieIcon(offre.categorie)" class="banner-icon"></mat-icon>
+                </div>
+                
+                <span class="cat-badge" [ngClass]="getCategorieBadgeClass(offre.categorie)">
+                    {{ offre.categorie }}
+                </span>
+
+                <button mat-icon-button class="btn-remove-favori" 
+                        (click)="retirerFavori(offre)"
+                        matTooltip="Retirer des favoris">
+                    <mat-progress-spinner *ngIf="isRemoving[offre.id!]" mode="indeterminate" diameter="20"></mat-progress-spinner>
+                    <mat-icon *ngIf="!isRemoving[offre.id!]" svgIcon="heroicons_solid:heart" style="color: #ef4444;"></mat-icon>
+                </button>
+            </div>
+
+            <!-- Body -->
+            <div class="card-body">
+                <h3 class="card-title">{{ offre.titre }}</h3>
+                <p class="card-desc" *ngIf="offre.description">{{ offre.description }}</p>
+
+                <div class="card-meta">
+                    <div class="meta-item" *ngIf="offre.localisation">
+                        <mat-icon svgIcon="heroicons_mini:map-pin"></mat-icon>
+                        <span>{{ offre.localisation }}</span>
+                    </div>
+                </div>
+
+                <!-- Footer : Prix -->
+                <div class="card-footer">
+                    <div class="prix-block" *ngIf="offre.categorie !== 'HOTEL'">
+                        <span class="prix-barre" *ngIf="offre.prixReel">{{ offre.prixReel | number:'1.0-2' }} DT</span>
+                        <span class="prix-convention">{{ offre.prixConvention | number:'1.0-2' }} DT</span>
+                    </div>
+                    <div class="prix-block" *ngIf="offre.categorie === 'HOTEL' && offre.detailsHotel" style="flex-direction: column; align-items: flex-start;">
+                        <span class="prix-barre" *ngIf="offre.prixReel">{{ offre.prixReel | number:'1.0-2' }} DT</span>
+                        <span class="prix-convention">{{ offre.detailsHotel.prixAdulte | number:'1.0-2' }} DT <small style="font-size:12px; font-weight:normal;">/ nuit</small></span>
+                    </div>
+                    
+                    <button class="btn-reserver-link" (click)="allerCatalogue()">
+                        Réserver ➔
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

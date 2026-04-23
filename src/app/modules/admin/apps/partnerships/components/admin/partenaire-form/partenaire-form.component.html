@@ -1,0 +1,114 @@
+<div class="form-page">
+
+    <!-- ─── HEADER ─────────────────────────────────────── -->
+    <div class="page-header">
+        <button mat-icon-button class="back-btn" (click)="annuler()">
+            <mat-icon svgIcon="heroicons_outline:arrow-left"></mat-icon>
+        </button>
+        <div class="header-info">
+            <h1 class="page-title">{{ isEdit ? 'Modifier le Partenaire' : 'Nouveau Partenaire' }}</h1>
+            <p class="page-subtitle">{{ isEdit ? 'Mise à jour des informations du partenaire existant' : 'Remplissez les détails pour ajouter un nouveau partenaire à la mutuelle' }}</p>
+        </div>
+    </div>
+
+    <!-- ─── LOADER ─────────────────────────────────────── -->
+    <div class="loader-container" *ngIf="isLoading">
+        <mat-progress-spinner mode="indeterminate" diameter="48" color="primary"></mat-progress-spinner>
+    </div>
+
+    <!-- ─── FORMULAIRE ─────────────────────────────────── -->
+    <div class="form-container" *ngIf="!isLoading">
+        <form [formGroup]="form" class="admin-form" (ngSubmit)="sauvegarder()">
+
+            <!-- Section Avatar/Logo -->
+            <div class="form-section avatar-section">
+                <div class="avatar-circle">
+                    {{ getInitiale() }}
+                </div>
+                <div class="avatar-info">
+                    <h3>Identité visuelle</h3>
+                    <p>Le logo ou l'initiale représente ce partenaire dans le catalogue</p>
+                </div>
+            </div>
+
+            <!-- Grille des champs -->
+            <div class="fields-grid">
+                <!-- Nom -->
+                <div class="col-span-2 flex flex-col gap-1.5 focus-within:text-primary transition-colors">
+                    <label class="text-[0.85rem] font-semibold text-slate-700 mb-0.5">Nom du partenaire</label>
+                    <div class="relative flex items-center">
+                        <mat-icon svgIcon="heroicons_outline:office-building" class="absolute left-3 text-slate-400 w-5 h-5 pointer-events-none z-10"></mat-icon>
+                        <input formControlName="nom" placeholder="Ex: Tunisair, Hôtel El Mouradi..."
+                               class="w-full pl-10 pr-4 py-[0.625rem] border border-slate-200 rounded-lg text-[0.875rem] text-slate-800 bg-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all box-border">
+                    </div>
+                    <div *ngIf="f['nom'].hasError('required') && (f['nom'].touched || f['nom'].dirty)" class="text-xs text-red-500 mt-0.5">Le nom est requis</div>
+                    <div *ngIf="f['nom'].hasError('minlength') && (f['nom'].touched || f['nom'].dirty)" class="text-xs text-red-500 mt-0.5">Le nom doit faire au moins 2 caractères</div>
+                </div>
+
+                <!-- Type -->
+                <div class="col-span-1 flex flex-col gap-1.5 focus-within:text-primary transition-colors">
+                    <label class="text-[0.85rem] font-semibold text-slate-700 mb-0.5">Type/Catégorie</label>
+                    <div class="relative flex items-center">
+                        <mat-icon svgIcon="heroicons_outline:tag" class="absolute left-3 text-slate-400 w-5 h-5 pointer-events-none z-10"></mat-icon>
+                        <select formControlName="type"
+                                style="-webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: none;"
+                                class="w-full pl-10 pr-8 py-[0.625rem] border border-slate-200 rounded-lg text-[0.875rem] text-slate-800 bg-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all box-border cursor-pointer">
+                            <option value="null" disabled selected>Sélectionnez une catégorie...</option>
+                            <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+                        </select>
+                        <!-- Icône de chevons pour le select -->
+                        <div class="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-slate-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                        </div>
+                    </div>
+                    <div *ngIf="f['type'].hasError('required') && (f['type'].touched || f['type'].dirty)" class="text-xs text-red-500 mt-0.5">La catégorie est requise</div>
+                </div>
+
+                <!-- Date convention -->
+                <div class="col-span-1 flex flex-col gap-1.5 focus-within:text-primary transition-colors relative">
+                    <label class="text-[0.85rem] font-semibold text-slate-700 mb-0.5">Date de signature convention</label>
+                    <div class="relative flex items-center">
+                        <input [matDatepicker]="picker" formControlName="dateConvention" placeholder="JJ/MM/AAAA"
+                               class="w-full pl-4 pr-12 py-[0.625rem] border border-slate-200 rounded-lg text-[0.875rem] text-slate-800 bg-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all box-border cursor-pointer"
+                               (click)="picker.open()">
+                        <div class="absolute right-1 text-slate-500">
+                            <mat-datepicker-toggle [for]="picker"></mat-datepicker-toggle>
+                        </div>
+                        <mat-datepicker #picker></mat-datepicker>
+                    </div>
+                    <div *ngIf="f['dateConvention'].hasError('required') && (f['dateConvention'].touched || f['dateConvention'].dirty)" class="text-xs text-red-500 mt-0.5">La date est requise</div>
+                </div>
+
+                <!-- Email -->
+                <div class="col-span-2 flex flex-col gap-1.5 focus-within:text-primary transition-colors">
+                    <label class="text-[0.85rem] font-semibold text-slate-700 mb-0.5">Email de contact (Optionnel)</label>
+                    <div class="relative flex items-center">
+                        <mat-icon svgIcon="heroicons_outline:mail" class="absolute left-3 text-slate-400 w-5 h-5 pointer-events-none z-10"></mat-icon>
+                        <input formControlName="emailContact" type="email" placeholder="contact@partenaire.com"
+                               class="w-full pl-10 pr-4 py-[0.625rem] border border-slate-200 rounded-lg text-[0.875rem] text-slate-800 bg-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all box-border">
+                    </div>
+                    <div *ngIf="f['emailContact'].hasError('email') && (f['emailContact'].touched || f['emailContact'].dirty)" class="text-xs text-red-500 mt-0.5">Format email invalide</div>
+                </div>
+
+                <!-- Actif -->
+                <div class="form-toggle row-span-col-2">
+                    <mat-slide-toggle formControlName="actif" color="primary">
+                        <span class="toggle-label relative -top-0.5 font-semibold text-slate-700">Partenaire Actif</span>
+                    </mat-slide-toggle>
+                    <p class="toggle-hint text-xs text-slate-500 mt-1">Si désactivé, les offres de ce partenaire ne seront plus visibles dans le catalogue employés</p>
+                </div>
+            </div>
+
+            <!-- Actions du formulaire -->
+            <div class="form-actions">
+                <button mat-button type="button" class="btn-secondary" (click)="annuler()" [disabled]="isSaving">
+                    Annuler
+                </button>
+                <button mat-flat-button color="primary" class="btn-primary" type="submit" [disabled]="form.invalid || isSaving">
+                    <mat-progress-spinner *ngIf="isSaving" mode="indeterminate" diameter="20" class="spinner-white"></mat-progress-spinner>
+                    <span *ngIf="!isSaving">{{ isEdit ? 'Mettre à jour' : 'Créer le partenaire' }}</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

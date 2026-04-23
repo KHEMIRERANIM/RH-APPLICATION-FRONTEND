@@ -1,6 +1,6 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
 
 @layer utilities {
     .bg-card { background-color: #ffffff; }
@@ -12,4 +12,39 @@
     .icon-size-4 { width: 16px; height: 16px; font-size: 16px; }
     .icon-size-5 { width: 20px; height: 20px; font-size: 20px; }
     .w-128 { width: 32rem; }
+}
+
+/* Correction globale exhaustive du conflit Tailwind / Angular Material MDC */
+/* Tailwind injecte 'border-style: solid' sur TOUS les éléments (y compris ::before/after) */
+.mat-mdc-form-field, 
+.mat-mdc-form-field.mat-focused {
+    .mdc-notched-outline {
+        &, &::before, &::after { border-style: none !important; }
+    }
+    
+    .mdc-notched-outline__leading {
+        &, &::before, &::after { border-right-style: hidden !important; }
+    }
+    
+    .mdc-notched-outline__notch {
+        &, &::before, &::after { 
+            border-left-style: hidden !important; 
+            border-right-style: hidden !important; 
+        }
+    }
+    
+    .mdc-notched-outline__trailing {
+        &, &::before, &::after { border-left-style: hidden !important; }
+    }
+}
+
+/* Supprimer la flèche native des menus déroulants <select> stylisés avec Tailwind */
+select.appearance-none {
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+    background-image: none !important; /* Neutralise l'icône injectée par @tailwindcss/forms */
+}
+select.appearance-none::-ms-expand {
+    display: none !important;
 }

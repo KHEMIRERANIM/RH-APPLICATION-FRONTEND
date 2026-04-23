@@ -1,0 +1,281 @@
+<div class="reservation-dialog">
+
+    <!-- ═══ BANNIÈRE ════════════════════════════════════════ -->
+    <div class="dialog-banner" [style.background]="getCardGradient()">
+        <img *ngIf="offre.imageUrl" [src]="offre.imageUrl" [alt]="offre.titre" class="banner-img">
+        <div class="banner-overlay">
+            <div class="banner-icon-wrapper" *ngIf="!offre.imageUrl">
+                <mat-icon [svgIcon]="getCategorieIcon()" class="banner-icon"></mat-icon>
+            </div>
+        </div>
+        <div class="banner-badges">
+            <span class="cat-badge">{{ offre.categorie }}</span>
+            <span class="eco-badge" *ngIf="getEconomie() > 0">
+                Économisez {{ getEconomie() | number:'1.0-0' }} DT
+            </span>
+            <!-- 🤖 Badge Intelligence Artificielle (Demand Forecasting) -->
+            <span class="urgency-badge" *ngIf="isUrgent">
+                <mat-icon svgIcon="heroicons_solid:fire" class="fire-icon"></mat-icon>
+                Forte demande (IA)
+            </span>
+        </div>
+        <button mat-icon-button class="close-btn" (click)="fermer()">
+            <mat-icon svgIcon="heroicons_outline:x"></mat-icon>
+        </button>
+    </div>
+
+    <!-- ═══ CONTENU ═══════════════════════════════════════════ -->
+    <mat-dialog-content class="dialog-content">
+
+        <!-- Titre & Partenaire -->
+        <div class="offer-header">
+            <h2 class="offer-title">{{ offre.titre }}</h2>
+            <p class="offer-desc" *ngIf="offre.description">{{ offre.description }}</p>
+        </div>
+
+        <!-- Infos rapides -->
+        <div class="info-chips">
+            <span class="info-chip" *ngIf="offre.localisation">
+                <mat-icon svgIcon="heroicons_mini:map-pin"></mat-icon>
+                {{ offre.localisation }}
+            </span>
+            <span class="info-chip" *ngIf="offre.dateDebut">
+                <mat-icon svgIcon="heroicons_mini:calendar"></mat-icon>
+                {{ offre.dateDebut | date:'dd MMM' }} → {{ offre.dateFin | date:'dd MMM yyyy' }}
+            </span>
+            <span class="info-chip places" [class.low]="offre.nbPlacesDispo <= 3">
+                <mat-icon svgIcon="heroicons_mini:users"></mat-icon>
+                {{ offre.nbPlacesDispo }} place(s) disponible(s)
+            </span>
+        </div>
+
+        <!-- Bloc prix -->
+        <div class="price-block">
+            <div class="price-normal">
+                <span class="price-label">Prix normal</span>
+                <span class="price-value struck">{{ offre.prixReel | number:'1.0-2' }} DT</span>
+            </div>
+            <div class="price-divider">
+                <mat-icon svgIcon="heroicons_outline:arrow-right" class="arrow-icon"></mat-icon>
+            </div>
+            <div class="price-convention" *ngIf="!isHotel">
+                <span class="price-label">Votre prix</span>
+                <span class="price-value highlight">{{ offre.prixConvention | number:'1.0-2' }} DT</span>
+            </div>
+            <div class="price-convention" *ngIf="isHotel">
+                <span class="price-label">Dès / adulte / nuit</span>
+                <span class="price-value highlight">{{ offre.detailsHotel?.prixAdulte | number:'1.0-2' }} DT</span>
+            </div>
+        </div>
+
+        <!-- 🤖 Warning IA -->
+        <div class="ia-alert" *ngIf="isUrgent">
+            <div class="ia-alert-decor"></div>
+            <div class="ia-alert-icon">
+                <mat-icon svgIcon="heroicons_solid:sparkles"></mat-icon>
+            </div>
+            <div class="ia-alert-content">
+                <h4 class="ia-alert-title">Diagnostic de l'Intelligence Artificielle</h4>
+                <p class="ia-alert-text">Selon l'historique de notre entreprise et les algorithmes prédictifs, le risque de rupture de stock sur cette offre atteint <strong>{{ probaRupture }}%</strong>. Il vous est conseillé de réserver dès aujourd'hui.</p>
+            </div>
+        </div>
+
+        <!-- Séparateur -->
+        <div class="section-divider">
+            <span>Votre réservation</span>
+        </div>
+
+        <!-- Formulaire quantité / Réservation -->
+        <form [formGroup]="form" class="reservation-form">
+
+            <!-- CAS STANDARD -->
+            <div class="quantity-selector" *ngIf="!isHotel">
+                <label class="quantity-label">Nombre de personnes</label>
+                <div class="quantity-controls">
+                    <button mat-icon-button type="button" class="qty-btn" (click)="decrementer()"
+                        [disabled]="form.get('nbPersonnes')?.value <= 1">
+                        <mat-icon svgIcon="heroicons_solid:minus"></mat-icon>
+                    </button>
+                    <span class="qty-value">{{ form.get('nbPersonnes')?.value }}</span>
+                    <button mat-icon-button type="button" class="qty-btn" (click)="incrementer()"
+                        [disabled]="form.get('nbPersonnes')?.value >= offre.nbPlacesDispo">
+                        <mat-icon svgIcon="heroicons_solid:plus"></mat-icon>
+                    </button>
+                </div>
+            </div>
+
+            <!-- CAS HÔTEL -->
+            <div class="hotel-reservation-block" *ngIf="isHotel">
+
+                <div class="date-selector flex flex-col gap-1.5 focus-within:text-primary transition-colors" style="margin-bottom: 12px; text-align: left;">
+                    <label class="text-[0.85rem] font-semibold text-slate-700 mb-0.5">Dates du séjour</label>
+                    <div class="relative flex items-center border border-slate-200 rounded-lg bg-white focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 transition-all px-2 box-border">
+                        <mat-date-range-input [rangePicker]="picker" [min]="offre.dateDebut" [max]="offre.dateFin" class="w-full ml-2 text-sm text-slate-800 py-[0.625rem] cursor-pointer" (click)="picker.open()">
+                            <input matStartDate formControlName="checkIn" placeholder="Arrivée" class="focus:outline-none cursor-pointer bg-transparent">
+                            <span class="mx-2 text-slate-400">➝</span>
+                            <input matEndDate formControlName="checkOut" placeholder="Départ" class="focus:outline-none cursor-pointer bg-transparent">
+                        </mat-date-range-input>
+                        <div class="text-slate-500 mr-1 flex items-center">
+                            <mat-datepicker-toggle [for]="picker"></mat-datepicker-toggle>
+                        </div>
+                        <mat-date-range-picker #picker></mat-date-range-picker>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 24px; margin-bottom: 16px;">
+                    <div class="quantity-selector" style="flex: 1;">
+                        <label class="quantity-label">Adultes</label>
+                        <div class="quantity-controls">
+                            <button mat-icon-button type="button" class="qty-btn" (click)="decrementerType('nbAdultes')"
+                                [disabled]="form.get('nbAdultes')?.value <= 1">
+                                <mat-icon svgIcon="heroicons_solid:minus"></mat-icon>
+                            </button>
+                            <span class="qty-value">{{ form.get('nbAdultes')?.value }}</span>
+                            <button mat-icon-button type="button" class="qty-btn" (click)="incrementerType('nbAdultes')"
+                                [disabled]="(form.get('nbAdultes')?.value + form.get('nbEnfants')?.value) >= offre.nbPlacesDispo">
+                                <mat-icon svgIcon="heroicons_solid:plus"></mat-icon>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="quantity-selector" style="flex: 1;">
+                        <label class="quantity-label">Enfants ( &lt; {{ offre.detailsHotel?.ageLimiteEnfant
+                            }}ans)</label>
+                        <div class="quantity-controls">
+                            <button mat-icon-button type="button" class="qty-btn" (click)="decrementerType('nbEnfants')"
+                                [disabled]="form.get('nbEnfants')?.value <= 0">
+                                <mat-icon svgIcon="heroicons_solid:minus"></mat-icon>
+                            </button>
+                            <span class="qty-value">{{ form.get('nbEnfants')?.value }}</span>
+                            <button mat-icon-button type="button" class="qty-btn" (click)="incrementerType('nbEnfants')"
+                                [disabled]="(form.get('nbAdultes')?.value + form.get('nbEnfants')?.value) >= offre.nbPlacesDispo">
+                                <mat-icon svgIcon="heroicons_solid:plus"></mat-icon>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Formules -->
+                <div class="formules-selector" *ngIf="offre.detailsHotel?.formulesDisponibles?.length > 0">
+                    <label class="quantity-label">Formule de restauration</label>
+                    <mat-radio-group formControlName="formule" class="formules-radio-group"
+                        style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
+                        <mat-radio-button *ngFor="let f of offre.detailsHotel?.formulesDisponibles" [value]="f"
+                            color="primary">
+                            {{ f === 'PD' ? 'Petit Déjeuner' : (f === 'DP' ? 'Demi Pension' : 'Pension Complète') }}
+                            <span *ngIf="offre.detailsHotel!.surprixFormules[f] > 0"
+                                style="color: #64748b; font-size: 0.85em; margin-left: 4px;">
+                                (+{{ offre.detailsHotel!.surprixFormules[f] }} DT/pers/nuit)
+                            </span>
+                        </mat-radio-button>
+                    </mat-radio-group>
+                </div>
+
+            </div>
+
+            <!-- Récapitulatif prix total -->
+            <div class="total-recap" [style.marginTop.px]="isHotel ? 20 : 0">
+                <div class="total-row" *ngIf="!isHotel">
+                    <span>{{ form.get('nbPersonnes')?.value }} × {{ offre.prixConvention | number:'1.0-2' }} DT</span>
+                    <span class="total-value">{{ prixTotal | number:'1.0-2' }} DT</span>
+                </div>
+
+                <div class="total-row" *ngIf="isHotel"
+                    style="display: flex; justify-content: space-between; align-items: center;">
+                    <div
+                        style="font-size: 0.85em; color: #475569; display: flex; flex-direction: column; align-items: flex-start;">
+                        <span>{{ form.get('nbAdultes')?.value }} Adulte(s), {{ form.get('nbEnfants')?.value }}
+                            Enfant(s)</span>
+                        <span *ngIf="nuitsH > 0">Séjour de {{ nuitsH }} Nuit(s)</span>
+                        <span *ngIf="nuitsH <= 0" style="color: #ef4444;">Sélectionnez des dates</span>
+                    </div>
+                    <span class="total-value">{{ prixTotal | number:'1.0-2' }} DT</span>
+                </div>
+            </div>
+        </form>
+
+        <!-- ═══ ÉCRAN DE CONFIRMATION ════════════════════════════════════════ -->
+        <div class="confirmation-panel" *ngIf="confirmationStep">
+
+            <div class="recap-header">
+                <mat-icon svgIcon="heroicons_outline:clipboard-check" class="recap-icon"></mat-icon>
+                <span>Récapitulatif de votre réservation</span>
+            </div>
+
+            <div class="recap-list">
+                <div class="recap-row">
+                    <span class="recap-key">OffreAvantage</span>
+                    <span class="recap-val">{{ offre.titre }}</span>
+                </div>
+                <div class="recap-row" *ngIf="!isHotel">
+                    <span class="recap-key">Catégorie</span>
+                    <span class="recap-val">{{ offre.categorie }}</span>
+                </div>
+                <div class="recap-row" *ngIf="!isHotel && offre.localisation">
+                    <span class="recap-key">Lieu</span>
+                    <span class="recap-val">{{ offre.localisation }}</span>
+                </div>
+                <div class="recap-row" *ngIf="!isHotel && offre.dateDebut">
+                    <span class="recap-key">Dates</span>
+                    <span class="recap-val">{{ offre.dateDebut | date:'dd MMM' }} → {{ offre.dateFin | date:'dd MMM yyyy' }}</span>
+                </div>
+                <div class="recap-row" *ngIf="!isHotel">
+                    <span class="recap-key">Nombre de personnes</span>
+                    <span class="recap-val">{{ form.get('nbPersonnes')?.value }} pers. × {{ offre.prixConvention | number:'1.0-2' }} DT</span>
+                </div>
+                <ng-container *ngIf="isHotel">
+                    <div class="recap-row">
+                        <span class="recap-key">Adultes / Enfants</span>
+                        <span class="recap-val">{{ form.get('nbAdultes')?.value }} × Adulte — {{ form.get('nbEnfants')?.value }} × Enfant</span>
+                    </div>
+                    <div class="recap-row">
+                        <span class="recap-key">Séjour</span>
+                        <span class="recap-val">{{ getCheckInLabel() }} → {{ getCheckOutLabel() }} ({{ nuitsH }} nuit(s))</span>
+                    </div>
+                    <div class="recap-row">
+                        <span class="recap-key">Formule</span>
+                        <span class="recap-val">{{ getFormuleLabel() }}</span>
+                    </div>
+                </ng-container>
+                <div class="recap-row total">
+                    <span class="recap-key">Total à régler</span>
+                    <span class="recap-val">{{ prixTotal | number:'1.0-2' }} DT</span>
+                </div>
+            </div>
+
+            <p class="recap-warning">
+                <mat-icon svgIcon="heroicons_mini:information-circle"></mat-icon>
+                En confirmant, vous bénéficiez du tarif de convention. Un email de confirmation vous sera envoyé.
+            </p>
+        </div>
+
+    </mat-dialog-content>
+
+    <!-- ═══ ACTIONS ════════════════════════════════════════════ -->
+    <mat-dialog-actions class="dialog-actions">
+
+        <!-- Étape 1 : Formulaire -->
+        <ng-container *ngIf="!confirmationStep">
+            <button mat-button class="btn-cancel" (click)="fermer()">Annuler</button>
+            <button mat-flat-button class="btn-confirm" (click)="demanderConfirmation()" [disabled]="form.invalid || isLoading">
+                <mat-icon svgIcon="heroicons_outline:arrow-right"></mat-icon>
+                Continuer ({{ prixTotal | number:'1.0-2' }} DT)
+            </button>
+        </ng-container>
+
+        <!-- Étape 2 : Confirmation -->
+        <ng-container *ngIf="confirmationStep">
+            <button mat-stroked-button class="btn-cancel" (click)="retourFormulaire()">
+                <mat-icon svgIcon="heroicons_outline:arrow-left"></mat-icon>
+                Modifier
+            </button>
+            <button mat-flat-button class="btn-confirm btn-confirm-final" (click)="confirmer()" [disabled]="isLoading">
+                <mat-progress-spinner *ngIf="isLoading" mode="indeterminate" diameter="20" class="spinner-white">
+                </mat-progress-spinner>
+                <mat-icon svgIcon="heroicons_outline:check-circle" *ngIf="!isLoading"></mat-icon>
+                {{ isLoading ? 'Réservation en cours...' : 'Oui, confirmer ma réservation' }}
+            </button>
+        </ng-container>
+
+    </mat-dialog-actions>
+</div>

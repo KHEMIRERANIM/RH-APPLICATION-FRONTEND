@@ -59,6 +59,14 @@ export class NotificationsComponent implements OnInit, OnDestroy
                 // Mark for check
                 this._changeDetectorRef.markForCheck();
             });
+            
+        // Setup polling every 60 seconds
+        setInterval(() => {
+            if (this.notifications) {
+                // If the user hasn't opened it, we can fetch on background
+                this._notificationsService.getAll().subscribe();
+            }
+        }, 60000);
     }
 
     /**

@@ -1,0 +1,272 @@
+<div class="form-page">
+
+    <!-- ─── HEADER ─────────────────────────────────────── -->
+    <div class="page-header">
+        <button mat-icon-button class="back-btn" (click)="annuler()">
+            <mat-icon svgIcon="heroicons_outline:arrow-left"></mat-icon>
+        </button>
+        <div class="header-info">
+            <h1 class="page-title">{{ isEdit ? 'Modifier l\'offre' : 'Nouvelle offre' }}</h1>
+            <p class="page-subtitle">{{ isEdit ? 'Mise à jour des règles et détails de l\'offre' : 'Création d\'une nouvelle offre dans le catalogue' }}</p>
+        </div>
+    </div>
+
+    <!-- ─── LOADER ─────────────────────────────────────── -->
+    <div class="loader-container" *ngIf="isLoading">
+        <mat-progress-spinner mode="indeterminate" diameter="48" color="primary"></mat-progress-spinner>
+    </div>
+
+    <!-- ─── FORMULAIRE ─────────────────────────────────── -->
+    <div class="form-container" *ngIf="!isLoading">
+        <form [formGroup]="form" class="admin-form" (ngSubmit)="sauvegarder()">
+
+            <!-- ════ IMAGE D'OFFRE (Base64) ═════════════════ -->
+            <div class="image-upload-section">
+                <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" style="display: none">
+
+                <div class="image-preview-container"
+                    [class.has-image]="!!imagePreview"
+                    [class.is-loading]="imageLoading"
+                    (click)="!imagePreview && triggerFileInput()">
+
+                    <!-- Image affichée -->
+                    <img *ngIf="imagePreview" [src]="imagePreview" alt="Aperçu" class="preview-img">
+
+                    <!-- Overlay au survol / bouton supprimer -->
+                    <div class="preview-overlay" *ngIf="imagePreview">
+                        <button mat-mini-fab color="warn" (click)="$event.stopPropagation(); supprimerImage()" matTooltip="Supprimer l'image">
+                            <mat-icon svgIcon="heroicons_outline:trash"></mat-icon>
+                        </button>
+                        <button mat-mini-fab color="primary" (click)="triggerFileInput()" matTooltip="Remplacer" class="ml-2">
+                            <mat-icon svgIcon="heroicons_outline:camera"></mat-icon>
+                        </button>
+                    </div>
+
+                    <!-- Placeholder si vide -->
+                    <div class="placeholder-content" *ngIf="!imagePreview && !imageLoading">
+                        <mat-icon svgIcon="heroicons_outline:photograph" class="upload-icon"></mat-icon>
+                        <span class="upload-text">Cliquez pour ajouter une image d'illustration</span>
+                        <span class="upload-hint">Format JPG/PNG • Max 5 Mo</span>
+                    </div>
+
+                    <!-- Loader si traitement -->
+                    <mat-spinner *ngIf="imageLoading" diameter="32"></mat-spinner>
+                </div>
+            </div>
+
+            <div class="fields-wrapper">
+                <div class="section-title">Informations Générales</div>
+
+                <div class="fields-grid text-left">
+                    <!-- Titre -->
+                    <div class="col-span-2 flex flex-col gap-1.5 focus-within:text-primary transition-colors">
+                        <label class="text-[0.85rem] font-semibold text-slate-700 mb-0.5">Titre de l'offre</label>
+                        <div class="relative flex items-center">
+                            <input formControlName="titre" placeholder="Ex: Weekend découverte à Tozeur"
+                                   class="w-full px-4 py-[0.625rem] border border-slate-200 rounded-lg text-[0.875rem] text-slate-800 bg-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all box-border">
+                        </div>
+                        <div *ngIf="f['titre'].hasError('required') && (f['titre'].touched || f['titre'].dirty)" class="text-xs text-red-500 mt-0.5">Le titre est requis</div>
+                    </div>
+
+                    <!-- Partenaire -->
+                    <div class="col-span-1 flex flex-col gap-1.5 focus-within:text-primary transition-colors">
+                        <label class="text-[0.85rem] font-semibold text-slate-700 mb-0.5">Partenaire associé</label>
+                        <div class="relative flex items-center">
+                            <select formControlName="idPartenaire"
+                                    style="-webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: none;"
+                                    class="w-full pl-4 pr-10 py-[0.625rem] border border-slate-200 rounded-lg text-[0.875rem] text-slate-800 bg-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all box-border cursor-pointer">
+                                <option *ngFor="let p of partenaires" [value]="p.id">{{ p.nom }}</option>
+                            </select>
+                            <div class="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-slate-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                            </div>
+                        </div>
+                        <div *ngIf="f['idPartenaire'].hasError('required') && (f['idPartenaire'].touched || f['idPartenaire'].dirty)" class="text-xs text-red-500 mt-0.5">Requis</div>
+                    </div>
+
+                    <!-- Catégorie -->
+                    <div class="col-span-1 flex flex-col gap-1.5 focus-within:text-primary transition-colors">
+                        <label class="text-[0.85rem] font-semibold text-slate-700 mb-0.5">Catégorie</label>
+                        <div class="relative flex items-center">
+                            <select formControlName="categorie"
+                                    style="-webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: none;"
+                                    class="w-full pl-4 pr-10 py-[0.625rem] border border-slate-200 rounded-lg text-[0.875rem] text-slate-800 bg-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all box-border cursor-pointer">
+                                <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+                            </select>
+                            <div class="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-slate-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                            </div>
+                        </div>
+                        <div *ngIf="f['categorie'].hasError('required') && (f['categorie'].touched || f['categorie'].dirty)" class="text-xs text-red-500 mt-0.5">Requis</div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="col-span-2 flex flex-col gap-1.5 focus-within:text-primary transition-colors">
+                        <label class="text-[0.85rem] font-semibold text-slate-700 mb-0.5">Description détaillée (optionnelle)</label>
+                        <div class="relative flex items-start">
+                            <textarea formControlName="description" rows="3" placeholder="Description de l'avantage..."
+                                      class="w-full px-4 py-[0.625rem] border border-slate-200 rounded-lg text-[0.875rem] text-slate-800 bg-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all box-border resize-y"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-divider"></div>
+                
+                <!-- SECTION HÔTEL -->
+                <ng-container *ngIf="form.get('categorie')?.value === 'HOTEL'">
+                    <div class="section-title" style="color: #6366f1;">
+                        <mat-icon svgIcon="heroicons_mini:building-office-2" style="vertical-align: middle; margin-right: 4px;"></mat-icon>
+                        Détails Hôteliers
+                    </div>
+                    
+                    <div formGroupName="detailsHotel" class="hotel-details-block" style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 24px;">
+                        <div class="fields-grid cols-3 text-left">
+                            <div class="col-span-1 flex flex-col gap-1.5 focus-within:text-primary transition-colors">
+                                <label class="text-[0.85rem] font-semibold text-slate-700 mb-0.5">Prix Adulte / nuit</label>
+                                <div class="relative flex items-center">
+                                    <input type="number" formControlName="prixAdulte" min="0" placeholder="0" class="w-full pl-4 pr-10 py-[0.625rem] border border-slate-200 rounded-lg text-[0.875rem] text-slate-800 bg-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all box-border">
+                                    <span class="absolute right-4 text-slate-500 text-[0.875rem]">DT</span>
+                                </div>
+                            </div>
+
+                            <div class="col-span-1 flex flex-col gap-1.5 focus-within:text-primary transition-colors">
+                                <label class="text-[0.85rem] font-semibold text-slate-700 mb-0.5">Prix Enfant / nuit</label>
+                                <div class="relative flex items-center">
+                                    <input type="number" formControlName="prixEnfant" min="0" placeholder="0" class="w-full pl-4 pr-10 py-[0.625rem] border border-slate-200 rounded-lg text-[0.875rem] text-slate-800 bg-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all box-border">
+                                    <span class="absolute right-4 text-slate-500 text-[0.875rem]">DT</span>
+                                </div>
+                            </div>
+
+                            <div class="col-span-1 flex flex-col gap-1.5 focus-within:text-primary transition-colors">
+                                <label class="text-[0.85rem] font-semibold text-slate-700 mb-0.5">Âge max enfant</label>
+                                <div class="relative flex items-center">
+                                    <input type="number" formControlName="ageLimiteEnfant" min="0" placeholder="0" class="w-full pl-4 pr-12 py-[0.625rem] border border-slate-200 rounded-lg text-[0.875rem] text-slate-800 bg-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all box-border">
+                                    <span class="absolute right-4 text-slate-500 text-[0.875rem]">ans</span>
+                                </div>
+                            </div>
+                            
+                            <div class="col-span-1 flex flex-col gap-1.5 focus-within:text-primary transition-colors">
+                                <label class="text-[0.85rem] font-semibold text-slate-700 mb-0.5">Séjour par défaut (Nuits)</label>
+                                <div class="relative flex items-center">
+                                    <mat-icon svgIcon="heroicons_mini:moon" class="absolute left-3 text-slate-400 w-5 h-5 pointer-events-none z-10"></mat-icon>
+                                    <input type="number" formControlName="nombreNuits" min="1" class="w-full pl-10 pr-4 py-[0.625rem] border border-slate-200 rounded-lg text-[0.875rem] text-slate-800 bg-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all box-border">
+                                </div>
+                            </div>
+
+                            <div class="col-span-2 flex flex-col gap-1.5 focus-within:text-primary transition-colors">
+                                <label class="text-[0.85rem] font-semibold text-slate-700 mb-0.5">Types de chambres proposées</label>
+                                <div class="relative flex items-center">
+                                    <input formControlName="typeChambres" placeholder="Ex: Standard, Vue Mer, Suite..." class="w-full px-4 py-[0.625rem] border border-slate-200 rounded-lg text-[0.875rem] text-slate-800 bg-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all box-border">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="formules-block text-left" style="margin-top: 16px;">
+                            <h4 style="font-size: 14px; font-weight: 600; color: #475569; margin-bottom: 12px;">Formules de Pension (Cochez celles disponibles)</h4>
+                            <div class="formule-row" style="display: flex; align-items: center; gap: 16px; margin-bottom: 12px; min-height: 48px;">
+                                <mat-checkbox formControlName="hasPD" color="primary" style="min-width: 200px;">Petit Déjeuner (PD)</mat-checkbox>
+                                <div *ngIf="form.get('detailsHotel.hasPD')?.value" class="flex flex-col gap-1 w-[150px]">
+                                    <div class="relative flex items-center">
+                                        <input type="number" formControlName="surprixPD" min="0" placeholder="Surcoût" class="w-full pl-3 pr-8 py-2 border border-slate-200 rounded-lg text-sm text-slate-800 bg-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all box-border">
+                                        <span class="absolute right-3 text-slate-500 text-sm">DT</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="formule-row" style="display: flex; align-items: center; gap: 16px; margin-bottom: 12px; min-height: 48px;">
+                                <mat-checkbox formControlName="hasDP" color="primary" style="min-width: 200px;">Demi Pension (DP)</mat-checkbox>
+                                <div *ngIf="form.get('detailsHotel.hasDP')?.value" class="flex flex-col gap-1 w-[150px]">
+                                    <div class="relative flex items-center">
+                                        <input type="number" formControlName="surprixDP" min="0" placeholder="Surcoût" class="w-full pl-3 pr-8 py-2 border border-slate-200 rounded-lg text-sm text-slate-800 bg-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all box-border">
+                                        <span class="absolute right-3 text-slate-500 text-sm">DT</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="formule-row" style="display: flex; align-items: center; gap: 16px; min-height: 48px;">
+                                <mat-checkbox formControlName="hasPC" color="primary" style="min-width: 200px;">Pension Complète (PC)</mat-checkbox>
+                                <div *ngIf="form.get('detailsHotel.hasPC')?.value" class="flex flex-col gap-1 w-[150px]">
+                                    <div class="relative flex items-center">
+                                        <input type="number" formControlName="surprixPC" min="0" placeholder="Surcoût" class="w-full pl-3 pr-8 py-2 border border-slate-200 rounded-lg text-sm text-slate-800 bg-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all box-border">
+                                        <span class="absolute right-3 text-slate-500 text-sm">DT</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </ng-container>
+
+                <div class="section-title">Tarification & Disponibilité</div>
+
+                <div class="fields-grid cols-3 text-left">
+                    <!-- Prix Réel -->
+                    <div class="col-span-1 flex flex-col gap-1.5 focus-within:text-primary transition-colors">
+                        <label class="text-[0.85rem] font-semibold text-slate-700 mb-0.5">Prix Normal (Réel)</label>
+                        <div class="relative flex items-center">
+                            <input type="number" formControlName="prixReel" min="0" placeholder="0" class="w-full pl-4 pr-10 py-[0.625rem] border border-slate-200 rounded-lg text-[0.875rem] text-slate-800 bg-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all box-border">
+                            <span class="absolute right-4 text-slate-500 text-[0.875rem]">DT</span>
+                        </div>
+                        <div *ngIf="f['prixReel'].hasError('required') && (f['prixReel'].touched || f['prixReel'].dirty)" class="text-xs text-red-500 mt-0.5">Requis</div>
+                    </div>
+
+                    <!-- Prix Convention -->
+                    <div class="col-span-1 flex flex-col gap-1.5 focus-within:text-primary transition-colors" *ngIf="form.get('categorie')?.value !== 'HOTEL'">
+                        <label class="text-[0.85rem] font-semibold text-slate-700 mb-0.5">Prix Convention</label>
+                        <div class="relative flex items-center">
+                            <input type="number" formControlName="prixConvention" min="0" placeholder="0" class="w-full pl-4 pr-10 py-[0.625rem] border border-slate-200 rounded-lg text-[0.875rem] text-slate-800 bg-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all box-border">
+                            <span class="absolute right-4 text-slate-500 text-[0.875rem]">DT</span>
+                        </div>
+                        <div *ngIf="f['prixConvention'].hasError('required') && (f['prixConvention'].touched || f['prixConvention'].dirty)" class="text-xs text-red-500 mt-0.5">Requis</div>
+                    </div>
+
+                    <!-- Places (quota) -->
+                    <div class="col-span-1 flex flex-col gap-1.5 focus-within:text-primary transition-colors">
+                        <label class="text-[0.85rem] font-semibold text-slate-700 mb-0.5">Nombre de places</label>
+                        <div class="relative flex items-center">
+                            <mat-icon svgIcon="heroicons_mini:users" class="absolute left-3 text-slate-400 w-5 h-5 pointer-events-none z-10"></mat-icon>
+                            <input type="number" formControlName="nbPlacesTotal" min="1" placeholder="Nb" class="w-full pl-10 pr-4 py-[0.625rem] border border-slate-200 rounded-lg text-[0.875rem] text-slate-800 bg-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all box-border">
+                        </div>
+                        <div *ngIf="f['nbPlacesTotal'].hasError('required') && (f['nbPlacesTotal'].touched || f['nbPlacesTotal'].dirty)" class="text-xs text-red-500 mt-0.5">Requis</div>
+                    </div>
+                </div>
+
+                <div class="section-divider"></div>
+                <div class="section-title">Détails pratiques (Optionnel)</div>
+
+                <div class="fields-grid cols-3 text-left">
+                    <!-- Localisation -->
+                    <div class="col-span-1 flex flex-col gap-1.5 focus-within:text-primary transition-colors">
+                        <label class="text-[0.85rem] font-semibold text-slate-700 mb-0.5">Lieu / Ville</label>
+                        <div class="relative flex items-center">
+                            <mat-icon svgIcon="heroicons_mini:map-pin" class="absolute left-3 text-slate-400 w-5 h-5 pointer-events-none z-10"></mat-icon>
+                            <input formControlName="localisation" placeholder="Ex: Sousse, Bizerte..." class="w-full pl-10 pr-4 py-[0.625rem] border border-slate-200 rounded-lg text-[0.875rem] text-slate-800 bg-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all box-border">
+                        </div>
+                    </div>
+
+                    <!-- Dates -->
+                    <div class="col-span-2 flex flex-col gap-1.5 focus-within:text-primary transition-colors">
+                        <label class="text-[0.85rem] font-semibold text-slate-700 mb-0.5">Période de Validité</label>
+                        <div class="relative flex items-center border border-slate-200 rounded-lg bg-white focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 transition-all px-2 box-border">
+                            <mat-date-range-input [rangePicker]="picker" class="w-full ml-2 text-sm text-slate-800 py-[0.625rem] cursor-pointer" (click)="picker.open()">
+                                <input matStartDate formControlName="dateDebut" placeholder="Date début" class="focus:outline-none cursor-pointer">
+                                <span class="mx-2 text-slate-400">➝</span>
+                                <input matEndDate formControlName="dateFin" placeholder="Date fin" class="focus:outline-none cursor-pointer">
+                            </mat-date-range-input>
+                            <div class="text-slate-500 mr-1 flex items-center">
+                                <mat-datepicker-toggle [for]="picker"></mat-datepicker-toggle>
+                            </div>
+                            <mat-date-range-picker #picker></mat-date-range-picker>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="form-actions">
+                <button mat-button type="button" class="btn-secondary" (click)="annuler()" [disabled]="isSaving">Annuler</button>
+                <button mat-flat-button color="primary" class="btn-primary" type="submit" [disabled]="form.invalid || isSaving">
+                    <mat-progress-spinner *ngIf="isSaving" mode="indeterminate" diameter="20" class="spinner-white"></mat-progress-spinner>
+                    <span *ngIf="!isSaving">{{ isEdit ? 'Enregistrer les modifications' : 'Créer l\'offre' }}</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

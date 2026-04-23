@@ -1,0 +1,505 @@
+.reservation-dialog {
+    border-radius: 20px;
+    overflow     : hidden;
+}
+
+// ── Bannière ──────────────────────────────────────────────
+.dialog-banner {
+    position: relative;
+    height  : 200px;
+    overflow: hidden;
+
+    .banner-img {
+        width     : 100%;
+        height    : 100%;
+        object-fit: cover;
+    }
+
+    .banner-overlay {
+        position  : absolute;
+        inset     : 0;
+        background: rgba(0,0,0,0.25);
+        display   : flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .banner-icon-wrapper {
+        display        : flex;
+        align-items    : center;
+        justify-content: center;
+        width          : 80px;
+        height         : 80px;
+        border-radius  : 50%;
+        background     : rgba(255,255,255,0.15);
+        backdrop-filter: blur(10px);
+
+        .banner-icon {
+            font-size: 40px;
+            width    : 40px;
+            height   : 40px;
+            color    : rgba(255,255,255,0.9);
+        }
+    }
+
+    .banner-badges {
+        position: absolute;
+        bottom  : 12px;
+        left    : 16px;
+        display : flex;
+        gap     : 0.5rem;
+
+        .cat-badge {
+            padding        : 0.25rem 0.75rem;
+            border-radius  : 100px;
+            font-size      : 0.7rem;
+            font-weight    : 700;
+            letter-spacing : 0.08em;
+            text-transform : uppercase;
+            background     : rgba(255,255,255,0.2);
+            color          : white;
+            backdrop-filter: blur(8px);
+            border         : 1px solid rgba(255,255,255,0.3);
+        }
+
+        .eco-badge {
+            padding        : 0.25rem 0.75rem;
+            border-radius  : 100px;
+            font-size      : 0.75rem;
+            font-weight    : 700;
+            background     : rgba(16, 185, 129, 0.9);
+            color          : white;
+            backdrop-filter: blur(8px);
+        }
+
+        .urgency-badge {
+            display        : flex;
+            align-items    : center;
+            gap            : 4px;
+            padding        : 0.25rem 0.85rem;
+            border-radius  : 100px;
+            font-size      : 0.75rem;
+            font-weight    : 800;
+            background     : linear-gradient(135deg, #ef4444, #f97316); /* Dégradé premium rouge-orangé */
+            color          : white;
+            border         : 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow     : 0 0 12px rgba(249, 115, 22, 0.6);
+            animation      : pulse-urgency 2s infinite;
+
+            .fire-icon {
+                width : 16px;
+                height: 16px;
+                color : #ffffff;
+            }
+        }
+    }
+
+    .close-btn {
+        position  : absolute;
+        top       : 12px;
+        right     : 12px;
+        background: rgba(0,0,0,0.3) !important;
+        color     : white !important;
+        backdrop-filter: blur(8px);
+
+        &:hover { background: rgba(0,0,0,0.5) !important; }
+    }
+}
+
+// ── Contenu ────────────────────────────────────────────────
+.dialog-content {
+    padding   : 1.5rem !important;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.offer-header {
+    margin-bottom: 1rem;
+
+    .offer-title {
+        font-size  : 1.25rem;
+        font-weight: 700;
+        margin     : 0 0 0.5rem;
+        color      : #0f172a;
+    }
+
+    .offer-desc {
+        font-size  : 0.875rem;
+        color      : #64748b;
+        margin     : 0;
+        line-height: 1.5;
+    }
+}
+
+// ── Info chips ─────────────────────────────────────────────
+.info-chips {
+    display  : flex;
+    flex-wrap: wrap;
+    gap      : 0.5rem;
+    margin-bottom: 1.25rem;
+
+    .info-chip {
+        display    : inline-flex;
+        align-items: center;
+        gap        : 0.3rem;
+        padding    : 0.3rem 0.75rem;
+        background : #f1f5f9;
+        border-radius: 100px;
+        font-size  : 0.78rem;
+        color      : #475569;
+        font-weight: 500;
+
+        mat-icon {
+            font-size: 13px;
+            width    : 13px;
+            height   : 13px;
+        }
+
+        &.places { background: #ecfdf5; color: #059669; }
+        &.places.low { background: #fff1f2; color: #e11d48; }
+    }
+}
+
+// ── Bloc prix ──────────────────────────────────────────────
+.price-block {
+    display        : flex;
+    align-items    : center;
+    justify-content: center;
+    gap            : 1.5rem;
+    padding        : 1.25rem;
+    background     : linear-gradient(135deg, #faf5ff, #f0f4ff);
+    border-radius  : 16px;
+    margin-bottom  : 1.25rem;
+
+    .price-normal, .price-convention {
+        display       : flex;
+        flex-direction: column;
+        align-items   : center;
+        gap           : 0.2rem;
+
+        .price-label {
+            font-size  : 0.72rem;
+            color      : #94a3b8;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .price-value {
+            font-size  : 1.4rem;
+            font-weight: 800;
+
+            &.struck {
+                text-decoration: line-through;
+                color           : #94a3b8;
+                font-size       : 1.1rem;
+            }
+
+            &.highlight { color: #6366f1; }
+        }
+    }
+
+    .price-divider {
+        .arrow-icon {
+            color    : #cbd5e1;
+            font-size: 20px;
+            width    : 20px;
+            height   : 20px;
+        }
+    }
+}
+
+// ── Alerte Intelligence Artificielle ─────────────────────────
+.ia-alert {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: linear-gradient(to right, #fff1f2, #ffffff);
+    border: 1px solid #fecdd3;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(225, 29, 72, 0.05);
+
+    .ia-alert-decor {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 4px;
+        background: linear-gradient(to bottom, #f43f5e, #fb923c);
+    }
+
+    .ia-alert-icon {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: #ffe4e6;
+        color: #e11d48;
+
+        mat-icon {
+            width: 20px;
+            height: 20px;
+        }
+    }
+
+    .ia-alert-content {
+        flex: 1;
+
+        .ia-alert-title {
+            margin: 0 0 0.25rem 0;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #be123c;
+            letter-spacing: 0.02em;
+        }
+
+        .ia-alert-text {
+            margin: 0;
+            font-size: 0.85rem;
+            color: #4c0519;
+            line-height: 1.5;
+
+            strong {
+                font-weight: 800;
+                color: #e11d48;
+                font-size: 0.9rem;
+            }
+        }
+    }
+}
+
+// ── Séparateur ─────────────────────────────────────────────
+.section-divider {
+    display        : flex;
+    align-items    : center;
+    gap            : 0.75rem;
+    margin-bottom  : 1rem;
+    color          : #94a3b8;
+    font-size      : 0.78rem;
+    font-weight    : 600;
+    text-transform : uppercase;
+    letter-spacing : 0.08em;
+
+    &::before, &::after {
+        content   : '';
+        flex      : 1;
+        height    : 1px;
+        background: #e2e8f0;
+    }
+}
+
+// ── Sélecteur quantité ─────────────────────────────────────
+.reservation-form {
+    .quantity-selector {
+        display        : flex;
+        align-items    : center;
+        justify-content: space-between;
+        margin-bottom  : 1rem;
+
+        .quantity-label {
+            font-size  : 0.9rem;
+            font-weight: 600;
+            color      : #334155;
+        }
+
+        .quantity-controls {
+            display    : flex;
+            align-items: center;
+            gap        : 0.75rem;
+            background : #f8fafc;
+            border     : 1.5px solid #e2e8f0;
+            border-radius: 12px;
+            padding    : 0.25rem;
+
+            .qty-btn {
+                width     : 36px;
+                height    : 36px;
+                background: white !important;
+                box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+                border-radius: 8px !important;
+
+                &:hover:not([disabled]) {
+                    background: #6366f1 !important;
+                    color     : white !important;
+                }
+            }
+
+            .qty-value {
+                font-size  : 1.2rem;
+                font-weight: 800;
+                color      : #1e293b;
+                min-width  : 32px;
+                text-align : center;
+            }
+        }
+    }
+}
+
+// ── Total ──────────────────────────────────────────────────
+.total-recap {
+    background   : linear-gradient(135deg, #6366f1, #8b5cf6);
+    border-radius: 14px;
+    padding      : 1rem 1.25rem;
+    color        : white;
+
+    .total-row {
+        display        : flex;
+        justify-content: space-between;
+        align-items    : center;
+        font-size      : 0.9rem;
+
+        .total-value {
+            font-size  : 1.4rem;
+            font-weight: 800;
+        }
+    }
+}
+
+// ── Actions ────────────────────────────────────────────────
+.dialog-actions {
+    padding      : 1rem 1.5rem !important;
+    border-top   : 1px solid #f1f5f9;
+    display      : flex !important;
+    gap          : 0.75rem !important;
+    justify-content: flex-end !important;
+
+    .btn-cancel {
+        color: #64748b;
+        &:hover { background: #f8fafc; }
+    }
+
+    .btn-confirm {
+        background   : #6366f1 !important;
+        color        : white !important;
+        border-radius: 12px !important;
+        padding      : 0 1.5rem !important;
+        font-weight  : 600 !important;
+        height       : 44px !important;
+        display      : flex !important;
+        align-items  : center !important;
+        gap          : 0.4rem !important;
+        transition   : all 0.2s ease !important;
+
+        &:hover:not([disabled]) {
+            background: #4f46e5 !important;
+            box-shadow: 0 4px 16px rgba(99,102,241,0.4) !important;
+        }
+
+    }
+
+    .btn-confirm-final {
+        background   : linear-gradient(135deg, #059669, #10b981) !important;
+
+        &:hover:not([disabled]) {
+            background: #047857 !important;
+            box-shadow: 0 4px 16px rgba(5, 150, 105, 0.4) !important;
+        }
+    }
+}
+
+// ── Panneau de confirmation ────────────────────────────────────────
+.confirmation-panel {
+    margin-top   : 1.25rem;
+    border-radius: 16px;
+    overflow     : hidden;
+    border       : 1.5px solid #e2e8f0;
+    animation    : slideInUp 0.25s ease;
+
+    .recap-header {
+        display        : flex;
+        align-items    : center;
+        gap            : 0.6rem;
+        padding        : 0.85rem 1.25rem;
+        background     : linear-gradient(135deg, #6366f1, #8b5cf6);
+        color          : white;
+        font-size      : 0.88rem;
+        font-weight    : 700;
+        letter-spacing : 0.03em;
+
+        .recap-icon {
+            font-size: 20px;
+            width    : 20px;
+            height   : 20px;
+        }
+    }
+
+    .recap-list {
+        background: #f8fafc;
+
+        .recap-row {
+            display        : flex;
+            justify-content: space-between;
+            align-items    : center;
+            padding        : 0.7rem 1.25rem;
+            font-size      : 0.875rem;
+            border-bottom  : 1px solid #f1f5f9;
+
+            .recap-key {
+                color      : #64748b;
+                font-weight: 500;
+            }
+
+            .recap-val {
+                color      : #1e293b;
+                font-weight: 600;
+                text-align : right;
+            }
+
+            &.total {
+                background: linear-gradient(135deg, #faf5ff, #f0f4ff);
+                border-bottom: none;
+
+                .recap-key {
+                    font-size  : 0.9rem;
+                    font-weight: 700;
+                    color      : #4f46e5;
+                }
+                .recap-val {
+                    font-size  : 1.2rem;
+                    font-weight: 800;
+                    color      : #4f46e5;
+                }
+            }
+        }
+    }
+
+    .recap-warning {
+        display     : flex;
+        align-items : flex-start;
+        gap         : 0.5rem;
+        padding     : 0.85rem 1.25rem;
+        margin      : 0;
+        font-size   : 0.78rem;
+        color       : #475569;
+        background  : white;
+        line-height : 1.5;
+
+        mat-icon {
+            font-size   : 16px;
+            width       : 16px;
+            height      : 16px;
+            color       : #6366f1;
+            flex-shrink : 0;
+            margin-top  : 1px;
+        }
+    }
+}
+
+@keyframes slideInUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-urgency {
+    0% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.7); }
+    70% { box-shadow: 0 0 0 8px rgba(249, 115, 22, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); }
+}
+
