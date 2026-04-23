@@ -40,14 +40,15 @@ import { LayoutModule } from './layout/layout.module';
 import { AppComponent } from './app.component';
 import { appRoutes } from './app-routing.module';
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
-
 const routerConfig: ExtraOptions = {
     preloadingStrategy: PreloadAllModules,
     scrollPositionRestoration: 'enabled'
 };
 
 @NgModule({
-    declarations: [AppComponent],
+    declarations: [AppComponent,
+        
+    ],
     imports: [
         BrowserModule,
         BrowserAnimationsModule,

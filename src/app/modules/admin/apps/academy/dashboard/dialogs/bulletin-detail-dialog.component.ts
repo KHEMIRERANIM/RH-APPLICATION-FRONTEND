@@ -1,6 +1,7 @@
 import { Component, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { BulletinSalaire } from '../../academy.types';
+import { AcademyService } from '../../academy.service'; // Ajout de l'import
 
 @Component({
     selector: 'bulletin-detail-dialog',
@@ -16,7 +17,7 @@ import { BulletinSalaire } from '../../academy.types';
             <div class="grid grid-cols-2 gap-4 mb-6">
                 <div class="p-3 bg-gray-100 dark:bg-gray-800 rounded">
                     <div class="text-sm text-secondary">Employé</div>
-                    <div class="font-medium">{{bulletin.employeId}}</div>
+                    <div class="font-medium">{{employeNom}}</div>  <!-- Modification ici -->
                 </div>
                 <div class="p-3 bg-gray-100 dark:bg-gray-800 rounded">
                     <div class="text-sm text-secondary">Période</div>
@@ -25,6 +26,7 @@ import { BulletinSalaire } from '../../academy.types';
             </div>
 
             <table class="w-full mb-6">
+                <!-- Le reste du tableau reste identique -->
                 <tr class="border-b">
                     <td class="py-2">Salaire Brut</td>
                     <td class="py-2 text-right">{{bulletin.salaireBrut | number:'1.2-2'}} TND</td>
@@ -69,11 +71,16 @@ import { BulletinSalaire } from '../../academy.types';
 })
 export class BulletinDetailDialogComponent {
     moisList = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+    employeNom: string = ''; // Nouvelle propriété
 
     constructor(
         public dialogRef: MatDialogRef<BulletinDetailDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) public bulletin: BulletinSalaire
-    ) {}
+        @Inject(MAT_DIALOG_DATA) public bulletin: BulletinSalaire,
+        private academyService: AcademyService // Injection du service
+    ) {
+        // Récupération du nom de l'employé
+        this.employeNom = this.academyService.getEmployeNom(bulletin.employeId);
+    }
 
     getMoisLabel(mois: number): string {
         return this.moisList[mois - 1] || `${mois}`;

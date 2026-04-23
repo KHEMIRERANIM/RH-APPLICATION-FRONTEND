@@ -1,0 +1,47 @@
+// Styles pour les onglets modernes
+.modern-tabs {
+    ::ng-deep .mat-tab-header {
+        background: transparent;
+        border-bottom: none;
+    }
+    
+    ::ng-deep .mat-tab-label {
+        border-radius: 12px;
+        margin: 0 4px;
+        transition: all 0.2s;
+        
+        &:hover {
+            background: rgba(0,0,0,0.05);
+        }
+        
+        &.mat-tab-label-active {
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+    }
+}
+
+// Animation pour les cartes
+.group:hover .group-hover\:opacity-100 {
+    opacity: 1;
+}
+
+// Scrollbar personnalisée
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+    
+    &:hover {
+        background: #a1a1a1;
+    }
+}

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, forkJoin, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
+
 import { 
     DemandeConge, 
     DemandeCongeRequest, 
@@ -12,6 +13,8 @@ import {
     User,
     AlerteTendance,
     AdminStats,
+    PredictionResponse,
+    RecommandationEmployeResponse,
     Role
 } from './academy.types';
 
@@ -92,18 +95,18 @@ export class AcademyService
     }
 
     validerDemande(id: string, validation: ValidationCongeRequest): Observable<DemandeConge> {
-    return this._httpClient.patch<DemandeConge>(`${this.apiUrl}/conges/${id}/valider`, validation).pipe(
-        map(demande => {
-            console.log('Validation réussie:', demande);
-            this.refreshDemandes();
-            return demande;
-        }),
-        catchError(error => {
-            console.error('Erreur validation:', error);
-            throw error;
-        })
-    );
-}
+        return this._httpClient.patch<DemandeConge>(`${this.apiUrl}/conges/${id}/valider`, validation).pipe(
+            map(demande => {
+                console.log('Validation réussie:', demande);
+                this.refreshDemandes();
+                return demande;
+            }),
+            catchError(error => {
+                console.error('Erreur validation:', error);
+                throw error;
+            })
+        );
+    }
 
     detecterTendances(managerId?: string): Observable<{alertes: AlerteTendance[]}> {
         const url = managerId 
@@ -318,13 +321,10 @@ export class AcademyService
 
     /**
      * Supprimer définitivement une demande de congé
-     * Utilise le endpoint /supprimer/{id} pour une suppression totale
      */
     supprimerDemande(id: string, employeId: string): Observable<void> {
-        // ✅ URL correcte pour suppression définitive
         return this._httpClient.delete<void>(`${this.apiUrl}/conges/supprimer/${id}`).pipe(
             map(() => {
-                // Rafraîchir la liste
                 this.getMesDemandes(employeId).subscribe();
                 return;
             }),
@@ -352,20 +352,47 @@ export class AcademyService
     }
 
     telechargerPDF(id: string): Observable<Blob> {
-    return this._httpClient.get(`${this.apiUrl}/salaires/${id}/pdf`, {
-        responseType: 'blob'
-    });
-}
+        return this._httpClient.get(`${this.apiUrl}/salaires/${id}/pdf`, {
+            responseType: 'blob'
+        });
+    }
 
-/**
- * Soumettre une nouvelle demande de congé avec fichier
- */
-soumettreDemandeWithFile(formData: FormData): Observable<DemandeConge> {
-    return this._httpClient.post<DemandeConge>(`${this.apiUrl}/conges/with-file`, formData).pipe(
-        catchError(error => {
-            console.error('Erreur soumission demande avec fichier:', error);
-            throw error;
-        })
-    );
-}
+    /**
+     * Soumettre une nouvelle demande de congé avec fichier
+     */
+    soumettreDemandeWithFile(formData: FormData): Observable<DemandeConge> {
+        return this._httpClient.post<DemandeConge>(`${this.apiUrl}/conges/with-file`, formData).pipe(
+            catchError(error => {
+                console.error('Erreur soumission demande avec fichier:', error);
+                throw error;
+            })
+        );
+    }
+
+    // ==================== IA PREDICTION ====================
+
+    /**
+     * Prédiction de charge pour l'admin
+     */
+    getPredictionCharge(mois?: number, annee?: number): Observable<PredictionResponse> {
+        let url = `${this.apiUrl}/predictions/admin/charge`;
+        if (mois && annee) {
+            url += `?mois=${mois}&annee=${annee}`;
+        }
+        return this._httpClient.get<PredictionResponse>(url);
+    }
+
+    /**
+     * Recommandations personnalisées pour l'employé
+     */
+    getRecommandationsEmploye(employeId: string): Observable<RecommandationEmployeResponse[]> {
+        return this._httpClient.get<RecommandationEmployeResponse[]>(`${this.apiUrl}/predictions/employee/${employeId}/recommandations`);
+    }
+
+    /**
+     * Générer des données synthétiques pour l'IA
+     */
+    genererDonneesSynthetiques(): Observable<string> {
+        return this._httpClient.post<string>(`${this.apiUrl}/admin/generer-donnees`, {});
+    }
 }

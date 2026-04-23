@@ -31,6 +31,8 @@ import { NewDemandeDialogComponent } from './employee/dialogs/new-demande-dialog
 import { AcademyRedirectComponent } from './redirect.component';
 import { EditDemandeDialogComponent } from './employee/dialogs/edit-demande-dialog.component';
 import { ConfirmDeleteDialogComponent } from './employee/dialogs/confirm-delete-dialog.component';
+import { ChatbotComponent } from './chatbot/chatbot.component';
+
 @NgModule({
     declarations: [
         AcademyComponent,
@@ -39,6 +41,7 @@ import { ConfirmDeleteDialogComponent } from './employee/dialogs/confirm-delete-
         ValidateCongeDialogComponent,
         BulletinDetailDialogComponent,
         SoldeCongeDialogComponent,
+        ChatbotComponent,
         ConfirmDialogComponent,
         EditDemandeDialogComponent,
         EditBulletinDialogComponent,

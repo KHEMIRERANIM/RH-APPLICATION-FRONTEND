@@ -136,3 +136,30 @@ export enum UserStatus {
     ACTIF = 'ACTIF',
     INACTIF = 'INACTIF'
 }
+
+// ==================== IA PREDICTION TYPES ====================
+
+export interface PredictionResponse {
+    pourcentage: number;
+    risque: string;
+    message: string;
+    recommandation: string;
+    mois: number;
+    annee: number;
+    facteurs: FacteurPrediction[];
+    totalDemandesHistorique: number;
+}
+
+export interface FacteurPrediction {
+    nom: string;
+    impact: number;
+    description: string;
+}
+
+export interface RecommandationEmployeResponse {
+    type: string;
+    icon: string;
+    titre: string;
+    description: string;
+    dateSuggestion?: string;
+}

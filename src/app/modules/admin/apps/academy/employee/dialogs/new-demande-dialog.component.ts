@@ -12,6 +12,15 @@ import { AcademyService } from '../../academy.service';
                 Nouvelle demande de congé
             </h2>
 
+            <!-- Bannière suggestion IA (si date suggérée) -->
+            <div *ngIf="data.dateSuggestion" class="mb-4 p-3 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-lg text-white text-sm">
+                <div class="flex items-center gap-2">
+                    <mat-icon>auto_awesome</mat-icon>
+                    <span class="font-semibold">IA Recommendation</span>
+                </div>
+                <p class="mt-1">La date de début a été pré-remplie selon notre recommandation (période calme détectée).</p>
+            </div>
+
             <form [formGroup]="demandeForm" class="flex flex-col gap-4">
                 <mat-form-field appearance="outline">
                     <mat-label>Type de congé</mat-label>
@@ -94,11 +103,12 @@ export class NewDemandeDialogComponent {
         public dialogRef: MatDialogRef<NewDemandeDialogComponent>,
         private fb: FormBuilder,
         private academyService: AcademyService,
-        @Inject(MAT_DIALOG_DATA) public data: { employeId: string; managerId: string }
+        @Inject(MAT_DIALOG_DATA) public data: { employeId: string; managerId: string; dateSuggestion?: string }
     ) {
         this.demandeForm = this.fb.group({
             type: ['CONGE_ANNUEL', Validators.required],
-            dateDebut: ['', Validators.required],
+            // ✅ MODIFICATION ICI : Pré-remplit la date de début si une suggestion IA est fournie
+            dateDebut: [data.dateSuggestion ? new Date(data.dateSuggestion) : '', Validators.required],
             dateFin: ['', Validators.required],
             motif: ['']
         });

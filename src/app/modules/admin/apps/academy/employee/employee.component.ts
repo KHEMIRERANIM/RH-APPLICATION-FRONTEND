@@ -8,7 +8,7 @@ import { NewDemandeDialogComponent } from './dialogs/new-demande-dialog.componen
 import { BulletinDetailDialogComponent } from '../dashboard/dialogs/bulletin-detail-dialog.component';
 import { EditDemandeDialogComponent } from './dialogs/edit-demande-dialog.component';
 import { ConfirmDeleteDialogComponent } from './dialogs/confirm-delete-dialog.component';
-
+import { RecommandationEmployeResponse } from '../academy.types';
 @Component({
     selector: 'employee',
     templateUrl: './employee.component.html',
@@ -16,7 +16,8 @@ import { ConfirmDeleteDialogComponent } from './dialogs/confirm-delete-dialog.co
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EmployeeComponent implements OnInit {
-    
+    recommandations: RecommandationEmployeResponse[] = [];
+
     mesDemandes: DemandeConge[] = [];
     mesBulletins: BulletinSalaire[] = [];
     solde: SoldeConge | null = null;
@@ -40,6 +41,7 @@ export class EmployeeComponent implements OnInit {
         console.log('=== EmployeeComponent INIT ===');
         this.loadUserFromStorage();
         this.loadData();
+        this.loadRecommandations();
 
         // S'abonner aux notifications WebSocket pour les validations
         this.notificationService.getNotifications().subscribe((notification: any) => {
@@ -241,6 +243,35 @@ export class EmployeeComponent implements OnInit {
             window.URL.revokeObjectURL(url);
         },
         error: (err) => console.error('Erreur téléchargement:', err)
+    });
+}
+
+loadRecommandations(): void {
+    if (!this.employeId) return;
+    
+    this.academyService.getRecommandationsEmploye(this.employeId).subscribe({
+        next: (recommandations) => {
+            this.recommandations = recommandations;
+            this.cdr.markForCheck();
+        },
+        error: (err) => {
+            console.error('Erreur chargement recommandations:', err);
+        }
+    });
+}
+
+utiliserSuggestion(dateSuggestion: string): void {
+    const dialogRef = this.dialog.open(NewDemandeDialogComponent, {
+        width: '550px',
+        data: { 
+            employeId: this.employeId, 
+            managerId: this.managerId,
+            dateSuggestion: dateSuggestion
+        }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+        if (result) this.loadData();
     });
 }
 }

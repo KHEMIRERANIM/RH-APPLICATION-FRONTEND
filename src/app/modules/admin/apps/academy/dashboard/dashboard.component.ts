@@ -5,6 +5,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { AcademyService } from '../academy.service';
 import { NotificationService } from 'src/app/services/notification.service';
+import { PredictionResponse, FacteurPrediction, RecommandationEmployeResponse } from '../academy.types';
 import { 
     DemandeConge, 
     BulletinSalaire, 
@@ -37,7 +38,8 @@ export class AcademyDashboardComponent implements OnInit, OnDestroy {
     employes: User[] = [];
     alertes: AlerteTendance[] = [];
     stats: AdminStats | null = null;
-    
+    prediction: PredictionResponse | null = null;
+
     filtreStatut: string = 'all';
     searchQuery: string = '';
     demandesEnAttenteCount: number = 0;
@@ -54,14 +56,13 @@ export class AcademyDashboardComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.loadData();
-        
-        // Filtrer pour n'afficher que EN_ATTENTE et APPROUVE
+        this.loadPrediction();
+
+        // ✅ CORRECTION : Garder TOUTES les demandes (y compris REFUSE)
         this._academyService.demandes$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe(demandes => {
-                this.demandes = (demandes || []).filter(d => 
-                    d.statut === 'EN_ATTENTE' || d.statut === 'APPROUVE'
-                );
+                this.demandes = demandes || [];
                 this.demandesEnAttenteCount = this.demandes.filter(d => d.statut === 'EN_ATTENTE').length;
                 this.applyFilters();
                 this._changeDetectorRef.markForCheck();
@@ -98,7 +99,7 @@ export class AcademyDashboardComponent implements OnInit, OnDestroy {
                     positionClass: 'toast-top-right',
                     closeButton: true
                 });
-                this.loadData(); // Rafraîchir la liste
+                this.loadData();
             }
         });
     }
@@ -176,25 +177,23 @@ export class AcademyDashboardComponent implements OnInit, OnDestroy {
     }
     
     openValidationDialog(demande: DemandeConge, decision: 'APPROUVE' | 'REFUSE'): void {
-    const dialogRef = this._dialog.open(ValidateCongeDialogComponent, {
-        width: '500px',
-        data: { demande, decision }
-    });
+        const dialogRef = this._dialog.open(ValidateCongeDialogComponent, {
+            width: '500px',
+            data: { demande, decision }
+        });
 
-    dialogRef.afterClosed().subscribe(result => {
-        console.log('Dialogue fermé, résultat:', result);
-        if (result === true) {
-            // Recharger les données seulement si validation réussie
-            this.loadData();
-            this.loadAlertes();
-            // Afficher une notification de succès
-            const message = decision === 'APPROUVE' 
-                ? '✅ Demande approuvée avec succès' 
-                : '❌ Demande refusée';
-            this.toastr.success(message, 'Succès');
-        }
-    });
-}
+        dialogRef.afterClosed().subscribe(result => {
+            console.log('Dialogue fermé, résultat:', result);
+            if (result === true) {
+                this.loadData();
+                this.loadAlertes();
+                const message = decision === 'APPROUVE' 
+                    ? '✅ Demande approuvée avec succès' 
+                    : '❌ Demande refusée';
+                this.toastr.success(message, 'Succès');
+            }
+        });
+    }
     
     openCreateBulletinDialog(): void {
         const dialogRef = this._dialog.open(CreateBulletinDialogComponent, {
@@ -323,25 +322,59 @@ export class AcademyDashboardComponent implements OnInit, OnDestroy {
     }
 
     telechargerPDF(id: string): void {
-    console.log('📄 Téléchargement PDF pour bulletin:', id);
-    this._academyService.telechargerPDF(id).subscribe({
-        next: (blob: Blob) => {
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `bulletin_${id}.pdf`;
-            a.click();
-            window.URL.revokeObjectURL(url);
-        },
-        error: (err) => {
-            console.error('Erreur téléchargement PDF:', err);
-            alert('Erreur lors du téléchargement du PDF');
-        }
-    });
-}
+        console.log('📄 Téléchargement PDF pour bulletin:', id);
+        this._academyService.telechargerPDF(id).subscribe({
+            next: (blob: Blob) => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `bulletin_${id}.pdf`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+            },
+            error: (err) => {
+                console.error('Erreur téléchargement PDF:', err);
+                alert('Erreur lors du téléchargement du PDF');
+            }
+        });
+    }
 
-getDocumentUrl(fileName: string): string {
-    if (!fileName) return '';
-    return `http://localhost:8081/api/uploads/${fileName}`;
-}
+    getDocumentUrl(fileName: string): string {
+        if (!fileName) return '';
+        return `http://localhost:8081/api/uploads/${fileName}`;
+    }
+
+    loadPrediction(): void {
+        this._academyService.getPredictionCharge().subscribe({
+            next: (prediction) => {
+                this.prediction = prediction;
+                this._changeDetectorRef.markForCheck();
+            },
+            error: (err) => {
+                console.error('Erreur chargement prédiction:', err);
+            }
+        });
+    }
+
+    getRiskColor(percentage: number): string {
+        if (percentage >= 80) return 'linear-gradient(90deg, #ef4444, #dc2626)';
+        if (percentage >= 60) return 'linear-gradient(90deg, #f97316, #ea580c)';
+        if (percentage >= 40) return 'linear-gradient(90deg, #eab308, #ca8a04)';
+        return 'linear-gradient(90deg, #22c55e, #16a34a)';
+    }
+
+    genererDonneesSynthetiques(): void {
+        this._academyService.genererDonneesSynthetiques().subscribe({
+            next: (result) => {
+                console.log('Résultat génération:', result);
+                alert(result);
+                this.loadPrediction();
+                this.loadData();
+            },
+            error: (err) => {
+                console.error('Erreur:', err);
+                alert('Erreur lors de la génération des données');
+            }
+        });
+    }
 }
