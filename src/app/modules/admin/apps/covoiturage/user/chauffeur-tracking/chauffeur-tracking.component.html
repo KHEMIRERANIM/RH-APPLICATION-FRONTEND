@@ -1,0 +1,116 @@
+<div class="w-full h-full p-3 sm:p-6">
+  <div class="bg-white rounded-2xl shadow-lg p-4 sm:p-6 w-full h-full flex flex-col gap-4">
+    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+      <div>
+        <div class="text-4xl sm:text-5xl mb-1">🚗</div>
+        <h2 class="text-xl sm:text-2xl font-bold text-[#0F3460]">Interface conducteur</h2>
+      </div>
+
+      <div class="bg-gray-50 border border-gray-100 rounded-xl p-3">
+        <div class="flex items-center gap-2">
+          <span class="w-3 h-3 rounded-full"
+            [ngClass]="connecte ? 'bg-green-500 animate-pulse' : (positionActuelle ? 'bg-amber-500' : 'bg-red-400')"></span>
+          <span class="text-sm font-medium text-gray-700">
+            {{ connecte ? 'Serveur connecté' : (positionActuelle ? 'GPS prêt (serveur non joignable)' : 'Connexion serveur…') }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
+      <div class="lg:col-span-1 bg-gray-50 border border-gray-100 rounded-xl p-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Trajet assigné</label>
+        <div class="bg-white border border-gray-200 rounded-lg p-3 shadow-sm flex items-center justify-between min-h-[64px]">
+          <div *ngIf="isLoading" class="flex items-center gap-2 text-gray-400 italic">
+            <span class="w-4 h-4 border-2 border-[#1D9E75] border-t-transparent rounded-full animate-spin"></span>
+            Chargement de l'itinéraire...
+          </div>
+          
+          <div *ngIf="!isLoading && selectedTrajet" class="flex flex-col">
+            <span class="text-xs text-gray-400 uppercase font-bold tracking-wider">Itinéraire assigné</span>
+            <div class="flex items-center gap-2 mt-1">
+              <span class="font-bold text-[#0F3460]">{{ selectedTrajet.adresseDepart.split(',')[0] }}</span>
+              <span class="text-gray-400">→</span>
+              <span class="font-bold text-[#1D9E75]">{{ selectedTrajet.adresseArrivee.split(',')[0] }}</span>
+            </div>
+          </div>
+
+          <div *ngIf="!isLoading && !selectedTrajet" class="text-red-400 text-sm">
+            Aucun trajet assigné trouvé.
+          </div>
+
+          <div *ngIf="!isLoading" class="bg-[#1D9E75]/10 p-2 rounded-lg">
+            <span class="text-xl">📍</span>
+          </div>
+        </div>
+
+        <div *ngIf="positionActuelle" class="mt-3 text-sm text-gray-600">
+          <div class="font-semibold text-[#0F3460]">{{ statut }}</div>
+          <div class="mt-1">📍 {{ positionActuelle }}</div>
+          <div *ngIf="nbPositionsEnvoyees > 0" class="mt-1">➡️ {{ nbPositionsEnvoyees }} positions envoyées</div>
+          <div class="mt-2 grid grid-cols-2 gap-2 text-xs">
+            <div class="bg-white/70 border border-gray-100 rounded-lg px-2 py-1">
+              <div class="text-gray-500">Temps restant</div>
+              <div class="font-semibold text-[#0F3460]">{{ tempsRestant }}</div>
+            </div>
+            <div class="bg-white/70 border border-gray-100 rounded-lg px-2 py-1">
+              <div class="text-gray-500">Distance</div>
+              <div class="font-semibold text-[#1D9E75]">{{ distance }}</div>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="!positionActuelle" class="mt-3 text-sm text-gray-600">
+          {{ statut }}
+        </div>
+
+        <div *ngIf="!connecte && !enRoute" class="mt-3 text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg p-3">
+          Sans connexion serveur, les passagers ne verront pas le mouvement en temps réel. Le GPS reste utilisable pour tester la carte.
+        </div>
+      </div>
+
+      <div class="lg:col-span-2">
+        <div #chauffeurMap
+          class="w-full rounded-xl overflow-hidden border border-gray-200 shadow-inner"
+          style="height: min(55vh, 620px); min-height: 320px;">
+        </div>
+      </div>
+    </div>
+
+    <div class="flex flex-col sm:flex-row gap-3">
+      <button type="button" *ngIf="!enRoute" (click)="afficherMaPositionActuelle(true)"
+        class="flex-1 py-3 rounded-xl text-base font-bold bg-white text-[#0F3460] border-2 border-[#0F3460] hover:bg-gray-50 transition shadow-sm">
+        📍 Voir / actualiser ma position
+      </button>
+
+      <button type="button" *ngIf="!enRoute" (click)="demarrerTrajet()"
+        class="flex-1 py-3 rounded-xl text-base font-bold bg-[#1D9E75] text-white hover:bg-[#168567] transition shadow-sm">
+        🚀 Démarrer trajet (GPS réel)
+      </button>
+    </div>
+
+    <div class="flex flex-col sm:flex-row gap-3">
+      <button type="button" *ngIf="!enRoute" (click)="demarrerSimulation()"
+        class="flex-1 py-2.5 rounded-xl text-base font-bold bg-white text-[#1D9E75] border-2 border-[#1D9E75] hover:bg-green-50 transition shadow-sm">
+        🎮 Démo (mouvement simulé)
+      </button>
+
+      <button *ngIf="enRoute" (click)="arreterTrajet()"
+        class="flex-1 py-3 bg-[#E94560] text-white rounded-xl text-lg font-bold hover:bg-[#d13850] transition shadow-md">
+        ⛔ Terminer le trajet
+      </button>
+    </div>
+
+    <div class="bg-gray-50 rounded-xl border border-gray-100 p-4">
+      <p class="text-sm font-semibold text-[#0F3460] mb-2">Option simple de test : Google Maps partage de position</p>
+      <div class="text-xs text-gray-600 space-y-1">
+        <div>1. Ouvrez Google Maps sur votre téléphone.</div>
+        <div>2. Partagez votre position avec le passager (par email) dans Google Maps.</div>
+        <div>3. Le passager accepte la demande et voit la voiture bouger.</div>
+      </div>
+      <button type="button" *ngIf="!enRoute" (click)="ouvrirGoogleMapsSurMaPosition()"
+        class="mt-3 w-full py-2.5 rounded-xl bg-[#0F3460] text-white font-semibold hover:bg-[#0a2442] transition disabled:opacity-50">
+        🌍 Ouvrir Google Maps sur ma position
+      </button>
+    </div>
+  </div>
+</div>

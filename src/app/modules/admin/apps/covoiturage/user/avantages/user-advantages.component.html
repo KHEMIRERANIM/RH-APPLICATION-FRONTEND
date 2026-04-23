@@ -1,0 +1,165 @@
+<div class="flex flex-col flex-auto min-w-0 bg-[#F8FAFC]">
+  <!-- Header / Navigation Placeholder if needed -->
+  <div class="flex flex-col shadow-sm bg-white border-b border-gray-200">
+    <div class="flex flex-col flex-0 p-6 sm:p-10 space-y-1">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-3xl font-black text-[#1e293b] tracking-tight">Mes Récompenses</h2>
+          <p class="text-slate-500 font-medium">Suivez votre progression et débloquez des avantages exclusifs.</p>
+        </div>
+        <button [routerLink]="['/apps/covoiturage/user/dashboard']"
+                class="inline-flex items-center px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors border border-slate-200">
+          <mat-icon svgIcon="feather:arrow-left" class="icon-size-5 mr-2"></mat-icon>
+          Retour aux transports
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="flex-auto p-6 sm:p-10">
+    <div class="max-w-3xl mx-auto space-y-10">
+      
+      <!-- 1. Profil de l'employé -->
+      <div class="bg-white rounded-[2.5rem] p-8 shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-slate-100 relative overflow-hidden group">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-amber-50 rounded-bl-[5rem] -mr-10 -mt-10 transition-transform group-hover:scale-110 duration-700"></div>
+        
+        <div class="relative flex flex-col sm:flex-row items-center gap-8">
+          <!-- Avatar Icon with Level Badge -->
+          <div class="relative">
+            <div class="w-32 h-32 bg-slate-100 rounded-3xl flex items-center justify-center text-5xl shadow-inner border-4 border-white">
+              👤
+            </div>
+            <div class="absolute -bottom-3 -right-3 w-12 h-12 bg-amber-400 rounded-2xl flex items-center justify-center shadow-lg border-4 border-white animate-bounce-subtle">
+              <mat-icon svgIcon="feather:award" class="text-white icon-size-6"></mat-icon>
+            </div>
+          </div>
+
+          <!-- Profile Details -->
+          <div class="flex-1 text-center sm:text-left space-y-4">
+            <div>
+              <h1 class="text-4xl font-black text-slate-800 tracking-tight">Karim Mansour</h1>
+              <div class="flex flex-wrap justify-center sm:justify-start gap-2 mt-2">
+                <span class="inline-flex items-center px-4 py-1.5 rounded-full bg-emerald-50 text-emerald-600 text-sm font-bold border border-emerald-100">
+                  <mat-icon svgIcon="feather:shield" class="icon-size-4 mr-2"></mat-icon>
+                  🏅 Conducteur actif
+                </span>
+                <span class="inline-flex items-center px-4 py-1.5 rounded-full bg-amber-50 text-amber-600 text-sm font-bold border border-amber-100">
+                  <mat-icon svgIcon="feather:star" class="icon-size-4 mr-2"></mat-icon>
+                  ⭐ 850 points éco
+                </span>
+              </div>
+            </div>
+            
+            <div class="inline-block px-6 py-2 bg-slate-900 text-white rounded-2xl shadow-xl shadow-slate-200">
+               <span class="text-xs font-black uppercase tracking-[0.2em] opacity-70 block mb-0.5">Statut Actuel</span>
+               <div class="flex items-center gap-2">
+                 <span class="text-2xl font-black tracking-tighter">📊 NIVEAU OR</span>
+                 <div class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></div>
+               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Barre de progression -->
+      <div class="bg-white rounded-[2.5rem] p-10 shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-slate-100">
+        <div class="flex flex-col space-y-6">
+          <div class="flex items-end justify-between">
+            <div class="space-y-1">
+              <span class="text-sm font-black text-slate-400 uppercase tracking-widest">Votre Progression</span>
+              <h3 class="text-2xl font-black text-slate-800">Niveau OR <span class="text-amber-500 ml-2">850/1000</span></h3>
+            </div>
+            <div class="text-right">
+              <span class="text-5xl font-black text-slate-900 tracking-tighter">85%</span>
+            </div>
+          </div>
+
+          <!-- Custom Premium Progress Bar -->
+          <div class="relative h-6 w-full bg-slate-100 rounded-3xl p-1.5 shadow-inner overflow-hidden">
+            <div class="h-full bg-gradient-to-r from-amber-300 via-amber-500 to-amber-600 rounded-2xl shadow-[0_0_20px_rgba(245,158,11,0.3)] transition-all duration-1000 ease-out relative group"
+                 [style.width.%]="85">
+              <div class="absolute inset-0 bg-white/20 skew-x-[-20deg] animate-shimmer"></div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+            <div class="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-xl">🚀</div>
+            <p class="text-slate-600 font-bold">
+              Plus que <span class="text-slate-900 font-black">150 points</span> pour atteindre <span class="text-indigo-600 font-black uppercase tracking-wider">PLATINE</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Avantages débloqués -->
+      <div class="bg-slate-900 rounded-[2.5rem] p-10 shadow-2xl relative overflow-hidden">
+        <!-- Decoration background -->
+        <div class="absolute -left-20 -bottom-20 w-64 h-64 bg-indigo-500/10 rounded-full blur-[100px]"></div>
+        <div class="absolute -right-20 -top-20 w-64 h-64 bg-emerald-500/10 rounded-full blur-[100px]"></div>
+
+        <div class="relative space-y-8">
+          <div class="flex items-center gap-4">
+            <div class="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center text-3xl backdrop-blur-sm border border-white/10 shadow-xl">
+              🎁
+            </div>
+            <h2 class="text-3xl font-black text-white tracking-tight uppercase tracking-widest">Vos Avantages</h2>
+          </div>
+
+          <div class="grid grid-cols-1 gap-4">
+            <!-- Avantage active 1 -->
+            <div class="flex items-center gap-5 p-6 bg-white/5 hover:bg-white/10 rounded-3xl border border-white/5 transition-all duration-300 group cursor-default">
+              <div class="w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.4)] group-hover:scale-110 transition-transform">
+                <mat-icon svgIcon="feather:check" class="text-white icon-size-6"></mat-icon>
+              </div>
+              <div class="flex-1">
+                <h4 class="text-lg font-black text-white">Badge OR</h4>
+                <p class="text-slate-400 font-medium">Visible par tous les membres du réseau.</p>
+              </div>
+            </div>
+
+            <!-- Avantage active 2 -->
+            <div class="flex items-center gap-5 p-6 bg-white/5 hover:bg-white/10 rounded-3xl border border-white/5 transition-all duration-300 group cursor-default">
+              <div class="w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.4)] group-hover:scale-110 transition-transform">
+                <mat-icon svgIcon="feather:check" class="text-white icon-size-6"></mat-icon>
+              </div>
+              <div class="flex-1">
+                <h4 class="text-lg font-black text-white">Priorité en liste d'attente</h4>
+                <p class="text-slate-400 font-medium">Accès prioritaire sur tous les trajets complets.</p>
+              </div>
+            </div>
+
+            <!-- Avantage locked -->
+            <div class="flex items-center gap-5 p-6 bg-white/[0.02] rounded-3xl border border-white/[0.05] grayscale opacity-60">
+              <div class="w-12 h-12 bg-slate-700 rounded-2xl flex items-center justify-center">
+                <mat-icon svgIcon="feather:lock" class="text-slate-400 icon-size-6"></mat-icon>
+              </div>
+              <div class="flex-1 text-slate-500">
+                <h4 class="text-lg font-bold">Réservation gratuite</h4>
+                <p class="text-xs font-black uppercase tracking-[0.1em] text-amber-500/80 mt-1">⏳ 1000 points requis</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<style>
+  @keyframes shimmer {
+    0% { transform: translateX(-100%) skewX(-20deg); }
+    100% { transform: translateX(200%) skewX(-20deg); }
+  }
+  .animate-shimmer {
+    animation: shimmer 2.5s infinite linear;
+  }
+  @keyframes bounce-subtle {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+  }
+  .animate-bounce-subtle {
+    animation: bounce-subtle 3s infinite ease-in-out;
+  }
+</style>

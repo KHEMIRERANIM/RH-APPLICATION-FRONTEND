@@ -3,13 +3,15 @@ import { AuthGuard } from 'app/core/auth/guards/auth.guard';
 import { NoAuthGuard } from 'app/core/auth/guards/noAuth.guard';
 import { LayoutComponent } from 'app/layout/layout.component';
 import { InitialDataResolver } from 'app/app.resolvers';
+import { PaymentPageComponent } from './modules/admin/apps/covoiturage/user/payment-page/payment-page.component';
 
 // Routes principales
 export const appRoutes: Route[] = [
-
     // Redirection par défaut
     { path: '', pathMatch: 'full', redirectTo: 'sign-in' },
     { path: 'signed-in-redirect', pathMatch: 'full', redirectTo: 'dashboards/project' },
+    { path: 'admin/team', loadChildren: () => import('./modules/admin/dashboards/project/team-admin/team-admin.module').then(m => m.TeamAdminModule) },
+
 
     // Routes pour invités (non authentifiés)
     {
@@ -36,7 +38,9 @@ export const appRoutes: Route[] = [
         data: { layout: 'empty' },
         children: [
             { path: 'sign-out', loadChildren: () => import('app/modules/auth/sign-out/sign-out.module').then(m => m.AuthSignOutModule) },
-            { path: 'unlock-session', loadChildren: () => import('app/modules/auth/unlock-session/unlock-session.module').then(m => m.AuthUnlockSessionModule) }
+            { path: 'unlock-session', loadChildren: () => import('app/modules/auth/unlock-session/unlock-session.module').then(m => m.AuthUnlockSessionModule) },
+            { path: 'paiement-checkout', component: PaymentPageComponent, title: 'Paiement Réservation' }
+
         ]
     },
 
@@ -82,7 +86,7 @@ export const appRoutes: Route[] = [
                     { path: 'restaurant', loadChildren: () => import('app/modules/admin/apps/restaurant/restaurant.module').then(m => m.RestaurantModule) },
                     { path: 'partnerships', loadChildren: () => import('app/modules/admin/apps/partnerships/partnerships.module').then(m => m.PartnershipsModule) },
                     { path: 'rse', loadChildren: () => import('app/modules/admin/apps/hr-apps/hr-apps.module').then(m => m.HrAppsModule) },
-                    { path: 'covoiturage', loadChildren: () => import('app/modules/admin/apps/hr-apps/hr-apps.module').then(m => m.HrAppsModule) },
+                    { path: 'covoiturage', loadChildren: () => import('app/modules/admin/apps/covoiturage/covoiturage.module').then(m => m.CovoiturageModule) },
                     { path: 'carriere', loadChildren: () => import('app/modules/admin/apps/hr-apps/hr-apps.module').then(m => m.HrAppsModule) },
                     { path: 'file-manager', loadChildren: () => import('app/modules/admin/apps/file-manager/file-manager.module').then(m => m.FileManagerModule) },
                     { path: 'help-center', loadChildren: () => import('app/modules/admin/apps/help-center/help-center.module').then(m => m.HelpCenterModule) },
@@ -92,6 +96,7 @@ export const appRoutes: Route[] = [
                     { path: 'tasks', loadChildren: () => import('app/modules/admin/apps/tasks/tasks.module').then(m => m.TasksModule) }
                 ]
             },
+
 
             // Pages
             {

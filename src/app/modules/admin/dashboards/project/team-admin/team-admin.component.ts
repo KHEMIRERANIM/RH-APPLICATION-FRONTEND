@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
+import { FuseConfirmationService } from '@fuse/services/confirmation';
 
 export interface UserItem {
     id: string;
@@ -70,7 +71,8 @@ export class TeamAdminComponent implements OnInit {
     
     constructor(
         private http: HttpClient,
-        private toastr: ToastrService
+        private toastr: ToastrService,
+        private _fuseConfirmationService: FuseConfirmationService
     ) {}
     
     ngOnInit(): void {
@@ -80,7 +82,7 @@ export class TeamAdminComponent implements OnInit {
     // ========== CHARGEMENT ==========
     
     loadUsers(): void {
-        this.http.get<UserItem[]>('http://localhost:8081/api/users')
+        this.http.get<UserItem[]>('http://10.252.246.174:8081/api/users')
             .subscribe({
                 next: (data) => {
                     this.originalData = data;
@@ -250,7 +252,7 @@ export class TeamAdminComponent implements OnInit {
             formData.append('file', this.selectedFile);
             formData.append('type', 'user_avatar');
             
-            this.http.post<{ url: string }>('http://localhost:8081/api/upload', formData)
+            this.http.post<{ url: string }>('http://10.252.246.174:8081/api/upload', formData)
                 .subscribe({
                     next: (response) => {
                         this.uploading = false;
@@ -279,7 +281,7 @@ export class TeamAdminComponent implements OnInit {
             const data = { ...this.userFormValue };
             
             if (this.isEditMode) {
-                this.http.put(`http://localhost:8081/api/users/${data.id}`, data)
+                this.http.put(`http://10.252.246.174:8081/api/users/${data.id}`, data)
                     .subscribe({
                         next: () => {
                             this.toastr.success('Membre modifié avec succès', 'Succès');
@@ -291,7 +293,7 @@ export class TeamAdminComponent implements OnInit {
                         }
                     });
             } else {
-                this.http.post('http://localhost:8081/api/users', data)
+                this.http.post('http://10.252.246.174:8081/api/users', data)
                     .subscribe({
                         next: () => {
                             this.toastr.success('Membre ajouté avec succès', 'Succès');
@@ -309,17 +311,26 @@ export class TeamAdminComponent implements OnInit {
     }
     
     deleteUser(u: UserItem): void {
-        if (confirm(`Supprimer ${u.prenom} ${u.nom} ?`)) {
-            this.http.delete(`http://localhost:8081/api/users/${u.id}`)
-                .subscribe({
-                    next: () => {
-                        this.toastr.success('Membre supprimé', 'Succès');
-                        this.loadUsers();
-                    },
-                    error: () => {
-                        this.toastr.error('Erreur lors de la suppression', 'Erreur');
-                    }
-                });
-        }
+        const dialogRef = this._fuseConfirmationService.open({
+            title: 'Supprimer membre',
+            message: `Êtes-vous sûr de vouloir supprimer ${u.prenom} ${u.nom} ?`,
+            icon: { show: true, name: 'heroicons_outline:trash', color: 'warn' },
+            actions: { confirm: { label: 'Supprimer', color: 'warn' } }
+        });
+
+        dialogRef.afterClosed().subscribe((result) => {
+            if (result === 'confirmed') {
+                this.http.delete(`http://10.252.246.174:8081/api/users/${u.id}`)
+                    .subscribe({
+                        next: () => {
+                            this.toastr.success('Membre supprimé', 'Succès');
+                            this.loadUsers();
+                        },
+                        error: () => {
+                            this.toastr.error('Erreur lors de la suppression', 'Erreur');
+                        }
+                    });
+            }
+        });
     }
 }

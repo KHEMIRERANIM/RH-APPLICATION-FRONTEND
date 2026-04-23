@@ -17,6 +17,7 @@ import { SharedModule } from 'app/shared/shared.module';
 import { ProjectComponent } from 'app/modules/admin/dashboards/project/project.component';
 import { projectRoutes } from 'app/modules/admin/dashboards/project/project.routing';
 import { MaterialModule } from 'app/material.module';
+import { FuseConfirmationModule } from '@fuse/services/confirmation';
 
 @NgModule({
     declarations: [
@@ -38,7 +39,8 @@ import { MaterialModule } from 'app/material.module';
         NgApexchartsModule,
         TranslocoModule,
         MaterialModule,
-        SharedModule
+        SharedModule,
+        FuseConfirmationModule
     ]
 })
 export class ProjectModule

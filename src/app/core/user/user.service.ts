@@ -52,7 +52,7 @@ export class UserService
             return this._httpClient.get<User>('api/common/user').pipe(tap(user => this._user.next(user)));
         }
         const localUser = JSON.parse(localUserStr);
-        return this._httpClient.get<any>(`http://localhost:8081/api/users/${localUser.id}`).pipe(
+        return this._httpClient.get<any>(`http://10.252.246.174:8081/api/users/${localUser.id}`).pipe(
             map(response => {
                 return {
                     id: response.id,
@@ -124,7 +124,7 @@ export class UserService
            photoUrl: user.avatar
         };
 
-        return this._httpClient.put<any>(`http://localhost:8081/api/users/${localUser.id}`, updateData).pipe(
+        return this._httpClient.put<any>(`http://10.252.246.174:8081/api/users/${localUser.id}`, updateData).pipe(
             tap(() => {
                 this.get().subscribe();
             })

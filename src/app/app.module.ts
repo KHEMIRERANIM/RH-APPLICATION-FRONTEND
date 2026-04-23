@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { NgModule, LOCALE_ID } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ExtraOptions, PreloadAllModules, RouterModule } from '@angular/router';
@@ -7,6 +7,12 @@ import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { ToastrModule } from 'ngx-toastr';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MaterialModule } from './material.module';
+
+import { registerLocaleData } from '@angular/common';
+import localeFr from '@angular/common/locales/fr';
+
+registerLocaleData(localeFr);
+
 
 
 import { TextFieldModule } from '@angular/cdk/text-field';  // ← AJOUTER
@@ -48,6 +54,7 @@ const routerConfig: ExtraOptions = {
 @NgModule({
     declarations: [AppComponent],
     imports: [
+        
         BrowserModule,
         BrowserAnimationsModule,
         HttpClientModule,
@@ -73,10 +80,13 @@ const routerConfig: ExtraOptions = {
         MatNativeDateModule,
         
         
+        
         ToastrModule.forRoot({
             positionClass: 'toast-top-right',
-            timeOut: 3000,
-            progressBar: true,
+            timeOut: 0,
+            extendedTimeOut: 0,
+            disableTimeOut: true,
+            progressBar: false,
             closeButton: true,
             preventDuplicates: true,
             newestOnTop: true
@@ -94,7 +104,8 @@ const routerConfig: ExtraOptions = {
             provide: HTTP_INTERCEPTORS,
             useClass: AuthInterceptor,
             multi: true
-        }
+        },
+        { provide: LOCALE_ID, useValue: 'fr' }
     ],
     bootstrap: [AppComponent]
 })
