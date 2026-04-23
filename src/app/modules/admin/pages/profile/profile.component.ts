@@ -33,7 +33,7 @@ export class ProfileComponent implements OnInit {
         this.profileForm = this._formBuilder.group({
             nom: ['', Validators.required],
             prenom: ['', Validators.required],
-            email: [{value: '', disabled: true}],
+            email: ['', Validators.email],
             telephone: [''],
             adresse: [''],
             departement: [{value: '', disabled: true}],

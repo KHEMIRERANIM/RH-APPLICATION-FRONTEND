@@ -71,7 +71,6 @@ export const appRoutes: Route[] = [
             },
 
             // Apps
-<<<<<<< HEAD
             {
                 path: 'apps',
                 children: [
@@ -80,35 +79,19 @@ export const appRoutes: Route[] = [
                     { path: 'chat', loadChildren: () => import('app/modules/admin/apps/chat/chat.module').then(m => m.ChatModule) },
                     { path: 'contacts', loadChildren: () => import('app/modules/admin/apps/contacts/contacts.module').then(m => m.ContactsModule) },
                     { path: 'ecommerce', loadChildren: () => import('app/modules/admin/apps/ecommerce/ecommerce.module').then(m => m.ECommerceModule) },
-                    { path: 'restaurant', loadChildren: () => import('app/modules/admin/apps/restaurant/restaurant.module').then(m => m.RestaurantModule)},
+                    { path: 'restaurant', loadChildren: () => import('app/modules/admin/apps/restaurant/restaurant.module').then(m => m.RestaurantModule) },
+                    { path: 'partnerships', loadChildren: () => import('app/modules/admin/apps/partnerships/partnerships.module').then(m => m.PartnershipsModule) },
                     { path: 'rse', loadChildren: () => import('app/modules/admin/apps/hr-apps/hr-apps.module').then(m => m.HrAppsModule) },
+                    { path: 'covoiturage', loadChildren: () => import('app/modules/admin/apps/hr-apps/hr-apps.module').then(m => m.HrAppsModule) },
+                    { path: 'carriere', loadChildren: () => import('app/modules/admin/apps/hr-apps/hr-apps.module').then(m => m.HrAppsModule) },
                     { path: 'file-manager', loadChildren: () => import('app/modules/admin/apps/file-manager/file-manager.module').then(m => m.FileManagerModule) },
                     { path: 'help-center', loadChildren: () => import('app/modules/admin/apps/help-center/help-center.module').then(m => m.HelpCenterModule) },
                     { path: 'mailbox', loadChildren: () => import('app/modules/admin/apps/mailbox/mailbox.module').then(m => m.MailboxModule) },
                     { path: 'notes', loadChildren: () => import('app/modules/admin/apps/notes/notes.module').then(m => m.NotesModule) },
+                    { path: 'scrumboard', loadChildren: () => import('app/modules/admin/apps/scrumboard/scrumboard.module').then(m => m.ScrumboardModule) },
                     { path: 'tasks', loadChildren: () => import('app/modules/admin/apps/tasks/tasks.module').then(m => m.TasksModule) }
                 ]
             },
-=======
-            {path: 'apps', children: [
-                {path: 'academy', loadChildren: () => import('app/modules/admin/apps/academy/academy.module').then(m => m.AcademyModule)},
-                {path: 'calendar', loadChildren: () => import('app/modules/admin/apps/calendar/calendar.module').then(m => m.CalendarModule)},
-                {path: 'chat', loadChildren: () => import('app/modules/admin/apps/chat/chat.module').then(m => m.ChatModule)},
-                {path: 'contacts', loadChildren: () => import('app/modules/admin/apps/contacts/contacts.module').then(m => m.ContactsModule)},
-                {path: 'ecommerce', loadChildren: () => import('app/modules/admin/apps/ecommerce/ecommerce.module').then(m => m.ECommerceModule)},
-                {path: 'partnerships', loadChildren: () => import('app/modules/admin/apps/partnerships/partnerships.module').then(m => m.PartnershipsModule)},
-                {path: 'rse', loadChildren: () => import('app/modules/admin/apps/hr-apps/hr-apps.module').then(m => m.HrAppsModule)},
-                {path: 'restaurant', loadChildren: () => import('app/modules/admin/apps/hr-apps/hr-apps.module').then(m => m.HrAppsModule)},
-                {path: 'covoiturage', loadChildren: () => import('app/modules/admin/apps/hr-apps/hr-apps.module').then(m => m.HrAppsModule)},
-                {path: 'carriere', loadChildren: () => import('app/modules/admin/apps/hr-apps/hr-apps.module').then(m => m.HrAppsModule)},
-                {path: 'file-manager', loadChildren: () => import('app/modules/admin/apps/file-manager/file-manager.module').then(m => m.FileManagerModule)},
-                {path: 'help-center', loadChildren: () => import('app/modules/admin/apps/help-center/help-center.module').then(m => m.HelpCenterModule)},
-                {path: 'mailbox', loadChildren: () => import('app/modules/admin/apps/mailbox/mailbox.module').then(m => m.MailboxModule)},
-                {path: 'notes', loadChildren: () => import('app/modules/admin/apps/notes/notes.module').then(m => m.NotesModule)},
-                {path: 'scrumboard', loadChildren: () => import('app/modules/admin/apps/scrumboard/scrumboard.module').then(m => m.ScrumboardModule)},
-                {path: 'tasks', loadChildren: () => import('app/modules/admin/apps/tasks/tasks.module').then(m => m.TasksModule)},
-            ]},
->>>>>>> daaaf38a49e0403cda1705bb46c92ef6a134f9d3
 
             // Pages
             {
@@ -117,6 +100,8 @@ export const appRoutes: Route[] = [
                     { path: 'activities', loadChildren: () => import('app/modules/admin/pages/activities/activities.module').then(m => m.ActivitiesModule) },
                     { path: 'authentication', loadChildren: () => import('app/modules/admin/pages/authentication/authentication.module').then(m => m.AuthenticationModule) },
                     { path: 'coming-soon', loadChildren: () => import('app/modules/admin/pages/coming-soon/coming-soon.module').then(m => m.ComingSoonModule) },
+                    { path: 'profile', loadChildren: () => import('app/modules/admin/pages/profile/profile.module').then(m => m.ProfileModule) },
+                    { path: 'settings', loadChildren: () => import('app/modules/admin/pages/settings/settings.module').then(m => m.SettingsModule) },
                     { path: 'error', children: [
                         { path: '404', loadChildren: () => import('app/modules/admin/pages/error/error-404/error-404.module').then(m => m.Error404Module) },
                         { path: '500', loadChildren: () => import('app/modules/admin/pages/error/error-500/error-500.module').then(m => m.Error500Module) }

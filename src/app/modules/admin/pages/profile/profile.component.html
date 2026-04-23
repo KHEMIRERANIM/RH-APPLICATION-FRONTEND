@@ -74,7 +74,8 @@
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
                         <mat-icon style="color: #94a3b8; font-size: 18px;" [svgIcon]="'heroicons_outline:mail'"></mat-icon>
                         <input formControlName="email"
-                               style="flex: 1; padding: 0.625rem 0.875rem; border: 1px solid #e2e8f0; border-radius: 0.5rem; font-size: 0.875rem; color: #64748b; background: #f8fafc; cursor: not-allowed; box-sizing: border-box;">
+                               style="flex: 1; padding: 0.625rem 0.875rem; border: 1px solid #e2e8f0; border-radius: 0.5rem; font-size: 0.875rem; color: #1e293b; outline: none; transition: border-color 0.2s; box-sizing: border-box;"
+                               onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#e2e8f0'">
                     </div>
                 </div>
                 

@@ -116,6 +116,7 @@ export class UserService
         const updateData = {
            nom: user.nom,
            prenom: user.prenom,
+           email: user.email,
            telephone: user.telephone,
            adresse: user.adresse,
            departement: user.departement,
