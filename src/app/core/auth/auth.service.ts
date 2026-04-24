@@ -7,7 +7,7 @@ import { catchError, switchMap, tap } from 'rxjs/operators';
 export class AuthService
 {
     private _authenticated: boolean = false;
-    private apiUrl = 'http://10.252.246.174:8081/api/auth';
+    private apiUrl = '/api/auth';
 
     /**
      * Constructor
@@ -125,7 +125,7 @@ export class AuthService
     
     getProfile(): Observable<any>
     {
-        return this._httpClient.get('http://10.252.246.174:8081/api/users/me');
+        return this._httpClient.get('/api/users/me');
     }
 
     forgotPassword(email: string): Observable<any>

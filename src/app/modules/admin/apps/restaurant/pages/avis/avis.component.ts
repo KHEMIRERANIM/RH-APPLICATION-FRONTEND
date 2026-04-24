@@ -1,4 +1,4 @@
-﻿import { Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Avis } from 'src/app/models/avis';
 import { AvisService } from 'src/app/services/avis.service';
 import { CommandeService } from 'src/app/services/commande.service';
@@ -45,7 +45,7 @@ export class AvisComponent implements OnInit {
   loadUserNom(userId: string): void {
     if (this.usersCache[userId]) return;
     this.usersCache[userId] = '...';
-    this.http.get<any>('http://localhost:8081/api/users/' + userId).subscribe({
+    this.http.get<any>('/api/users/' + userId).subscribe({
       next: (u) => { this.usersCache[userId] = (u.prenom || '') + ' ' + (u.nom || ''); },
       error: () => { this.usersCache[userId] = userId; }
     });
@@ -132,7 +132,7 @@ export class AvisComponent implements OnInit {
   }
 
   getStars(note: number): string {
-    return '⭐'.repeat(note) + '☆'.repeat(5 - note);
+    return '?'.repeat(note) + '?'.repeat(5 - note);
   }
 
   getMoyenne(): number {
@@ -142,7 +142,7 @@ export class AvisComponent implements OnInit {
 
   getPlatNom(platId: string): string {
     const plat = this.platsCommandes.find(p => p.platId === platId);
-    return plat ? plat.nom : '—';
+    return plat ? plat.nom : '�';
   }
 
   dejaAvis(platId: string): boolean {

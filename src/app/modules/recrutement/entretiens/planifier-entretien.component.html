@@ -1,0 +1,139 @@
+<div class="flex flex-col flex-auto min-w-0 p-6 sm:p-10">
+
+  <div class="inline-flex items-center gap-2 text-sm font-semibold text-secondary mb-8 cursor-pointer hover:text-blue-600 transition-colors px-4 py-2 rounded-full hover:bg-blue-50/50 w-max" 
+       (click)="retour()">
+    <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:arrow-left'"></mat-icon>
+    Retour
+  </div>
+
+  <div class="max-w-2xl mx-auto w-full">
+    <h2 class="text-4xl font-extrabold tracking-tight leading-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-indigo-700 mb-3">
+      {{ isEditMode ? 'Modifier un entretien' : 'Planifier un entretien' }}
+    </h2>
+    <p class="text-lg font-medium text-secondary mb-10">
+      Si vous choisissez <strong class="text-gray-800">Visio</strong>, un lien Jitsi Meet sera créé automatiquement.
+    </p>
+
+    <!-- Succès -->
+    <div *ngIf="submitted"
+      class="bg-white border-t-4 border-t-green-500 shadow-xl ring-1 ring-black/5 rounded-3xl p-10 text-center transform transition-all">
+      <mat-icon class="icon-size-20 text-green-500 mb-6 drop-shadow-sm"
+                [svgIcon]="'heroicons_outline:check-circle'"></mat-icon>
+      <h3 class="text-3xl font-extrabold text-gray-800 mb-3 tracking-tight">
+        {{ isEditMode ? 'Entretien modifié !' : 'Entretien planifié !' }}
+      </h3>
+      <p class="text-lg font-medium text-secondary mb-8">
+        Le candidat et le recruteur ont reçu une invitation par email.
+      </p>
+
+      <!-- Lien Meet -->
+      <div *ngIf="meetLinkCreated"
+        class="bg-green-50 border border-green-200 rounded-2xl p-6 mb-8 text-left shadow-inner">
+        <p class="text-sm font-bold text-green-800 mb-2 flex items-center gap-2">
+          🎥 Lien Jitsi Meet créé automatiquement :
+        </p>
+        <a [href]="meetLink" target="_blank"
+          class="text-blue-700 font-bold break-all hover:text-blue-900 transition-colors">
+          {{ meetLink }}
+        </a>
+      </div>
+
+      <button mat-flat-button class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full px-8 py-2 font-bold shadow-lg hover:shadow-xl transition-all" (click)="retour()">
+        Retour au pipeline
+      </button>
+    </div>
+
+    <!-- Formulaire -->
+    <form *ngIf="!submitted" [formGroup]="form" (ngSubmit)="submit()"
+          class="flex flex-col gap-8">
+
+      <div class="bg-white rounded-3xl shadow-lg ring-1 ring-black/5 p-10">
+        <h3 class="font-extrabold text-2xl mb-8 text-gray-800 tracking-tight">Détails de l'entretien</h3>
+
+        <!-- Type entretien -->
+        <div class="mb-8">
+          <label class="block text-sm font-medium mb-3 text-secondary">Type d'entretien</label>
+          <div class="flex gap-4">
+            <div *ngFor="let type of typesEntretien"
+              class="flex-1 border-2 rounded-2xl p-5 cursor-pointer text-center transition-all duration-300 transform hover:-translate-y-1 hover:shadow-md shadow-sm"
+              [ngClass]="{
+                'border-blue-500 bg-gradient-to-br from-blue-50 to-indigo-50/50': form.get('type')?.value === type,
+                'border-gray-200 bg-white hover:border-blue-300': form.get('type')?.value !== type
+              }"
+              (click)="form.get('type')?.setValue(type)">
+              <mat-icon class="icon-size-8 mb-3"
+                [ngClass]="{'text-blue-600 drop-shadow-sm': form.get('type')?.value === type, 'text-gray-400': form.get('type')?.value !== type}"
+                [svgIcon]="type === 'TELEPHONIQUE' ? 'heroicons_outline:phone' :
+                           type === 'VISIO' ? 'heroicons_outline:video-camera' :
+                           'heroicons_outline:office-building'">
+              </mat-icon>
+              <p class="text-sm font-bold text-gray-800">{{ type }}</p>
+              <p *ngIf="type === 'VISIO'"
+                 class="text-xs font-medium text-pink-600 mt-1.5">Jitsi Meet auto 🎥</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alerte Jitsi Meet -->
+        <div *ngIf="isVisio"
+          class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-5 mb-8 flex items-center gap-4 shadow-inner">
+          <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm">
+            <mat-icon class="text-blue-600 icon-size-6"
+                      [svgIcon]="'heroicons_outline:video-camera'"></mat-icon>
+          </div>
+          <div>
+            <p class="text-sm font-bold text-gray-900">Jitsi Meet automatique</p>
+            <p class="text-xs font-medium text-secondary mt-0.5">
+              Un lien de réunion sera créé et envoyé par email au candidat et au recruteur.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <mat-form-field>
+              <mat-label>Date et heure</mat-label>
+              <input matInput type="datetime-local" formControlName="dateHeure">
+              <mat-error>Date requise</mat-error>
+            </mat-form-field>
+            <mat-form-field>
+              <mat-label>Durée (minutes)</mat-label>
+              <input matInput type="number" formControlName="dureeMinutes" min="15">
+              <mat-error>Durée minimum 15 min</mat-error>
+            </mat-form-field>
+          </div>
+
+          <!-- Lieu si PRESENTIEL -->
+          <mat-form-field *ngIf="showLieu">
+            <mat-label>Lieu de l'entretien</mat-label>
+            <input matInput formControlName="lieu"
+                   placeholder="Salle de réunion, adresse...">
+          </mat-form-field>
+
+          <!-- Numéro si TELEPHONIQUE -->
+          <mat-form-field *ngIf="form.get('type')?.value === 'TELEPHONIQUE'">
+            <mat-label>Numéro de téléphone (optionnel)</mat-label>
+            <input matInput formControlName="lieu"
+                   placeholder="+216 XX XXX XXX">
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Erreur -->
+      <fuse-alert *ngIf="errorMsg" type="error" [appearance]="'outline'">
+        {{ errorMsg }}
+      </fuse-alert>
+
+      <div class="flex gap-4">
+        <button mat-stroked-button type="button" class="flex-1 rounded-full py-4 text-sm font-bold border-2 hover:bg-gray-50 transition-colors" (click)="retour()">
+          Annuler
+        </button>
+        <button mat-flat-button type="submit" class="flex-1 rounded-full py-4 text-sm font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg hover:shadow-xl transition-all"
+          [disabled]="loading || form.invalid" [class.opacity-50]="loading || form.invalid">
+          {{ loading ? (isEditMode ? 'Modification en cours...' : 'Planification en cours...') : (isEditMode ? 'Modifier l\'entretien' : 'Planifier l\'entretien') }}
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>

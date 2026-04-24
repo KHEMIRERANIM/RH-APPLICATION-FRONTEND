@@ -1,4 +1,4 @@
-﻿export interface Fidelite {
+export interface Fidelite {
   id?: string;
   userId: string;
   points: number;

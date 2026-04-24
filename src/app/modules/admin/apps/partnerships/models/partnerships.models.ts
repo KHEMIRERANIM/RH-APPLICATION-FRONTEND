@@ -1,5 +1,5 @@
-﻿// ============================================================
-// Module Mutuelle & Avantages Sociaux — Modèles TypeScript
+// ============================================================
+// Module Mutuelle & Avantages Sociaux � Mod�les TypeScript
 // ============================================================
 
 export type CategorieOffreAvantage = 'VOYAGE' | 'HOTEL' | 'FESTIVAL';
@@ -18,9 +18,9 @@ export interface DetailsHotel {
 }
 
 
-// ─────────────────────────────────────────
+// -----------------------------------------
 // Partenaire
-// ─────────────────────────────────────────
+// -----------------------------------------
 export interface Partenaire {
     id?: string;
     nom: string;
@@ -40,9 +40,9 @@ export interface CreatePartenaireRequest {
     dateConvention?: string;
 }
 
-// ─────────────────────────────────────────
+// -----------------------------------------
 // OffreAvantage
-// ─────────────────────────────────────────
+// -----------------------------------------
 export interface OffreAvantage {
     id?: string;
     idPartenaire: string;
@@ -50,7 +50,7 @@ export interface OffreAvantage {
     description?: string;
     categorie: CategorieOffreAvantage;
     prixReel: number;
-    prixConvention?: number; // Optionnel pour les hôtels
+    prixConvention?: number; // Optionnel pour les h�tels
 
     nbPlacesTotal: number;
     nbPlacesDispo: number;
@@ -83,9 +83,9 @@ export interface CreateOffreRequest {
 }
 
 
-// ─────────────────────────────────────────
-// Réservation
-// ─────────────────────────────────────────
+// -----------------------------------------
+// R�servation
+// -----------------------------------------
 export interface AvantageReservation {
     id?: string;
     idUser: string;
@@ -106,9 +106,9 @@ export interface AvantageReservation {
 }
 
 
-// ─────────────────────────────────────────
+// -----------------------------------------
 // Filtres & UI
-// ─────────────────────────────────────────
+// -----------------------------------------
 
 export interface Wishlist {
     id?: string;
@@ -125,7 +125,7 @@ export interface OffreFiltres {
 export const CATEGORIE_LABELS: Record<CategorieOffreAvantage | 'TOUS', string> = {
     TOUS: 'Toutes les offres',
     VOYAGE: 'Voyages',
-    HOTEL: 'Hôtels',
+    HOTEL: 'H�tels',
     FESTIVAL: 'Festivals'
 };
 
@@ -141,9 +141,9 @@ export const CATEGORIE_COLORS: Record<CategorieOffreAvantage, string> = {
     FESTIVAL: '#f59e0b'
 };
 
-// ─────────────────────────────────────────
+// -----------------------------------------
 // Statistiques (Dashboard)
-// ─────────────────────────────────────────
+// -----------------------------------------
 
 export interface StatAvantageKpi {
     totalReservations: number;

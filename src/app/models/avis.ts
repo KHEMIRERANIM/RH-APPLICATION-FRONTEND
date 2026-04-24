@@ -1,4 +1,4 @@
-﻿export interface Avis {
+export interface Avis {
   id?: string;
   userId: string;
   platId: string;

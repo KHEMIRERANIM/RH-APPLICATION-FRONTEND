@@ -61,7 +61,7 @@ export interface ReservationResponse {
   providedIn: 'root'
 })
 export class CovoiturageService {
-  private apiUrl = 'http://10.252.246.174:8081/api'; // Same base URL used in UserService
+  private apiUrl = '/api'; // Same base URL used in UserService
 
   constructor(private http: HttpClient) { }
 
@@ -105,8 +105,8 @@ export class CovoiturageService {
     return this.http.delete<void>(`${this.apiUrl}/trajets/${id}`);
   }
 
-  private reservationsUrl = 'http://10.252.246.174:8081/api/reservations';
-  private empreintesUrl = 'http://10.252.246.174:8081/api/empreintes';
+  private reservationsUrl = '/api/reservations';
+  private empreintesUrl = '/api/empreintes';
 
   getAllReservations(): Observable<ReservationResponse[]> {
     return this.http.get<ReservationResponse[]>(this.reservationsUrl);

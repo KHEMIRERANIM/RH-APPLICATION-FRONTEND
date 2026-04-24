@@ -170,7 +170,7 @@ export class ProjectComponent implements OnInit, OnDestroy
     }
     
     loadEmployees(): void {
-    this._http.get<any[]>('http://10.252.246.174:8081/api/users')
+    this._http.get<any[]>('/api/users')
         .subscribe({
             next: (data) => {
                 /*
@@ -210,7 +210,7 @@ export class ProjectComponent implements OnInit, OnDestroy
 }
     
     loadDepartments(): void {
-        this._http.get<any[]>('http://10.252.246.174:8081/api/departments')
+        this._http.get<any[]>('/api/departments')
             .subscribe({
                 next: (data) => this.departments = data,
                 error: () => console.error('Erreur chargement départements')
@@ -218,7 +218,7 @@ export class ProjectComponent implements OnInit, OnDestroy
     }
     
     loadJobTitles(): void {
-        this._http.get<any[]>('http://10.252.246.174:8081/api/job-titles')
+        this._http.get<any[]>('/api/job-titles')
             .subscribe({
                 next: (data) => this.jobTitles = data,
                 error: () => console.error('Erreur chargement postes')
@@ -226,7 +226,7 @@ export class ProjectComponent implements OnInit, OnDestroy
     }
     
     loadManagers(): void {
-        this._http.get<any[]>('http://10.252.246.174:8081/api/users/managers')
+        this._http.get<any[]>('/api/users/managers')
             .subscribe({
                 next: (data) => this.managers = data,
                 error: () => console.error('Erreur chargement managers')
@@ -466,7 +466,7 @@ export class ProjectComponent implements OnInit, OnDestroy
             };
             
             if (this.isEditMode) {
-                this._http.put(`http://10.252.246.174:8081/api/users/${this.employeeFormValue.id}`, data)
+                this._http.put(`/api/users/${this.employeeFormValue.id}`, data)
                     .subscribe({
                         next: () => {
                             this.toastr?.success('Utilisateur modifié avec succès', 'Succès');
@@ -478,7 +478,7 @@ export class ProjectComponent implements OnInit, OnDestroy
                         }
                     });
             } else {
-                this._http.post('http://10.252.246.174:8081/api/users', data)
+                this._http.post('/api/users', data)
                     .subscribe({
                         next: () => {
                             this.toastr?.success('Utilisateur ajouté avec succès', 'Succès');
@@ -520,7 +520,7 @@ deleteEmployee(user: any): void {
 
     dialogRef.afterClosed().subscribe((result) => {
         if (result === 'confirmed') {
-            this._http.delete(`http://10.252.246.174:8081/api/users/${user.id}`)
+            this._http.delete(`/api/users/${user.id}`)
                 .subscribe({
                     next: () => {
                         this.toastr?.success(`${user.prenom} ${user.nom} supprimé`, 'Succès');

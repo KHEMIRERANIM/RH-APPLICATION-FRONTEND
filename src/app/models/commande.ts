@@ -1,4 +1,4 @@
-﻿export interface Commande {
+export interface Commande {
   id?: string;
   userId: string;
   menuId: string;

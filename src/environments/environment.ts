@@ -6,7 +6,7 @@ export const environment = {
    * URL SockJS optionnelle pour le suivi.
    * Si vide, on calcule automatiquement à partir de l'API (ou de l'origine navigateur en dev).
    */
-  wsTrackingUrl: 'http://10.252.246.174:8081/ws-tracking'
+  wsTrackingUrl: 'http://localhost:8081/ws-tracking'
 };
 
 /**

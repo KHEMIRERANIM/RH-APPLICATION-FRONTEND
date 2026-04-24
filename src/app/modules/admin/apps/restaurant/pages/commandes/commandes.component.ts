@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { take } from 'rxjs/operators';
 import { Commande } from 'src/app/models/commande';
@@ -143,7 +143,7 @@ export class CommandesComponent implements OnInit, OnDestroy {
         icon: 'heroicons_outline:bell',
         title: alerte.enRetard ? 'Recuperez votre repas rapidement !' : 'Votre commande est prete !',
         description: alerte.enRetard
-          ? 'Annulation dans ' + alerte.minutesRestantes + ' min — Code : ' + alerte.codeRetrait
+          ? 'Annulation dans ' + alerte.minutesRestantes + ' min � Code : ' + alerte.codeRetrait
           : 'Presentez le code ' + alerte.codeRetrait + ' au comptoir',
         time: new Date().toISOString(),
         link: '/apps/restaurant/commandes',
@@ -163,7 +163,7 @@ export class CommandesComponent implements OnInit, OnDestroy {
   loadUserNom(userId: string): void {
     if (this.usersCache[userId]) return;
     this.usersCache[userId] = '...';
-    this.http.get<any>('http://localhost:8081/api/users/' + userId).subscribe({
+    this.http.get<any>('/api/users/' + userId).subscribe({
       next: (u) => { this.usersCache[userId] = (u.prenom || '') + ' ' + (u.nom || ''); },
       error: () => { this.usersCache[userId] = userId; }
     });
@@ -201,7 +201,7 @@ export class CommandesComponent implements OnInit, OnDestroy {
     ).subscribe({
       next: () => {
         this.fermerModalPaiement();
-        this.successMsg = 'Paiement enregistre — commande livree !';
+        this.successMsg = 'Paiement enregistre � commande livree !';
         setTimeout(() => this.successMsg = '', 4000);
         this.loadCommandes();
         this.loadFidelites();
@@ -518,13 +518,13 @@ export class CommandesComponent implements OnInit, OnDestroy {
   }
 
   loadFidelites(): void {
-    this.http.get<any[]>('http://localhost:8081/api/fidelite/all').subscribe({
+    this.http.get<any[]>('/api/fidelite/all').subscribe({
       next: (data) => { this.fidelites = data.sort((a, b) => b.points - a.points); },
       error: () => {}
     });
   }
 
-  // ─── EXPORT PDF ───────────────────────────────────────────────
+  // --- EXPORT PDF -----------------------------------------------
   exportPdf(): void {
     this.commandeService.exportPdf();
   }

@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { BusService, Bus, BusPackRequest } from '../bus.service';
 import { CovoiturageService } from '../covoiturage.service';
 import { forkJoin, of } from 'rxjs';
@@ -1373,6 +1373,23 @@ export class CovoiturageAdminComponent implements OnInit {
     const temp = this.busForm.arrets[index];
     this.busForm.arrets[index] = this.busForm.arrets[newIdx];
     this.busForm.arrets[newIdx] = temp;
+  }
+
+  optimizeRoute(stat: any): void {
+    this.openModal();
+    // Pré-remplir le formulaire avec les données de l'analyse
+    this.busForm.depart = stat.neighborhood;
+    this.busForm.arrivee = 'Siège Social'; // Destination par défaut
+    this.busForm.arrets = [{
+      name: stat.stopName,
+      latitude: stat.latitude,
+      longitude: stat.longitude
+    }];
+    
+    // Définir une suggestion de ligne
+    this.busForm.ligne = `${stat.neighborhood} - Siège Social`;
+    
+    this._toastrService.info(`Optimisation lancée pour ${stat.neighborhood}`);
   }
 
   saveBus(): void {

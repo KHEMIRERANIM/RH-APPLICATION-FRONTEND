@@ -1,4 +1,4 @@
-﻿import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Avis } from 'src/app/models/avis';
@@ -7,7 +7,7 @@ import { Avis } from 'src/app/models/avis';
   providedIn: 'root'
 })
 export class AvisService {
-  private apiUrl = 'http://localhost:8081/api/avis';
+  private apiUrl = '/api/avis';
 
   constructor(private http: HttpClient) {}
 

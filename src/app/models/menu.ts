@@ -1,4 +1,4 @@
-﻿export interface Plat {
+export interface Plat {
   platId?: string;
   nom: string;
   description: string;

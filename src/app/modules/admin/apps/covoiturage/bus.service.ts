@@ -39,7 +39,7 @@ export interface BusPackRequest {
 
 @Injectable({ providedIn: 'root' })
 export class BusService {
-  private apiUrl = 'http://10.252.246.174:8081/api/bus';
+  private apiUrl = '/api/bus';
 
   constructor(private http: HttpClient) {}
 

@@ -1,4 +1,4 @@
-ï»¿import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -59,7 +59,7 @@ export class PlatsComponent implements OnInit, OnDestroy {
     'quiche': 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=400',
     // Salades
     'salade': 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400',
-    'taboulÃ©': 'https://images.unsplash.com/photo-1512058564366-18510be2db19?w=400',
+    'taboulé': 'https://images.unsplash.com/photo-1512058564366-18510be2db19?w=400',
     'taboul': 'https://images.unsplash.com/photo-1512058564366-18510be2db19?w=400',
     // Desserts
     'gateau': 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400',
@@ -85,7 +85,7 @@ export class PlatsComponent implements OnInit, OnDestroy {
     'cappuccino': 'https://images.unsplash.com/photo-1534778101976-62847782c213?w=400',
     'latte': 'https://images.unsplash.com/photo-1561047029-3000c68339ca?w=400',
     'the': 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=400',
-    'thÃ©': 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=400',
+    'thé': 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=400',
     'jus': 'https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=400',
     'smoothie': 'https://images.unsplash.com/photo-1505252585461-04db1eb84625?w=400',
     'eau': 'https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=400',

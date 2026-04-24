@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
@@ -16,32 +16,32 @@ import { Partenaire, OffreAvantage, AvantageReservation } from '../../models/par
 })
 export class AdminDashboardComponent implements OnInit, OnDestroy {
 
-    // ── Partenaires ──────────────────────────────────────
+    // -- Partenaires --------------------------------------
     partenairesDS = new MatTableDataSource<Partenaire>();
     partenairesCols = ['nom', 'type', 'emailContact', 'dateConvention', 'actif', 'actions'];
     loadingP = true;
 
-    // ── Offres ───────────────────────────────────────────
+    // -- Offres -------------------------------------------
     offresDS = new MatTableDataSource<OffreAvantage>();
     offres: OffreAvantage[] = [];
     partenaires: Partenaire[] = [];
     offresCols = ['titre', 'categorie', 'partenaire', 'prixConvention', 'nbPlacesDispo', 'statut', 'actions'];
     loadingO = true;
 
-    // ── Réservations ─────────────────────────────────────
+    // -- R�servations -------------------------------------
     reservationsDS = new MatTableDataSource<AvantageReservation>();
     reservationsCols = ['reference', 'user', 'offre', 'nbPersonnes', 'prixTotal', 'statut', 'dateReservation'];
     loadingR = true;
     users: any[] = [];
 
-    // ── Paginators / Sorts ────────────────────────────────
+    // -- Paginators / Sorts --------------------------------
     @ViewChild('paginatorP') set paginatorP(p: MatPaginator) { if (p) { this.partenairesDS.paginator = p; } }
     @ViewChild('paginatorO') set paginatorO(p: MatPaginator) { if (p) { this.offresDS.paginator = p; } }
     @ViewChild('paginatorR') set paginatorR(p: MatPaginator) { if (p) { this.reservationsDS.paginator = p; } }
     @ViewChild('sortP') set sortP(s: MatSort) { if (s) { this.partenairesDS.sort = s; } }
     @ViewChild('sortO') set sortO(s: MatSort) { if (s) { this.offresDS.sort = s; } }
 
-    // ── Suppression en cours ─────────────────────────────
+    // -- Suppression en cours -----------------------------
     deletingP: Record<string, boolean> = {};
     deletingO: Record<string, boolean> = {};
 
@@ -64,9 +64,9 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
         this._unsub.complete();
     }
 
-    // ════════════════════════════════════════════════════
+    // ----------------------------------------------------
     // PARTENAIRES
-    // ════════════════════════════════════════════════════
+    // ----------------------------------------------------
 
     private _loadPartenaires(): void {
         this.loadingP = true;
@@ -96,7 +96,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
             .pipe(takeUntil(this._unsub), finalize(() => delete this.deletingP[id]))
             .subscribe({
                 next: () => {
-                    this._toastr.success('Partenaire supprimé');
+                    this._toastr.success('Partenaire supprim�');
                     this._loadPartenaires();
                 },
                 error: () => this._toastr.error('Erreur lors de la suppression')
@@ -110,9 +110,9 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
                 next: (updated) => {
                     const i = this.partenaires.findIndex(p => p.id === updated.id);
                     if (i !== -1) { this.partenaires[i] = updated; this.partenairesDS.data = [...this.partenaires]; }
-                    this._toastr.success(updated.actif ? 'Partenaire activé' : 'Partenaire désactivé');
+                    this._toastr.success(updated.actif ? 'Partenaire activ�' : 'Partenaire d�sactiv�');
                 },
-                error: () => this._toastr.error('Erreur mise à jour statut')
+                error: () => this._toastr.error('Erreur mise � jour statut')
             });
     }
 
@@ -121,9 +121,9 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
         this.partenairesDS.filter = val.trim().toLowerCase();
     }
 
-    // ════════════════════════════════════════════════════
+    // ----------------------------------------------------
     // OFFRES
-    // ════════════════════════════════════════════════════
+    // ----------------------------------------------------
 
     private _loadOffres(): void {
         this.loadingO = true;
@@ -153,7 +153,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
             .pipe(takeUntil(this._unsub), finalize(() => delete this.deletingO[id]))
             .subscribe({
                 next: () => {
-                    this._toastr.success('OffreAvantage supprimée');
+                    this._toastr.success('OffreAvantage supprim�e');
                     this._loadOffres();
                 },
                 error: () => this._toastr.error('Erreur lors de la suppression')
@@ -167,9 +167,9 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
                 next: (updated) => {
                     const i = this.offres.findIndex(o => o.id === updated.id);
                     if (i !== -1) { this.offres[i] = updated; this.offresDS.data = [...this.offres]; }
-                    this._toastr.success(updated.statut === 'ACTIVE' ? 'OffreAvantage activée' : 'OffreAvantage désactivée');
+                    this._toastr.success(updated.statut === 'ACTIVE' ? 'OffreAvantage activ�e' : 'OffreAvantage d�sactiv�e');
                 },
-                error: () => this._toastr.error('Erreur mise à jour statut')
+                error: () => this._toastr.error('Erreur mise � jour statut')
             });
     }
 
@@ -182,9 +182,9 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
         return this.partenaires.find(p => p.id === idPartenaire)?.nom || '-';
     }
 
-    // ════════════════════════════════════════════════════
-    // RÉSERVATIONS
-    // ════════════════════════════════════════════════════
+    // ----------------------------------------------------
+    // R�SERVATIONS
+    // ----------------------------------------------------
 
     private _loadUsersAndReservations(): void {
         this.loadingR = true;
@@ -231,7 +231,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
                         new Date(b.dateReservation!).getTime() - new Date(a.dateReservation!).getTime()
                     );
                 },
-                error: () => this._toastr.error('Erreur chargement réservations')
+                error: () => this._toastr.error('Erreur chargement r�servations')
             });
     }
 

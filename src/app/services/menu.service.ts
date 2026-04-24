@@ -9,7 +9,7 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root'
 })
 export class MenuService {
-  private apiUrl = 'http://localhost:8081/api/menus';
+  private apiUrl = '/api/menus';
   private pexelsApiKey = environment.pexelsApiKey;
 
   constructor(private http: HttpClient) {}

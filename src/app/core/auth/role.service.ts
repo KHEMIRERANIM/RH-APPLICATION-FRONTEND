@@ -1,4 +1,4 @@
-ï»¿import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { AuthService } from 'app/core/auth/auth.service';
 
 @Injectable({ providedIn: 'root' })
@@ -7,7 +7,7 @@ export class RoleService {
   constructor(private authService: AuthService) {}
 
   /**
-   * Normalise le rÃ´le renvoyÃ© par lâ€™API (casse, accents, variantes anglaises).
+   * Normalise le rôle renvoyé par l’API (casse, accents, variantes anglaises).
    */
   static normalizeRole(raw: string | null | undefined): string {
     if (raw == null || raw === '') {

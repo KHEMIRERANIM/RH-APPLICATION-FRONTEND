@@ -1,10 +1,10 @@
-ï»¿:host {
+:host {
   display: block;
   width: 100%;
   min-height: 100%;
 }
 
-/* Fond visible mÃªme si les utilitaires Tailwind ne sâ€™appliquent pas sur le host */
+/* Fond visible même si les utilitaires Tailwind ne s’appliquent pas sur le host */
 .restaurant-shell {
   min-height: 100vh;
   width: 100%;
@@ -139,7 +139,7 @@
 }
 }
 
-/* Panneau lÃ©ger derriÃ¨re le contenu des pages enfants */
+/* Panneau léger derrière le contenu des pages enfants */
 .restaurant-content {
   background: rgba(255, 255, 255, 0.78);
   border: 1px solid rgba(191, 219, 254, 0.55);

@@ -1,4 +1,4 @@
-﻿import { Component } from '@angular/core';
+import { Component } from '@angular/core';
 import { RoleService } from 'app/core/auth/role.service';
 
 @Component({

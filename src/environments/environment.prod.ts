@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://10.252.246.174:8081/api',
+  apiUrl: 'http://localhost:8081/api',
   wsTrackingUrl: '' as string,
   pexelsApiKey: 'qP5hpgaZsBhnzJH3LFh60cTDNcpdaslYfYXxZnLt3W5L0hzvUg1PzVBT'
 };

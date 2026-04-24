@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { cloneDeep } from 'lodash-es';
 import { FuseNavigationItem } from '@fuse/components/navigation';
 import { FuseMockApiService } from '@fuse/lib/mock-api';
-import { compactNavigation, defaultNavigation, futuristicNavigation, horizontalNavigation } from 'app/mock-api/common/navigation/data';
+import { compactNavigation, defaultNavigation, futuristicNavigation, horizontalNavigation, candidatNavigation } from 'app/mock-api/common/navigation/data';
 
 @Injectable({
     providedIn: 'root'
@@ -36,7 +36,20 @@ export class NavigationMockApi
                     } catch (e) {}
                 }
 
-                // Filtrer : cacher section admin si pas admin, et section partnerships si candidat
+                // Si c'est un candidat, on retourne sa navigation spécifique
+                if (userRole?.toUpperCase() === 'CANDIDAT') {
+                    return [
+                        200,
+                        {
+                            compact: cloneDeep(candidatNavigation),
+                            default: cloneDeep(candidatNavigation),
+                            futuristic: cloneDeep(candidatNavigation),
+                            horizontal: cloneDeep(candidatNavigation)
+                        }
+                    ];
+                }
+
+                // Filtrer : cacher section admin si pas admin, et section partnerships si candidat (cas déjà géré au dessus mais conservé pour sécurité)
                 const filteredDefault = cloneDeep(this._defaultNavigation).map(item => {
                     if (item.id === 'apps' && item.children) {
                         item.children = item.children.filter(child => {
@@ -55,6 +68,7 @@ export class NavigationMockApi
                 });
 
                 // Fill compact navigation
+
                 this._compactNavigation.forEach((compactNavItem) => {
                     filteredDefault.forEach((defaultNavItem) => {
                         if (defaultNavItem.id === compactNavItem.id) {

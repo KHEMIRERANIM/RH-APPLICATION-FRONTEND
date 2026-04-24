@@ -1,8 +1,8 @@
-﻿<div class="reservations-page">
+<div class="reservations-page">
 
-    <!-- ═══════════════════════════════════════════════════════
+    <!-- -------------------------------------------------------
          HERO HEADER
-    ═══════════════════════════════════════════════════════════ -->
+    ----------------------------------------------------------- -->
     <div class="hero-header">
         <div class="hero-bg-shapes">
             <div class="shape shape-1"></div>
@@ -15,9 +15,9 @@
                     <mat-icon svgIcon="heroicons_solid:bookmark"></mat-icon>
                     <span>Mon Historique</span>
                 </div>
-                <h1 class="hero-title">Mes Réservations</h1>
+                <h1 class="hero-title">Mes R�servations</h1>
                 <p class="hero-subtitle">
-                    Consultez et gérez vos réservations d'avantages sociaux
+                    Consultez et g�rez vos r�servations d'avantages sociaux
                 </p>
             </div>
             <div class="hero-actions">
@@ -31,13 +31,13 @@
                     <mat-progress-spinner *ngIf="isClearingHistory" mode="indeterminate" diameter="16"
                         class="mr-2"></mat-progress-spinner>
                     <span *ngIf="isClearingHistory">&nbsp; Nettoyage...</span>
-                    <span *ngIf="!isClearingHistory">Vider les annulées</span>
+                    <span *ngIf="!isClearingHistory">Vider les annul�es</span>
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- ─── STATS KPI CARDS ──────────────────────────────────── -->
+    <!-- --- STATS KPI CARDS ------------------------------------ -->
     <div class="stats-row" *ngIf="!isLoading && reservations.length > 0">
         <div class="kpi-card">
             <div class="kpi-icon kpi-green">
@@ -45,7 +45,7 @@
             </div>
             <div class="kpi-info">
                 <span class="kpi-value">{{ nbConfirmees }}</span>
-                <span class="kpi-label">Confirmée(s)</span>
+                <span class="kpi-label">Confirm�e(s)</span>
             </div>
         </div>
 
@@ -55,7 +55,7 @@
             </div>
             <div class="kpi-info">
                 <span class="kpi-value">{{ nbAnnulees }}</span>
-                <span class="kpi-label">Annulée(s)</span>
+                <span class="kpi-label">Annul�e(s)</span>
             </div>
         </div>
 
@@ -65,30 +65,30 @@
             </div>
             <div class="kpi-info">
                 <span class="kpi-value">{{ montantTotal | number:'1.0-2' }} DT</span>
-                <span class="kpi-label">Total engagé</span>
+                <span class="kpi-label">Total engag�</span>
             </div>
         </div>
     </div>
 
-    <!-- ─── LOADER ──────────────────────────────────────────── -->
+    <!-- --- LOADER -------------------------------------------- -->
     <div class="loader-container" *ngIf="isLoading">
         <mat-progress-spinner mode="indeterminate" diameter="48" color="primary"></mat-progress-spinner>
     </div>
 
-    <!-- ─── ÉTAT VIDE ────────────────────────────────────────── -->
+    <!-- --- �TAT VIDE ------------------------------------------ -->
     <div class="empty-state" *ngIf="!isLoading && reservations.length === 0">
         <div class="empty-icon">
             <mat-icon svgIcon="heroicons_outline:bookmark"></mat-icon>
         </div>
-        <h3>Aucune réservation</h3>
-        <p>Vous n'avez pas encore effectué de réservation.</p>
+        <h3>Aucune r�servation</h3>
+        <p>Vous n'avez pas encore effectu� de r�servation.</p>
         <button mat-flat-button class="btn-primary-action" (click)="retourCatalogue()">
             <mat-icon svgIcon="heroicons_outline:collection"></mat-icon>
-            Découvrir les offres
+            D�couvrir les offres
         </button>
     </div>
 
-    <!-- ─── LISTE DES RÉSERVATIONS ───────────────────────────── -->
+    <!-- --- LISTE DES R�SERVATIONS ----------------------------- -->
     <div class="reservations-list" *ngIf="!isLoading && reservations.length > 0">
 
         <div class="reservation-card"
@@ -97,7 +97,7 @@
             [class.confirmed]="r.statut === 'CONFIRMEE'"
             [class.cancelled]="r.statut === 'ANNULEE'">
 
-            <!-- ── Panneau accent gauche coloré ─── -->
+            <!-- -- Panneau accent gauche color� --- -->
             <div class="card-accent">
                 <div class="accent-icon">
                     <mat-icon [svgIcon]="r.statut === 'CONFIRMEE'
@@ -108,7 +108,7 @@
                 <span class="accent-num">#{{ i + 1 }}</span>
             </div>
 
-            <!-- ── Corps de la carte ──────────────── -->
+            <!-- -- Corps de la carte ---------------- -->
             <div class="card-body">
 
                 <!-- Ligne 1 : Titre offre + badge statut -->
@@ -120,11 +120,11 @@
                     <span class="status-badge"
                         [class.badge-confirmee]="r.statut === 'CONFIRMEE'"
                         [class.badge-annulee]="r.statut === 'ANNULEE'">
-                        {{ r.statut === 'CONFIRMEE' ? '✓ CONFIRMÉE' : '✕ ANNULÉE' }}
+                        {{ r.statut === 'CONFIRMEE' ? '? CONFIRM�E' : '? ANNUL�E' }}
                     </span>
                 </div>
 
-                <!-- Ligne 2 : Chips méta -->
+                <!-- Ligne 2 : Chips m�ta -->
                 <div class="card-meta">
                     <span class="meta-chip" *ngIf="!(r.nbAdultes > 0 || r.nbEnfants > 0)">
                         <mat-icon svgIcon="heroicons_mini:users"></mat-icon>
@@ -136,7 +136,7 @@
                     </span>
                     <span class="meta-chip" *ngIf="r.formule">
                         <mat-icon svgIcon="heroicons_mini:cake"></mat-icon>
-                        {{ r.formule === 'PD' ? 'Petit Dėj.' : (r.formule === 'DP' ? 'Demi Pension' : 'Pension Complète') }}
+                        {{ r.formule === 'PD' ? 'Petit Dej.' : (r.formule === 'DP' ? 'Demi Pension' : 'Pension Compl�te') }}
                     </span>
                     <span class="meta-chip" *ngIf="!r.nbAdultes && r.nbEnfants === undefined">
                         <mat-icon svgIcon="heroicons_mini:currency-dollar"></mat-icon>
@@ -144,21 +144,21 @@
                     </span>
                     <span class="meta-chip" *ngIf="r.dateReservation">
                         <mat-icon svgIcon="heroicons_mini:calendar"></mat-icon>
-                        {{ r.dateReservation | date:'dd/MM/yyyy à HH:mm' }}
+                        {{ r.dateReservation | date:'dd/MM/yyyy � HH:mm' }}
                     </span>
                 </div>
 
-                <!-- Ligne 3 : Séparateur + total + actions -->
+                <!-- Ligne 3 : S�parateur + total + actions -->
                 <div class="card-footer-row">
                     <div class="total-block">
-                        <span class="total-label">Total réservation</span>
+                        <span class="total-label">Total r�servation</span>
                         <span class="total-amount">{{ r.prixTotal | number:'1.0-2' }} DT</span>
                     </div>
 
                     <div class="card-actions">
                         <span class="cancel-note" *ngIf="r.statut === 'ANNULEE' && r.dateAnnulation">
                             <mat-icon svgIcon="heroicons_mini:information-circle"></mat-icon>
-                            Annulée le {{ r.dateAnnulation | date:'dd/MM/yyyy' }}
+                            Annul�e le {{ r.dateAnnulation | date:'dd/MM/yyyy' }}
                         </span>
 
                         <button *ngIf="r.statut === 'CONFIRMEE'"

@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class EmailService {
-  private apiUrl = 'http://10.252.246.174:8081/api/notifications/email';
+  private apiUrl = '/api/notifications/email';
 
   constructor(private http: HttpClient) { }
 

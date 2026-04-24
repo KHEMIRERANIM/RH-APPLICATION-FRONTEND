@@ -1,4 +1,4 @@
-﻿import { NgModule } from '@angular/core';
+import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { RoleGuard } from 'app/core/auth/guards/role.guard';
 import { RestaurantComponent } from './restaurant/restaurant.component';
@@ -16,7 +16,7 @@ const routes: Routes = [
       { path: 'plats', component: PlatsComponent },
       { path: 'commandes', component: CommandesComponent, canActivate: [RoleGuard], data: { roles: ['ADMIN', 'EMPLOYE'] } },
       { path: 'avis', component: AvisComponent },
-      { path: '', redirectTo: 'menus', pathMatch: 'full' } // page par défaut
+      { path: '', redirectTo: 'menus', pathMatch: 'full' } // page par d�faut
     ]
   }
 ];

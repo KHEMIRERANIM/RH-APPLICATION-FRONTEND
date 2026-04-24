@@ -20,7 +20,7 @@ export interface Reclamation {
     providedIn: 'root'
 })
 export class ReclamationService {
-    private apiUrl = 'http://10.252.246.174:8081/api/reclamations';
+    private apiUrl = '/api/reclamations';
 
     constructor(private http: HttpClient) { }
 

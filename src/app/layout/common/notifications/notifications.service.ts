@@ -7,7 +7,7 @@ import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { getWsTrackingSockJsUrl } from 'src/environments/environment';
 
-const NOTIF_API = 'http://10.252.246.174:8081/api/notifications';
+const NOTIF_API = '/api/notifications';
 
 @Injectable({
     providedIn: 'root'
@@ -241,7 +241,7 @@ export class NotificationsService {
                         }),
                         catchError(() => {
                             // Fallback to localhost if NOTIF_API fails
-                            return this._httpClient.patch<any>(`http://localhost:8081/api/notifications/${id}/lire`, {}).pipe(
+                            return this._httpClient.patch<any>(`/api/notifications/${id}/lire`, {}).pipe(
                                 map(() => {
                                     const index = notifications.findIndex(item => item.id === id);
                                     notifications[index].read = true;
@@ -283,7 +283,7 @@ export class NotificationsService {
                         map(() => true),
                         catchError(() => {
                             // Fallback to localhost
-                            return this._httpClient.delete<void>(`http://localhost:8081/api/notifications/${id}`).pipe(
+                            return this._httpClient.delete<void>(`/api/notifications/${id}`).pipe(
                                 map(() => true),
                                 catchError(() => of(false))
                             );
@@ -336,7 +336,7 @@ export class NotificationsService {
                             }),
                             catchError(() => {
                                 // Fallback
-                                return this._httpClient.patch<void>('http://localhost:8081/api/notifications/tout-lire', {}).pipe(
+                                return this._httpClient.patch<void>('/api/notifications/tout-lire', {}).pipe(
                                     map(() => {
                                         notifications.forEach((notification, index) => {
                                             notifications[index].read = true;
