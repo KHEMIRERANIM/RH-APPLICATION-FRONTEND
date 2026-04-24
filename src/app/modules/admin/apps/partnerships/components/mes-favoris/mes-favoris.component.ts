@@ -40,7 +40,7 @@ export class MesFavorisComponent implements OnInit, OnDestroy {
     private _loadData(): void {
         this.isLoading = true;
         
-        // Charger les offres d'abord pour avoir les détails (titre, image, etc.)
+        // Charger les offres d'abord pour avoir les dÃ©tails (titre, image, etc.)
         this._svc.getOffres()
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe({
@@ -64,7 +64,7 @@ export class MesFavorisComponent implements OnInit, OnDestroy {
             .subscribe({
                 next: (favoris) => {
                     this.favoris = favoris;
-                    // Mapper les favoris avec les détails des offres correspondantes
+                    // Mapper les favoris avec les dÃ©tails des offres correspondantes
                     this.offresFavorites = this.favoris
                         .map(f => this.offres.find(o => o.id === f.idOffreAvantage))
                         .filter(o => o !== undefined) as OffreAvantage[];
@@ -81,7 +81,7 @@ export class MesFavorisComponent implements OnInit, OnDestroy {
         this._svc.retirerFavori(offre.id).subscribe({
             next: () => {
                 this.offresFavorites = this.offresFavorites.filter(o => o.id !== offre.id);
-                this._toastr.success('OffreAvantage retirée des favoris');
+                this._toastr.success('OffreAvantage retirÃ©e des favoris');
                 delete this.isRemoving[offre.id!];
             },
             error: () => {

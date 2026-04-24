@@ -142,7 +142,7 @@ export class AvisComponent implements OnInit {
 
   getPlatNom(platId: string): string {
     const plat = this.platsCommandes.find(p => p.platId === platId);
-    return plat ? plat.nom : '—';
+    return plat ? plat.nom : '-';
   }
 
   dejaAvis(platId: string): boolean {

@@ -1,5 +1,5 @@
 // ============================================================
-// Module Mutuelle & Avantages Sociaux — Modèles TypeScript
+// Module Mutuelle & Avantages Sociaux - ModÃ¨les TypeScript
 // ============================================================
 
 export type CategorieOffreAvantage = 'VOYAGE' | 'HOTEL' | 'FESTIVAL';
@@ -50,7 +50,7 @@ export interface OffreAvantage {
     description?: string;
     categorie: CategorieOffreAvantage;
     prixReel: number;
-    prixConvention?: number; // Optionnel pour les hôtels
+    prixConvention?: number; // Optionnel pour les hÃ´tels
 
     nbPlacesTotal: number;
     nbPlacesDispo: number;
@@ -84,7 +84,7 @@ export interface CreateOffreRequest {
 
 
 // -----------------------------------------
-// Réservation
+// RÃ©servation
 // -----------------------------------------
 export interface AvantageReservation {
     id?: string;
@@ -125,7 +125,7 @@ export interface OffreFiltres {
 export const CATEGORIE_LABELS: Record<CategorieOffreAvantage | 'TOUS', string> = {
     TOUS: 'Toutes les offres',
     VOYAGE: 'Voyages',
-    HOTEL: 'Hôtels',
+    HOTEL: 'HÃ´tels',
     FESTIVAL: 'Festivals'
 };
 

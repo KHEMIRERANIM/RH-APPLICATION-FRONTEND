@@ -57,7 +57,7 @@ export class PlanifierEntretienComponent implements OnInit {
     }
   }
 
-  // ? Une seule méthode loadEntretien
+  // ? Une seule mÃ©thode loadEntretien
   private loadEntretien(id: string): void {
     this.loading = true;
     this.entretienService.getEntretienById(id).subscribe({
@@ -101,7 +101,7 @@ export class PlanifierEntretienComponent implements OnInit {
       dateHeure:     this.form.value.dateHeure,
       dureeMinutes:  this.form.value.dureeMinutes,
       lieu:          this.form.value.lieu || null,
-      lienVisio:     null, // ? null pour forcer génération backend
+      lienVisio:     null, // ? null pour forcer gÃ©nÃ©ration backend
     };
 
     const request$ = this.isEditMode && this.entretienId
@@ -120,7 +120,7 @@ export class PlanifierEntretienComponent implements OnInit {
       error: (err) => {
         this.loading = false;
         if (err?.status === 0) {
-          this.errorMsg = 'Backend non démarré sur le port 8081.';
+          this.errorMsg = 'Backend non dÃ©marrÃ© sur le port 8081.';
         } else {
           this.errorMsg = 'Erreur lors de la planification.';
         }

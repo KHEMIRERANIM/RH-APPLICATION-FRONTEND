@@ -11,7 +11,7 @@
           {{ roleService.isAdmin() ? 'Gestion des Commandes' : 'Mes Commandes' }}
         </h2>
         <p class="text-secondary truncate">
-          {{ roleService.isAdmin() ? 'Suivez et gérez toutes les commandes' : 'Passez et suivez vos commandes' }}
+          {{ roleService.isAdmin() ? 'Suivez et gÃ©rez toutes les commandes' : 'Passez et suivez vos commandes' }}
         </p>
       </div>
     </div>
@@ -48,7 +48,7 @@
           <div>
             <p class="text-white font-bold text-base">Encaisser la commande</p>
             <p class="text-blue-200 text-xs mt-0.5">
-              {{ getUserNom(commandeEnCoursDePaiement.userId) }} —
+              {{ getUserNom(commandeEnCoursDePaiement.userId) }} Ã©
               #{{ commandeEnCoursDePaiement.id?.slice(-8) | uppercase }}
             </p>
           </div>
@@ -57,12 +57,12 @@
         <div class="px-6 py-5">
           <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-5 flex items-center justify-between">
             <div>
-              <p class="text-xs text-secondary uppercase tracking-wide mb-0.5">Montant à encaisser</p>
+              <p class="text-xs text-secondary uppercase tracking-wide mb-0.5">Montant - encaisser</p>
               <p class="text-2xl font-extrabold text-primary">
                 {{ commandeEnCoursDePaiement.montantTotal | number:'1.2-2' }} TND
               </p>
               <p *ngIf="commandeEnCoursDePaiement.reductionAppliquee" class="text-xs text-purple-600 mt-0.5">
-                Réduction de {{ commandeEnCoursDePaiement.montantReduction | number:'1.2-2' }} TND appliquée
+                RÃ©duction de {{ commandeEnCoursDePaiement.montantReduction | number:'1.2-2' }} TND appliquÃ©e
               </p>
             </div>
             <div class="text-center">
@@ -80,18 +80,18 @@
               [ngClass]="modePaiementSelectionne === 'especes' ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-gray-200 bg-white text-gray-600 hover:border-blue-300'"
               class="flex flex-col items-center gap-2 p-4 border-2 rounded-xl transition-all font-semibold text-sm">
               <mat-icon svgIcon="heroicons_outline:banknotes" class="icon-size-6"></mat-icon>
-              Espèces
+              EspÃ¨ces
             </button>
             <button (click)="modePaiementSelectionne = 'salaire'"
               [ngClass]="modePaiementSelectionne === 'salaire' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-gray-200 bg-white text-gray-600 hover:border-indigo-300'"
               class="flex flex-col items-center gap-2 p-4 border-2 rounded-xl transition-all font-semibold text-sm">
               <mat-icon svgIcon="heroicons_outline:document-text" class="icon-size-6"></mat-icon>
-              Déduction salaire
+              DÃ©duction salaire
             </button>
           </div>
           <p *ngIf="modePaiementSelectionne === 'salaire'"
             class="text-xs text-indigo-600 bg-indigo-50 border border-indigo-100 rounded-lg px-3 py-2 mb-4">
-            Le montant sera déduit automatiquement du prochain versement de salaire.
+            Le montant sera dÃ©duit automatiquement du prochain versement de salaire.
           </p>
           <div class="flex gap-3">
             <button (click)="fermerModalPaiement()" mat-stroked-button class="flex-1">Annuler</button>
@@ -116,10 +116,10 @@
               class="icon-size-8" [ngClass]="alerte.enRetard ? 'text-red-500' : 'text-blue-500'"></mat-icon>
             <div>
               <p class="font-bold text-sm" [ngClass]="alerte.enRetard ? 'text-red-700' : 'text-blue-700'">
-                {{ alerte.enRetard ? 'Récupérez votre repas rapidement !' : 'Votre repas est prêt !' }}
+                {{ alerte.enRetard ? 'RÃ©cupÃ©rez votre repas rapidement !' : 'Votre repas est prÃªt !' }}
               </p>
               <p class="text-xs text-secondary mt-0.5">
-                {{ alerte.enRetard ? 'Annulation dans ' + alerte.minutesRestantes + ' min' : 'Présentez votre code au comptoir' }}
+                {{ alerte.enRetard ? 'Annulation dans ' + alerte.minutesRestantes + ' min' : 'PrÃ©sentez votre code au comptoir' }}
               </p>
             </div>
           </div>
@@ -157,11 +157,11 @@
       </div>
       <div class="bg-card shadow rounded-2xl p-5 text-center">
         <p class="text-4xl font-semibold text-indigo-600">{{ getTotalMontant() | number:'1.2-2' }} TND</p>
-        <p class="text-sm text-secondary mt-1 uppercase tracking-wide">Total dépensé</p>
+        <p class="text-sm text-secondary mt-1 uppercase tracking-wide">Total dÃ©pensÃ©</p>
       </div>
       <div *ngIf="fidelite" class="bg-primary shadow rounded-2xl p-5 text-center">
         <p class="text-4xl font-semibold text-white">{{ fidelite.points }}</p>
-        <p class="text-sm text-blue-200 mt-1 uppercase tracking-wide">Points fidélité</p>
+        <p class="text-sm text-blue-200 mt-1 uppercase tracking-wide">Points fidÃ©litÃ©</p>
       </div>
     </div>
 
@@ -173,11 +173,11 @@
           <mat-icon svgIcon="heroicons_outline:gift" class="icon-size-5 text-purple-600"></mat-icon>
         </div>
         <div>
-          <p class="text-sm font-semibold text-gray-900">Réduction disponible !</p>
+          <p class="text-sm font-semibold text-gray-900">RÃ©duction disponible !</p>
           <p class="text-xs text-secondary mt-0.5">
-            {{ fidelite.points }} points —
+            {{ fidelite.points }} points Ã©
             <span class="font-bold text-purple-700">-{{ fidelite.montantReduction }} TND</span>
-            sera déduite automatiquement de votre prochaine commande
+            sera dÃ©duite automatiquement de votre prochaine commande
           </p>
         </div>
       </div>
@@ -185,8 +185,8 @@
         <div class="flex items-center justify-between mb-3">
           <div class="flex items-center gap-2">
             <mat-icon svgIcon="heroicons_outline:star" class="icon-size-5 text-primary"></mat-icon>
-            <p class="text-sm font-semibold text-gray-900">Programme fidélité</p>
-            <span class="text-xs text-secondary">— 1 TND = 10 pts — 500 pts = 5 TND</span>
+            <p class="text-sm font-semibold text-gray-900">Programme fidÃ©litÃ©</p>
+            <span class="text-xs text-secondary">- 1 TND = 10 pts - 500 pts = 5 TND</span>
           </div>
           <p class="text-xs text-secondary">encore <span class="font-bold text-primary">{{ getPointsVersProchain() }} pts</span></p>
         </div>
@@ -222,7 +222,7 @@
         class="w-full flex items-center justify-between p-4 bg-card shadow rounded-2xl hover:shadow-md transition-all">
         <div class="flex items-center gap-2">
           <mat-icon svgIcon="heroicons_outline:shield-check" class="icon-size-5 text-primary"></mat-icon>
-          <span class="text-sm font-semibold text-gray-900">Mes allergies — Vérification IA</span>
+          <span class="text-sm font-semibold text-gray-900">Mes allergies - VÃ©rification IA</span>
           <span *ngIf="allergiesEmploye.length > 0" class="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-medium">{{ allergiesEmploye.length }}</span>
           <span *ngIf="alertesAllergie.length > 0" class="text-xs px-2 py-0.5 bg-red-100 text-red-600 rounded-full font-medium">{{ alertesAllergie.length }} alerte(s)</span>
         </div>
@@ -243,17 +243,17 @@
         </div>
         <button *ngIf="allergiesEmploye.length > 0" (click)="verifierAllergies()" [disabled]="analyseEnCours"
           mat-stroked-button [color]="'primary'" class="text-sm">
-          {{ analyseEnCours ? 'Analyse...' : 'Vérifier les plats disponibles' }}
+          {{ analyseEnCours ? 'Analyse...' : 'VÃ©rifier les plats disponibles' }}
         </button>
         <div *ngIf="alertesAllergie.length > 0" class="mt-3 space-y-2">
-          <p class="text-sm font-semibold text-gray-700">Plats à éviter :</p>
+          <p class="text-sm font-semibold text-gray-700">Plats - Ã©viter :</p>
           <div *ngFor="let alerte of alertesAllergie"
             class="p-3 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-between gap-3">
             <div>
               <p class="font-semibold text-sm text-gray-900">{{ alerte.nom }}</p>
               <p class="text-xs text-secondary mt-0.5">Conflits : {{ alerte.conflits.join(', ') }}</p>
             </div>
-            <span class="px-2 py-1 bg-red-50 text-red-600 border border-red-200 rounded-lg text-xs font-bold flex-shrink-0">À éviter</span>
+            <span class="px-2 py-1 bg-red-50 text-red-600 border border-red-200 rounded-lg text-xs font-bold flex-shrink-0">Ã© Ã©viter</span>
           </div>
         </div>
       </div>
@@ -265,9 +265,9 @@
         class="w-full flex items-center justify-between p-4 bg-card shadow rounded-2xl hover:shadow-md transition-all">
         <div class="flex items-center gap-2">
           <mat-icon svgIcon="heroicons_outline:star" class="icon-size-5 text-primary"></mat-icon>
-          <span class="text-sm font-semibold text-gray-900">Programme Fidélité — Vue Admin</span>
+          <span class="text-sm font-semibold text-gray-900">Programme FidÃ©litÃ© - Vue Admin</span>
           <span *ngIf="fidelites.length > 0" class="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-medium">
-            {{ fidelites.length }} employé(s)
+            {{ fidelites.length }} employÃ©(s)
           </span>
         </div>
         <mat-icon [svgIcon]="showDashboardFidelite ? 'heroicons_outline:chevron-up' : 'heroicons_outline:chevron-down'" class="icon-size-5 text-secondary"></mat-icon>
@@ -275,7 +275,7 @@
       <div *ngIf="showDashboardFidelite" class="mt-2 bg-card shadow rounded-2xl overflow-hidden">
         <div class="px-5 py-3 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
           <p class="text-xs text-secondary uppercase tracking-wide font-semibold">
-            Classement — 1 TND = 10 pts — 500 pts = 5 TND
+            Classement - 1 TND = 10 pts - 500 pts = 5 TND
           </p>
           <button (click)="loadFidelites()" mat-button class="text-xs text-primary font-semibold">Actualiser</button>
         </div>
@@ -298,7 +298,7 @@
                   [ngClass]="f.reductionDisponible ? 'bg-purple-500' : 'bg-primary'"
                   [style.width.%]="f.reductionDisponible ? 100 : ((f.points % 500) / 500 * 100)"></div>
               </div>
-              <p class="text-xs text-secondary mt-0.5">{{ f.totalDepense | number:'1.2-2' }} TND dépensé</p>
+              <p class="text-xs text-secondary mt-0.5">{{ f.totalDepense | number:'1.2-2' }} TND dÃ©pensÃ©</p>
             </div>
             <div class="text-right flex-shrink-0">
               <p class="text-sm font-semibold" [ngClass]="f.reductionDisponible ? 'text-purple-600' : 'text-primary'">
@@ -308,7 +308,7 @@
             <div class="flex-shrink-0 w-32 text-right">
               <span *ngIf="f.reductionDisponible"
                 class="px-2 py-1 bg-purple-100 text-purple-700 border border-purple-200 rounded-full text-xs font-bold">
-                ?? Réduction dispo
+                ?? RÃ©duction dispo
               </span>
               <span *ngIf="!f.reductionDisponible"
                 class="px-2 py-1 bg-gray-100 text-secondary rounded-full text-xs">
@@ -318,7 +318,7 @@
           </div>
         </div>
         <div *ngIf="fidelites.length === 0" class="p-8 text-center text-secondary text-sm">
-          Aucune donnée de fidélité disponible.
+          Aucune donnÃ©e de fidÃ©litÃ© disponible.
         </div>
       </div>
     </div>
@@ -339,7 +339,7 @@
 
     <!-- BARRE ADMIN -->
     <div *ngIf="roleService.isAdmin()" class="bg-card shadow rounded-2xl p-4 mb-6 flex flex-wrap gap-3 items-center justify-between">
-      <input type="text" placeholder="Rechercher par nom employé..."
+      <input type="text" placeholder="Rechercher par nom employÃ©..."
         [(ngModel)]="searchUserId"
         class="flex-1 min-w-48 px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50" />
       <div class="flex items-center gap-3">
@@ -360,11 +360,11 @@
       <div class="flex border-b border-gray-100">
         <div class="flex-1 py-3 text-center text-sm font-semibold"
           [ngClass]="step === 1 ? 'bg-primary text-white' : 'bg-gray-50 text-secondary'">
-          1 — Choisir un menu
+          1 - Choisir un menu
         </div>
         <div class="flex-1 py-3 text-center text-sm font-semibold"
           [ngClass]="step === 2 ? 'bg-primary text-white' : 'bg-gray-50 text-secondary'">
-          2 — Choisir les plats
+          2 - Choisir les plats
         </div>
       </div>
       <div class="p-5">
@@ -383,8 +383,8 @@
               class="border border-gray-200 bg-card rounded-2xl p-4 transition-all shadow-sm">
               <div class="flex items-center justify-between mb-2">
                 <h4 class="font-semibold text-gray-900">{{ m.titre }}</h4>
-                <span *ngIf="isMenuDejaCommande(m.id!)" class="text-xs px-2 py-1 bg-gray-200 text-secondary rounded-full">Déjà commandé</span>
-                <span *ngIf="!isMenuDejaCommande(m.id!) && newCommande.menuId === m.id" class="text-xs px-2 py-1 bg-primary text-white rounded-full">Sélectionné</span>
+                <span *ngIf="isMenuDejaCommande(m.id!)" class="text-xs px-2 py-1 bg-gray-200 text-secondary rounded-full">DÃ©jÃ  commandÃ©</span>
+                <span *ngIf="!isMenuDejaCommande(m.id!) && newCommande.menuId === m.id" class="text-xs px-2 py-1 bg-primary text-white rounded-full">SÃ©lectionnÃ©</span>
               </div>
               <p class="text-xs text-secondary">{{ m.date }}</p>
               <p class="text-xs text-primary font-semibold mt-1">{{ m.plats?.length || 0 }} plat(s)</p>
@@ -421,7 +421,7 @@
                     {{ getStockRestant(plat.platId!) }} restant(s)
                   </span>
                   <span *ngIf="(plat.quantite || 0) <= 0 || !plat.disponible"
-                    class="text-xs px-1.5 py-0.5 bg-red-50 text-red-500 border border-red-200 rounded-full font-semibold">Épuisé</span>
+                    class="text-xs px-1.5 py-0.5 bg-red-50 text-red-500 border border-red-200 rounded-full font-semibold">Ã‰puisÃ©</span>
                 </div>
                 <p class="text-primary font-bold text-sm mt-1">{{ plat.prix }} TND</p>
               </div>
@@ -444,13 +444,13 @@
             </div>
           </div>
           <div *ngIf="platsSelectionnes.length > 0" class="p-4 bg-primary-50 border border-primary-200 rounded-2xl mb-4 flex justify-between items-center">
-            <span class="font-semibold text-gray-700">{{ platsSelectionnes.length }} unité(s)</span>
+            <span class="font-semibold text-gray-700">{{ platsSelectionnes.length }} unitÃ©(s)</span>
             <span class="text-xl font-bold text-primary">{{ getMontantPreview() | number:'1.2-2' }} TND</span>
           </div>
           <div class="flex gap-3">
             <button (click)="submitCommande()" [disabled]="platsSelectionnes.length === 0" mat-flat-button [color]="'primary'"
               [ngClass]="platsSelectionnes.length === 0 ? 'opacity-50 cursor-not-allowed' : ''">
-              {{ commandeEnModification ? 'Enregistrer les modifications' : 'Confirmer (' + platsSelectionnes.length + ' unité(s))' }}
+              {{ commandeEnModification ? 'Enregistrer les modifications' : 'Confirmer (' + platsSelectionnes.length + ' unitÃ©(s))' }}
             </button>
             <button (click)="showForm = false; commandeEnModification = null" mat-stroked-button>Annuler</button>
           </div>
@@ -491,7 +491,7 @@
             </div>
             <div class="grid grid-cols-2 gap-3 mb-3">
               <div *ngIf="roleService.isAdmin()" class="bg-gray-50 rounded-xl p-3">
-                <p class="text-xs text-secondary uppercase tracking-wide mb-1">Employé</p>
+                <p class="text-xs text-secondary uppercase tracking-wide mb-1">EmployÃ©</p>
                 <p class="font-semibold text-gray-900 text-sm">{{ getUserNom(c.userId) }}</p>
               </div>
               <div class="bg-gray-50 rounded-xl p-3">
@@ -510,7 +510,7 @@
             <div *ngIf="c.plats?.length" class="flex flex-wrap gap-1">
               <span *ngFor="let item of getPlatsGroupes(c.plats)"
                 class="text-xs px-2 py-1 bg-blue-50 text-blue-700 rounded-full border border-blue-100 font-medium">
-                {{ item.qty > 1 ? item.qty + '× ' : '' }}{{ item.nom }}
+                {{ item.qty > 1 ? item.qty + 'Ã© ' : '' }}{{ item.nom }}
               </span>
             </div>
             <div *ngIf="roleService.isAdmin() && c.statut === 'prete'"
@@ -534,7 +534,7 @@
             </button>
             <div *ngIf="c.statut === 'livree'"
               class="w-full px-4 py-2 bg-green-50 text-green-700 border border-green-200 rounded-xl text-sm font-bold text-center">
-              Completée ?
+              CompletÃ©e ?
             </div>
             <div class="grid grid-cols-5 gap-1">
               <button *ngFor="let s of statuts" (click)="updateStatut(c.id!, s)" [disabled]="c.statut === s"
@@ -573,7 +573,7 @@
         </p>
         <button *ngIf="roleService.isEmploye()" (click)="ouvrirFormulaire()"
           mat-flat-button [color]="'primary'" class="mt-4 text-sm">
-          Passer ma première commande
+          Passer ma premiÃ¨re commande
         </button>
       </div>
     </div>

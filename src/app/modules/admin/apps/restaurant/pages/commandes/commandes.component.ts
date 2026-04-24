@@ -143,7 +143,7 @@ export class CommandesComponent implements OnInit, OnDestroy {
         icon: 'heroicons_outline:bell',
         title: alerte.enRetard ? 'Recuperez votre repas rapidement !' : 'Votre commande est prete !',
         description: alerte.enRetard
-          ? 'Annulation dans ' + alerte.minutesRestantes + ' min — Code : ' + alerte.codeRetrait
+          ? 'Annulation dans ' + alerte.minutesRestantes + ' min - Code : ' + alerte.codeRetrait
           : 'Presentez le code ' + alerte.codeRetrait + ' au comptoir',
         time: new Date().toISOString(),
         link: '/apps/restaurant/commandes',
@@ -201,7 +201,7 @@ export class CommandesComponent implements OnInit, OnDestroy {
     ).subscribe({
       next: () => {
         this.fermerModalPaiement();
-        this.successMsg = 'Paiement enregistre — commande livree !';
+        this.successMsg = 'Paiement enregistre - commande livree !';
         setTimeout(() => this.successMsg = '', 4000);
         this.loadCommandes();
         this.loadFidelites();

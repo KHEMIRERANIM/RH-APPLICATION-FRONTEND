@@ -47,7 +47,7 @@ export class MesReservationsComponent implements OnInit, OnDestroy {
                     // Enrichir avec les titres des offres
                     this._enrichirOffres();
                 },
-                error: () => this._toastr.error('Impossible de charger vos réservations', 'Erreur')
+                error: () => this._toastr.error('Impossible de charger vos rÃ©servations', 'Erreur')
             });
     }
 
@@ -75,7 +75,7 @@ export class MesReservationsComponent implements OnInit, OnDestroy {
             )
             .subscribe({
                 next : () => {
-                    this._toastr.success('Réservation annulée avec succès', 'Succès');
+                    this._toastr.success('RÃ©servation annulÃ©e avec succÃ¨s', 'SuccÃ©s');
                     this._load();
                 },
                 error: (err) => {
@@ -98,7 +98,7 @@ export class MesReservationsComponent implements OnInit, OnDestroy {
             )
             .subscribe({
                 next : () => {
-                    this._toastr.success('Historique vidé avec succès', 'Succès');
+                    this._toastr.success('Historique vidÃ© avec succÃ¨s', 'SuccÃ©s');
                     this._load();
                 },
                 error: (err) => {

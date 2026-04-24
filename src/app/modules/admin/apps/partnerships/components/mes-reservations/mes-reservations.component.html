@@ -15,9 +15,9 @@
                     <mat-icon svgIcon="heroicons_solid:bookmark"></mat-icon>
                     <span>Mon Historique</span>
                 </div>
-                <h1 class="hero-title">Mes Réservations</h1>
+                <h1 class="hero-title">Mes RÃ©servations</h1>
                 <p class="hero-subtitle">
-                    Consultez et gérez vos réservations d'avantages sociaux
+                    Consultez et gÃ©rez vos rÃ©servations d'avantages sociaux
                 </p>
             </div>
             <div class="hero-actions">
@@ -31,7 +31,7 @@
                     <mat-progress-spinner *ngIf="isClearingHistory" mode="indeterminate" diameter="16"
                         class="mr-2"></mat-progress-spinner>
                     <span *ngIf="isClearingHistory">&nbsp; Nettoyage...</span>
-                    <span *ngIf="!isClearingHistory">Vider les annulées</span>
+                    <span *ngIf="!isClearingHistory">Vider les annulÃ©es</span>
                 </button>
             </div>
         </div>
@@ -45,7 +45,7 @@
             </div>
             <div class="kpi-info">
                 <span class="kpi-value">{{ nbConfirmees }}</span>
-                <span class="kpi-label">Confirmée(s)</span>
+                <span class="kpi-label">ConfirmÃ©e(s)</span>
             </div>
         </div>
 
@@ -55,7 +55,7 @@
             </div>
             <div class="kpi-info">
                 <span class="kpi-value">{{ nbAnnulees }}</span>
-                <span class="kpi-label">Annulée(s)</span>
+                <span class="kpi-label">AnnulÃ©ee(s)</span>
             </div>
         </div>
 
@@ -65,7 +65,7 @@
             </div>
             <div class="kpi-info">
                 <span class="kpi-value">{{ montantTotal | number:'1.0-2' }} DT</span>
-                <span class="kpi-label">Total engagé</span>
+                <span class="kpi-label">Total engagÃ©</span>
             </div>
         </div>
     </div>
@@ -75,20 +75,20 @@
         <mat-progress-spinner mode="indeterminate" diameter="48" color="primary"></mat-progress-spinner>
     </div>
 
-    <!-- --- ÉTAT VIDE ------------------------------------------ -->
+    <!-- --- Ã©TAT VIDE ------------------------------------------ -->
     <div class="empty-state" *ngIf="!isLoading && reservations.length === 0">
         <div class="empty-icon">
             <mat-icon svgIcon="heroicons_outline:bookmark"></mat-icon>
         </div>
-        <h3>Aucune réservation</h3>
-        <p>Vous n'avez pas encore effectué de réservation.</p>
+        <h3>Aucune rÃ©servation</h3>
+        <p>Vous n'avez pas encore effectuÃ© de rÃ©servation.</p>
         <button mat-flat-button class="btn-primary-action" (click)="retourCatalogue()">
             <mat-icon svgIcon="heroicons_outline:collection"></mat-icon>
-            Découvrir les offres
+            DÃ©couvrir les offres
         </button>
     </div>
 
-    <!-- --- LISTE DES RÉSERVATIONS ----------------------------- -->
+    <!-- --- LISTE DES RÃ‰SERVATIONS ----------------------------- -->
     <div class="reservations-list" *ngIf="!isLoading && reservations.length > 0">
 
         <div class="reservation-card"
@@ -97,7 +97,7 @@
             [class.confirmed]="r.statut === 'CONFIRMEE'"
             [class.cancelled]="r.statut === 'ANNULEE'">
 
-            <!-- -- Panneau accent gauche coloré --- -->
+            <!-- -- Panneau accent gauche colorÃ© --- -->
             <div class="card-accent">
                 <div class="accent-icon">
                     <mat-icon [svgIcon]="r.statut === 'CONFIRMEE'
@@ -120,11 +120,11 @@
                     <span class="status-badge"
                         [class.badge-confirmee]="r.statut === 'CONFIRMEE'"
                         [class.badge-annulee]="r.statut === 'ANNULEE'">
-                        {{ r.statut === 'CONFIRMEE' ? '? CONFIRMÉE' : '? ANNULÉE' }}
+                        {{ r.statut === 'CONFIRMEE' ? '? CONFIRMÃ‰EE' : '? ANNULÃ‰EE' }}
                     </span>
                 </div>
 
-                <!-- Ligne 2 : Chips méta -->
+                <!-- Ligne 2 : Chips mÃ©ta -->
                 <div class="card-meta">
                     <span class="meta-chip" *ngIf="!(r.nbAdultes > 0 || r.nbEnfants > 0)">
                         <mat-icon svgIcon="heroicons_mini:users"></mat-icon>
@@ -136,7 +136,7 @@
                     </span>
                     <span class="meta-chip" *ngIf="r.formule">
                         <mat-icon svgIcon="heroicons_mini:cake"></mat-icon>
-                        {{ r.formule === 'PD' ? 'Petit Dej.' : (r.formule === 'DP' ? 'Demi Pension' : 'Pension Complète') }}
+                        {{ r.formule === 'PD' ? 'Petit Dej.' : (r.formule === 'DP' ? 'Demi Pension' : 'Pension ComplÃ¨te') }}
                     </span>
                     <span class="meta-chip" *ngIf="!r.nbAdultes && r.nbEnfants === undefined">
                         <mat-icon svgIcon="heroicons_mini:currency-dollar"></mat-icon>
@@ -144,21 +144,21 @@
                     </span>
                     <span class="meta-chip" *ngIf="r.dateReservation">
                         <mat-icon svgIcon="heroicons_mini:calendar"></mat-icon>
-                        {{ r.dateReservation | date:'dd/MM/yyyy à HH:mm' }}
+                        {{ r.dateReservation | date:'dd/MM/yyyy Ã  HH:mm' }}
                     </span>
                 </div>
 
-                <!-- Ligne 3 : Séparateur + total + actions -->
+                <!-- Ligne 3 : SÃ©parateur + total + actions -->
                 <div class="card-footer-row">
                     <div class="total-block">
-                        <span class="total-label">Total réservation</span>
+                        <span class="total-label">Total rÃ©servation</span>
                         <span class="total-amount">{{ r.prixTotal | number:'1.0-2' }} DT</span>
                     </div>
 
                     <div class="card-actions">
                         <span class="cancel-note" *ngIf="r.statut === 'ANNULEE' && r.dateAnnulation">
                             <mat-icon svgIcon="heroicons_mini:information-circle"></mat-icon>
-                            Annulée le {{ r.dateAnnulation | date:'dd/MM/yyyy' }}
+                            AnnulÃ©ee le {{ r.dateAnnulation | date:'dd/MM/yyyy' }}
                         </span>
 
                         <button *ngIf="r.statut === 'CONFIRMEE'"

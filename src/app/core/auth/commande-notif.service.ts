@@ -60,7 +60,7 @@ export class CommandeNotifService implements OnDestroy {
             const minutesRestantes = Math.max(0, 2 - minutes);
             const enRetard = minutes >= 1;
 
-            // ? Utilise codeRetrait du backend en priorité
+            // ? Utilise codeRetrait du backend en prioritÃ©
             const code = c.codeRetrait || (c.id || '').slice(-4).toUpperCase();
 
             const notif: any = {
@@ -70,7 +70,7 @@ export class CommandeNotifService implements OnDestroy {
                     ? '?? Recuperez votre repas !'
                     : '??? Votre commande est prete !',
                 description: enRetard
-                    ? `Annulation dans <strong style="color:#dc2626">${minutesRestantes} min</strong> — Code : <strong style="letter-spacing:3px;color:#dc2626;font-size:1.1em">${code}</strong>`
+                    ? `Annulation dans <strong style="color:#dc2626">${minutesRestantes} min</strong> - Code : <strong style="letter-spacing:3px;color:#dc2626;font-size:1.1em">${code}</strong>`
                     : `Presentez ce code au comptoir : <strong style="letter-spacing:3px;color:#4f46e5;font-size:1.1em">${code}</strong>`,
                 link: '/apps/restaurant/commandes',
                 useRouter: true,

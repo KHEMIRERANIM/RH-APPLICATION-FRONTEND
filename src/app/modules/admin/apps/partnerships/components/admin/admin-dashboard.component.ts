@@ -28,7 +28,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     offresCols = ['titre', 'categorie', 'partenaire', 'prixConvention', 'nbPlacesDispo', 'statut', 'actions'];
     loadingO = true;
 
-    // -- RÈservations -------------------------------------
+    // -- R√©servations -------------------------------------
     reservationsDS = new MatTableDataSource<AvantageReservation>();
     reservationsCols = ['reference', 'user', 'offre', 'nbPersonnes', 'prixTotal', 'statut', 'dateReservation'];
     loadingR = true;
@@ -96,7 +96,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
             .pipe(takeUntil(this._unsub), finalize(() => delete this.deletingP[id]))
             .subscribe({
                 next: () => {
-                    this._toastr.success('Partenaire supprimÈ');
+                    this._toastr.success('Partenaire supprim√©');
                     this._loadPartenaires();
                 },
                 error: () => this._toastr.error('Erreur lors de la suppression')
@@ -110,9 +110,9 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
                 next: (updated) => {
                     const i = this.partenaires.findIndex(p => p.id === updated.id);
                     if (i !== -1) { this.partenaires[i] = updated; this.partenairesDS.data = [...this.partenaires]; }
-                    this._toastr.success(updated.actif ? 'Partenaire activÈ' : 'Partenaire dÈsactivÈ');
+                    this._toastr.success(updated.actif ? 'Partenaire activ√©' : 'Partenaire d√©sactiv√©');
                 },
-                error: () => this._toastr.error('Erreur mise ‡ jour statut')
+                error: () => this._toastr.error('Erreur mise - jour statut')
             });
     }
 
@@ -153,7 +153,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
             .pipe(takeUntil(this._unsub), finalize(() => delete this.deletingO[id]))
             .subscribe({
                 next: () => {
-                    this._toastr.success('OffreAvantage supprimÈe');
+                    this._toastr.success('OffreAvantage supprim√©e');
                     this._loadOffres();
                 },
                 error: () => this._toastr.error('Erreur lors de la suppression')
@@ -167,9 +167,9 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
                 next: (updated) => {
                     const i = this.offres.findIndex(o => o.id === updated.id);
                     if (i !== -1) { this.offres[i] = updated; this.offresDS.data = [...this.offres]; }
-                    this._toastr.success(updated.statut === 'ACTIVE' ? 'OffreAvantage activÈe' : 'OffreAvantage dÈsactivÈe');
+                    this._toastr.success(updated.statut === 'ACTIVE' ? 'OffreAvantage activ√©e' : 'OffreAvantage d√©sactiv√©e');
                 },
-                error: () => this._toastr.error('Erreur mise ‡ jour statut')
+                error: () => this._toastr.error('Erreur mise - jour statut')
             });
     }
 
@@ -183,7 +183,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     }
 
     // ----------------------------------------------------
-    // R…SERVATIONS
+    // R√âSERVATIONS
     // ----------------------------------------------------
 
     private _loadUsersAndReservations(): void {
@@ -231,7 +231,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
                         new Date(b.dateReservation!).getTime() - new Date(a.dateReservation!).getTime()
                     );
                 },
-                error: () => this._toastr.error('Erreur chargement rÈservations')
+                error: () => this._toastr.error('Erreur chargement r√©servations')
             });
     }
 

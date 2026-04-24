@@ -3114,7 +3114,7 @@ export const countries = [
     {
         id          : '489db55f-6316-4f43-a1c7-a0921e16743a',
         iso         : 'ci',
-        name        : 'Côte d’Ivoire',
+        name        : 'CÃ©te dÃ©Ivoire',
         code        : '+225',
         flagImagePos: '-1px -2194px'
     },
@@ -3135,7 +3135,7 @@ export const countries = [
     {
         id          : '572674e5-b0d4-4206-8310-70f4656e65e2',
         iso         : 'cw',
-        name        : 'Curaçao',
+        name        : 'CuraÃ©ao',
         code        : '+599',
         flagImagePos: '-1px -3758px'
     },
@@ -3947,7 +3947,7 @@ export const countries = [
     {
         id          : 'c3a3fb54-5731-4a28-96bd-4190cfeeaff0',
         iso         : 're',
-        name        : 'Réunion',
+        name        : 'RÃ©union',
         code        : '+262',
         flagImagePos: '-1px -324px'
     },
@@ -3989,7 +3989,7 @@ export const countries = [
     {
         id          : 'c5301260-13dc-4012-9678-2b57a5e409ae',
         iso         : 'st',
-        name        : 'São Tomé & Príncipe',
+        name        : 'SÃ©o TomÃ© & PrÃ©ncipe',
         code        : '+239',
         flagImagePos: '-1px -3299px'
     },
@@ -4108,7 +4108,7 @@ export const countries = [
     {
         id          : '0ae719a5-ae43-45d0-b669-66976a050ef1',
         iso         : 'bl',
-        name        : 'St. Barthélemy',
+        name        : 'St. BarthÃ©lemy',
         code        : '+590',
         flagImagePos: '-1px -324px'
     },

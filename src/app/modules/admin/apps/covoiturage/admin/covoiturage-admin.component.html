@@ -871,31 +871,34 @@
                   <span class="text-xs text-gray-400 font-medium">réclamations</span>
                 </div>
                 <!-- Actions Recommandation -->
-                <div class="flex items-center gap-2">
-                  <button *ngIf="stat.isRecommended" (click)="optimizeRoute(stat)"
+                <div class="flex items-center gap-2" *ngIf="stat.isRecommended">
+                  <button (click)="stat.showDetails = !stat.showDetails"
+                    class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                    [title]="'Voir les détails des ' + stat.regularCount + ' employés réguliers'">
+                    <mat-icon class="icon-size-4"
+                      [svgIcon]="stat.showDetails ? 'feather:chevron-up' : 'feather:info'"></mat-icon>
+                  </button>
+                  <button (click)="applyStopRecommendation(stat)"
                     class="px-3 py-1.5 bg-[#1D9E75] text-white rounded-lg text-xs font-bold hover:bg-[#168567] transition flex items-center gap-1.5"
                     [title]="stat.regularCount + ' employés réguliers identifiés'">
-                    <mat-icon class="icon-size-3.5 text-white" svgIcon="feather:map-pin"></mat-icon> OPTIMISER
-                  </button>
-                  <button (click)="stat.showDetails = !stat.showDetails"
-                    class="p-1.5 text-gray-400 hover:text-[#1D9E75] hover:bg-[#1D9E75]/5 rounded-lg transition-all"
-                    [title]="stat.showDetails ? 'Masquer les détails' : 'Voir les détails'">
-                    <mat-icon class="icon-size-4" [svgIcon]="stat.showDetails ? 'feather:chevron-up' : 'feather:chevron-down'"></mat-icon>
+                    <mat-icon class="icon-size-3.5 text-white" svgIcon="feather:map-pin"></mat-icon> Optimiser
                   </button>
                 </div>
               </div>
             </div>
 
-            <!-- Détails Section (Expansible) -->
-            <div *ngIf="stat.showDetails" class="mt-4 ml-54 bg-gray-50/80 rounded-2xl p-4 border border-gray-100 animate-in slide-in-from-top-2 duration-300">
-              <p class="text-xs font-bold text-[#1D9E75] flex items-center gap-2 mb-3">
+            <!-- Détails de l'Optimisation -->
+            <div *ngIf="stat.showDetails && stat.isRecommended"
+              class="ml-54 border-l-4 border-[#1D9E75]/30 pl-6 py-4 mt-2 space-y-3 animate-in slide-in-from-top-2 duration-300 bg-[#1D9E75]/5 rounded-r-xl">
+              <p class="text-xs font-bold text-[#1D9E75] flex items-center gap-2">
                 <mat-icon class="icon-size-4" svgIcon="feather:users"></mat-icon>
-                Utilisateurs réguliers impactés ({{ stat.regularCount }})
+                Utilisateurs réguliers impactés
               </p>
               <div class="flex flex-wrap gap-3">
                 <div *ngFor="let emp of stat.regularEmployeesDetails"
                   class="bg-white border border-gray-100 rounded-xl px-4 py-3 shadow-sm flex items-center gap-3">
-                  <div class="w-8 h-8 rounded-full bg-[#1D9E75]/10 text-[#1D9E75] flex items-center justify-center text-sm font-bold">
+                  <div
+                    class="w-8 h-8 rounded-full bg-[#1D9E75] text-white flex items-center justify-center text-sm font-bold">
                     {{ emp.name.charAt(0) }}
                   </div>
                   <div class="flex flex-col">
@@ -905,6 +908,7 @@
                 </div>
               </div>
             </div>
+
             <!-- Empty State -->
             <div *ngIf="reclamationStats.length === 0" class="py-12 text-center">
               <div

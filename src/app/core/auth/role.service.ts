@@ -7,7 +7,7 @@ export class RoleService {
   constructor(private authService: AuthService) {}
 
   /**
-   * Normalise le rôle renvoyé par l’API (casse, accents, variantes anglaises).
+   * Normalise le rÃ©le renvoyÃ© par lÃ©API (casse, accents, variantes anglaises).
    */
   static normalizeRole(raw: string | null | undefined): string {
     if (raw == null || raw === '') {

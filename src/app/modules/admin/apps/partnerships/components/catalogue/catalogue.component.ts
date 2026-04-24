@@ -31,7 +31,7 @@ export class CatalogueComponent implements OnInit, OnDestroy {
     filters: { key: FilterType; label: string; icon: string }[] = [
         { key: 'TOUS',     label: 'Toutes',    icon: 'heroicons_outline:view-grid'        },
         { key: 'VOYAGE',   label: 'Voyages',   icon: 'heroicons_outline:paper-airplane'   },
-        { key: 'HOTEL',    label: 'Hôtels',    icon: 'heroicons_outline:office-building'  },
+        { key: 'HOTEL',    label: 'HÃ´tels',    icon: 'heroicons_outline:office-building'  },
         { key: 'FESTIVAL', label: 'Festivals', icon: 'heroicons_outline:music-note'       }
     ];
 
@@ -76,7 +76,7 @@ export class CatalogueComponent implements OnInit, OnDestroy {
                     this.kpis.placesTotal = offres.reduce((acc, o) => acc + (o.nbPlacesDispo || 0), 0);
                     if (this.isAdmin) { this._loadPartenaires(); }
 
-                    // ?? Évaluation asynchrone IA de la demande pour chaque offre affichée
+                    // ?? Ã©valuation asynchrone IA de la demande pour chaque offre affichÃ©e
                     this.offres.forEach(offre => {
                         if (offre.id) {
                             this._svc.evaluerUrgence(offre.id).subscribe({
@@ -143,7 +143,7 @@ export class CatalogueComponent implements OnInit, OnDestroy {
     // -- Actions -----------------------------------------------
 
     toggleFavori(offre: OffreAvantage, event: Event): void {
-        event.stopPropagation(); // Empêche l'ouverture de la boîte de dialogue
+        event.stopPropagation(); // EmpÃ©che l'ouverture de la boÃ©te de dialogue
         
         if (!offre.id || this.isTogglingFavori[offre.id]) return;
         
@@ -154,7 +154,7 @@ export class CatalogueComponent implements OnInit, OnDestroy {
             this._svc.retirerFavori(offre.id).subscribe({
                 next: () => {
                     this.favoriMap[offre.id] = false;
-                    this._toastr.info('OffreAvantage retirée de vos favoris', 'Favoris');
+                    this._toastr.info('OffreAvantage retirÃ©e de vos favoris', 'Favoris');
                     this.isTogglingFavori[offre.id] = false;
                 },
                 error: () => {
@@ -166,11 +166,11 @@ export class CatalogueComponent implements OnInit, OnDestroy {
             this._svc.ajouterFavori(offre.id).subscribe({
                 next: () => {
                     this.favoriMap[offre.id] = true;
-                    this._toastr.success('OffreAvantage ajoutée à vos favoris ?', 'Favoris');
+                    this._toastr.success('OffreAvantage ajoutÃ©e - vos favoris ?', 'Favoris');
                     this.isTogglingFavori[offre.id] = false;
                 },
                 error: (err) => {
-                    this._toastr.error('Erreur ou offre déjà en favoris', 'Erreur');
+                    this._toastr.error('Erreur ou offre dÃ©jÃ© en favoris', 'Erreur');
                     this.isTogglingFavori[offre.id] = false;
                 }
             });
@@ -188,7 +188,7 @@ export class CatalogueComponent implements OnInit, OnDestroy {
         dialogRef.afterClosed().subscribe(result => {
             if (result === 'reserved') {
                 this._loadData();
-                this._toastr.success('Réservation confirmée avec succès !', 'Succès');
+                this._toastr.success('RÃ©servation confirmÃ©e avec succÃ¨s !', 'SuccÃ©s');
             }
         });
     }
@@ -241,7 +241,7 @@ export class CatalogueComponent implements OnInit, OnDestroy {
     }
 
     getDefaultImage(cat: CategorieOffreAvantage): string {
-        // SVG data URI inline par catégorie (fallback si pas d'image)
+        // SVG data URI inline par catÃ©gorie (fallback si pas d'image)
         const gradients: Record<CategorieOffreAvantage, string> = {
             VOYAGE  : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
             HOTEL   : 'linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%)',

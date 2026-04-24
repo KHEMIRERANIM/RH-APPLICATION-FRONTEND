@@ -63,7 +63,7 @@
                         </ng-container>
 
                         <ng-container matColumnDef="type">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header>Catégorie</th>
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header>CatÃ©gorie</th>
                             <td mat-cell *matCellDef="let p">
                                 <span class="cat-chip cat-{{ p.type | lowercase }}">{{ p.type }}</span>
                             </td>
@@ -72,7 +72,7 @@
                         <ng-container matColumnDef="emailContact">
                             <th mat-header-cell *matHeaderCellDef>Email</th>
                             <td mat-cell *matCellDef="let p">
-                                <span class="text-muted">{{ p.emailContact || '—' }}</span>
+                                <span class="text-muted">{{ p.emailContact || '-' }}</span>
                             </td>
                         </ng-container>
 
@@ -90,7 +90,7 @@
                                     [checked]="p.actif"
                                     color="primary"
                                     (change)="togglePartenaire(p)"
-                                    [matTooltip]="p.actif ? 'Désactiver' : 'Activer'">
+                                    [matTooltip]="p.actif ? 'DÃ©sactiver' : 'Activer'">
                                 </mat-slide-toggle>
                             </td>
                         </ng-container>
@@ -116,7 +116,7 @@
 
                         <tr class="mat-row" *matNoDataRow>
                             <td class="mat-cell no-data" [attr.colspan]="partenairesCols.length">
-                                Aucun partenaire trouvé
+                                Aucun partenaire trouvÃ©
                             </td>
                         </tr>
                     </table>
@@ -169,7 +169,7 @@
                         </ng-container>
 
                         <ng-container matColumnDef="categorie">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header>Catégorie</th>
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header>CatÃ©gorie</th>
                             <td mat-cell *matCellDef="let o">
                                 <span class="cat-chip cat-{{ o.categorie | lowercase }}">{{ o.categorie }}</span>
                             </td>
@@ -213,7 +213,7 @@
                                     [checked]="o.statut === 'ACTIVE'"
                                     color="primary"
                                     (change)="toggleOffre(o)"
-                                    [matTooltip]="o.statut === 'ACTIVE' ? 'Désactiver' : 'Activer'">
+                                    [matTooltip]="o.statut === 'ACTIVE' ? 'DÃ©sactiver' : 'Activer'">
                                 </mat-slide-toggle>
                             </td>
                         </ng-container>
@@ -239,7 +239,7 @@
 
                         <tr class="mat-row" *matNoDataRow>
                             <td class="mat-cell no-data" [attr.colspan]="offresCols.length">
-                                Aucune offre trouvée
+                                Aucune offre trouvÃ©e
                             </td>
                         </tr>
                     </table>
@@ -249,12 +249,12 @@
         </mat-tab>
 
         <!-- ----------------------------------------------
-             ONGLET 3 : TOUTES LES RÉSERVATIONS
+             ONGLET 3 : TOUTES LES RÃ‰SERVATIONS
         --------------------------------------------------- -->
         <mat-tab>
             <ng-template mat-tab-label>
                 <mat-icon svgIcon="heroicons_outline:clipboard-list" class="tab-icon"></mat-icon>
-                Réservations
+                RÃ©servations
             </ng-template>
 
             <div class="tab-content">
@@ -276,7 +276,7 @@
                     <table mat-table [dataSource]="reservationsDS" class="admin-table">
 
                         <ng-container matColumnDef="reference">
-                            <th mat-header-cell *matHeaderCellDef>Réf.</th>
+                            <th mat-header-cell *matHeaderCellDef>RÃ©f.</th>
                             <td mat-cell *matCellDef="let r">
                                 <span class="badge-ref" *ngIf="r.id">#{{ r.id.slice(-8) | uppercase }}</span>
                                 <span class="badge-ref" *ngIf="!r.id">#N/A</span>
@@ -332,7 +332,7 @@
 
                         <tr class="mat-row" *matNoDataRow>
                             <td class="mat-cell no-data" [attr.colspan]="reservationsCols.length">
-                                Aucune réservation trouvée
+                                Aucune rÃ©servation trouvÃ©e
                             </td>
                         </tr>
                     </table>
