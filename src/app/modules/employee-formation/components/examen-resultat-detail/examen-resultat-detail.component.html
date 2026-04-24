@@ -1,0 +1,160 @@
+<!-- examen-resultat-detail.component.html -->
+<div class="examen-resultat-container" *ngIf="!isLoading && resultat && examen">
+    
+    <!-- En-tête avec note -->
+    <div class="resultat-header" [class]="getNoteClass()">
+        <div class="note-circle">
+            <span class="note-icon">{{ getNoteIcon() }}</span>
+            <span class="note-value">{{ resultat.note }}/20</span>
+            <span class="note-pourcentage">{{ getPourcentage() }}%</span>
+        </div>
+        <div class="resultat-info">
+            <h2>{{ examen.titre }}</h2>
+            <p class="statut" [class]="getStatutClass()">
+                {{ getStatutText() }}
+            </p>
+            <p class="feedback-global" *ngIf="resultat.feedbackIA">
+                {{ resultat.feedbackIA }}
+            </p>
+            <div class="badge-ia" *ngIf="resultat.iaUtilisee">
+                🤖 Correction assistée par IA
+            </div>
+        </div>
+    </div>
+
+    <!-- Onglets -->
+    <div class="tabs">
+        <button [class.active]="activeTab === 'resume'" (click)="activeTab = 'resume'">
+             Résumé
+        </button>
+        <button [class.active]="activeTab === 'details'" (click)="activeTab = 'details'">
+             Détail des questions
+        </button>
+        <button [class.active]="activeTab === 'global'" (click)="activeTab = 'global'">
+            💬 Feedback global
+        </button>
+    </div>
+
+    <!-- Onglet Résumé -->
+    <div class="tab-content" *ngIf="activeTab === 'resume'">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">{{ getNoteMoyenne() }}/20</div>
+                <div class="stat-label">Votre note</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ getTauxReussite() }}%</div>
+                <div class="stat-label">Taux de réussite</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ getQuestionsRepondues() }}/{{ getTotalQuestions() }}</div>
+                <div class="stat-label">Questions répondues</div>
+            </div>
+        </div>
+
+        <!-- Graphique des scores par question -->
+        <div class="scores-chart">
+            <h3>📊 Performance par question</h3>
+            <div class="bar-container" *ngFor="let score of getScoreParQuestion(); let i = index">
+                <div class="bar-label">Question {{ i + 1 }}</div>
+                <div class="bar">
+                    <div class="bar-fill" [style.width.%]="score.pourcentage" 
+                         [class.success]="score.points === score.max"
+                         [class.partial]="score.points > 0 && score.points < score.max"
+                         [class.fail]="score.points === 0">
+                    </div>
+                </div>
+                <div class="bar-score">{{ score.points }}/{{ score.max }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Onglet Détail des questions -->
+    <div class="tab-content" *ngIf="activeTab === 'details'">
+        <div class="questions-details">
+            <div *ngFor="let question of examen.questions; let i = index" 
+                 class="question-detail-card" 
+                 [class.correct]="getReponseForQuestion(question.id)?.pointsObtenus === question.points"
+                 [class.incorrect]="getReponseForQuestion(question.id)?.pointsObtenus === 0"
+                 [class.partial]="getReponseForQuestion(question.id)?.pointsObtenus > 0 && getReponseForQuestion(question.id)?.pointsObtenus < question.points">
+                
+                <div class="question-header">
+                    <div class="question-num">Question {{ i + 1 }}</div>
+                    <div class="question-points">
+                        {{ getReponseForQuestion(question.id)?.pointsObtenus || 0 }}/{{ question.points }} pts
+                    </div>
+                </div>
+                
+                <div class="question-text">
+                    <strong>{{ question.texte }}</strong>
+                    <span class="question-type">{{ getQuestionTypeIcon(question.type) }} {{ question.type }}</span>
+                </div>
+                
+                <div class="reponse-utilisateur">
+                    <div class="label"> Votre réponse :</div>
+                    <div class="content" [innerHTML]="formatReponse(getReponseForQuestion(question.id)?.reponse || 'Aucune réponse')"></div>
+                </div>
+                
+                <!-- Feedback IA -->
+                <div class="feedback-ia" *ngIf="getFeedbackForQuestion(question.id)">
+                    <div class="feedback-header">
+                        🤖 Feedback IA
+                        <span class="feedback-points" *ngIf="getReponseForQuestion(question.id)?.pointsObtenus === question.points">✅</span>
+                        <span class="feedback-points" *ngIf="getReponseForQuestion(question.id)?.pointsObtenus === 0">❌</span>
+                    </div>
+                    <div class="feedback-message">
+                        {{ getFeedbackForQuestion(question.id)?.feedback }}
+                    </div>
+                    <div class="feedback-commentaire" *ngIf="getFeedbackForQuestion(question.id)?.commentaire">
+                        <strong>💡 Détail :</strong> {{ getFeedbackForQuestion(question.id)?.commentaire }}
+                    </div>
+                </div>
+
+                <!-- Réponse attendue -->
+                <div class="reponse-attendue" *ngIf="question.type !== 'QCM' && question.correctAnswer">
+                    <div class="label"> Réponse attendue :</div>
+                    <div class="content">{{ question.correctAnswer }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Onglet Feedback global -->
+    <div class="tab-content" *ngIf="activeTab === 'global'">
+        <div class="feedback-global-card">
+            <div class="feedback-icon">🤖</div>
+            <h3>Analyse de votre examen</h3>
+            <div class="feedback-text">
+                {{ resultat.feedbackIA || 'Aucun feedback global disponible.' }}
+            </div>
+            
+            <div class="recommandations" *ngIf="resultat.note < 10">
+                <h4> Suggestions d'amélioration</h4>
+                <ul>
+                    <li>Révisez les notions où vous avez eu le plus de difficultés</li>
+                    <li>Consultez les ressources de la formation</li>
+                    <li>N'hésitez pas à contacter votre formateur</li>
+                </ul>
+            </div>
+            
+            <div class="certification-action" *ngIf="resultat.valide">
+                <button class="btn-certification" (click)="telechargerCertification()">
+                    Télécharger ma certification
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+        <button class="btn-retour" (click)="retour()">
+            ← Retour à mes formations
+        </button>
+    </div>
+</div>
+
+<!-- Loader -->
+<div class="loader-container" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Chargement de vos résultats...</p>
+</div>

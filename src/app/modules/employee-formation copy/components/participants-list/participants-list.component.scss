@@ -1,0 +1,629 @@
+// ==================== VARIABLES ====================
+$primary: #4f46e5;
+$success: #10b981;
+$danger: #ef4444;
+$warning: #f59e0b;
+$info: #3b82f6;
+$bg-light: #f8fafc;
+$border: #e2e8f0;
+$text-dark: #1e293b;
+$text-gray: #64748b;
+
+// ==================== GLOBAL ====================
+:host {
+    display: block;
+    width: 100%;
+}
+
+.viewport-wrapper {
+    background-color: $bg-light;
+    min-height: 100vh;
+    width: 100%;
+    padding: 2rem;
+    box-sizing: border-box;
+
+    .main-content {
+        max-width: 1600px;
+        margin: 0 auto;
+    }
+}
+
+// ==================== HEADER ====================
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+
+    .header-nav {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+
+        .btn-back-circle {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            border: 1px solid $border;
+            background: white;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            &:hover {
+                background: $primary;
+                color: white;
+                border-color: $primary;
+                transform: translateX(-2px);
+            }
+        }
+
+        .title-group {
+            .breadcrumb {
+                font-size: 0.75rem;
+                color: #94a3b8;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                margin-bottom: 0.25rem;
+            }
+
+            h1 {
+                margin: 0;
+                font-size: 1.8rem;
+                font-weight: 800;
+                color: $text-dark;
+            }
+        }
+    }
+
+    .btn-export {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem 1.2rem;
+        background: white;
+        border: 1px solid $border;
+        border-radius: 0.5rem;
+        color: $text-dark;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+
+        &:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+    }
+}
+
+// ==================== BANNIÈRE PÉRIODE ====================
+.period-banner {
+    margin-bottom: 1.5rem;
+
+    .period-info {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1rem 1.25rem;
+        border-radius: 0.75rem;
+        background: white;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+
+        &.period-ongoing {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border-left: 4px solid $success;
+        }
+
+        &.period-upcoming {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border-left: 4px solid $info;
+        }
+
+        &.period-finished {
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            border-left: 4px solid #6b7280;
+        }
+
+        .period-icon {
+            font-size: 1.5rem;
+        }
+
+        .period-details {
+            flex: 1;
+
+            .period-title {
+                font-size: 0.875rem;
+                font-weight: 700;
+                margin-bottom: 0.25rem;
+                letter-spacing: 0.5px;
+
+                .period-ongoing & {
+                    color: #065f46;
+                }
+                .period-upcoming & {
+                    color: #1e40af;
+                }
+                .period-finished & {
+                    color: #4b5563;
+                }
+            }
+
+            .period-dates {
+                font-size: 0.75rem;
+                color: #4b5563;
+                margin-bottom: 0.5rem;
+            }
+
+            .period-message {
+                font-size: 0.75rem;
+
+                .period-ongoing & {
+                    color: #065f46;
+                }
+                .period-upcoming & {
+                    color: #1e40af;
+                }
+                .period-finished & {
+                    color: #6b7280;
+                }
+            }
+        }
+    }
+}
+
+// ==================== STATS GRID ====================
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+
+    .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        gap: 1.2rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        transition: transform 0.2s, box-shadow 0.2s;
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 12px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+
+            &.blue {
+                background: #eff6ff;
+                color: #2563eb;
+            }
+            &.green {
+                background: #ecfdf5;
+                color: $success;
+            }
+            &.purple {
+                background: #faf5ff;
+                color: #7c3aed;
+            }
+            &.orange {
+                background: #fff3e0;
+                color: $warning;
+            }
+        }
+
+        .stat-data {
+            .value {
+                display: block;
+                font-size: 1.6rem;
+                font-weight: 700;
+                color: $text-dark;
+            }
+            .label {
+                font-size: 0.85rem;
+                color: $text-gray;
+                font-weight: 500;
+            }
+        }
+    }
+}
+
+// ==================== TOOLBAR ====================
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    background: white;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    flex-wrap: wrap;
+    gap: 1rem;
+
+    .search-wrapper {
+        position: relative;
+        flex: 1;
+        max-width: 400px;
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.7rem 1rem 0.7rem 2.5rem;
+            border-radius: 8px;
+            border: 1px solid $border;
+            outline: none;
+            transition: all 0.2s;
+
+            &:focus {
+                border-color: $primary;
+                box-shadow: 0 0 0 3px rgba($primary, 0.1);
+            }
+        }
+    }
+
+    .filter-group {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+
+        button {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            background: #f1f5f9;
+            color: $text-gray;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+
+            &.active {
+                background: $primary;
+                color: white;
+            }
+
+            &:hover:not(.active) {
+                background: #e2e8f0;
+            }
+        }
+    }
+}
+
+// ==================== TABLE ====================
+.table-container {
+    background: white;
+    border-radius: 16px;
+    overflow-x: auto;
+    border: 1px solid $border;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.modern-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
+
+    th {
+        background: #f8fafc;
+        padding: 1.2rem 1.5rem;
+        text-align: left;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: $text-gray;
+        font-weight: 700;
+        border-bottom: 1px solid $border;
+
+        &.text-right {
+            text-align: right;
+        }
+    }
+
+    td {
+        padding: 1.2rem 1.5rem;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle;
+    }
+
+    tbody tr {
+        transition: background 0.2s;
+
+        &:hover {
+            background: #f8fafc;
+        }
+    }
+
+    // Cellules spécifiques
+    .user-cell {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+
+        .avatar-sm {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, $primary 0%, #7c3aed 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+
+        .full-name {
+            font-weight: 700;
+            color: $text-dark;
+        }
+    }
+
+    .email-text {
+        color: $text-gray;
+        font-size: 0.85rem;
+    }
+
+    // Badges / Chips
+    .chip {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        display: inline-block;
+
+        &.badge-success {
+            background: #dcfce7;
+            color: #166534;
+        }
+        &.badge-warning {
+            background: #fef9c3;
+            color: #854d0e;
+        }
+        &.badge-info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        &.badge-danger {
+            background: #ffebee;
+            color: #c62828;
+        }
+        &.badge-primary {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+        &.badge-secondary {
+            background: #f1f5f9;
+            color: #475569;
+        }
+    }
+
+    .presence-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+
+        .text-success {
+            color: $success;
+            font-weight: 600;
+        }
+        .text-muted {
+            color: $text-gray;
+        }
+        .sub-text {
+            font-size: 0.7rem;
+            color: #94a3b8;
+        }
+    }
+
+    .actions-cell {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+
+        .btn-round {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+
+            &:hover {
+                transform: scale(1.05);
+            }
+
+            &:active {
+                animation: pulse 0.2s ease;
+            }
+
+            &.validate {
+                background: #e8f5e9;
+                color: #2e7d32;
+
+                &:hover {
+                    background: $success;
+                    color: white;
+                }
+            }
+
+            &.absent {
+                background: #ffebee;
+                color: #c62828;
+
+                &:hover {
+                    background: $danger;
+                    color: white;
+                }
+            }
+
+            &.reset {
+                background: #fff8e1;
+                color: #f57c00;
+                font-size: 1.1rem;
+
+                &:hover {
+                    background: $warning;
+                    color: white;
+                }
+            }
+
+            &.delete {
+                background: #f5f5f5;
+                color: #757575;
+
+                &:hover {
+                    background: #9e9e9e;
+                    color: white;
+                }
+            }
+        }
+    }
+}
+
+// ==================== EMPTY STATE ====================
+.empty-state {
+    padding: 4rem;
+    text-align: center;
+    color: #94a3b8;
+
+    .empty-illustration {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    p {
+        font-size: 0.9rem;
+    }
+}
+
+// ==================== LOADING ====================
+.loading-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+
+    .spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid #e2e8f0;
+        border-top-color: $primary;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    p {
+        margin-top: 1rem;
+        color: $text-gray;
+    }
+}
+
+// ==================== ANIMATIONS ====================
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+// ==================== RESPONSIVE ====================
+@media (max-width: 1200px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .viewport-wrapper {
+        padding: 1rem;
+    }
+
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+
+        .header-nav {
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .btn-export {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .toolbar {
+        flex-direction: column;
+
+        .search-wrapper {
+            max-width: 100%;
+            width: 100%;
+        }
+
+        .filter-group {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    .modern-table {
+        .actions-cell {
+            justify-content: flex-start;
+        }
+    }
+}
+
+@media (max-width: 480px) {
+    .period-banner .period-info {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+}

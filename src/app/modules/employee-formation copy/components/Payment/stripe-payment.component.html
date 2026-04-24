@@ -1,0 +1,43 @@
+<div class="payment-overlay" *ngIf="visible" (click)="close.emit()">
+  <div class="payment-container" (click)="$event.stopPropagation()">
+    
+    <!-- Header -->
+    <div class="payment-header">
+      <h3>💳 Paiement sécurisé</h3>
+      <button class="close-btn" (click)="close.emit()">✕</button>
+    </div>
+    
+    <!-- Body -->
+    <div class="payment-body">
+      
+      <!-- Montant -->
+      <div class="info-row">
+        <span>Montant</span>
+        <strong>{{ amount }} Dt</strong>
+      </div>
+      
+      <!-- Points -->
+      <div class="info-row points">
+        <span>Points à recevoir</span>
+        <strong>{{ points }} pts</strong>
+      </div>
+      
+      <!-- Carte bancaire -->
+      <div class="card-container">
+        <label>Carte bancaire</label>
+        <div id="card-element" class="card-element"></div>
+        <div id="card-errors" class="card-errors"></div>
+      </div>
+      
+      <!-- Bouton payer -->
+      <button 
+        class="pay-btn" 
+        (click)="processPayment()" 
+        [disabled]="processing">
+        <span *ngIf="!processing">💳 Payer {{ amount }}€</span>
+        <span *ngIf="processing">⏳ Traitement en cours...</span>
+      </button>
+      
+    </div>
+  </div>
+</div>

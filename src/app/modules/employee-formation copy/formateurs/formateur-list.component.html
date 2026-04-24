@@ -1,0 +1,86 @@
+﻿<div class="page-wrapper">
+    <header class="main-header">
+        <div class="header-content">
+            <div class="title-area">
+                <h1>Formateurs</h1>
+                <span class="badge">{{formateurs.length}} Formateurs</span>
+            </div>
+            
+            <div class="action-area">
+                <div class="search-field">
+                    <input type="text" (keyup)="applyFilter($event)" placeholder="Rechercher par nom, email ou domaine...">
+                </div>
+                <button class="primary-button" (click)="openFormateurDialog()">
+                    Ajouter un formateur
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="content-area">
+        <div class="table-responsive">
+            <table class="full-width-table">
+                <thead>
+                    <tr>
+                        <th>NOM ET PRÉNOM</th>
+                        <th>EMAIL</th>
+                        <th>SPÉCIALITÉ</th>
+                        <th>STATUT</th>
+                        <th class="text-right">ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <ng-container *ngFor="let formateur of formateurs">
+                        <tr [class.is-expanded]="selectedFormateur?.id === formateur.id" (click)="toggleDetails(formateur.id)">
+                            
+                            <td class="name-cell">
+                                <div class="user-info">
+                                    <div class="avatar-letter">{{formateur.prenom[0]}}{{formateur.nom[0]}}</div>
+                                    <span class="user-name">{{formateur.prenom}} {{formateur.nom}}</span>
+                                </div>
+                            </td>
+
+                            <td class="email-cell">{{formateur.email}}</td>
+
+                            <td>
+                                <span class="tag">{{formateur.specialite}}</span>
+                            </td>
+
+                            <td>
+                                <span class="status-indicator" [class.active]="formateur.status === 'ACTIF'">
+                                    {{formateur.status}}
+                                </span>
+                            </td>
+
+                            <td class="actions-cell text-right" (click)="$event.stopPropagation()">
+                                <button class="link-btn" (click)="openFormateurDialog(formateur)">Modifier</button>
+                                <button class="link-btn delete" (click)="deleteFormateur(formateur)">Supprimer</button>
+                            </td>
+                        </tr>
+
+                        <tr *ngIf="selectedFormateur?.id === formateur.id" class="details-pane">
+                            <td colspan="5">
+                                <div class="details-wrapper">
+                                    <div class="info-section">
+                                        <label>Bio & Expériences</label>
+                                        <p>{{formateur.bio || 'Aucune information biographique.'}}</p>
+                                    </div>
+                                    <div class="info-section side">
+                                        <div>
+                                            <label>Téléphone</label>
+                                            <span>{{formateur.telephone || 'Non renseigné'}}</span>
+                                        </div>
+                                        <div>
+                                            <label>Date de création</label>
+                                            <span>{{formateur.createdAt | date:'dd/MM/yyyy'}}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </ng-container>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>

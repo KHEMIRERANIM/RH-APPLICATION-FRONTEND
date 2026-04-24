@@ -1,0 +1,18 @@
+// C:\pi\RH-APPLICATION-FRONTEND\src\app\modules\employee\components\votes-propositions\votes-propositions.component.scss
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.vote-pour { color: #10b981; }
+.vote-contre { color: #ef4444; }
+.vote-peut-etre { color: #f59e0b; }
+
+.bg-green-500 { background-color: #10b981; }
+.bg-yellow-500 { background-color: #f59e0b; }
+.bg-red-500 { background-color: #ef4444; }

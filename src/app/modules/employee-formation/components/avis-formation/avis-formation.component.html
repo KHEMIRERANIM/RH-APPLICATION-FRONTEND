@@ -1,0 +1,167 @@
+<div class="avis-container">
+    <!-- Statistiques des notes -->
+    <div *ngIf="statistiques && statistiques.totalAvis > 0" class="stats-section">
+        <div class="moyenne-container">
+            <div class="moyenne-note">{{ statistiques.moyenne }}</div>
+            <div class="moyenne-etoiles">
+                <span *ngFor="let s of [1,2,3,4,5]" class="etoile">
+                    <span class="star" 
+                          [class.filled]="isStarFilled(s, statistiques.moyenne)"
+                          [style.background]="!isStarFilled(s, statistiques.moyenne) && getStarFillPercentage(s, statistiques.moyenne) > 0 ? 'linear-gradient(90deg, #fbbf24 ' + getStarFillPercentage(s, statistiques.moyenne) + '%, #d1d5db ' + getStarFillPercentage(s, statistiques.moyenne) + '%)' : ''"
+                          [style.background-clip]="'text'"
+                          [style.webkit-background-clip]="'text'"
+                          [style.color]="!isStarFilled(s, statistiques.moyenne) && getStarFillPercentage(s, statistiques.moyenne) > 0 ? 'transparent' : ''">
+                        ⭐
+                    </span>
+                </span>
+            </div>
+            <div class="moyenne-text">({{ statistiques.totalAvis }} avis)</div>
+        </div>
+        
+        <div class="repartition-container">
+            <div *ngFor="let i of [5,4,3,2,1]" class="repartition-line">
+                <span class="etoile-label">{{ i }} ★</span>
+                <div class="barre-container">
+                    <div class="barre" 
+                         [style.width]="(statistiques.repartition[i] / statistiques.totalAvis * 100) + '%'"
+                         [style.background]="i >= 4 ? '#10b981' : (i >= 3 ? '#f59e0b' : '#ef4444')">
+                    </div>
+                </div>
+                <span class="compte">{{ statistiques.repartition[i] || 0 }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Liste des avis existants (toujours visible) -->
+    <div *ngIf="listeAvis.length > 0" class="avis-list">
+        <h3>
+            <span>📝</span>
+            Avis des participants ({{listeAvis.length}})
+        </h3>
+        
+        <div *ngFor="let avis of listeAvis" class="avis-card">
+            <div class="avis-header">
+                <div class="avis-user">
+                    <div class="avatar" [style.background]="'hsl(' + (avis.employeNom?.charCodeAt(0) || 0) + ', 70%, 50%)'">
+                        {{ avis.employePrenom?.charAt(0) }}{{ avis.employeNom?.charAt(0) }}
+                    </div>
+                    <div class="user-info">
+                        <strong>{{ avis.employePrenom }} {{ avis.employeNom }}</strong>
+                        <span class="date">{{ avis.createdAt | date:'dd/MM/yyyy' }}</span>
+                    </div>
+                </div>
+                <div class="avis-note">
+                    <span *ngFor="let s of [1,2,3,4,5]" class="etoile">
+                        <span class="star" 
+                              [class.filled]="s <= avis.note"
+                              [style.opacity]="s <= avis.note ? '1' : '0.3'">⭐</span>
+                    </span>
+                    <span class="note-value ml-1 text-xs text-gray-500">({{avis.note}}/5)</span>
+                </div>
+            </div>
+            <div class="avis-body">
+                <h4>{{ avis.titre }}</h4>
+                <p>{{ avis.commentaire }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Message si avis déjà donné (ne pas afficher le bouton commenter) -->
+    <div *ngIf="dejaAvis && avisExistant" class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+        <div class="flex items-start gap-3">
+            <span class="text-2xl">ℹ️</span>
+            <div class="flex-1">
+                <p class="text-sm font-semibold text-blue-800">Vous avez déjà donné votre avis</p>
+                <p class="text-xs text-blue-600 mt-1">
+                    Votre avis "{{avisExistant.titre}}" 
+                    <span class="font-bold">{{avisExistant.note}}/5</span> est 
+                    {{avisExistant.valide ? '✅ validé et visible' : '⏳ en attente de validation'}}.
+                </p>
+                <p class="text-xs text-blue-500 mt-1">
+                    Un seul avis par formation est autorisé. Merci pour votre contribution !
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ✅ BOUTON "COMMENTER" STYLE FACEBOOK - visible seulement si l'utilisateur n'a pas encore donné son avis -->
+    <div *ngIf="!dejaAvis && !showCommentForm" class="comment-trigger" (click)="showCommentForm = true">
+        <div class="comment-trigger-content">
+            <div class="avatar-placeholder">
+                {{ getUserInitials() }}
+            </div>
+            <span class="comment-placeholder">Écrire un commentaire...</span>
+        </div>
+    </div>
+
+    <!-- ✅ FORMULAIRE D'AVIS - affiché seulement si showCommentForm = true -->
+    <div *ngIf="!dejaAvis && showCommentForm" class="form-section">
+        <div class="form-header">
+            <h3>Donnez votre avis</h3>
+            <button class="close-form" (click)="showCommentForm = false">✕</button>
+        </div>
+        <p>Votre avis nous aide à améliorer nos formations</p>
+        
+        <app-voice-recorder (analysisCompleted)="onVoiceAnalysisCompleted($event)"></app-voice-recorder>
+        
+        <div class="etoiles-input">
+            <span *ngFor="let s of [1,2,3,4,5]" 
+                  class="etoile-input"
+                  (mouseenter)="setHover(s)"
+                  (mouseleave)="resetHover()"
+                  (click)="setNote(s)">
+                <span class="star-emoji" 
+                      [class.filled]="s <= (hoverEtoile || noteEtoiles)">⭐</span>
+            </span>
+            <span class="note-label">{{ noteEtoiles }}/5 étoiles</span>
+        </div>
+
+        <form [formGroup]="avisForm" (ngSubmit)="onSubmit()">
+            <div class="form-group">
+                <label>Titre de l'avis *</label>
+                <input type="text" formControlName="titre" placeholder="Ex: Excellente formation !" maxlength="100">
+                <small *ngIf="avisForm.get('titre')?.invalid && avisForm.get('titre')?.touched" class="error">
+                    Le titre est requis (minimum 3 caractères)
+                </small>
+                <small class="char-count" *ngIf="avisForm.get('titre')?.value?.length">
+                    {{ avisForm.get('titre')?.value?.length }}/100
+                </small>
+            </div>
+
+            <div class="form-group">
+                <label>Commentaire *</label>
+                <textarea formControlName="commentaire" rows="4" 
+                          placeholder="Partagez votre expérience..." maxlength="500"></textarea>
+                <small *ngIf="avisForm.get('commentaire')?.invalid && avisForm.get('commentaire')?.touched" class="error">
+                    Le commentaire est requis (minimum 10 caractères)
+                </small>
+                <small class="char-count" *ngIf="avisForm.get('commentaire')?.value?.length">
+                    {{ avisForm.get('commentaire')?.value?.length }}/500
+                </small>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn-cancel-form" (click)="showCommentForm = false">
+                    Annuler
+                </button>
+                <button type="submit" class="btn-submit" [disabled]="isLoading">
+                    <span *ngIf="!isLoading">📝 Publier mon avis</span>
+                    <span *ngIf="isLoading" class="loading-spinner">⏳ Envoi en cours...</span>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Messages de remerciement -->
+    <div *ngIf="dejaAvis && !avisExistant?.valide" class="merci-message">
+        <span class="check-icon">⏳</span>
+        <p>Merci pour votre avis !</p>
+        <small>Votre avis sera visible après validation par l'administrateur</small>
+    </div>
+
+    <div *ngIf="dejaAvis && avisExistant?.valide" class="merci-message validated">
+        <span class="check-icon">✅</span>
+        <p>Merci pour votre contribution !</p>
+        <small>Votre avis est visible et aide les autres participants</small>
+    </div>
+</div>

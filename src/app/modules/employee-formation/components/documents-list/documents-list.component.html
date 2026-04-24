@@ -1,0 +1,608 @@
+<div class="documents-container">
+    <!-- En-tête -->
+    <div class="documents-header">
+        <div class="header-title">
+            <i class="fas fa-folder-open"></i>
+            <h2>Documents de la formation</h2>
+            <span class="badge">{{ documents.length }} documents</span>
+        </div>
+        
+        <div class="header-actions">
+            <div class="filter-group">
+                <select class="filter-select" [value]="typeFiltre" (change)="onTypeFilterChange($event)">
+                    <option value="TOUS">Tous les types</option>
+                    <option value="COURS">📚 Cours</option>
+                    <option value="EXERCICE">📝 Exercices</option>
+                    <option value="EXAMEN">📋 Examens</option>
+                    <option value="RESSOURCE">🔗 Ressources</option>
+                </select>
+            </div>
+            
+            <!-- Bouton Upload - visible uniquement pour les formateurs -->
+            <button *ngIf="isFormateur()" class="btn-upload" (click)="openUploadModal()" [disabled]="isUploading">
+                <i class="fas fa-upload"></i>
+                {{ isUploading ? 'Upload en cours...' : 'Uploader un document' }}
+            </button>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="loading-state">
+        <div class="spinner"></div>
+        <p>Chargement des documents...</p>
+    </div>
+
+    <!-- Grille des documents -->
+    <div *ngIf="!isLoading && getDocumentsFiltres().length > 0" class="documents-grid">
+        <div *ngFor="let doc of getDocumentsFiltres()" class="document-card">
+            <div class="card-header" [style.background]="getTypeInfo(doc.type).color">
+                <i [class]="getTypeInfo(doc.type).icon"></i>
+                <span class="doc-type">{{ getTypeInfo(doc.type).label }}</span>
+                <!-- Badge pour les exercices avec rendu -->
+                <span *ngIf="doc.type === 'EXERCICE' && mesRendus[doc.id]" class="badge-rendu">
+                     Rendu soumis
+                </span>
+            </div>
+            <div class="card-body">
+                <h3 class="doc-title">{{ doc.titre }}</h3>
+                <p class="doc-description">{{ doc.description || 'Aucune description' }}</p>
+                <div class="doc-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-file"></i>
+                        <span>{{ formatFileSize(doc.fileSize) }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>{{ doc.uploadedAt | date:'dd/MM/yyyy' }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <!-- Pour les COURS, EXAMENS, RESSOURCES: toujours télécharger -->
+                <button *ngIf="doc.type !== 'EXERCICE'" 
+                        class="btn-download" 
+                        (click)="downloadDocument(doc)" 
+                        [disabled]="isDownloading">
+                    <i class="fas fa-download"></i>
+                    Télécharger
+                </button>
+                
+ <!-- Pour les EXERCICES: comportement différent selon le rôle -->
+<ng-container *ngIf="doc.type === 'EXERCICE'">
+    
+    <!-- Affichage du statut et du compte à rebours - UNIQUEMENT POUR EMPLOYÉ -->
+    <div *ngIf="isEmploye()" class="exercice-status" style="margin-bottom: 12px; padding: 8px; border-radius: 8px; text-align: center;"
+         [style.background]="getExerciceStatut(doc).couleur + '20'"
+         [style.color]="getExerciceStatut(doc).couleur">
+        <strong>{{ getExerciceStatut(doc).icone }} {{ getExerciceStatut(doc).texte }}</strong>
+        
+        <!-- Compte à rebours si l'exercice a été uploadé et pas encore rendu -->
+        <span *ngIf="!mesRendus[doc.id] && dateUploadExercice[doc.id] && !estDelaiDepasse(doc.id)" 
+              style="display: block; font-size: 12px; margin-top: 4px;">
+            {{ tempsRestant[doc.id] || calculerTempsRestant(doc.id) }}
+        </span>
+        
+        <!-- Message si l'exercice n'a pas encore été uploadé par le formateur -->
+        <span *ngIf="!dateUploadExercice[doc.id] && !mesRendus[doc.id]" 
+              style="display: block; font-size: 11px; margin-top: 4px;">
+            ⏳ L'exercice sera bientôt disponible
+        </span>
+        
+        <!-- Message si délai dépassé -->
+        <span *ngIf="estDelaiDepasse(doc.id) && !mesRendus[doc.id]" 
+              style="display: block; font-size: 11px; margin-top: 4px;">
+            ⏰ Délai expiré, vous ne pouvez plus rendre cet exercice
+        </span>
+    </div>
+    
+    <!-- Pour l'employé: boutons -->
+    <ng-container *ngIf="isEmploye()">
+        <button class="btn-download" (click)="downloadDocument(doc)" [disabled]="isDownloading" style="width: 100%; margin-bottom: 8px;">
+            <i class="fas fa-download"></i>
+            📄 Télécharger l'énoncé
+        </button>
+        
+        <button *ngIf="!mesRendus[doc.id] && peutRendreExercice(doc)" 
+                class="btn-submit-work" 
+                (click)="openRenduModal(doc)"
+                style="width: 100%;">
+            <i class="fas fa-paper-plane"></i>
+            📤 Rendre l'exercice
+        </button>
+        
+        <button *ngIf="!mesRendus[doc.id] && !peutRendreExercice(doc) && dateUploadExercice[doc.id]" 
+                class="btn-disabled" 
+                disabled
+                style="background: #9ca3af; color: white; padding: 8px 12px; border-radius: 6px; border: none; cursor: not-allowed; width: 100%;">
+             Délai dépassé
+        </button>
+        
+        <button *ngIf="mesRendus[doc.id]" 
+                class="btn-view-submission" 
+                (click)="downloadDocument(doc)"
+                style="width: 100%;">
+            <i class="fas fa-eye"></i>
+             Voir l'énoncé
+        </button>
+        
+        <span *ngIf="mesRendus[doc.id]" class="submission-status" style="display: block; text-align: center; margin-top: 8px;">
+             Rendu le {{ mesRendus[doc.id].submittedAt | date:'dd/MM/yyyy HH:mm' }}
+        </span>
+    </ng-container>
+    
+    <!-- Pour le formateur: affichage simplifié -->
+    <ng-container *ngIf="isFormateur()">
+        <div class="exercice-status" style="margin-bottom: 12px; padding: 8px; border-radius: 8px; text-align: center; background: #f3f4f6; color: #374151;">
+            <strong>📊 Exercice</strong>
+            <span *ngIf="dateUploadExercice[doc.id]" style="display: block; font-size: 11px; margin-top: 4px;">
+                📅 Uploadé le {{ dateUploadExercice[doc.id] | date:'dd/MM/yyyy HH:mm' }}
+            </span>
+        </div>
+        
+        <button class="btn-download" (click)="downloadDocument(doc)" [disabled]="isDownloading" style="width: 100%; margin-bottom: 8px;">
+            <i class="fas fa-download"></i>
+            📄 Télécharger énoncé
+        </button>
+        
+        <button class="btn-view-submissions" (click)="voirRendusEmployes(doc.id)" style="width: 100%;">
+            <i class="fas fa-users"></i>
+            👥 Voir les rendus 
+        </button>
+    </ng-container>
+</ng-container>
+                
+                <!-- Bouton suppression pour formateur -->
+                <button *ngIf="isFormateur()" class="btn-delete" (click)="deleteDocument(doc)">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Aucun document -->
+    <div *ngIf="!isLoading && getDocumentsFiltres().length === 0" class="empty-state">
+        <i class="fas fa-folder-open"></i>
+        <p>Aucun document disponible pour cette formation</p>
+        <button *ngIf="isFormateur()" class="btn-upload" (click)="openUploadModal()">
+            <i class="fas fa-upload"></i>
+            Uploader un document
+        </button>
+    </div>
+</div>
+
+<!-- Modal Upload (pour formateur) -->
+<div *ngIf="showUploadModal" class="modal-overlay" (click)="showUploadModal = false">
+    <div class="upload-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3><i class="fas fa-upload"></i> Uploader un document</h3>
+            <button class="close-btn" (click)="showUploadModal = false">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Titre *</label>
+                <input type="text" class="form-control" [value]="uploadData.titre" (input)="onTitreChange($event)" placeholder="Ex: Cours Angular">
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea class="form-control" rows="3" [value]="uploadData.description" (input)="onDescriptionChange($event)" placeholder="Description du document..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>Type *</label>
+                <select class="form-control" [value]="uploadData.type" (change)="onUploadTypeChange($event)">
+                    <option value="COURS">📚 Cours (téléchargement uniquement)</option>
+                    <option value="EXERCICE">📝 Exercice (avec rendu employé)</option>
+                    <option value="EXAMEN">📋 Examen (téléchargement uniquement)</option>
+                    <option value="RESSOURCE">🔗 Ressource (téléchargement uniquement)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Fichier *</label>
+                <input type="file" class="form-control" (change)="onFileSelected($event)" accept=".pdf,.doc,.docx,.ppt,.pptx,.zip,.jpg,.png">
+                <small class="form-text">Formats acceptés: PDF, DOC, PPT, ZIP, JPG, PNG (max 10MB)</small>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" (click)="showUploadModal = false">Annuler</button>
+            <button class="btn-submit" (click)="uploadDocument()" [disabled]="!uploadData.titre || !uploadData.file || isUploading">
+                <i class="fas fa-upload"></i> {{ isUploading ? 'Upload en cours...' : 'Uploader' }}
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Rendu (pour employé) -->
+<div *ngIf="showRenduModal" class="modal-overlay" (click)="showRenduModal = false">
+    <div class="upload-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header" style="background: #10b981;">
+            <h3><i class="fas fa-paper-plane"></i> Rendre l'exercice</h3>
+            <button class="close-btn" (click)="showRenduModal = false">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Exercice</label>
+                <input type="text" class="form-control" [value]="renduData.documentTitre" disabled>
+            </div>
+            <div class="form-group">
+                <label>Votre fichier *</label>
+                <input type="file" class="form-control" (change)="onRenduFileSelected($event)" accept=".pdf,.doc,.docx,.zip">
+                <small class="form-text">Formats acceptés: PDF, DOC, DOCX, ZIP (max 10MB)</small>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" (click)="showRenduModal = false">Annuler</button>
+            <button class="btn-submit" style="background: #10b981;" (click)="soumettreRendu()" [disabled]="!renduData.file || isRenduLoading">
+                <i class="fas fa-paper-plane"></i> {{ isRenduLoading ? 'Soumission...' : 'Soumettre' }}
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+.documents-container {
+    padding: 24px;
+    min-height: 100vh;
+    background: #f8f9fa;
+}
+
+.documents-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.header-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.header-title h2 {
+    margin: 0;
+    font-size: 24px;
+    color: #1f2937;
+}
+
+.badge {
+    background: #e5e7eb;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 13px;
+    color: #4b5563;
+}
+
+.header-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.filter-select {
+    padding: 8px 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: white;
+    cursor: pointer;
+}
+
+.btn-upload {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-upload:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+}
+
+.btn-upload:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+}
+
+.documents-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+}
+
+.document-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: transform 0.2s;
+}
+
+.document-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+
+.card-header {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: white;
+    position: relative;
+}
+
+.card-header i {
+    font-size: 18px;
+}
+
+.doc-type {
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.badge-rendu {
+    margin-left: auto;
+    background: rgba(255,255,255,0.3);
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 11px;
+}
+
+.card-body {
+    padding: 16px;
+}
+
+.doc-title {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+    color: #1f2937;
+}
+
+.doc-description {
+    color: #6b7280;
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 12px;
+}
+
+.doc-meta {
+    display: flex;
+    gap: 16px;
+    padding-top: 12px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+.card-footer {
+    padding: 12px 16px;
+    background: #f9fafb;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.btn-download, .btn-delete, .btn-submit-work, .btn-view-submission, .btn-view-submissions {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-download {
+    background: #3b82f6;
+    color: white;
+}
+
+.btn-download:hover {
+    background: #2563eb;
+}
+
+.btn-submit-work {
+    background: #10b981;
+    color: white;
+}
+
+.btn-submit-work:hover {
+    background: #059669;
+}
+
+.btn-view-submission {
+    background: #8b5cf6;
+    color: white;
+}
+
+.btn-view-submission:hover {
+    background: #7c3aed;
+}
+
+.btn-view-submissions {
+    background: #f59e0b;
+    color: white;
+}
+
+.btn-view-submissions:hover {
+    background: #d97706;
+}
+
+.btn-delete {
+    background: #ef4444;
+    color: white;
+}
+
+.btn-delete:hover {
+    background: #dc2626;
+}
+
+.submission-status {
+    font-size: 11px;
+    color: #10b981;
+    background: #d1fae5;
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.loading-state {
+    text-align: center;
+    padding: 60px;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #e5e7eb;
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 16px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px;
+    background: white;
+    border-radius: 12px;
+}
+
+.empty-state i {
+    font-size: 48px;
+    color: #d1d5db;
+    margin-bottom: 16px;
+}
+
+.empty-state p {
+    color: #6b7280;
+    margin-bottom: 20px;
+}
+
+/* Modal */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.upload-modal {
+    background: white;
+    border-radius: 12px;
+    width: 500px;
+    max-width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #9ca3af;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #374151;
+}
+
+.form-control {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+.form-text {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 20px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.btn-cancel {
+    padding: 8px 16px;
+    background: #f3f4f6;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn-submit {
+    padding: 8px 24px;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn-submit:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+}
+</style>

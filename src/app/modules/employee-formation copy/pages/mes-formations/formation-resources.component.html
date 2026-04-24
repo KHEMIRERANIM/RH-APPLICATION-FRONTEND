@@ -1,0 +1,79 @@
+<div class="absolute inset-0 flex flex-col min-w-0 overflow-y-auto bg-gradient-to-br from-gray-50 to-gray-100">
+
+    <!-- Header avec effet glassmorphism moderne -->
+    <div class="relative flex-0 py-8 px-4 sm:p-12 overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500">
+            <div class="absolute inset-0 bg-black opacity-20"></div>
+            <div class="absolute top-0 -left-40 w-80 h-80 bg-white opacity-10 rounded-full blur-3xl animate-pulse"></div>
+            <div class="absolute bottom-0 -right-40 w-80 h-80 bg-white opacity-10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        </div>
+        
+        <div class="z-10 relative flex flex-col items-center text-center">
+            <div class="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-md rounded-full text-white mb-4">
+                <span class="text-lg animate-bounce"></span>
+                <span class="text-sm font-semibold tracking-wide">RESSOURCES PÉDAGOGIQUES</span>
+            </div>
+            <div class="text-3xl sm:text-5xl font-bold tracking-tight text-white mb-4 drop-shadow-2xl">
+                {{formationTitre}}
+            </div>
+            <div class="text-base sm:text-lg text-white/90 max-w-2xl">
+                Gérez vos documents et examens au même endroit
+            </div>
+            <button (click)="retour()" 
+                    class="mt-6 px-5 py-2.5 rounded-xl bg-white/20 hover:bg-white/30 text-white text-sm font-medium transition-all duration-300 flex items-center gap-2 backdrop-blur-sm">
+                ← Retour à mes inscriptions
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex flex-auto p-6 sm:p-8">
+        <div class="flex flex-col flex-auto w-full max-w-6xl mx-auto">
+
+            <!-- Onglets modernes -->
+            <div class="flex gap-2 mb-8 bg-white rounded-2xl p-2 shadow-sm">
+                <button (click)="setActiveTab('documents')"
+                        class="flex-1 flex items-center justify-center gap-3 px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300"
+                        [class.bg-gradient-to-r]="activeTab === 'documents'"
+                        [class.from-blue-500]="activeTab === 'documents'"
+                        [class.to-indigo-600]="activeTab === 'documents'"
+                        [class.text-white]="activeTab === 'documents'"
+                        [class.shadow-lg]="activeTab === 'documents'"
+                        [class.text-gray-600]="activeTab !== 'documents'"
+                        [class.hover:bg-gray-100]="activeTab !== 'documents'">
+                    <span class="text-xl">📄</span>
+                    <span>Documents</span>
+                    <span *ngIf="activeTab === 'documents'" class="text-xs bg-white/30 px-2 py-0.5 rounded-full">📁</span>
+                </button>
+                
+                <button (click)="setActiveTab('examens')"
+                        class="flex-1 flex items-center justify-center gap-3 px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300"
+                        [class.bg-gradient-to-r]="activeTab === 'examens'"
+                        [class.from-purple-500]="activeTab === 'examens'"
+                        [class.to-pink-600]="activeTab === 'examens'"
+                        [class.text-white]="activeTab === 'examens'"
+                        [class.shadow-lg]="activeTab === 'examens'"
+                        [class.text-gray-600]="activeTab !== 'examens'"
+                        [class.hover:bg-gray-100]="activeTab !== 'examens'">
+                    <span class="text-xl">📝</span>
+                    <span>Examens</span>
+                    <span *ngIf="activeTab === 'examens'" class="text-xs bg-white/30 px-2 py-0.5 rounded-full">✏️</span>
+                </button>
+            </div>
+
+            <!-- Contenu des onglets -->
+            <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+                <!-- Onglet Documents -->
+                <div *ngIf="activeTab === 'documents'" class="p-6">
+                    <app-documents-list [formationId]="formationId"></app-documents-list>
+                </div>
+
+                <!-- Onglet Examens -->
+                <div *ngIf="activeTab === 'examens'" class="p-6">
+                    <app-examens-employe [formationId]="formationId" [formationTitre]="formationTitre"></app-examens-employe>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

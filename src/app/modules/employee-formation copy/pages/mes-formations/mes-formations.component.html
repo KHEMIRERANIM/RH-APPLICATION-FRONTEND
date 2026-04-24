@@ -1,0 +1,801 @@
+﻿<div class="absolute inset-0 flex flex-col min-w-0 overflow-y-auto bg-gradient-to-br from-gray-50 to-gray-100">
+
+    <!-- Header avec design simplifié et épuré -->
+    <div class="relative flex-0 py-6 px-4 sm:py-8 sm:px-6 overflow-hidden">
+        <!-- Background simplifié - un seul dégradé sans animations -->
+<div class="absolute inset-0 bg-blue-900"></div>
+        <!-- Contenu Header central simplifié -->
+        <div class="relative z-10 text-center">
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-white/10 backdrop-blur-sm rounded-full text-white mb-3">
+               
+                <span class="text-xs font-medium tracking-wide">ESPACE FORMATION</span>
+            </div>
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-2 drop-shadow-lg">
+                Mes inscriptions
+            </h1>
+            <p class="text-sm sm:text-base text-white/80 max-w-md mx-auto">
+                Suivez votre parcours de formation et développez vos compétences
+            </p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex flex-auto p-6 sm:p-8">
+        <div class="flex flex-col flex-auto w-full max-w-7xl mx-auto">
+            
+            <!-- 🔔 ICÔNE NOTIFICATION -->
+            <div class="absolute top-4 right-4 sm:top-5 sm:right-5 z-30">
+                <button (click)="toggleNotifications(); $event.stopPropagation()" 
+                        class="relative p-2 bg-white/10 backdrop-blur-sm rounded-lg hover:bg-white/20 transition-all duration-200">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
+                              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                    </svg>
+                    <span *ngIf="getNotificationsNonLuesCount() > 0" 
+                          class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                        {{ getNotificationsNonLuesCount() > 9 ? '9+' : getNotificationsNonLuesCount() }}
+                    </span>
+                </button>
+
+                <!-- Dropdown Notifications -->
+                <div *ngIf="showNotifications" 
+                     class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden z-50"
+                     (click)="$event.stopPropagation()">
+                    
+                    <!-- En-tête -->
+                    <div class="px-4 py-3 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                        <div class="flex items-center gap-2">
+                            <span class="text-lg">🔔</span>
+                            <h4 class="text-sm font-medium text-gray-700">Notifications</h4>
+                            <span *ngIf="getNotificationsNonLuesCount() > 0" 
+                                  class="px-1.5 py-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full">
+                                {{ getNotificationsNonLuesCount() }}
+                            </span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button *ngIf="getNotificationsNonLuesCount() > 0" 
+                                    (click)="marquerToutesLues(); $event.stopPropagation()" 
+                                    class="text-xs text-blue-500 hover:text-blue-700 transition-colors">
+                                Tout lire
+                            </button>
+                            <button (click)="toggleNotifications()" 
+                                    class="text-gray-400 hover:text-gray-600 text-sm w-6 h-6 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors">
+                                ✕
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Liste des notifications -->
+                    <div class="max-h-96 overflow-y-auto">
+                        <div *ngIf="notifications.length === 0 && getExercicesARendreCount() === 0" 
+                             class="text-center py-8 text-gray-400 text-sm">
+                            <div class="text-3xl mb-2">🔕</div>
+                            <p>Aucune notification</p>
+                            <p class="text-xs mt-1">Vous êtes à jour !</p>
+                        </div>
+
+                        <div *ngFor="let notif of notifications; let i = index" 
+                             class="px-4 py-3 border-b border-gray-50 hover:bg-gray-50 transition-colors cursor-pointer group"
+                             [class.bg-blue-50]="!notif.lue"
+                             [class.bg-red-50]="notif.type === 'danger' && !notif.lue"
+                             (click)="marquerNotificationLue(notif)">
+                            
+                            <div class="flex items-start gap-2">
+                                <div class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center"
+                                     [class.bg-blue-100]="notif.type === 'info'"
+                                     [class.bg-yellow-100]="notif.type === 'warning'"
+                                     [class.bg-red-100]="notif.type === 'danger'"
+                                     [class.bg-green-100]="notif.type === 'success'">
+                                    <span class="text-sm">
+                                        {{ notif.type === 'info' ? '📢' : 
+                                           notif.type === 'warning' ? '⚠️' : 
+                                           notif.type === 'danger' ? '🔴' : 
+                                           notif.type === 'success' ? '✅' : '📌' }}
+                                    </span>
+                                </div>
+                                
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-xs text-gray-700 leading-relaxed" [class.font-medium]="!notif.lue">
+                                        {{ notif.message }}
+                                    </p>
+                                    <div class="flex items-center gap-2 mt-1">
+                                        <p class="text-[10px] text-gray-400">{{ notif.date | date:'dd/MM HH:mm' }}</p>
+                                        <span *ngIf="!notif.lue" class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button *ngIf="!notif.lue" 
+                                            (click)="marquerNotificationLue(notif); $event.stopPropagation()" 
+                                            class="w-6 h-6 rounded bg-blue-100 hover:bg-blue-200 text-blue-800 text-xs flex items-center justify-center transition-colors"
+                                            title="Marquer comme lue">
+                                        ✓
+                                    </button>
+                                    <button (click)="supprimerNotification(i); $event.stopPropagation()" 
+                                            class="w-6 h-6 rounded bg-gray-100 hover:bg-red-100 text-gray-500 hover:text-red-600 text-xs flex items-center justify-center transition-colors"
+                                            title="Supprimer">
+                                        ✕
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <ng-container *ngFor="let inscription of inscriptions">
+                            <div *ngIf="inscription.statut === 'PRESENT' && getTempsRestantExercice(inscription.formationId) && getTempsRestantExercice(inscription.formationId) !== '⏰ Délai expiré'"
+                                 class="px-4 py-3 border-b border-gray-50 bg-yellow-50 hover:bg-yellow-100 transition-colors cursor-pointer"
+                                 (click)="voirDocuments(inscription.formationId)">
+                                <div class="flex items-center justify-between gap-2">
+                                    <div class="flex items-start gap-2 flex-1">
+                                        <div class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center flex-shrink-0">
+                                            <span class="text-sm">⏰</span>
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="text-xs font-medium text-yellow-800">Exercice à rendre</p>
+                                            <p class="text-xs text-gray-700 truncate">{{ inscription.formationTitre }}</p>
+                                            <div class="flex items-center gap-2 mt-1">
+                                                <span class="text-[10px] font-mono text-yellow-700 bg-yellow-200 px-1.5 py-0.5 rounded">
+                                                    {{ getTempsRestantExercice(inscription.formationId) }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button (click)="voirDocuments(inscription.formationId); $event.stopPropagation()" 
+                                            class="px-2 py-1 rounded bg-yellow-500 hover:bg-yellow-600 text-white text-xs font-medium whitespace-nowrap transition-colors shadow-sm">
+                                        Rendre →
+                                    </button>
+                                </div>
+                            </div>
+                        </ng-container>
+                    </div>
+
+                    <div class="px-4 py-2 border-t border-gray-100 bg-gray-50 flex justify-between items-center">
+                        <button (click)="supprimerToutesNotifications()" 
+                                class="text-xs text-gray-400 hover:text-red-500 transition-colors"
+                                *ngIf="notifications.length > 0">
+                            Tout supprimer
+                        </button>
+                        <a routerLink="/notifications" 
+                           class="text-xs text-blue-800 hover:text-blue-700 transition-colors flex items-center gap-1 ml-auto">
+                            Voir toutes les notifications
+                            <span>→</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Indicateurs de connexion -->
+            <div class="mb-8">
+                <div *ngIf="!isLoggedIn" class="glass-card bg-amber-500/10 border border-amber-500/20 backdrop-blur-sm p-5 rounded-2xl flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center">
+                        <span class="text-2xl">⚠️</span>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-amber-800">Vous n'êtes pas connecté</p>
+                        <p class="text-sm text-amber-700">Pour voir vos inscriptions, veuillez vous <a routerLink="/sign-in" class="underline font-bold hover:text-amber-900">connecter</a>.</p>
+                    </div>
+                </div>
+
+                <div *ngIf="isLoggedIn && userRole !== 'EMPLOYE'" class="glass-card bg-red-500/10 border border-red-500/20 backdrop-blur-sm p-5 rounded-2xl flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
+                        <span class="text-2xl">🔒</span>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-red-800">Accès restreint</p>
+                        <p class="text-sm text-red-700">Seuls les employés peuvent accéder à cet espace. Votre rôle: <strong>{{userRole}}</strong></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION TABLEAU DE BORD MODERNE -->
+            <div *ngIf="isLoggedIn && userRole === 'EMPLOYE' && inscriptions.length > 0" class="mb-8 space-y-6">
+                
+                <div class="modern-card rounded-2xl overflow-hidden shadow-lg border border-gray-100">
+                    <div class="px-6 py-4 bg-gradient-to-r from-indigo-800 via-bleu-900 to-bleu-900 cursor-pointer flex justify-between items-center transition-all duration-300 hover:from-indigo-700 hover:via-bleu-900 hover:to-bleu-100" (click)="toggleDashboardStats()">
+                        <div class="flex items-center gap-3">
+                          
+                            <div>
+                                <h3 class="text-white font-bold text-lg">Tableau de bord</h3>
+                                <p class="text-white/70 text-[10px]">Votre parcours de formation</p>
+                            </div>
+                        </div>
+                        <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center transition-transform duration-300 hover:bg-white/30" [class.rotate-180]="showDashboardStats">
+                            <span class="text-white text-sm">▼</span>
+                        </div>
+                    </div>
+                    
+                    <div *ngIf="showDashboardStats" class="p-6 bg-gradient-to-br from-gray-50 to-white">
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                            <div class="badge-card group bg-gradient-to-br from-blue-500 to-blue-900 rounded-xl p-4 text-center hover:scale-105 transition-all duration-300 cursor-pointer shadow-md hover:shadow-xl">
+                                <div class="w-12 h-12 mx-auto rounded-full bg-white/20 flex items-center justify-center text-2xl mb-2 group-hover:scale-110 transition-transform">📋</div>
+                                <div class="text-2xl font-bold text-white">{{ statistiquesGlobales.totalFormations }}</div>
+                                <div class="text-[10px] text-white/80 mt-1 font-medium">Total inscriptions</div>
+                                <div class="mt-2 w-full bg-white/30 rounded-full h-1">
+                                    <div class="bg-white h-1 rounded-full transition-all duration-500" style="width: 100%"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="badge-card group bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl p-4 text-center hover:scale-105 transition-all duration-300 cursor-pointer shadow-md hover:shadow-xl">
+                                <div class="w-12 h-12 mx-auto rounded-full bg-white/20 flex items-center justify-center text-2xl mb-2 group-hover:scale-110 transition-transform">✅</div>
+                                <div class="text-2xl font-bold text-white">{{ statistiquesGlobales.formationsTerminees }}</div>
+                                <div class="text-[10px] text-white/80 mt-1 font-medium">Formations terminées</div>
+                                <div class="mt-2 w-full bg-white/30 rounded-full h-1">
+                                    <div class="bg-white h-1 rounded-full transition-all duration-500" [style.width.%]="(statistiquesGlobales.formationsTerminees / statistiquesGlobales.totalFormations) * 100"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="badge-card group bg-gradient-to-br from-teal-500 to-cyan-600 rounded-xl p-4 text-center hover:scale-105 transition-all duration-300 cursor-pointer shadow-md hover:shadow-xl">
+                                <div class="w-12 h-12 mx-auto rounded-full bg-white/20 flex items-center justify-center text-2xl mb-2 group-hover:scale-110 transition-transform">🔄</div>
+                                <div class="text-2xl font-bold text-white">{{ statistiquesGlobales.formationsEnCours }}</div>
+                                <div class="text-[10px] text-white/80 mt-1 font-medium">En cours</div>
+                                <div class="mt-2 w-full bg-white/30 rounded-full h-1">
+                                    <div class="bg-white h-1 rounded-full transition-all duration-500 animate-pulse" [style.width.%]="(statistiquesGlobales.formationsEnCours / statistiquesGlobales.totalFormations) * 100"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="badge-card group bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl p-4 text-center hover:scale-105 transition-all duration-300 cursor-pointer shadow-md hover:shadow-xl">
+                                <div class="w-12 h-12 mx-auto rounded-full bg-white/20 flex items-center justify-center text-2xl mb-2 group-hover:scale-110 transition-transform">⏳</div>
+                                <div class="text-2xl font-bold text-white">{{ statistiquesGlobales.formationsAVenir }}</div>
+                                <div class="text-[10px] text-white/80 mt-1 font-medium">À venir</div>
+                                <div class="mt-2 w-full bg-white/30 rounded-full h-1">
+                                    <div class="bg-white h-1 rounded-full transition-all duration-500" [style.width.%]="(statistiquesGlobales.formationsAVenir / statistiquesGlobales.totalFormations) * 100"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-5 p-3 bg-gradient-to-r from-indigo-50 to-bleu-50 rounded-xl border border-indigo-100">
+                            <div class="flex items-center gap-3">
+                                <div class="text-2xl">🎯</div>
+                                <div class="flex-1">
+                                    <p class="text-xs font-semibold text-indigo-900">Votre progression</p>
+                                    <p class="text-[11px] text-gray-600">
+                                        <ng-container *ngIf="statistiquesGlobales.formationsTerminees === 0">
+                                            Commencez votre première formation pour débloquer des badges ! 🚀
+                                        </ng-container>
+                                        <ng-container *ngIf="statistiquesGlobales.formationsTerminees > 0 && statistiquesGlobales.formationsTerminees < 3">
+                                            Plus que {{ 3 - statistiquesGlobales.formationsTerminees }} formation(s) pour le badge "Apprenant assidu" ! 💪
+                                        </ng-container>
+                                        <ng-container *ngIf="statistiquesGlobales.formationsTerminees >= 3">
+                                            Excellent travail ! Vous êtes un apprenant assidu ! 🏆
+                                        </ng-container>
+                                    </p>
+                                </div>
+                                <div class="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center">
+                                    <span class="text-lg">{{ getInitialesEmploye() }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div *ngIf="showBadges" class="p-6 bg-white">
+                    <div *ngIf="badges.length === 0" class="text-center text-gray-500 py-8">
+                        <div class="text-5xl mb-3">🎯</div>
+                        <p>Continuez votre apprentissage pour débloquer des badges !</p>
+                        <p class="text-xs mt-2">{{statistiquesGlobales.formationsTerminees}}/3 formations pour le badge "Apprenant assidu"</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" *ngIf="badges.length > 0">
+                        <div *ngFor="let badge of badges" 
+                             class="badge-card flex items-start gap-4 p-4 rounded-xl border-2 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer"
+                             [class]="getBadgeColor(badge.couleur)"
+                             [class.opacity-60]="badge.progression < 100">
+                            
+                            <div class="w-14 h-14 rounded-full bg-white/50 flex items-center justify-center text-3xl">
+                                {{ badge.icon }}
+                            </div>
+                            
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <div class="font-bold text-sm">{{ badge.nom }}</div>
+                                    <div class="text-xs opacity-75" *ngIf="badge.dateObtenu">
+                                        {{ badge.dateObtenu | date:'dd/MM/yyyy' }}
+                                    </div>
+                                </div>
+                                <div class="text-xs opacity-75 mt-1">{{ badge.description }}</div>
+                                
+                                <div *ngIf="badge.progression < 100" class="mt-2">
+                                    <div class="w-full bg-gray-200 rounded-full h-1.5">
+                                        <div class="bg-current rounded-full h-1.5 transition-all duration-500" [style.width.%]="badge.progression"></div>
+                                    </div>
+                                    <div class="text-[10px] opacity-60 mt-1">{{ badge.progression }}% complété</div>
+                                </div>
+                                
+                                <div *ngIf="badge.progression >= 100" class="mt-1">
+                                    <span class="text-[10px] font-bold bg-green-500 text-white px-2 py-0.5 rounded-full">✓ Débloqué</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 pt-3 border-t border-gray-100">
+                        <div class="flex justify-between text-xs text-gray-500">
+                            <span> Badges débloqués: {{ badgesDebloques }}/{{ totalBadges }}</span>
+                            <span> Points bonus accumulés: {{ totalBonusPoints }}</span>
+                        </div>
+                    </div>
+                </div>
+
+              
+
+            </div>
+
+            <!-- Filtres par statut -->
+            <div *ngIf="isLoggedIn && userRole === 'EMPLOYE' && inscriptions.length > 0" class="mb-8">
+                <div class="flex flex-wrap gap-3">
+                    <button class="filter-chip px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300"
+                            [class.bg-gradient-to-r]="!selectedStatut"
+                            [class.from-blue-600]="!selectedStatut"
+                            [class.to-indigo-600]="!selectedStatut"
+                            [class.text-white]="!selectedStatut"
+                            [class.shadow-md]="!selectedStatut"
+                            [class.bg-gray-100]="selectedStatut"
+                            [class.text-gray-600]="selectedStatut"
+                            (click)="filterByStatut('')">
+                        Tous <span class="ml-1 text-xs opacity-80">({{inscriptions.length}})</span>
+                    </button>
+                    
+                    <button *ngFor="let statut of statuts" 
+                            class="filter-chip px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 transform hover:scale-105"
+                            [class.bg-gradient-to-r]="selectedStatut === statut.value"
+                            [class.from-green-600]="selectedStatut === statut.value && statut.value === 'CONFIRME'"
+                            [class.to-emerald-600]="selectedStatut === statut.value && statut.value === 'CONFIRME'"
+                            [class.from-orange-600]="selectedStatut === statut.value && statut.value === 'EN_ATTENTE'"
+                            [class.to-red-600]="selectedStatut === statut.value && statut.value === 'EN_ATTENTE'"
+                            [class.from-blue-600]="selectedStatut === statut.value && statut.value === 'TERMINE'"
+                            [class.to-cyan-600]="selectedStatut === statut.value && statut.value === 'TERMINE'"
+                            [class.from-red-600]="selectedStatut === statut.value && statut.value === 'ANNULE'"
+                            [class.to-pink-600]="selectedStatut === statut.value && statut.value === 'ANNULE'"
+                            [class.text-white]="selectedStatut === statut.value"
+                            [class.bg-gray-100]="selectedStatut !== statut.value"
+                            [class.text-gray-600]="selectedStatut !== statut.value"
+                            (click)="filterByStatut(statut.value)">
+                            {{statut.label}}
+                            <span class="ml-1 text-xs" [class.opacity-80]="selectedStatut === statut.value" [class.text-gray-400]="selectedStatut !== statut.value">({{getStatutCount(statut.value)}})</span>
+                        </button>
+                </div>
+            </div>
+
+            <!-- Loading Spinner -->
+            <div *ngIf="loading" class="flex flex-col items-center justify-center py-32">
+                <div class="relative">
+                    <div class="w-16 h-16 border-4 border-gray-200 rounded-full animate-spin"></div>
+                    <div class="w-16 h-16 border-4 border-indigo-600 rounded-full animate-spin absolute top-0 left-0 border-t-transparent"></div>
+                </div>
+                <p class="mt-6 text-gray-500 font-medium">Chargement de vos inscriptions...</p>
+            </div>
+
+            <!-- ==================== CARTES FORMATIONS ==================== -->
+            <div *ngIf="!loading && isLoggedIn && userRole === 'EMPLOYE' && filteredInscriptions.length > 0" class="space-y-6">
+                <div *ngFor="let inscription of filteredInscriptions; trackBy: trackByFn" 
+                     class="formation-card bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 border border-gray-100">
+                    
+<div class="bg-blue-900 px-6 py-4">
+                            <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center text-xl">🎓</div>
+                                <div>
+                                    <h3 class="text-white font-bold text-lg">{{inscription.formationTitre}}</h3>
+                                    <p class="text-white/80 text-xs">Formation #{{inscription.formationId}}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center gap-2">
+                                <div class="flex items-center gap-2">
+<!-- ✅ Utilisez la nouvelle méthode au lieu de la condition directe -->
+<div *ngIf="isFormationEnCours(inscription)" 
+     class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-semibold shadow-lg animate-pulse">
+    <span class="relative flex h-2 w-2">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-2 w-2 bg-green-300"></span>
+    </span>
+    <span>🟢 EN COURS</span>
+</div>
+
+<!-- ✅ Afficher un message d'alerte pour EN_ATTENTE en cours -->
+<!-- ✅ CORRECTION - Utiliser une méthode du composant -->
+<div *ngIf="inscription.statut === 'EN_ATTENTE' && !isFormationTerminee(inscription.dateFin) && isDateDepassee(inscription.dateDebut)" 
+     class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-100 text-red-700 text-xs font-semibold">
+    <span>⚠️</span>
+    <span>Délai dépassé - Non confirmée</span>
+</div>
+                                    
+                                    <div *ngIf="inscription.statut === 'PRESENT' && isFormationTerminee(inscription.dateFin)" 
+                                         class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold">
+                                        <span></span><span>Présent</span>
+                                    </div>
+                                    
+                                    <div *ngIf="inscription.statut === 'ABSENT' && isFormationTerminee(inscription.dateFin)" 
+                                         class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-100 text-red-700 text-xs font-semibold">
+                                        <span>❌</span><span>Absent</span>
+                                    </div>
+                                    
+                                    <div *ngIf="inscription.statut === 'VALIDE'" 
+                                         class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold">
+                                        <span>✓</span><span>Validé</span>
+                                    </div>
+                                    
+                                    <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-white/20 text-white"
+                                          *ngIf="inscription.statut !== 'PRESENT' && inscription.statut !== 'ABSENT' && inscription.statut !== 'VALIDE'">
+                                        <span>{{inscription.statut === 'EN_ATTENTE' ? '⏳' : (inscription.statut === 'CONFIRME' ? '' : (inscription.statut === 'TERMINE' ? '🏁' : '📌'))}}</span>
+                                        <span>{{getStatutLabel(inscription.statut)}}</span>
+                                    </span>
+                                    
+                                    <span *ngIf="inscription.statut === 'TERMINE' && isCertificationAvailable(inscription.formationId)" 
+                                          class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+                                         Certifié
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="relative">
+                        <div class="absolute top-0 left-0 right-0 h-1"
+                             [class.bg-green-500]="inscription.statut === 'CONFIRME'"
+                             [class.bg-orange-500]="inscription.statut === 'EN_ATTENTE'"
+                             [class.bg-emerald-500]="inscription.statut === 'PRESENT'"
+                             [class.bg-red-500]="inscription.statut === 'ABSENT'"
+                             [class.bg-blue-500]="inscription.statut === 'TERMINE'"
+                             [class.bg-gray-500]="inscription.statut === 'ANNULE'"></div>
+                        
+                        <div class="p-6">
+                            <div class="flex flex-wrap justify-between items-start gap-4">
+                                <div class="flex-1">
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-2">
+                                        <div class="info-item flex items-center gap-3 p-3 rounded-xl bg-gray-50">
+                                            <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-sm">📅</div>
+                                            <div>
+                                                <div class="text-xs text-gray-500">Inscription</div>
+                                                <div class="text-sm font-medium">{{(inscription.dateInscription | date:'dd/MM/yyyy') || 'Non renseigné'}}</div>
+                                            </div>
+                                        </div>
+                                        <div class="info-item flex items-center gap-3 p-3 rounded-xl bg-gray-50">
+                                            <div class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center text-sm">🚀</div>
+                                            <div>
+                                                <div class="text-xs text-gray-500">Début</div>
+                                                <div class="text-sm font-medium">{{(inscription.dateDebut | date:'dd/MM/yyyy HH:mm') || 'Non renseignée'}}</div>
+                                            </div>
+                                        </div>
+                                        <div class="info-item flex items-center gap-3 p-3 rounded-xl bg-gray-50">
+                                            <div class="w-8 h-8 rounded-lg bg-bleu-100 flex items-center justify-center text-sm">🏁</div>
+                                            <div>
+                                                <div class="text-xs text-gray-500">Fin</div>
+                                                <div class="text-sm font-medium">{{(inscription.dateFin | date:'dd/MM/yyyy HH:mm') || 'Non renseignée'}}</div>
+                                            </div>
+                                        </div>
+                                        <div class="info-item flex items-center gap-3 p-3 rounded-xl bg-gray-50">
+                                            <div class="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center text-sm">👨‍🏫</div>
+                                            <div>
+                                                <div class="text-xs text-gray-500">Formateur</div>
+                                                <div class="text-sm font-medium">{{inscription.formateur || 'Non renseigné'}}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div *ngIf="inscription.lieu" class="mt-4">
+                                        <div class="glass-card bg-blue-50/50 rounded-xl p-3 border border-blue-100">
+                                            <div class="flex items-center gap-2 mb-2">
+                                                <span class="text-lg"></span>
+                                                <span class="text-xs font-semibold text-blue-700 uppercase tracking-wide">Lieu de la formation</span>
+                                            </div>
+                                            <div class="flex flex-wrap gap-2">
+                                                <div class="px-3 py-2 bg-white rounded-lg text-sm text-gray-700 flex items-center gap-2">
+                                                    <span></span>
+                                                    <span>{{inscription.lieu}}</span>
+                                                </div>
+                                                <a *ngIf="inscription.lienGoogleMaps && inscription.lienGoogleMaps !== ''" 
+                                                   [href]="inscription.lienGoogleMaps" 
+                                                   target="_blank" 
+                                                   class="btn-gradient-blue px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-1">
+                                                    🗺️ Voir sur Maps
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-4">
+                                        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium"
+                                             [class.bg-green-50]="inscription.statut === 'CONFIRME'"
+                                             [class.text-green-700]="inscription.statut === 'CONFIRME'"
+                                             [class.bg-orange-50]="inscription.statut === 'EN_ATTENTE'"
+                                             [class.text-orange-700]="inscription.statut === 'EN_ATTENTE'"
+                                             [class.bg-blue-50]="inscription.statut === 'TERMINE'"
+                                             [class.text-blue-700]="inscription.statut === 'TERMINE'">
+                                            {{getStatutMessage(inscription)}}
+                                        </div>
+                                    </div>
+                                    
+                                    <div *ngIf="inscription.statut === 'PRESENT' || inscription.statut === 'TERMINE'" class="mt-4 flex flex-wrap gap-2 items-center">
+                                        <button class="btn-action bg-blue-900 hover:bg-blue-900 text-white px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 flex items-center gap-2 shadow-sm"
+                                                (click)="voirDocuments(inscription.formationId)">
+                                            📄 Documents
+                                        </button>
+                                        <span *ngIf="inscription.statut === 'PRESENT'">
+                                            <button class="btn-action bg-bleu-500 hover:bg-bleu-900 text-white px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 flex items-center gap-2 shadow-sm"
+                                                    (click)="voirExamens(inscription.formationId)">
+                                                📝 Examens
+                                                <span *ngIf="examenNotes && examenNotes[inscription.formationId]" 
+                                                      class="ml-1 px-2 py-0.5 rounded-full text-xs bg-white/30">
+                                                    {{ examenNotes[inscription.formationId] }}/20
+                                                </span>
+                                            </button>
+                                        </span>
+                                        <button *ngIf="examenNotes && examenNotes[inscription.formationId]" 
+                                                class="btn-feedback-ia bg-gradient-to-r from-indigo-400 to-bleu-900 hover:from-indigo-700 hover:to-bleu-900 text-white px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 flex items-center gap-2 shadow-sm"
+                                                (click)="voirFeedbackIA(inscription.formationId)">
+                                            🤖 Voir feedback IA
+                                        </button>
+                                        
+                                        <button *ngIf="isCertificationAvailable(inscription.formationId) && !certificatDejaTelecharge[inscription.formationId]" 
+                                                class="btn-gradient-green px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 flex items-center gap-2 shadow-sm"
+                                                (click)="telechargerCertification(inscription.formationId)">
+                                            📜 Certificat
+                                        </button>
+                                        
+                                        <button *ngIf="isCertificationAvailable(inscription.formationId) && certificatDejaTelecharge[inscription.formationId]" 
+                                                class="px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 flex items-center gap-2 shadow-sm opacity-50 cursor-not-allowed"
+                                                style="background:#9ca3af; color:white;" disabled>
+                                            ✅ Certificat déjà téléchargé
+                                        </button>
+                                        
+                                        <button class="btn-gradient-bleu px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 flex items-center gap-2 shadow-sm"
+                                                (click)="afficherQRCode(inscription)">
+                                            📱 QR Code
+                                        </button>
+                                    </div>
+
+                                    <div *ngIf="(inscription.statut === 'CONFIRME' || inscription.statut === 'EN_ATTENTE') && isAnnulationPossible(inscription)" class="mt-4 flex flex-wrap gap-2 items-center">
+                                        <button class="btn-gradient-bleu px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 flex items-center gap-2 shadow-sm"
+                                                (click)="afficherQRCode(inscription)">
+                                             QR Code
+                                        </button>
+                                        
+                                        <button class="btn-danger px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 flex items-center gap-2"
+                                                (click)="openAnnulationModal(inscription)">
+                                            ❌ Annuler
+                                        </button>
+                                        
+                                        <div *ngIf="inscription.statut === 'EN_ATTENTE'" class="text-xs text-orange-600 bg-orange-50 px-3 py-2 rounded-lg">
+                                            ⏳ En attente de confirmation - Vous pouvez annuler avant confirmation
+                                        </div>
+                                        
+                                        <div *ngIf="inscription.statut === 'CONFIRME'" class="text-xs text-green-600 bg-green-50 px-3 py-2 rounded-lg">
+                                            Formation confirmée - Annulation possible jusqu'à 3 jours avant le début
+                                        </div>
+                                    </div>
+                                    
+                                    <div *ngIf="inscription.statut === 'EN_ATTENTE' && isConfirmationPossible(inscription)" class="mt-4">
+                                        <button class="btn-gradient-green px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 flex items-center gap-2 shadow-lg animate-pulse"
+                                                (click)="confirmerPresence(inscription)">
+                                             Confirmer présence
+                                        </button>
+                                    </div>
+
+                                    <div *ngIf="inscription.statut === 'PRESENT' || inscription.statut === 'TERMINE'" class="mt-4 space-y-4">
+                                        <app-avis-formation 
+                                            [formationId]="inscription.formationId"
+                                            [formationTitre]="inscription.formationTitre">
+                                        </app-avis-formation>
+                                        
+                                        <app-sentiment-analysis 
+                                            [formationId]="inscription.formationId"
+                                            [formationTitre]="inscription.formationTitre">
+                                        </app-sentiment-analysis>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ALERTE POINTS INSUFFISANTS -->
+            <div *ngIf="userPoints < coutFormation && filteredInscriptions.length > 0" class="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-xl">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="text-lg">⚠️</span>
+                    <span class="text-xs font-bold text-amber-700">Points insuffisants</span>
+                </div>
+                <p class="text-[11px] text-amber-600 mb-3">
+                    Vous avez <strong class="text-amber-800">{{userPoints}} points</strong>, 
+                    besoin de <strong class="text-amber-800">{{coutFormation}} points</strong> pour confirmer votre présence.
+                </p>
+                <div class="flex gap-2">
+                    <button (click)="openBuyPointsDialog()" 
+                            class="flex-1 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1">
+                        <span>💰</span> Acheter des points
+                    </button>
+                </div>
+            </div>
+
+            <!-- Messages vides -->
+            <div *ngIf="!loading && isLoggedIn && userRole === 'EMPLOYE' && inscriptions.length === 0" class="flex flex-col items-center justify-center py-20 bg-white rounded-2xl shadow-sm">
+                <div class="w-24 h-24 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-5xl mb-6">📭</div>
+                <h3 class="text-2xl font-semibold text-gray-700 mb-2">Aucune inscription</h3>
+                <p class="text-gray-500 mb-6">Vous n'êtes inscrit à aucune formation pour le moment.</p>
+                <a routerLink="/employee/formations" class="btn-gradient-primary px-6 py-3 rounded-xl text-white font-medium inline-flex items-center gap-2 transition-all duration-300 hover:shadow-lg">
+                    🎓 Découvrir les formations →
+                </a>
+            </div>
+
+            <div *ngIf="!loading && isLoggedIn && userRole === 'EMPLOYE' && inscriptions.length > 0 && filteredInscriptions.length === 0" class="flex flex-col items-center justify-center py-20 bg-white rounded-2xl shadow-sm">
+                <div class="w-24 h-24 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-5xl mb-6">🔍</div>
+                <h3 class="text-xl font-semibold text-gray-700 mb-2">Aucun résultat</h3>
+                <p class="text-gray-500 mb-4">Aucune inscription ne correspond au filtre sélectionné.</p>
+                <button class="btn-outline-gray px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-300" (click)="filterByStatut('')">
+                    Voir toutes mes inscriptions
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- MODALS PLACÉS EN DEHORS DE LA BOUCLE (UNE SEULE FOIS) -->
+    <!-- ============================================ -->
+
+    <!-- Modal QR Code -->
+    <div *ngIf="qrCodeData" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm animate-fadeIn" (click)="fermerQRCode()">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 transform transition-all duration-300 scale-100" (click)="$event.stopPropagation()">
+            <div class="bg-gradient-to-r from-indigo-900 to-bleu-900 p-5 rounded-t-2xl">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center text-xl">📱</div>
+                        <div>
+                            <h3 class="text-white font-bold text-lg">QR Code d'accès</h3>
+                            <p class="text-white/80 text-xs">{{qrCodeData.titre}}</p>
+                        </div>
+                    </div>
+                    <button (click)="fermerQRCode()" class="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 transition-colors flex items-center justify-center text-white">✕</button>
+                </div>
+            </div>
+            
+            <div class="p-6 text-center">
+                <div class="bg-gray-50 rounded-xl p-4 mb-4">
+                    <div class="flex justify-center">
+                        <img *ngIf="qrCodeData.qrCode" 
+                             [src]="'data:image/png;base64,' + qrCodeData.qrCode" 
+                             alt="QR Code" 
+                             class="w-48 h-48 object-contain">
+                        <div *ngIf="!qrCodeData.qrCode" class="w-48 h-48 bg-gray-200 rounded-lg flex items-center justify-center">
+                            <span class="text-gray-400">QR Code non disponible</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="space-y-3">
+                    <div class="glass-card bg-blue-50 rounded-xl p-3">
+                        <p class="text-xs text-gray-500">Formation</p>
+                        <p class="font-semibold text-gray-800">{{qrCodeData.titre}}</p>
+                    </div>
+                    <div class="glass-card bg-green-50 rounded-xl p-3">
+                        <p class="text-xs text-gray-500">Date de validité</p>
+                        <p class="font-semibold text-gray-800">{{qrCodeData.dateValidite | date:'dd/MM/yyyy HH:mm'}}</p>
+                    </div>
+                </div>
+                
+                <div class="flex gap-3 mt-6">
+                    <button (click)="telechargerQRCode()" 
+                            class="flex-1 bg-gradient-to-r from-indigo-900 to-bleu-900 hover:from-indigo-900 hover:to-bleu-700 text-white px-4 py-2.5 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2">
+                        📥 Télécharger
+                    </button>
+                    <button (click)="fermerQRCode()" 
+                            class="flex-1 border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2.5 rounded-xl font-medium transition-all duration-300">
+                        Fermer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading spinner pour QR Code -->
+    <div *ngIf="loadingQRCode" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl p-8 flex flex-col items-center gap-4">
+            <div class="w-12 h-12 border-4 border-indigo-900 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-gray-900 font-medium">Chargement du QR Code...</p>
+        </div>
+    </div>
+
+    <!-- Modal d'annulation -->
+    <div *ngIf="showAnnulationModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn" (click)="closeAnnulationModal()">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 transform transition-all duration-300 scale-100" (click)="$event.stopPropagation()">
+            
+            <div class="bg-gradient-to-r from-red-600 to-red-700 p-5 rounded-t-2xl">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center text-xl">❌</div>
+                        <div>
+                            <h3 class="text-white font-bold text-lg">Annuler l'inscription</h3>
+                            <p class="text-white/80 text-xs">{{selectedInscription?.formationTitre}}</p>
+                        </div>
+                    </div>
+                    <button (click)="closeAnnulationModal()" class="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 transition-colors flex items-center justify-center text-white">✕</button>
+                </div>
+            </div>
+            
+            <div class="p-6">
+                <div class="mb-5 p-4 rounded-xl" 
+                     [class.bg-green-50]="joursAvantDebut >= 7"
+                     [class.bg-orange-50]="joursAvantDebut >= 3 && joursAvantDebut < 7"
+                     [class.bg-red-50]="joursAvantDebut < 3">
+                    
+                    <div class="flex items-start gap-3">
+                        <div class="text-2xl">{{getRemboursementIcon()}}</div>
+                        <div class="flex-1">
+                            <p class="font-semibold" [class.text-green-700]="joursAvantDebut >= 7"
+                               [class.text-orange-700]="joursAvantDebut >= 3 && joursAvantDebut < 7"
+                               [class.text-red-700]="joursAvantDebut < 3">
+                                {{getMessageRemboursement()}}
+                            </p>
+                            <p class="text-xs text-gray-500 mt-1">📅 {{joursAvantDebut}} jour(s) avant le début de la formation</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        Motif de l'annulation <span class="text-red-500">*</span>
+                    </label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button *ngFor="let motif of motifs"
+                                type="button"
+                                (click)="selectMotif(motif.value)"
+                                class="p-3 rounded-xl border-2 transition-all duration-200 text-left flex items-center gap-2"
+                                [class.border-red-500]="annulationTypeMotif === motif.value"
+                                [class.bg-red-50]="annulationTypeMotif === motif.value"
+                                [class.border-gray-200]="annulationTypeMotif !== motif.value"
+                                [class.hover:border-red-300]="annulationTypeMotif !== motif.value">
+                            <span class="text-lg">{{motif.icon}}</span>
+                            <span class="text-sm font-medium">{{motif.label}}</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div *ngIf="annulationTypeMotif === 'AUTRE'" class="mb-4">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        Précisez votre motif <span class="text-red-500">*</span>
+                    </label>
+                    <textarea [(ngModel)]="annulationMotif"
+                              rows="3"
+                              placeholder="Veuillez expliquer la raison de votre annulation..."
+                              class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all"></textarea>
+                    <p class="text-xs text-gray-400 mt-1">Minimum 5 caractères</p>
+                </div>
+                
+                <div class="mt-4 p-3 bg-yellow-50 rounded-xl border border-yellow-200">
+                    <div class="flex items-center gap-2">
+                        <span class="text-yellow-600">⚠️</span>
+                        <p class="text-xs text-yellow-800">
+                            Cette action est irréversible. La place sera immédiatement libérée pour d'autres participants.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex gap-3 p-6 pt-0">
+                <button (click)="closeAnnulationModal()" 
+                        class="flex-1 px-4 py-2.5 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-all duration-200">
+                    Annuler
+                </button>
+                <button (click)="annulerAvecMotif()" 
+                        [disabled]="!annulationMotif || annulationMotif.length < 5 || cancellingId === selectedInscription?.id"
+                        class="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-red-700 text-white font-medium hover:from-red-700 hover:to-red-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                    <span *ngIf="cancellingId === selectedInscription?.id" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    <span *ngIf="cancellingId !== selectedInscription?.id"> Confirmer l'annulation</span>
+                    <span *ngIf="cancellingId === selectedInscription?.id">Annulation en cours...</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Stripe Payment -->
+    <app-stripe-payment
+        *ngIf="showPaymentModal"
+        [visible]="showPaymentModal"
+        [userId]="getCurrentUserId()"
+        [points]="selectedPoints"
+        [amount]="selectedAmount"
+        (close)="showPaymentModal = false"
+        (success)="onPaymentSuccess($event)">
+    </app-stripe-payment>
+    
+</div>

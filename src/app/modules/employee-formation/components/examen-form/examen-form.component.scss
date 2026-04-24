@@ -1,0 +1,251 @@
+.examen-form-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+.form-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 24px;
+    
+    .btn-back {
+        background: none;
+        border: none;
+        font-size: 16px;
+        cursor: pointer;
+        color: #6b7280;
+        
+        &:hover {
+            color: #1f2937;
+        }
+    }
+    
+    h2 {
+        margin: 0;
+        font-size: 24px;
+        color: #1f2937;
+    }
+}
+
+.examen-form {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.form-section {
+    margin-bottom: 32px;
+    
+    h3 {
+        margin: 0 0 16px 0;
+        font-size: 18px;
+        color: #1f2937;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #e5e7eb;
+    }
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    
+    h3 {
+        margin: 0;
+        border-bottom: none;
+    }
+}
+
+.form-row {
+    display: flex;
+    gap: 20px;
+    
+    .form-group {
+        flex: 1;
+    }
+}
+
+.form-group {
+    margin-bottom: 16px;
+    
+    label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #374151;
+    }
+    
+    input, textarea, select {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 14px;
+        
+        &:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+        }
+    }
+    
+    textarea {
+        resize: vertical;
+    }
+    
+    .error {
+        color: #ef4444;
+        font-size: 12px;
+        margin-top: 4px;
+        display: block;
+    }
+}
+
+.question-card {
+    background: #f9fafb;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid #e5e7eb;
+    
+    .question-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        
+        .question-number {
+            font-weight: 600;
+            color: #3b82f6;
+        }
+        
+        .btn-remove {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: #ef4444;
+            
+            &:hover {
+                opacity: 0.8;
+            }
+        }
+    }
+}
+
+.options-section {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+    
+    label {
+        display: block;
+        margin-bottom: 12px;
+        font-weight: 500;
+    }
+}
+
+.option-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+    
+    input[type="text"] {
+        flex: 1;
+    }
+    
+    .checkbox-label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin: 0;
+        font-weight: normal;
+        
+        input {
+            width: auto;
+        }
+    }
+    
+    .btn-remove-option {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #9ca3af;
+        font-size: 16px;
+        
+        &:hover {
+            color: #ef4444;
+        }
+    }
+}
+
+.btn-add, .btn-add-option {
+    background: none;
+    border: 1px dashed #3b82f6;
+    color: #3b82f6;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    
+    &:hover {
+        background: #eff6ff;
+    }
+}
+
+.empty-questions {
+    text-align: center;
+    padding: 40px;
+    background: #f9fafb;
+    border-radius: 10px;
+    border: 1px dashed #e5e7eb;
+    
+    p {
+        color: #6b7280;
+        margin-bottom: 16px;
+    }
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid #e5e7eb;
+    
+    .btn-cancel {
+        padding: 10px 24px;
+        background: #f3f4f6;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        
+        &:hover {
+            background: #e5e7eb;
+        }
+    }
+    
+    .btn-submit {
+        padding: 10px 32px;
+        background: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        
+        &:hover {
+            background: #2563eb;
+        }
+        
+        &:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+    }
+}

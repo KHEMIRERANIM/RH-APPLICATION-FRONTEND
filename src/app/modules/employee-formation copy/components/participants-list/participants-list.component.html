@@ -1,0 +1,183 @@
+<div class="viewport-wrapper">
+  <div class="main-content">
+    
+    <header class="page-header">
+      <div class="header-nav">
+        <button class="btn-back-circle" (click)="goBack()" title="Retour">
+          <span class="icon">←</span>
+        </button>
+        <div class="title-group">
+          <nav class="breadcrumb">Formations / Détails</nav>
+          <h1>Gestion des Participants</h1>
+        </div>
+      </div>
+      
+      <button class="btn-export" (click)="exporterListe()">
+        <span class="icon"></span> Exporter en CSV
+      </button>
+    </header>
+
+    <!-- ✅ BANNIÈRE D'INFORMATION SUR LA PÉRIODE DE FORMATION -->
+    <section class="period-banner" *ngIf="formation">
+      <div class="period-info" [ngClass]="{
+        'period-ongoing': isFormationEnCours,
+        'period-upcoming': !isFormationEnCours && isFormationAVenir,
+        'period-finished': !isFormationEnCours && isFormationTerminee
+      }">
+        <div class="period-icon">
+          <span *ngIf="isFormationEnCours">🔴</span>
+          <span *ngIf="!isFormationEnCours && isFormationAVenir">⏳</span>
+          <span *ngIf="!isFormationEnCours && isFormationTerminee">✅</span>
+        </div>
+        <div class="period-details">
+          <div class="period-title">
+            <strong *ngIf="isFormationEnCours">FORMATION EN COURS</strong>
+            <strong *ngIf="!isFormationEnCours && isFormationAVenir">FORMATION À VENIR</strong>
+            <strong *ngIf="!isFormationEnCours && isFormationTerminee">FORMATION TERMINÉE</strong>
+          </div>
+          <div class="period-dates">
+             {{ getPeriodeFormation() }}
+          </div>
+          <div class="period-message" *ngIf="!isFormationEnCours">
+            <span *ngIf="isFormationAVenir">
+              ⚠️ La gestion des présences et absences sera disponible à partir du {{ formation.dateDebut | date:'dd/MM/yyyy HH:mm' }}
+            </span>
+            <span *ngIf="isFormationTerminee">
+               Cette formation est terminée. Plus de modifications possibles.
+            </span>
+          </div>
+          <div class="period-message" *ngIf="isFormationEnCours">
+            🟢 Vous pouvez gérer les présences et absences des participants pendant la période de formation.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="stats-grid" *ngIf="statistiques">
+      <div class="stat-card">
+        <div class="stat-icon blue"></div>
+        <div class="stat-data">
+          <span class="value">{{ statistiques.totalInscrits || 0 }}</span>
+          <span class="label">Total Inscrits</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green"></div>
+        <div class="stat-data">
+          <span class="value">{{ statistiques.presenceValidee || 0 }}</span>
+          <span class="label">Présences Validées</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon purple"></div>
+        <div class="stat-data">
+          <span class="value">{{ (statistiques.tauxPresence || 0).toFixed(1) }}%</span>
+          <span class="label">Taux de Présence</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon orange">❌</div>
+        <div class="stat-data">
+          <span class="value">{{ statistiques.absents || 0 }}</span>
+          <span class="label">Absents</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="toolbar">
+      <div class="search-wrapper">
+        <span class="search-icon"></span>
+        <input type="text" placeholder="Rechercher un nom ou un email..." [(ngModel)]="searchTerm" (input)="getParticipantsFiltres()">
+      </div>
+      
+      <div class="filter-group">
+        <button [class.active]="filtreStatut === 'TOUS'" (click)="filtreStatut = 'TOUS'">Tous</button>
+        <button [class.active]="filtreStatut === 'CONFIRME'" (click)="filtreStatut = 'CONFIRME'"> Inscrits</button>
+        <button [class.active]="filtreStatut === 'PRESENT'" (click)="filtreStatut = 'PRESENT'">📍 Présents</button>
+        <button [class.active]="filtreStatut === 'ABSENT'" (click)="filtreStatut = 'ABSENT'">❌ Absents</button>
+        <button [class.active]="filtreStatut === 'VALIDE'" (click)="filtreStatut = 'VALIDE'">✓ Validés</button>
+      </div>
+    </section>
+
+    <div class="table-container shadow-sm">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th>Participant</th>
+            <th>Email</th>
+            <th>Inscription</th>
+            <th>Statut</th>
+            <th>Validation</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of getParticipantsFiltres(); trackBy: trackById">
+            <td>
+              <div class="user-cell">
+                <div class="avatar-sm">
+                  {{ (p.employePrenom?.charAt(0) || '') }}{{ (p.employeNom?.charAt(0) || '') }}
+                </div>
+                <div class="user-names">
+                  <span class="full-name">{{ p.employePrenom }} {{ p.employeNom }}</span>
+                </div>
+              </div>
+            </td>
+            <td class="email-text">{{ p.employeEmail }}</td>
+            <td>{{ p.dateInscription | date:'dd MMM yyyy' }}</td>
+            <td>
+              <span class="chip" [ngClass]="getStatutBadgeClass(p.statut)">
+                {{ getStatutText(p.statut) }}
+              </span>
+            </td>
+            <td>
+              <div class="presence-info">
+                <span [class.text-success]="p.presenceValidee" [class.text-muted]="!p.presenceValidee">
+                  {{ p.presenceValidee ? '✓ Validée' : '⏳ En attente' }}
+                </span>
+                <small *ngIf="p.datePresence" class="sub-text">le {{ p.datePresence | date:'dd/MM HH:mm' }}</small>
+              </div>
+            </td>
+            <td class="actions-cell">
+              <!-- ✅ Bouton Présent (✓) - visible seulement si formation en cours -->
+              <button *ngIf="canValidatePresence(p.statut)" 
+                      class="btn-round validate" 
+                      (click)="validerPresence(p)" 
+                      title="Valider la présence">
+                ✓
+              </button>
+              
+              <!-- ✅ Bouton Absent (✗) - visible seulement si formation en cours -->
+              <button *ngIf="canMarkAbsent(p.statut)" 
+                      class="btn-round absent" 
+                      (click)="marquerAbsent(p)" 
+                      title="Marquer comme absent">
+                ✗
+              </button>
+              
+              <!-- ✅ Bouton Réinitialiser (⟳) - visible seulement si formation en cours -->
+              <button *ngIf="canResetStatus(p.statut)" 
+                      class="btn-round reset" 
+                      (click)="reinitialiserStatut(p)" 
+                      title="Réinitialiser le statut">
+                ⟳
+              </button>
+              
+              <!-- Bouton Supprimer (🗑️) - toujours visible -->
+              <button class="btn-round delete" 
+                      (click)="annulerInscription(p)" 
+                      title="Annuler l'inscription">
+                🗑️
+              </button>
+            </td>
+          </tr>
+        </tbody>
+       </table>
+
+      <div class="empty-state" *ngIf="!isLoading && getParticipantsFiltres().length === 0">
+        <div class="empty-illustration"></div>
+        <p>Aucun participant ne correspond à votre recherche.</p>
+      </div>
+    </div>
+  </div>
+</div>

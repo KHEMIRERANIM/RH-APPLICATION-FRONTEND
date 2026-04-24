@@ -1,0 +1,345 @@
+<div class="examens-section">
+    <div class="examens-header">
+        <div class="header-left">
+            <i class="fas fa-pen-alt"></i>
+            <span>Examens de la formation</span>
+            <span class="examens-count" *ngIf="examens.length > 0">({{ examens.length }})</span>
+        </div>
+    </div>
+
+    <!-- Loading state -->
+    <div *ngIf="isLoading" class="loading-state">
+        <div class="spinner"></div>
+        <span>Chargement des examens...</span>
+    </div>
+
+    <!-- Liste des examens -->
+    <div *ngIf="!isLoading && examens.length > 0" class="examens-list">
+        <div *ngFor="let examen of examens" class="examen-item">
+            <div class="examen-info" (click)="toggleExamenDetails(examen.id)">
+                <div class="examen-title-row">
+                    <h4>{{ examen.titre }}</h4>
+                    <span class="expansion-icon" [class.expanded]="expandedExamenId === examen.id">
+                        <i class="fas fa-chevron-down"></i>
+                    </span>
+                </div>
+                <div class="examen-meta">
+                    <span class="meta-badge">
+                        <i class="fas fa-question-circle"></i> {{ examen.questions?.length || 0 }} questions
+                    </span>
+                    <span class="meta-badge">
+                        <i class="fas fa-star"></i> {{ getTotalPoints(examen) }} pts
+                    </span>
+                    <span class="meta-badge">
+                        <i class="fas fa-clock"></i> {{ examen.dureeMinutes }} min
+                    </span>
+                </div>
+            </div>
+            
+            <div class="examen-actions" *ngIf="isFormateur()">
+                <button class="btn-results" (click)="viewResults(examen)">
+                    <i class="fas fa-chart-bar"></i> Résultats
+                </button>
+              <!-- Remplacer le bouton Modifier existant -->
+<button class="btn-edit" (click)="editExamenWithForm(examen)">
+    <i class="fas fa-edit"></i> Modifier
+</button>
+                <button class="btn-delete" (click)="deleteExamen(examen)">
+                    <i class="fas fa-trash-alt"></i> Supprimer
+                </button>
+            </div>
+
+            <div class="examen-details" *ngIf="expandedExamenId === examen.id">
+                <p class="description">{{ examen.description || 'Aucune description' }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- État vide -->
+    <div *ngIf="!isLoading && examens.length === 0" class="empty-examens">
+        <i class="fas fa-inbox"></i>
+        <p>Aucun examen créé pour cette formation.</p>
+        <p class="empty-hint" *ngIf="isFormateur()">Cliquez sur le bouton ci-dessous pour créer votre premier examen.</p>
+    </div>
+
+    <!-- ==================== FORMULAIRE DE CRÉATION AVEC QCM ==================== -->
+    <div *ngIf="showCreationForm" class="examen-form-inline">
+        <div class="form-header">
+            <h3>
+                <i class="fas fa-plus-circle"></i> 
+                Examen
+            </h3>
+            <button type="button" class="close-form" (click)="toggleCreationForm()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+<form (ngSubmit)="isEditing ? onUpdateExamen() : onSubmitExamen()" #examenForm="ngForm">
+            <!-- Infos générales -->
+            <div class="form-section">
+                <div class="form-group">
+                    <label>Titre de l'examen <span class="required">*</span></label>
+                    <input 
+                        type="text" 
+                        [(ngModel)]="newExamen.titre" 
+                        name="titre"
+                        #titre="ngModel"
+                        required
+                        minlength="3"
+                        placeholder="Ex: Examen final Angular"
+                        class="form-control">
+                    <div class="invalid-feedback" *ngIf="titre.invalid && titre.touched">
+                        Le titre est requis (minimum 3 caractères)
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Description (optionnelle)</label>
+                    <textarea 
+                        [(ngModel)]="newExamen.description" 
+                        name="description"
+                        rows="3"
+                        placeholder="Décrivez brièvement l'examen..."
+                        class="form-control"></textarea>
+                </div>
+            </div>
+
+            <!-- SECTION QUESTIONS -->
+            <div class="questions-section">
+                <div class="section-header">
+                    <h4>Questions</h4>
+                    <button type="button" class="btn-add-question" (click)="addQuestion()">
+                        <i class="fas fa-plus"></i> Ajouter une question
+                    </button>
+                </div>
+
+                <!-- Liste des questions -->
+                <div class="questions-list">
+                    <div *ngFor="let question of newExamen.questions; let i = index" class="question-card">
+                        <!-- En-tête question -->
+                        <div class="question-header">
+                            <div class="question-number">Question {{ i + 1 }}</div>
+                            <div class="question-actions">
+                                <button type="button" class="btn-icon" (click)="moveQuestionUp(i)" [disabled]="i === 0">
+                                    <i class="fas fa-arrow-up"></i>
+                                </button>
+                                <button type="button" class="btn-icon" (click)="moveQuestionDown(i)" [disabled]="i === newExamen.questions.length - 1">
+                                    <i class="fas fa-arrow-down"></i>
+                                </button>
+                                <button type="button" class="btn-icon" (click)="duplicateQuestion(i)">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <button type="button" class="btn-icon remove" (click)="removeQuestion(i)">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Texte de la question -->
+                        <div class="form-group">
+                            <label>Texte de la question *</label>
+                            <textarea 
+                                [(ngModel)]="question.texte" 
+                                name="texte_{{i}}"
+                                rows="2"
+                                placeholder="Saisissez votre question..."
+                                class="form-control"></textarea>
+                        </div>
+
+                        <!-- Type et points -->
+                        <div class="form-row">
+                            <div class="form-group half">
+                                <label>Type de question</label>
+                                <select [(ngModel)]="question.type" name="type_{{i}}" (change)="onTypeChange(i)" class="form-control">
+                                    <option *ngFor="let type of typesQuestion" [value]="type.value">
+                                        {{ type.icon }} {{ type.label }}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="form-group half">
+                                <label>Points</label>
+                                <input type="number" [(ngModel)]="question.points" name="points_{{i}}" min="1" max="50" class="form-control">
+                            </div>
+                        </div>
+
+                        <!-- OPTIONS POUR QCM -->
+                        <div *ngIf="question.type === 'QCM'" class="options-section">
+                            <label>Options de réponse</label>
+                            <div class="options-list">
+                                <div *ngFor="let option of question.options; let j = index" class="option-item">
+                                    <div class="option-letter">{{ getOptionLetter(j) }}</div>
+                                    <input 
+                                        type="text" 
+                                        [(ngModel)]="option.texte" 
+                                        name="option_{{i}}_{{j}}"
+                                        placeholder="Option {{ getOptionLetter(j) }}"
+                                        class="option-input">
+                                    <label class="checkbox-correct">
+                                        <input type="checkbox" [(ngModel)]="option.estCorrect" name="correct_{{i}}_{{j}}">
+                                        <span>Correcte</span>
+                                    </label>
+                                    <button type="button" class="btn-remove-option" (click)="removeOption(i, j)">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <button type="button" class="btn-add-option" (click)="addOption(i)">
+                                <i class="fas fa-plus"></i> Ajouter une option
+                            </button>
+                            <div class="hint-text" *ngIf="!hasCorrectOption(question)">
+                                ⚠️ Sélectionnez au moins une option correcte
+                            </div>
+                        </div>
+
+                        <!-- RÉPONSE POUR TEXTE -->
+                        <div *ngIf="question.type === 'TEXTE'" class="text-answer-section">
+                            <div class="form-group">
+                                <label>Réponse correcte (attendue)</label>
+                                <input 
+                                    type="text" 
+                                    [(ngModel)]="question.correctAnswer" 
+                                    name="correctAnswer_{{i}}"
+                                    placeholder="Saisissez la réponse attendue..."
+                                    class="form-control">
+                            </div>
+                        </div>
+
+                        <!-- TEMPLATE POUR CODE -->
+                        <div *ngIf="question.type === 'CODE'" class="code-section">
+                            <div class="form-group">
+                                <label>Template de code (optionnel)</label>
+                                <textarea 
+                                    [(ngModel)]="question.codeTemplate" 
+                                    name="codeTemplate_{{i}}"
+                                    rows="4"
+                                    placeholder="// Template de départ..."
+                                    class="code-editor"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Message si aucune question -->
+                <div class="empty-questions" *ngIf="newExamen.questions.length === 0">
+                    <p>Aucune question ajoutée</p>
+                    <button type="button" class="btn-add-first" (click)="addQuestion()">
+                        <i class="fas fa-plus"></i> Ajouter votre première question
+                    </button>
+                </div>
+            </div>
+
+           <div class="form-actions">
+        <button type="button" class="btn-cancel" (click)="toggleCreationForm()">
+            Annuler
+        </button>
+        <button type="submit" class="btn-submit" [disabled]="examenForm.invalid || isSubmitting || newExamen.questions.length === 0">
+            <i class="fas" [class.fa-spinner]="isSubmitting" [class.fa-save]="!isSubmitting"></i>
+            {{ isSubmitting ? (isEditing ? 'Mise à jour...' : 'Création...') : (isEditing ? 'Mettre à jour' : 'Créer l\'examen') }}
+        </button>
+    </div>
+</form>
+    </div>
+
+    <!-- Bouton créer -->
+    <button 
+        *ngIf="isFormateur() && !showCreationForm && examens.length > 0" 
+        class="btn-create-examen" 
+        (click)="toggleCreationForm()">
+        <i class="fas fa-plus"></i> Créer un nouvel examen
+    </button>
+
+    <button 
+        *ngIf="isFormateur() && !showCreationForm && examens.length === 0" 
+        class="btn-create-examen primary" 
+        (click)="toggleCreationForm()">
+        <i class="fas fa-plus-circle"></i> Créer votre premier examen
+    </button>
+
+    <!-- ==================== MODALE RÉSULTATS ==================== -->
+    <div class="modal-overlay" *ngIf="showResultsModal" (click)="closeResultsModal()">
+        <div class="modal-container" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h2>
+                    <i class="fas fa-chart-line"></i> 
+                    Résultats - {{ selectedExamen?.titre }}
+                </h2>
+                <button class="close-btn" (click)="closeResultsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="stats-grid" *ngIf="!isLoadingResults && resultats.length > 0">
+                    <div class="stat-card">
+                        <div class="stat-value">{{ resultats.length }}</div>
+                        <div class="stat-label">Participants</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">{{ getNoteMoyenne() }}/20</div>
+                        <div class="stat-label">Moyenne</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">{{ getTauxReussite() }}%</div>
+                        <div class="stat-label">Taux de réussite</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">{{ getNoteMin() }}/20</div>
+                        <div class="stat-label">Note min</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">{{ getNoteMax() }}/20</div>
+                        <div class="stat-label">Note max</div>
+                    </div>
+                </div>
+
+                <div class="export-section" *ngIf="!isLoadingResults && resultats.length > 0">
+                    <button class="btn-export" (click)="exporterResultats()">
+                        <i class="fas fa-download"></i> Exporter les résultats (CSV)
+                    </button>
+                </div>
+
+                <div *ngIf="isLoadingResults" class="loading-results">
+                    <div class="spinner"></div>
+                    <p>Chargement des résultats...</p>
+                </div>
+
+                <div *ngIf="!isLoadingResults && resultats.length > 0" class="resultats-list">
+                    <div class="resultats-table">
+                        <div class="table-header">
+                            <span>Participant</span>
+                            <span>Note</span>
+                            <span>Statut</span>
+                            <span>Date</span>
+                        </div>
+                        
+                        <div *ngFor="let resultat of resultats" class="table-row">
+                            <div class="participant-info">
+                                <strong>{{ resultat.employePrenom }} {{ resultat.employeNom }}</strong>
+                                <small>{{ resultat.employeEmail }}</small>
+                            </div>
+                            <div class="note-cell">
+                                <span class="note-badge" [class]="getNoteClass(resultat.note)">
+                                    {{ resultat.note }}/20
+                                </span>
+                            </div>
+                            <div class="statut-cell">
+                                <span class="statut-badge" [class.reussi]="resultat.note >= 10">
+                                    {{ getStatutText(resultat.note) }}
+                                </span>
+                            </div>
+                            <div class="date-cell">
+                                {{ resultat.submittedAt | date:'dd/MM/yyyy HH:mm' }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div *ngIf="!isLoadingResults && resultats.length === 0" class="no-results">
+                    <i class="fas fa-chart-simple"></i>
+                    <h3>Aucun résultat disponible</h3>
+                    <p>Aucun participant n'a encore passé cet examen.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

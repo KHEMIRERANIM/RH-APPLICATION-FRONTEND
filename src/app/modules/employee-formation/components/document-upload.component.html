@@ -1,0 +1,57 @@
+﻿<div class="document-upload">
+    <div class="upload-area" 
+         [class.drag-over]="dragOver"
+         (dragover)="onDragOver($event)" 
+         (dragleave)="onDragLeave($event)" 
+         (drop)="onDrop($event)" 
+         (click)="fileInput.click()">
+        <input type="file" #fileInput (change)="onFileSelected($event)" style="display: none" multiple>
+        <div class="upload-content">
+            <mat-icon class="upload-icon">cloud_upload</mat-icon>
+            <p>Glissez-déposez vos fichiers ici ou cliquez pour sélectionner</p>
+            <p class="upload-hint">PDF, DOC, PPT, images (max 10MB)</p>
+        </div>
+    </div>
+    
+    <div class="uploaded-files" *ngIf="files.length > 0">
+        <h4>Fichiers sélectionnés ({{files.length}})</h4>
+        <div class="file-list">
+            <div class="file-item" *ngFor="let file of files">
+                <mat-icon>insert_drive_file</mat-icon>
+                <div class="file-info">
+                    <span class="file-name">{{file.name}}</span>
+                    <span class="file-size">{{formatFileSize(file.size)}}</span>
+                </div>
+                <button mat-icon-button (click)="removeFile(file)">
+                    <mat-icon>close</mat-icon>
+                </button>
+            </div>
+        </div>
+        
+        <div class="upload-form">
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Titre du document *</mat-label>
+                <input matInput [(ngModel)]="documentTitre">
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Description</mat-label>
+                <textarea matInput [(ngModel)]="documentDescription" rows="2"></textarea>
+            </mat-form-field>
+            
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Type de document</mat-label>
+                <mat-select [(ngModel)]="documentType">
+                    <mat-option value="COURS">📚 Cours</mat-option>
+                    <mat-option value="EXERCICE">✍️ Exercice</mat-option>
+                
+                </mat-select>
+            </mat-form-field>
+            
+            <button mat-raised-button color="primary" (click)="uploadFiles()" [disabled]="uploading">
+                <mat-icon>upload</mat-icon>
+                {{uploading ? 'Upload en cours...' : 'Uploader les fichiers'}}
+            </button>
+        </div>
+    </div>
+</div>

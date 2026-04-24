@@ -1,0 +1,656 @@
+.avis-container {
+    padding: 20px;
+    background: white;
+    border-radius: 12px;
+}
+
+.stats-section {
+    display: flex;
+    gap: 40px;
+    padding: 20px;
+    background: #f8fafc;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.moyenne-container {
+    text-align: center;
+    min-width: 150px;
+    
+    .moyenne-note {
+        font-size: 48px;
+        font-weight: bold;
+        color: #1e293b;
+    }
+    
+    .moyenne-etoiles {
+        margin: 8px 0;
+        
+        .etoile i {
+            font-size: 20px;
+        }
+    }
+    
+    .moyenne-text {
+        font-size: 13px;
+        color: #64748b;
+    }
+}
+
+.repartition-container {
+    flex: 1;
+    
+    .repartition-line {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
+        
+        .etoile-label {
+            width: 45px;
+            font-size: 13px;
+        }
+        
+        .barre-container {
+            flex: 1;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            
+            .barre {
+                height: 100%;
+                border-radius: 4px;
+                transition: width 0.3s;
+            }
+        }
+        
+        .compte {
+            width: 35px;
+            font-size: 12px;
+            color: #64748b;
+        }
+    }
+}
+
+.form-section {
+    padding: 20px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    
+    h3 {
+        margin: 0 0 8px 0;
+        color: #1e293b;
+    }
+    
+    p {
+        color: #64748b;
+        margin-bottom: 20px;
+    }
+}
+
+.etoiles-input {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    
+    .etoile-input {
+        cursor: pointer;
+        font-size: 28px;
+        
+        i {
+            color: #cbd5e1;
+            transition: color 0.2s;
+            
+            &.active {
+                color: #fbbf24;
+            }
+        }
+        
+        &:hover i {
+            color: #fbbf24;
+        }
+    }
+    
+    .note-label {
+        margin-left: 10px;
+        font-size: 14px;
+        color: #64748b;
+    }
+}
+
+.form-group {
+    margin-bottom: 20px;
+    
+    label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #374151;
+    }
+    
+    input, textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 14px;
+        
+        &:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+    }
+    
+    .error {
+        color: #ef4444;
+        font-size: 12px;
+        margin-top: 4px;
+        display: block;
+    }
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    
+    .btn-submit {
+        padding: 10px 24px;
+        background: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        
+        &:hover {
+            background: #2563eb;
+        }
+        
+        &:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+        }
+    }
+}
+
+.merci-message {
+    text-align: center;
+    padding: 30px;
+    background: #f0fdf4;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    
+    i {
+        font-size: 48px;
+        color: #10b981;
+        margin-bottom: 10px;
+    }
+    
+    p {
+        font-size: 18px;
+        font-weight: 500;
+        color: #166534;
+        margin: 0;
+    }
+    
+    small {
+        color: #64748b;
+    }
+}
+
+.avis-list {
+    h3 {
+        margin-bottom: 20px;
+        color: #1e293b;
+    }
+}
+
+.avis-card {
+    padding: 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    margin-bottom: 16px;
+    
+    .avis-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        flex-wrap: wrap;
+        gap: 10px;
+        
+        .avis-user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            
+            .avatar {
+                width: 40px;
+                height: 40px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-weight: bold;
+            }
+            
+            .user-info {
+                strong {
+                    display: block;
+                    color: #1e293b;
+                }
+                
+                .date {
+                    font-size: 11px;
+                    color: #94a3b8;
+                }
+            }
+        }
+        
+        .avis-note {
+            .etoile i {
+                font-size: 14px;
+            }
+        }
+    }
+    
+    .avis-body {
+        h4 {
+            margin: 0 0 8px 0;
+            font-size: 16px;
+            color: #1e293b;
+        }
+        
+        p {
+            margin: 0;
+            font-size: 14px;
+            color: #475569;
+            line-height: 1.5;
+        }
+    }
+
+}
+.avis-container {
+    margin-top: 1rem;
+    
+    .stats-section {
+        background: #f8fafc;
+        border-radius: 0.75rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        
+        .moyenne-container {
+            text-align: center;
+            min-width: 120px;
+            
+            .moyenne-note {
+                font-size: 2rem;
+                font-weight: bold;
+                color: #1f2937;
+            }
+            
+            .moyenne-etoiles {
+                margin: 0.25rem 0;
+                
+                .fas.fa-star {
+                    font-size: 1rem;
+                    margin: 0 1px;
+                }
+            }
+            
+            .moyenne-text {
+                font-size: 0.75rem;
+                color: #6b7280;
+            }
+        }
+        
+        .repartition-container {
+            flex: 1;
+            
+            .repartition-line {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                margin-bottom: 0.5rem;
+                
+                .etoile-label {
+                    font-size: 0.75rem;
+                    width: 3rem;
+                    
+                    .fas.fa-star {
+                        font-size: 0.7rem;
+                        margin-left: 0.25rem;
+                    }
+                }
+                
+                .barre-container {
+                    flex: 1;
+                    height: 0.5rem;
+                    background: #e5e7eb;
+                    border-radius: 0.25rem;
+                    overflow: hidden;
+                    
+                    .barre {
+                        height: 100%;
+                        border-radius: 0.25rem;
+                        transition: width 0.3s ease;
+                    }
+                }
+                
+                .compte {
+                    font-size: 0.75rem;
+                    color: #6b7280;
+                    width: 2rem;
+                    text-align: right;
+                }
+            }
+        }
+    }
+    
+    .form-section {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.75rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        
+        .etoiles-input {
+            margin-bottom: 1rem;
+            
+            .etoile-input {
+                cursor: pointer;
+                font-size: 1.5rem;
+                margin-right: 0.25rem;
+                display: inline-block;
+                
+                .fas.fa-star {
+                    color: #d1d5db;
+                    transition: color 0.2s;
+                    
+                    &.active {
+                        color: #fbbf24;
+                    }
+                }
+                
+                &:hover .fas.fa-star {
+                    color: #fbbf24;
+                }
+            }
+            
+            .note-label {
+                margin-left: 0.5rem;
+                font-size: 0.875rem;
+                color: #6b7280;
+            }
+        }
+        
+        .form-actions {
+            .btn-submit {
+                padding: 0.5rem 1rem;
+                background: #4f46e5;
+                color: white;
+                border: none;
+                border-radius: 0.5rem;
+                font-size: 0.875rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.2s;
+                
+                i {
+                    margin-right: 0.5rem;
+                }
+                
+                .fa-spinner {
+                    animation: fa-spin 1s infinite linear;
+                }
+                
+                &:hover:not(:disabled) {
+                    background: #4338ca;
+                    transform: translateY(-1px);
+                }
+                
+                &:disabled {
+                    opacity: 0.5;
+                    cursor: not-allowed;
+                }
+            }
+        }
+    }
+    
+    .merci-message {
+        background: #ecfdf5;
+        border: 1px solid #a7f3d0;
+        border-radius: 0.75rem;
+        padding: 1rem;
+        text-align: center;
+        margin-bottom: 1rem;
+        
+        .fa-check-circle {
+            font-size: 2rem;
+            color: #10b981;
+            margin-bottom: 0.5rem;
+        }
+        
+        p {
+            font-weight: 500;
+            color: #065f46;
+            margin: 0;
+        }
+        
+        small {
+            color: #059669;
+        }
+    }
+    
+    .avis-list {
+        margin-top: 1rem;
+        
+        h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            
+            .fa-comments {
+                margin-right: 0.5rem;
+                color: #4f46e5;
+            }
+        }
+        
+        .avis-card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.75rem;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+            
+            .avis-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                margin-bottom: 0.75rem;
+                
+                .avis-user {
+                    display: flex;
+                    gap: 0.5rem;
+                    
+                    .avatar {
+                        width: 2rem;
+                        height: 2rem;
+                        background: #4f46e5;
+                        color: white;
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 0.75rem;
+                        font-weight: 600;
+                    }
+                    
+                    .user-info {
+                        strong {
+                            font-size: 0.875rem;
+                            display: block;
+                        }
+                        
+                        .date {
+                            font-size: 0.7rem;
+                            color: #6b7280;
+                            
+                            .fa-calendar-alt {
+                                margin-right: 0.25rem;
+                            }
+                        }
+                    }
+                }
+                
+                .avis-note {
+                    .fas.fa-star {
+                        font-size: 0.75rem;
+                        margin-left: 0.125rem;
+                    }
+                }
+            }
+            
+            .avis-body {
+                h4 {
+                    font-size: 0.875rem;
+                    font-weight: 600;
+                    margin-bottom: 0.25rem;
+                }
+                
+                p {
+                    font-size: 0.813rem;
+                    color: #4b5563;
+                    line-height: 1.4;
+                }
+            }
+        }
+    }
+}
+
+@keyframes fa-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+.star {
+    font-size: 1rem;
+    display: inline-block;
+    
+    &.filled {
+        opacity: 1;
+    }
+    
+    &:not(.filled) {
+        opacity: 0.3;
+    }
+}
+
+.star-emoji {
+    font-size: 1.75rem;
+    opacity: 0.3;
+    transition: opacity 0.2s;
+    
+    &.filled {
+        opacity: 1;
+    }
+}
+// Style du bouton "Commenter" à la Facebook
+.comment-trigger {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 40px;
+    padding: 8px 16px;
+    margin-top: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    
+    &:hover {
+        background: #f9fafb;
+        border-color: #d1d5db;
+    }
+    
+    .comment-trigger-content {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        
+        .avatar-placeholder {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .comment-placeholder {
+            color: #9ca3af;
+            font-size: 14px;
+            flex: 1;
+        }
+    }
+}
+
+// Style du header du formulaire
+.form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    
+    h3 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin: 0;
+    }
+    
+    .close-form {
+        background: none;
+        border: none;
+        font-size: 1.25rem;
+        cursor: pointer;
+        color: #9ca3af;
+        
+        &:hover {
+            color: #4b5563;
+        }
+    }
+}
+
+// Style du bouton Annuler
+.btn-cancel-form {
+    padding: 8px 16px;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    color: #4b5563;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    
+    &:hover {
+        background: #e5e7eb;
+    }
+}
+
+// Ajustement des actions du formulaire
+.form-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 1rem;
+}

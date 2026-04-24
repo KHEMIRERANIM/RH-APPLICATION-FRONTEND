@@ -1,0 +1,82 @@
+<div class="voice-recorder">
+    <div class="flex flex-col items-center gap-3">
+        <!-- Boutons d'enregistrement -->
+        <div class="flex gap-3">
+            <!-- Enregistrement audio avec analyse -->
+            <button *ngIf="!isRecording" 
+                    (click)="startVoiceRecording()"
+                    class="w-12 h-12 rounded-full bg-purple-500 hover:bg-purple-600 text-white flex items-center justify-center transition-all shadow-md hover:shadow-lg"
+                    title="Enregistrer ma voix (analyse émotion)">
+                🎙️
+            </button>
+            <button *ngIf="isRecording" 
+                    (click)="stopVoiceRecording()"
+                    class="w-12 h-12 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center transition-all shadow-md animate-pulse">
+                ⏹️
+            </button>
+            
+            <!-- Dictée vocale (transcription) -->
+            <button *ngIf="!isListening" 
+                    (click)="startSpeechToText()"
+                    class="w-12 h-12 rounded-full bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center transition-all shadow-md"
+                    title="Dicter mon avis">
+                📝
+            </button>
+            <button *ngIf="isListening" 
+                    (click)="stopSpeechToText()"
+                    class="w-12 h-12 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center transition-all shadow-md">
+                ⏹️
+            </button>
+        </div>
+        
+        <!-- Timer pendant l'enregistrement -->
+        <div *ngIf="isRecording" class="text-sm font-mono text-red-500">
+            🎙️ Enregistrement... {{formatTime(recordingTime)}}
+        </div>
+        
+        <div *ngIf="isListening" class="text-sm font-mono text-blue-500">
+            🎤 Écoute en cours...
+        </div>
+        
+        <!-- Résultat de l'analyse vocale -->
+        <div *ngIf="currentAnalysis" class="voice-analysis-result p-3 rounded-lg w-full"
+             [style.background]="getVoiceSentimentColor() + '20'"
+             [style.border]="'1px solid ' + getVoiceSentimentColor()">
+            
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">{{getVoiceSentimentIcon()}}</span>
+                    <div>
+                        <p class="text-sm font-semibold">Analyse vocale</p>
+                        <p class="text-xs opacity-80">Sentiment détecté par la voix</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-sm font-bold">{{currentAnalysis.sentiment}}</div>
+                    <div class="text-xs opacity-70">
+                        Intensité: {{currentAnalysis.intensity.toFixed(1)}}x
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Barre de progression du sentiment vocal -->
+            <div class="mt-2 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                <div class="h-full rounded-full transition-all duration-500"
+                     [style.width]="((currentAnalysis.sentimentScore + 1) / 2 * 100) + '%'"
+                     [style.background]="getVoiceSentimentColor()">
+                </div>
+            </div>
+            
+            <div class="flex justify-between text-xs mt-1 opacity-70">
+                <span>😡 Négatif</span>
+                <span>😐 Neutre</span>
+                <span>😍 Positif</span>
+            </div>
+        </div>
+        
+        <!-- Transcription -->
+        <div *ngIf="transcript" class="w-full p-2 bg-gray-100 rounded-lg text-sm">
+            <p class="text-gray-600 italic">"{{transcript}}"</p>
+        </div>
+    </div>
+</div>

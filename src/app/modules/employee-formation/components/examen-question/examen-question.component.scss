@@ -1,0 +1,178 @@
+:root {
+    --brand-primary: #4f46e5;
+    --brand-bg: #ffffff;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    --input-focus: #818cf8;
+    --danger-red: #ef4444;
+}
+
+.question-card {
+    background: var(--brand-bg);
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.question-card:hover {
+    border-color: var(--input-focus);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* Header & Numbering */
+.question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--slate-100);
+}
+
+.question-number {
+    font-weight: 800;
+    color: var(--brand-primary);
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    background: #eef2ff;
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+}
+
+/* Inputs & Labels */
+.form-group {
+    margin-bottom: 1.25rem;
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 0.5rem;
+}
+
+textarea, select, input[type="text"], input[type="number"] {
+    padding: 0.75rem 1rem;
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    color: var(--text-main);
+    transition: all 0.2s;
+    background-color: #f8fafc;
+}
+
+textarea:focus, select:focus, input:focus {
+    outline: none;
+    border-color: var(--brand-primary);
+    background-color: #fff;
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+}
+
+/* Row for Type & Points */
+.form-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1rem;
+}
+
+/* Options Section (QCM) */
+.options-section {
+    background: #f8fafc;
+    padding: 1.25rem;
+    border-radius: 12px;
+    margin-top: 1rem;
+}
+
+.option-item {
+    margin-bottom: 0.75rem;
+    animation: slideIn 0.3s ease-out;
+}
+
+.option-item > div {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.option-item input[type="text"] {
+    flex: 1;
+    background: white;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    padding: 0.5rem;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+.checkbox-label:hover { background: #e0e7ff; }
+
+/* Buttons */
+button {
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+}
+
+.btn-remove {
+    background: #fee2e2;
+    color: var(--danger-red);
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-remove:hover { background: var(--danger-red); color: white; }
+
+.btn-add-option {
+    background: transparent;
+    color: var(--brand-primary);
+    font-weight: 600;
+    font-size: 0.875rem;
+    padding: 0.5rem 0;
+    margin-top: 0.5rem;
+    border-bottom: 2px dashed #c7d2fe;
+}
+
+.btn-add-option:hover { color: var(--brand-primary-hover); border-color: var(--brand-primary); }
+
+.btn-remove-option {
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 1.2rem;
+}
+
+.btn-remove-option:hover { color: var(--danger-red); }
+
+/* Animation */
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Case Code (Monospace) */
+textarea[formControlName="codeTemplateControl"], 
+textarea[formControl="codeTemplateControl"] {
+    font-family: 'Fira Code', 'Courier New', monospace;
+    font-size: 0.85rem;
+    background: #1e293b;
+    color: #e2e8f0;
+}

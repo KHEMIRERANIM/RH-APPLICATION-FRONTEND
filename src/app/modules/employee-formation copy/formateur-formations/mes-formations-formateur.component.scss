@@ -1,0 +1,750 @@
+﻿// Variables de couleurs
+$primary: #4f46e5;
+$bg-body: #f8fafc;
+$white: #ffffff;
+$text-main: #1e293b;
+$text-muted: #64748b;
+$border-color: #e2e8f0;
+
+.formateur-formation-container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: $bg-body;
+  min-height: 100vh;
+  font-family: 'Inter', system-ui, sans-serif;
+
+  // --- HEADER SECTION ---
+  .header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+    gap: 2rem;
+
+    @media (max-width: 992px) { flex-direction: column; align-items: flex-start; }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+
+      .title-icon {
+        background: $white;
+        padding: 1rem;
+        border-radius: 16px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      }
+
+      h1 {
+        font-size: 1.875rem;
+        font-weight: 1000;
+        color: $text-main;
+        margin: 0;
+      }
+
+      .subtitle { color: $text-muted; margin-top: 0.25rem; }
+    }
+
+    // --- STATS CARDS ---
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+
+      @media (max-width: 640px) { grid-template-columns: repeat(2, 1fr); }
+
+      .stat-card {
+        background: $white;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        text-align: center;
+        border: 1px solid $border-color;
+        transition: transform 0.2s;
+
+        &:hover { transform: translateY(-2px); }
+
+        .stat-value {
+          display: block;
+          font-size: 1.25rem;
+          font-weight: 700;
+          color: $primary;
+        }
+
+        .stat-label {
+          font-size: 0.75rem;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          color: $text-muted;
+          font-weight: 600;
+        }
+      }
+    }
+  }
+
+  // --- FORMATION CARDS ---
+  .formations-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+
+    .formation-card {
+      background: $white;
+      border-radius: 16px;
+      border: 1px solid $border-color;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+
+      &:hover {
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        border-color: $primary;
+      }
+
+      &.expanded { border-left: 4px solid $primary; }
+
+      .card-header {
+        padding: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        h3 { font-size: 1.25rem; font-weight: 700; color: $text-main; margin: 0 0 0.75rem 0; }
+
+        .meta-info {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          flex-wrap: wrap;
+
+          .type-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+          }
+
+          .date-range, .duration {
+            font-size: 0.875rem;
+            color: $text-muted;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+          }
+        }
+      }
+
+      // --- EXPANDED DETAILS ---
+      .card-details {
+        padding: 0 1.5rem 1.5rem 1.5rem;
+        border-top: 1px dashed $border-color;
+        background: #fafafa;
+        animation: slideDown 0.3s ease-out;
+
+        .details-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 1.5rem;
+          padding: 1.5rem 0;
+
+          .detail-item {
+            label {
+              display: block;
+              font-size: 0.75rem;
+              font-weight: 700;
+              color: $text-muted;
+              text-transform: uppercase;
+              margin-bottom: 0.5rem;
+            }
+            p { font-size: 0.95rem; color: $text-main; margin: 0; line-height: 1.5; }
+          }
+        }
+
+        // --- BUTTONS ---
+        .actions-buttons {
+          display: flex;
+          gap: 1rem;
+          margin-top: 1rem;
+          flex-wrap: wrap;
+
+          .action-btn {
+            flex: 1;
+            min-width: 150px;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: opacity 0.2s;
+
+            &:hover { opacity: 0.9; }
+            &.participants { background: #e0e7ff; color: #4338ca; }
+            &.documents { background: #fef3c7; color: #b45309; }
+            &.examens { background: #d1fae5; color: #047857; }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Keyframes
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+// Spinner
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba($primary, 0.1);
+  border-left-color: $primary;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 2rem auto;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+// Variables
+$primary: #4f46e5;
+$bg-page: #f1f5f9;
+$text-dark: #0f172a;
+$text-light: #64748b;
+$white: #ffffff;
+
+:host {
+  display: block;
+  width: 100%;
+  min-height: 100vh;
+  background-color: $bg-page;
+}
+
+.dashboard-viewport {
+  width: 100%;
+  min-height: 100vh;
+  padding: 2rem;
+  box-sizing: border-box;
+
+  .content-wrapper {
+    max-width: 1600px; // Largeur maximale pour les écrans ultra-larges
+    margin: 0 auto;
+    width: 100%;
+  }
+}
+
+// Header & Stats
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 3rem;
+  flex-wrap: wrap;
+  gap: 2rem;
+
+  .header-left {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+
+    .title-icon {
+      font-size: 2.5rem;
+      background: $white;
+      padding: 1rem;
+      border-radius: 20px;
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+    }
+
+    h1 { font-size: 2.25rem; font-weight: 800; color: $text-dark; margin: 0; }
+    .subtitle { color: $text-light; margin-top: 0.5rem; font-size: 1.1rem; }
+  }
+
+  .stats-container {
+    display: flex;
+    gap: 1rem;
+
+    .stat-card {
+      background: $white;
+      padding: 1rem 2rem;
+      border-radius: 15px;
+      text-align: center;
+      min-width: 100px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+
+      .value { display: block; font-size: 1.5rem; font-weight: 700; color: $primary; }
+      .label { font-size: 0.8rem; color: $text-light; text-transform: uppercase; font-weight: 600; }
+    }
+  }
+}
+
+// Grid de cartes (Utilise tout l'espace horizontal)
+.formations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.formation-card {
+  background: $white;
+  border-radius: 20px;
+  padding: 1.5rem;
+  position: relative;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+    border-color: $primary;
+  }
+
+  &.active { border: 2px solid $primary; }
+
+  .card-badge {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+  }
+
+  h3 { font-size: 1.4rem; color: $text-dark; margin-top: 0; padding-right: 80px; }
+
+  .meta-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+
+    .status-indicator {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      &.status-en-cours { background: #10b981; }
+      &.status-a-venir { background: #3b82f6; }
+      &.status-termine { background: #ef4444; }
+    }
+    .status-text { font-size: 0.85rem; color: $text-light; font-weight: 500; }
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+
+    .info-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: $text-dark;
+      font-size: 0.9rem;
+    }
+  }
+
+  .card-footer {
+    display: flex;
+    gap: 0.5rem;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 1.25rem;
+
+    .btn-action {
+      flex: 1;
+      padding: 0.6rem;
+      border-radius: 10px;
+      border: none;
+      background: #f8fafc;
+      color: $text-dark;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+
+      &:hover { background: $primary; color: white; }
+    }
+  }
+}
+
+// Animations & Responsive
+@media (max-width: 768px) {
+  .header-section { flex-direction: column; }
+  .stats-container { width: 100%; justify-content: space-between; }
+  .formations-grid { grid-template-columns: 1fr; }
+}
+// mes-formations-formateur.component.scss
+
+.dashboard-viewport {
+  min-height: 100vh;
+  background: #f8f7f4;
+  padding: 2rem 1.5rem;
+}
+
+.content-wrapper {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+// ==================== HEADER ====================
+
+.header-section {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+
+  h1 {
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0 0 4px;
+    letter-spacing: -0.02em;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+    color: #6b6b6b;
+    margin: 0;
+
+    strong {
+      color: #1a1a1a;
+      font-weight: 500;
+    }
+  }
+}
+
+.stats-container {
+  display: flex;
+  gap: 8px;
+}
+
+.stat-card {
+  background: #fff;
+  border: 0.5px solid #e0ddd6;
+  border-radius: 10px;
+  padding: 10px 20px;
+  text-align: center;
+  min-width: 70px;
+
+  .value {
+    display: block;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    line-height: 1.2;
+  }
+
+  .label {
+    font-size: 0.72rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  &.ongoing .value { color: #185FA5; }
+  &.upcoming .value { color: #0F6E56; }
+}
+
+// ==================== STATUS OVERLAY ====================
+
+.status-overlay {
+  padding: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .spinner-container {
+    text-align: center;
+    color: #888;
+
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 2px solid #e0ddd6;
+      border-top-color: #185FA5;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto 12px;
+    }
+
+    p { font-size: 0.9rem; margin: 0; }
+  }
+
+  .error-box {
+    text-align: center;
+    background: #fff;
+    border: 0.5px solid #F7C1C1;
+    border-radius: 12px;
+    padding: 2rem;
+    max-width: 360px;
+
+    .error-icon { font-size: 2rem; display: block; margin-bottom: 8px; }
+    p { font-size: 0.9rem; color: #A32D2D; margin: 0 0 1rem; }
+  }
+}
+
+.btn-retry {
+  font-size: 0.85rem;
+  padding: 8px 20px;
+  border: 0.5px solid #e0ddd6;
+  border-radius: 8px;
+  background: transparent;
+  color: #444;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover { background: #f8f7f4; }
+}
+
+// ==================== FORMATIONS GRID ====================
+
+.formations-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+// ==================== FORMATION CARD ====================
+
+.formation-card {
+  background: #fff;
+  border: 0.5px solid #e0ddd6;
+  border-radius: 14px;
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &:hover {
+    border-color: #c8c4bb;
+  }
+
+  &.expanded {
+    border-color: #b8b4ab;
+  }
+}
+
+.card-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 1.1rem 1.25rem 0.9rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.card-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-top: 3px;
+  letter-spacing: 0.04em;
+}
+
+.card-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.card-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+
+  h3 {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #1a1a1a;
+    margin: 0;
+    line-height: 1.3;
+  }
+}
+
+.chevron {
+  flex-shrink: 0;
+  color: #aaa;
+  transition: transform 0.2s ease;
+  margin-top: 2px;
+
+  &.rotated {
+    transform: rotate(180deg);
+  }
+}
+
+.meta-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+
+  &.status-en-cours { background: #1D9E75; }
+  &.status-a-venir  { background: #378ADD; }
+  &.status-termine  { background: #888780; }
+}
+
+.status-text {
+  font-size: 0.78rem;
+  color: #888;
+}
+
+.info-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  font-size: 0.75rem;
+  color: #666;
+  background: #f4f3f0;
+  padding: 3px 9px;
+  border-radius: 6px;
+}
+
+// ==================== CARD FOOTER (action buttons) ====================
+
+.card-footer {
+  display: flex;
+  gap: 6px;
+  padding: 0 1.25rem 1rem;
+  flex-wrap: wrap;
+}
+
+.btn-action {
+  font-size: 0.8rem;
+  padding: 6px 14px;
+  border: 0.5px solid #e0ddd6;
+  border-radius: 8px;
+  background: transparent;
+  color: #444;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  position: relative;
+
+  &:hover {
+    background: #f4f3f0;
+    border-color: #c8c4bb;
+  }
+
+  &.active {
+    background: #f0efe9;
+    border-color: #aaa89f;
+    color: #1a1a1a;
+    font-weight: 500;
+  }
+}
+
+// ==================== INLINE SECTION ====================
+
+.inline-section {
+  border-top: 0.5px solid #f0efe9;
+  background: #faf9f7;
+  padding: 1.25rem;
+}
+
+// ==================== EXPANSION (description) ====================
+
+.card-expansion {
+  border-top: 0.5px solid #f0efe9;
+  background: #faf9f7;
+}
+
+.expansion-inner {
+  padding: 1rem 1.25rem;
+}
+
+.desc-text {
+  font-size: 0.85rem;
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 10px;
+
+  strong { color: #333; }
+}
+
+.visio-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.visio-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: #185FA5;
+  text-decoration: none;
+  padding: 5px 12px;
+  border: 0.5px solid #B5D4F4;
+  border-radius: 8px;
+  background: #E6F1FB;
+  transition: background 0.15s;
+
+  &:hover { background: #d5e8f7; }
+}
+
+.btn-copy {
+  font-size: 0.78rem;
+  padding: 5px 12px;
+  border: 0.5px solid #e0ddd6;
+  border-radius: 8px;
+  background: transparent;
+  color: #666;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover { background: #f4f3f0; }
+}
+
+// ==================== EMPTY STATE ====================
+
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  background: #fff;
+  border: 0.5px dashed #e0ddd6;
+  border-radius: 14px;
+  color: #aaa;
+  font-size: 0.9rem;
+}
+
+// ==================== ANIMATIONS ====================
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+// ==================== RESPONSIVE ====================
+
+@media (max-width: 600px) {
+  .dashboard-viewport { padding: 1rem; }
+  .header-section { flex-direction: column; }
+  .stats-container { width: 100%; justify-content: space-between; }
+  .stat-card { flex: 1; }
+  .info-chips { display: none; }
+}

@@ -1,0 +1,106 @@
+<!-- C:\pi\RH-APPLICATION-FRONTEND\src\app\modules\employee\components\votes-propositions\votes-propositions.component.html -->
+
+<div class="p-6 max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-800">🗳️ Votes participatifs</h1>
+        <p class="text-gray-500 mt-2">Participez au choix des futures formations</p>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="text-center py-12">
+        <div class="inline-block w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        <p class="mt-2 text-gray-500">Chargement...</p>
+    </div>
+
+    <!-- Liste des propositions -->
+    <div *ngIf="!isLoading && propositions.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div *ngFor="let proposition of propositions" class="bg-white rounded-xl shadow-md overflow-hidden border-l-4" 
+             [style.border-left-color]="getTypeColor(proposition.type)">
+            
+            <div class="bg-gray-50 px-4 py-2 text-right text-xs text-gray-500 border-b">
+                 {{ tempsRestant[proposition.id] }}
+            </div>
+
+            <div class="p-5">
+                <div class="flex justify-between items-start mb-3">
+                    <h3 class="text-lg font-bold text-gray-800">{{ proposition.titre }}</h3>
+                    <span class="px-2 py-1 rounded-full text-xs font-semibold text-white" 
+                          [style.background]="getTypeColor(proposition.type)">
+                        {{ proposition.type }}
+                    </span>
+                </div>
+                
+                <p class="text-gray-600 text-sm mb-4">{{ proposition.description }}</p>
+                
+                <div class="flex gap-4 text-xs text-gray-500 mb-4">
+                    <span>⏱ {{ proposition.dureeHeures }}h</span>
+                    <span> {{ proposition.niveau }}</span>
+                    <span>🤖 Score IA: {{ proposition.scoreIA }}%</span>
+                </div>
+
+                <!-- Résultats -->
+                <div class="bg-gray-50 rounded-lg p-3 mb-4">
+                    <div class="flex justify-between text-xs mb-1">
+                        <span> Votes: {{ stats[proposition.id]?.totalVotes || 0 }}</span>
+                        <span> Seuil: {{ proposition.seuilMinimum }}</span>
+                    </div>
+                    <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div class="h-full rounded-full transition-all bg-green-500"
+                             [style.width]="(stats[proposition.id]?.pourcentagePour || 0) + '%'">
+                        </div>
+                    </div>
+                    <div class="flex justify-between text-xs mt-2">
+                        <span class="text-green-600">👍 {{ stats[proposition.id]?.votesPour || 0 }}</span>
+                        <span class="text-orange-500">🤔 {{ stats[proposition.id]?.votesPeutEtre || 0 }}</span>
+                        <span class="text-red-500">👎 {{ stats[proposition.id]?.votesContre || 0 }}</span>
+                    </div>
+                </div>
+
+                <!-- Vote -->
+                <div *ngIf="!aVote[proposition.id]" class="space-y-3">
+                    <div class="flex gap-2">
+                        <button (click)="voter(proposition.id, 'POUR')" 
+                                class="flex-1 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-semibold transition">
+                            👍 Pour
+                        </button>
+                        <button (click)="voter(proposition.id, 'PEUT_ETRE')" 
+                                class="flex-1 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold transition">
+                            🤔 Peut-être
+                        </button>
+                        <button (click)="voter(proposition.id, 'CONTRE')" 
+                                class="flex-1 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition">
+                            👎 Contre
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Déjà voté -->
+                <div *ngIf="aVote[proposition.id]" class="text-center py-3 bg-gray-100 rounded-lg">
+                    <span class="font-semibold" 
+                          [style.color]="votesUtilisateur[proposition.id] === 'POUR' ? '#10b981' : (votesUtilisateur[proposition.id] === 'CONTRE' ? '#ef4444' : '#f59e0b')">
+                        {{ getVoteLabel(votesUtilisateur[proposition.id]) }}
+                    </span>
+                    <p class="text-xs text-gray-500 mt-1">Merci pour votre participation !</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Message vide -->
+    <div *ngIf="!isLoading && propositions.length === 0" class="text-center py-12 bg-white rounded-xl">
+        <div class="text-6xl mb-4">🗳️</div>
+        <h3 class="text-xl font-semibold text-gray-600">Aucune proposition à voter</h3>
+        <p class="text-gray-400 mt-2">Revenez plus tard pour participer aux votes</p>
+    </div>
+</div>
+
+<style>
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+</style>
