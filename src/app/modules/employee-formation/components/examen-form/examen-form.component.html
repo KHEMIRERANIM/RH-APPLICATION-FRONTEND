@@ -1,0 +1,141 @@
+<div class="examen-form-container">
+    <div class="form-header">
+        <button class="btn-back" type="button" (click)="onCancel()">← Retour</button>
+        <h2>{{ isEditMode ? 'Modifier l\'examen' : 'Créer un examen' }}</h2>
+    </div>
+
+    <form [formGroup]="examenForm" (ngSubmit)="onSubmit()" class="examen-form">
+
+        <!-- Informations générales -->
+        <div class="form-section">
+            <h3>Informations générales</h3>
+
+            <div class="form-group">
+                <label>Titre *</label>
+                <input type="text" formControlName="titre" placeholder="Ex: Examen Angular">
+            </div>
+
+            <div class="form-group">
+                <label>Description *</label>
+                <textarea formControlName="description" rows="3" placeholder="Description de l'examen..."></textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Durée (minutes) *</label>
+                    <input type="number" formControlName="dureeMinutes" min="5" max="240">
+                </div>
+
+                <div class="form-group">
+                    <label>Date limite *</label>
+                    <input type="datetime-local" formControlName="dateLimite">
+                </div>
+            </div>
+        </div>
+
+
+        <!-- QUESTIONS -->
+        <div class="form-section">
+
+            <div class="section-header">
+                <h3>Questions</h3>
+                <button type="button" class="btn-add" (click)="addQuestion()">+ Ajouter une question</button>
+            </div>
+
+            <!-- IMPORTANT: formArrayName doit être ici -->
+            <div formArrayName="questions">
+
+                <div *ngFor="let q of questions.controls; let i = index" [formGroupName]="i" class="question-card">
+
+                    <div class="question-header">
+                        <span class="question-number">Question {{ i + 1 }}</span>
+                        <button type="button" class="btn-remove" (click)="removeQuestion(i)">🗑️</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Texte de la question *</label>
+                        <textarea formControlName="texte" rows="2" placeholder="Saisissez votre question..."></textarea>
+                    </div>
+
+                    <div class="form-row">
+
+                        <div class="form-group">
+                            <label>Type de question</label>
+                            <select formControlName="type" (change)="onTypeChange(i)">
+                                <option *ngFor="let type of typesQuestion" [value]="type.value">
+                                    {{type.label}}
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Points</label>
+                            <input type="number" formControlName="points" min="1" max="10">
+                        </div>
+
+                    </div>
+
+
+                    <!-- QCM -->
+                    <div *ngIf="q.get('type')?.value === 'QCM'" class="options-section">
+
+                        <label>Options de réponse</label>
+                        <div formArrayName="options">
+
+                            <div *ngFor="let opt of getOptions(i).controls; let j=index"
+                                 [formGroupName]="j"
+                                 class="option-item">
+
+                                <input type="text" formControlName="texte" placeholder="Option {{ j + 1 }}">
+
+                                <label class="checkbox-label">
+                                    <input type="checkbox" formControlName="estCorrect">
+                                    <span>Correcte</span>
+                                </label>
+
+                                <button type="button" class="btn-remove-option" (click)="removeOption(i,j)">
+                                    ✕
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                        <button type="button" class="btn-add-option" (click)="addOption(i)">
+                            + Ajouter une option
+                        </button>
+
+                    </div>
+
+
+                    <!-- TEXTE -->
+                    <div *ngIf="q.get('type')?.value === 'TEXTE'" class="form-group">
+                        <label>Réponse correcte</label>
+                        <input type="text" formControlName="correctAnswer" placeholder="Réponse attendue">
+                    </div>
+
+
+                    <!-- CODE -->
+                    <div *ngIf="q.get('type')?.value === 'CODE'" class="form-group">
+                        <label>Template de code (optionnel)</label>
+                        <textarea formControlName="codeTemplate" rows="4" placeholder="Template de départ..."></textarea>
+                    </div>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="form-actions">
+            <button type="button" class="btn-cancel" (click)="onCancel()">Annuler</button>
+            <button type="submit" class="btn-submit" [disabled]="examenForm.invalid || isLoading">
+                {{ isLoading ? 'Enregistrement...' : (isEditMode ? 'Modifier' : 'Créer') }}
+            </button>
+        </div>
+
+    </form>
+
+</div>

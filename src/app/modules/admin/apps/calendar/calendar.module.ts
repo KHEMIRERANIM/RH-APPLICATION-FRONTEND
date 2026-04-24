@@ -1,77 +1,68 @@
-import { NgModule } from '@angular/core';
+﻿import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { ScrollingModule } from '@angular/cdk/scrolling';
-import { MAT_DATE_FORMATS } from '@angular/material/core';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatDialogModule } from '@angular/material/dialog';
+import { MatDividerModule } from '@angular/material/divider';
+import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
+import { BaseChartDirective } from 'ng2-charts';
+
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatMomentDateModule } from '@angular/material-moment-adapter';
-import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { FullCalendarModule } from '@fullcalendar/angular';
 import { FuseDateRangeModule } from '@fuse/components/date-range';
-import { SharedModule } from 'app/shared/shared.module';
-import { CalendarComponent } from 'app/modules/admin/apps/calendar/calendar.component';
-import { CalendarRecurrenceComponent } from 'app/modules/admin/apps/calendar/recurrence/recurrence.component';
-import { CalendarSettingsComponent } from 'app/modules/admin/apps/calendar/settings/settings.component';
-import { CalendarSidebarComponent } from 'app/modules/admin/apps/calendar/sidebar/sidebar.component';
-import { calendarRoutes } from 'app/modules/admin/apps/calendar/calendar.routing';
-import { MaterialModule } from 'app/material.module';
+import { CalendarComponent } from './calendar.component';
+import { CalendarSettingsComponent } from './settings/settings.component';
+import { CalendarSidebarComponent } from './sidebar/sidebar.component';
+import { calendarRoutes } from './calendar.routing';
+import { SharedSentimentModule } from '../../../../shared/sentiment.module';
+import { CalendarService } from './calendar.service';
+
 
 @NgModule({
     declarations: [
         CalendarComponent,
-        CalendarRecurrenceComponent,
         CalendarSettingsComponent,
-        CalendarSidebarComponent
+        CalendarSidebarComponent,
     ],
-    imports     : [
+    imports: [
+        CommonModule,
+        SharedSentimentModule,
+        ReactiveFormsModule,
+        MatIconModule,
+        FormsModule,
         RouterModule.forChild(calendarRoutes),
-        ScrollingModule,
         MatButtonModule,
-        MatButtonToggleModule,
         MatCheckboxModule,
         MatDatepickerModule,
-        MaterialModule,
+        BaseChartDirective,
         MatDialogModule,
+        MatDividerModule,
         MatFormFieldModule,
-        MatIconModule,
         MatInputModule,
         MatMenuModule,
-        MatMomentDateModule,
-        MatRadioModule,
         MatSelectModule,
         MatSidenavModule,
         MatTooltipModule,
+        MatSnackBarModule,
+        MatProgressSpinnerModule,
         FullCalendarModule,
-        FuseDateRangeModule,
-        SharedModule
+        FuseDateRangeModule
     ],
-    providers   : [
-        {
-            provide : MAT_DATE_FORMATS,
-            useValue: {
-                parse  : {
-                    dateInput: 'DD.MM.YYYY'
-                },
-                display: {
-                    dateInput         : 'DD.MM.YYYY',
-                    monthYearLabel    : 'MMM YYYY',
-                    dateA11yLabel     : 'DD.MM.YYYY',
-                    monthYearA11yLabel: 'MMMM YYYY'
-                }
-            }
-        }
+     providers: [
+       
+        provideCharts(withDefaultRegisterables()) ,
+        CalendarService // ✅ Ajouter ceci
     ]
 })
-export class CalendarModule
-{
-}
+export class CalendarModule { }

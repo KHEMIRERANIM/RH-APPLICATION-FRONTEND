@@ -32,12 +32,12 @@ export const defaultNavigation: FuseNavigationItem[] = [
                 icon : 'heroicons_outline:academic-cap',
                 link : '/apps/academy'
             },
-            {
+           {
                 id   : 'apps.calendar',
-                title: 'Formation',
+                title: 'Formation',  // ← Changé 'formation' en 'Formation'
                 type : 'basic',
                 icon : 'heroicons_outline:calendar',
-                link : '/apps/calendar'
+                link : '/formations'  // ← CHANGÉ: '/apps/formations' → '/formations'
             },
             {
                 id   : 'apps.chat',

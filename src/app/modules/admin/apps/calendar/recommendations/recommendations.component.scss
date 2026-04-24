@@ -1,0 +1,149 @@
+// C:\pi\RH-APPLICATION-FRONTEND\src\app\modules\admin\apps\calendar\recommendations\recommendations.component.scss
+
+.recommendations-container {
+    padding: 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+    
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+        
+        h1 { font-size: 28px; color: #1e293b; margin: 0; }
+        p { color: #64748b; margin: 4px 0 0; }
+        
+        .refresh-btn {
+            padding: 8px 16px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            
+            &:disabled { opacity: 0.5; cursor: not-allowed; }
+        }
+    }
+    
+    .tabs {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 32px;
+        border-bottom: 2px solid #e2e8f0;
+        
+        button {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            color: #64748b;
+            transition: all 0.3s;
+            
+            &.active {
+                color: #3b82f6;
+                border-bottom: 2px solid #3b82f6;
+                margin-bottom: -2px;
+            }
+        }
+    }
+    
+    .personalized-section {
+        .profile-summary {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 24px;
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 32px;
+            
+            .skills-list {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                margin-top: 12px;
+            }
+        }
+        
+        .level-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            text-align: center;
+            
+            &.debutant { background: #10b981; color: white; }
+            &.intermediaire { background: #f59e0b; color: white; }
+            &.expert { background: #ef4444; color: white; }
+        }
+        
+        .suggestions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+            margin-top: 16px;
+            
+            .suggestion-card {
+                background: white;
+                border: 1px solid #e2e8f0;
+                border-radius: 12px;
+                padding: 16px;
+                transition: transform 0.2s;
+                
+                &:hover { transform: translateY(-4px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+                
+                .card-header {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 12px;
+                    
+                    .score {
+                        padding: 4px 8px;
+                        border-radius: 20px;
+                        font-weight: bold;
+                        font-size: 12px;
+                        
+                        &.high-score { background: #10b981; color: white; }
+                        &.medium-score { background: #f59e0b; color: white; }
+                        &.low-score { background: #ef4444; color: white; }
+                    }
+                }
+            }
+        }
+    }
+    
+    .skill-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 14px;
+        
+        &.known { background: #dbeafe; color: #1e40af; }
+        &.recommended { background: #fef3c7; color: #92400e; }
+        
+        .suggest-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: inherit;
+        }
+    }
+    
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255,255,255,0.9);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+}

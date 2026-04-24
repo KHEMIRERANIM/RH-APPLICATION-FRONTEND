@@ -13,9 +13,7 @@ import localeFr from '@angular/common/locales/fr';
 
 registerLocaleData(localeFr);
 
-
-
-import { TextFieldModule } from '@angular/cdk/text-field';  // ← AJOUTER
+import { TextFieldModule } from '@angular/cdk/text-field';
 
 // Material Modules
 import { MatIconModule } from '@angular/material/icon';
@@ -31,6 +29,9 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { FormationsRedirectComponent } from './shared/models/formations-redirect/formations-redirect.component';
 
 // Fuse imports - Utilise l'alias
 import { FuseModule } from 'src/@fuse/fuse.module';
@@ -45,23 +46,26 @@ import { LayoutModule } from './layout/layout.module';
 import { AppComponent } from './app.component';
 import { appRoutes } from './app-routing.module';
 import { AuthInterceptor } from './core/auth/auth.interceptor';
+import { ConfirmDialogComponent } from './core/components/confirm-dialog/confirm-dialog.component';
+
 const routerConfig: ExtraOptions = {
     preloadingStrategy: PreloadAllModules,
     scrollPositionRestoration: 'enabled'
 };
 
 @NgModule({
-    declarations: [AppComponent],
+    declarations: [
+        AppComponent,
+        ConfirmDialogComponent,
+        FormationsRedirectComponent
+    ],
     imports: [
-        
         BrowserModule,
         BrowserAnimationsModule,
         HttpClientModule,
         FormsModule,
-        TextFieldModule,  // ← AJOUTER ICI
-
+        TextFieldModule,
         ReactiveFormsModule,
-        
         // Material Modules
         MatIconModule,
         MatButtonModule,
@@ -77,8 +81,8 @@ const routerConfig: ExtraOptions = {
         MaterialModule,
         MatDatepickerModule,
         MatNativeDateModule,
-        
-        
+        MatDialogModule,
+        MatSnackBarModule,
         
         ToastrModule.forRoot({
             positionClass: 'toast-top-right',

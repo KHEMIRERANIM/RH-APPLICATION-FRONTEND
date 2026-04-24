@@ -1,0 +1,176 @@
+﻿<div class="formateur-form-container">
+    <h2 mat-dialog-title>
+        <mat-icon class="title-icon">{{isEdit ? 'edit' : 'person_add'}}</mat-icon>
+        {{isEdit ? 'Modifier' : 'Ajouter'}} un formateur
+    </h2>
+
+    <form [formGroup]="formateurForm" (ngSubmit)="onSubmit()">
+        <mat-dialog-content>
+
+            <!-- Sélection de l'employé -->
+            <div class="employe-selection">
+                <label class="section-label">
+                    <mat-icon>people</mat-icon>
+                    Sélectionner un employé *
+                </label>
+
+                <div class="search-container" *ngIf="!isLoadingEmployes">
+                    <div class="search-input-wrapper">
+                        <mat-icon class="search-icon">search</mat-icon>
+                        <input
+                            type="text"
+                            class="search-input"
+                            [(ngModel)]="searchEmployeTerm"
+                            (input)="filterEmployes()"
+                            [ngModelOptions]="{standalone: true}"
+                            placeholder="Rechercher un employé par nom, prénom ou email..."
+                            [disabled]="isEdit">
+                        <button
+                            *ngIf="searchEmployeTerm && !isEdit"
+                            type="button"
+                            class="clear-btn"
+                            (click)="clearEmployeSelection()">
+                            <mat-icon>close</mat-icon>
+                        </button>
+                    </div>
+
+                    <!-- Liste des employés -->
+                    <div class="employes-list"
+                         *ngIf="filteredEmployes.length > 0 && !formateurForm.get('employeId')?.value && !isEdit">
+                        <div class="employe-item"
+                             *ngFor="let employe of filteredEmployes"
+                             (click)="onEmployeSelect(employe)">
+                            <div class="employe-avatar">
+                                <div class="avatar-default">
+                                    <!-- ✅ firstName / lastName uniquement -->
+                                    {{employe.firstName?.charAt(0)?.toUpperCase()}}{{employe.lastName?.charAt(0)?.toUpperCase()}}
+                                </div>
+                            </div>
+                            <div class="employe-info">
+                                <div class="employe-name">
+                                    {{employe.firstName}} {{employe.lastName}}
+                                </div>
+                                <div class="employe-email">{{employe.email}}</div>
+                                <div class="employe-department" *ngIf="employe.department">
+                                    <mat-icon>business</mat-icon>
+                                    {{employe.department}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Employé sélectionné -->
+                    <div class="selected-employe" *ngIf="formateurForm.get('employeId')?.value">
+                        <div class="selected-card">
+                            <div class="selected-avatar">
+                                <div class="avatar-default">
+                                    {{formateurForm.get('prenom')?.value?.charAt(0)?.toUpperCase()}}{{formateurForm.get('nom')?.value?.charAt(0)?.toUpperCase()}}
+                                </div>
+                            </div>
+                            <div class="selected-info">
+                                <div class="selected-name">
+                                    {{formateurForm.get('prenom')?.value}} {{formateurForm.get('nom')?.value}}
+                                </div>
+                                <div class="selected-email">{{formateurForm.get('email')?.value}}</div>
+                                <div class="selected-phone" *ngIf="formateurForm.get('telephone')?.value">
+                                    <mat-icon>phone</mat-icon>
+                                    {{formateurForm.get('telephone')?.value}}
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                class="change-btn"
+                                (click)="clearEmployeSelection()"
+                                *ngIf="!isEdit">
+                                <mat-icon>swap_horiz</mat-icon>
+                                Changer
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Message aucun employé -->
+                    <div class="no-employes"
+                         *ngIf="filteredEmployes.length === 0 && !isLoadingEmployes && !formateurForm.get('employeId')?.value && !isEdit">
+                        <mat-icon>people_outline</mat-icon>
+                        <p>Aucun employé disponible</p>
+                        <p class="hint">Tous les employés sont déjà formateurs ou aucun employé n'est enregistré</p>
+                    </div>
+                </div>
+
+                <div class="loading-employes" *ngIf="isLoadingEmployes">
+                    <mat-spinner diameter="30"></mat-spinner>
+                    <p>Chargement des employés...</p>
+                </div>
+            </div>
+
+            <!-- Informations du formateur -->
+            <div class="form-section" *ngIf="formateurForm.get('employeId')?.value || isEdit">
+                <label class="section-label">
+                    <mat-icon>info</mat-icon>
+                    Informations du formateur
+                </label>
+
+                <div class="form-grid">
+                    <div class="grid-2">
+                        <mat-form-field appearance="outline">
+                            <mat-label>Spécialité *</mat-label>
+                            <mat-select formControlName="specialite">
+                                <mat-option *ngFor="let spec of specialites" [value]="spec">
+                                    {{spec}}
+                                </mat-option>
+                            </mat-select>
+                            <mat-error>{{getErrorMessage('specialite')}}</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline">
+                            <mat-label>Statut</mat-label>
+                            <mat-select formControlName="status">
+                                <mat-option value="ACTIF">
+                                    <span class="status-dot active"></span>
+                                    Actif
+                                </mat-option>
+                                <mat-option value="INACTIF">
+                                    <span class="status-dot inactive"></span>
+                                    Inactif
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Biographie</mat-label>
+                        <textarea matInput formControlName="bio" rows="3"
+                            placeholder="Présentation du formateur, ses compétences, son expérience...">
+                        </textarea>
+                        <mat-hint align="end">
+                            {{formateurForm.get('bio')?.value?.length || 0}} / 500
+                        </mat-hint>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>URL Photo (optionnel)</mat-label>
+                        <input matInput formControlName="photo"
+                            placeholder="https://exemple.com/photo.jpg">
+                        <mat-hint>Lien vers une photo de profil</mat-hint>
+                    </mat-form-field>
+                </div>
+            </div>
+
+        </mat-dialog-content>
+
+        <mat-dialog-actions align="end">
+            <button mat-button type="button" (click)="onCancel()">
+                <mat-icon>close</mat-icon>
+                Annuler
+            </button>
+            <button
+                mat-raised-button
+                color="primary"
+                type="submit"
+                [disabled]="!isFormReady">
+                <mat-icon>{{isEdit ? 'save' : 'add'}}</mat-icon>
+                {{isEdit ? 'Modifier' : 'Créer'}}
+            </button>
+        </mat-dialog-actions>
+    </form>
+</div>

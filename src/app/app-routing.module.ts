@@ -3,10 +3,21 @@ import { AuthGuard } from 'app/core/auth/guards/auth.guard';
 import { NoAuthGuard } from 'app/core/auth/guards/noAuth.guard';
 import { LayoutComponent } from 'app/layout/layout.component';
 import { InitialDataResolver } from 'app/app.resolvers';
+
 import { PaymentPageComponent } from './modules/admin/apps/covoiturage/user/payment-page/payment-page.component';
+import { FormationsRedirectComponent } from './shared/formations-redirect/formations-redirect.component';
 
 // Routes principales
 export const appRoutes: Route[] = [
+    // ============================================================
+    // ROUTE DE REDIRECTION FORMATION
+    // ============================================================
+    {
+        path: 'formations',
+        canActivate: [AuthGuard],
+        component: FormationsRedirectComponent
+    },
+    
     // Redirection par défaut
     { path: '', pathMatch: 'full', redirectTo: 'sign-in' },
     { path: 'signed-in-redirect', pathMatch: 'full', redirectTo: 'dashboards/project' },
@@ -40,7 +51,6 @@ export const appRoutes: Route[] = [
             { path: 'sign-out', loadChildren: () => import('app/modules/auth/sign-out/sign-out.module').then(m => m.AuthSignOutModule) },
             { path: 'unlock-session', loadChildren: () => import('app/modules/auth/unlock-session/unlock-session.module').then(m => m.AuthUnlockSessionModule) },
             { path: 'paiement-checkout', component: PaymentPageComponent, title: 'Paiement Réservation' }
-
         ]
     },
 
@@ -54,7 +64,19 @@ export const appRoutes: Route[] = [
         ]
     },
 
-    // Admin routes principales
+    // ============================================================
+    // ROUTES EMPLOYÉ (au même niveau que les routes admin)
+    // ============================================================
+    {
+        path: 'employee',
+        canActivate: [AuthGuard],
+        canActivateChild: [AuthGuard],
+        loadChildren: () => import('./modules/employee-formation/employee.module').then(m => m.EmployeeModule)
+    },
+
+    // ============================================================
+    // ROUTES ADMIN (PRINCIPALES)
+    // ============================================================
     {
         path: '',
         canActivate: [AuthGuard],
@@ -62,7 +84,6 @@ export const appRoutes: Route[] = [
         component: LayoutComponent,
         resolve: { initialData: InitialDataResolver },
         children: [
-
             // Dashboards
             {
                 path: 'dashboards',
@@ -79,7 +100,7 @@ export const appRoutes: Route[] = [
                 path: 'apps',
                 children: [
                     { path: 'academy', loadChildren: () => import('app/modules/admin/apps/academy/academy.module').then(m => m.AcademyModule) },
-                    { path: 'calendar', loadChildren: () => import('app/modules/admin/apps/calendar/calendar.module').then(m => m.CalendarModule) },
+                    { path: 'formations', loadChildren: () => import('app/modules/admin/apps/calendar/calendar.module').then(m => m.CalendarModule) },
                     { path: 'chat', loadChildren: () => import('app/modules/admin/apps/chat/chat.module').then(m => m.ChatModule) },
                     { path: 'contacts', loadChildren: () => import('app/modules/admin/apps/contacts/contacts.module').then(m => m.ContactsModule) },
                     { path: 'ecommerce', loadChildren: () => import('app/modules/admin/apps/ecommerce/ecommerce.module').then(m => m.ECommerceModule) },
@@ -129,27 +150,16 @@ export const appRoutes: Route[] = [
             // User Interface
             {
                 path: 'ui', children: [
-                    // Material Components
                     { path: 'material-components', loadChildren: () => import('app/modules/admin/ui/material-components/material-components.module').then(m => m.MaterialComponentsModule) },
-                    // Fuse Components
                     { path: 'fuse-components', loadChildren: () => import('app/modules/admin/ui/fuse-components/fuse-components.module').then(m => m.FuseComponentsModule) },
-                    // Other Components
                     { path: 'other-components', loadChildren: () => import('app/modules/admin/ui/other-components/other-components.module').then(m => m.OtherComponentsModule) },
-                    // TailwindCSS
                     { path: 'tailwindcss', loadChildren: () => import('app/modules/admin/ui/tailwindcss/tailwindcss.module').then(m => m.TailwindCSSModule) },
-                    // Advanced Search
                     { path: 'advanced-search', loadChildren: () => import('app/modules/admin/ui/advanced-search/advanced-search.module').then(m => m.AdvancedSearchModule) },
-                    // Animations
                     { path: 'animations', loadChildren: () => import('app/modules/admin/ui/animations/animations.module').then(m => m.AnimationsModule) },
-                    // Cards
                     { path: 'cards', loadChildren: () => import('app/modules/admin/ui/cards/cards.module').then(m => m.CardsModule) },
-                    // Colors
                     { path: 'colors', loadChildren: () => import('app/modules/admin/ui/colors/colors.module').then(m => m.ColorsModule) },
-                    // Confirmation Dialog
                     { path: 'confirmation-dialog', loadChildren: () => import('app/modules/admin/ui/confirmation-dialog/confirmation-dialog.module').then(m => m.ConfirmationDialogModule) },
-                    // Datatable
                     { path: 'datatable', loadChildren: () => import('app/modules/admin/ui/datatable/datatable.module').then(m => m.DatatableModule) },
-                    // Forms
                     {
                         path: 'forms', children: [
                             { path: 'fields', loadChildren: () => import('app/modules/admin/ui/forms/fields/fields.module').then(m => m.FormsFieldsModule) },
@@ -157,11 +167,8 @@ export const appRoutes: Route[] = [
                             { path: 'wizards', loadChildren: () => import('app/modules/admin/ui/forms/wizards/wizards.module').then(m => m.FormsWizardsModule) }
                         ]
                     },
-                    // Icons
                     { path: 'icons', loadChildren: () => import('app/modules/admin/ui/icons/icons.module').then(m => m.IconsModule) },
-                    // Page Layouts
                     { path: 'page-layouts', loadChildren: () => import('app/modules/admin/ui/page-layouts/page-layouts.module').then(m => m.PageLayoutsModule) },
-                    // Typography
                     { path: 'typography', loadChildren: () => import('app/modules/admin/ui/typography/typography.module').then(m => m.TypographyModule) }
                 ]
             },
@@ -169,16 +176,14 @@ export const appRoutes: Route[] = [
             // Documentation
             {
                 path: 'docs', children: [
-                    // Changelog
                     { path: 'changelog', loadChildren: () => import('app/modules/admin/docs/changelog/changelog.module').then(m => m.ChangelogModule) },
-                    // Guides
                     { path: 'guides', loadChildren: () => import('app/modules/admin/docs/guides/guides.module').then(m => m.GuidesModule) }
                 ]
             },
+            
             {
                 path: 'recrutement',
-                loadChildren: () => import('app/modules/recrutement/recrutement.module')
-                    .then(m => m.RecrutementModule)
+                loadChildren: () => import('app/modules/recrutement/recrutement.module').then(m => m.RecrutementModule)
             },
 
             // 404 & Catch all

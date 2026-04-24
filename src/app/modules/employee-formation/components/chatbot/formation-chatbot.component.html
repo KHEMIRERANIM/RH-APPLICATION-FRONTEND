@@ -1,0 +1,99 @@
+<!-- formation-chatbot.component.html -->
+<div class="formation-chatbot">
+  <!-- Bouton d'aide dans la carte -->
+  <button 
+    class="chat-help-btn" 
+    (click)="toggleChat()"
+    title="Poser une question sur cette formation">
+    <span class="help-icon">💬</span>
+    <span class="help-text">Assistant</span>
+    <span class="unread-badge" *ngIf="unreadCount > 0 && !isOpen">{{ unreadCount }}</span>
+  </button>
+
+  <!-- Fenêtre de chat flottante -->
+  <div class="chat-popup" *ngIf="isOpen" [class.open]="isOpen">
+    <!-- En-tête -->
+    <div class="chat-header">
+      <div class="header-info">
+        <div class="avatar">
+          <span>🤖</span>
+        </div>
+        <div class="title">
+          <h4>Assistant Formation</h4>
+          <p>{{formation?.titre | slice:0:30}}...</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" (click)="clearHistory()" title="Effacer l'historique">
+          <span class="icon">🗑️</span>
+        </button>
+        <button class="close-btn" (click)="toggleChat()">
+          <span class="icon">✕</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Messages -->
+    <div class="chat-messages" #chatMessagesContainer>
+      <div *ngFor="let message of messages" 
+           class="message" 
+           [class.user-message]="message.sender === 'USER'"
+           [class.bot-message]="message.sender === 'BOT'">
+        
+        <div class="message-avatar">
+          <span *ngIf="message.sender === 'BOT'">🤖</span>
+          <span *ngIf="message.sender === 'USER'">👤</span>
+        </div>
+        
+        <div class="message-content">
+          <div class="message-bubble">
+            <div class="message-text" [innerHTML]="message.content"></div>
+            <div class="message-sources" *ngIf="message.sources && message.sources.length > 0">
+              <span class="sources-label">📚 Sources:</span>
+              <span class="source" *ngFor="let source of message.sources">
+                {{source}}
+              </span>
+            </div>
+            <div class="message-time">{{formatTime(message.timestamp)}}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Indicateur de chargement -->
+      <div class="message bot-message" *ngIf="isLoading">
+        <div class="message-avatar">
+          <span>🤖</span>
+        </div>
+        <div class="message-content">
+          <div class="typing-indicator">
+            <span></span><span></span><span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Questions rapides -->
+    <div class="quick-questions" *ngIf="messages.length < 3">
+      <button 
+        *ngFor="let q of quickQuestions" 
+        class="quick-q-btn"
+        (click)="sendQuickQuestion(q)">
+        {{q}}
+      </button>
+    </div>
+
+    <!-- Input -->
+    <div class="chat-input">
+      <form [formGroup]="chatForm" (ngSubmit)="sendMessage()">
+        <input 
+          type="text" 
+          formControlName="message" 
+          placeholder="Posez votre question..."
+          autocomplete="off">
+        <button type="submit" [disabled]="chatForm.invalid || isLoading">
+          <span>➤</span>
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,140 @@
+<div class="examen-resultats-container">
+    <!-- En-tête -->
+    <div class="header">
+        <div class="header-left">
+            <button class="btn-back" (click)="retour()">
+                ← Retour
+            </button>
+            <div>
+                <h1>Résultats de l'examen</h1>
+                <h2>{{ examenTitre }}</h2>
+            </div>
+        </div>
+        <button class="btn-export" (click)="exporterResultats()">
+             Exporter CSV
+        </button>
+    </div>
+
+    <!-- Cartes statistiques -->
+    <div class="stats-grid" *ngIf="statistiques">
+        <div class="stat-card">
+            <div class="stat-value">{{ resultats.length }}</div>
+            <div class="stat-label">Participants</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ getNoteMoyenne() }}/20</div>
+            <div class="stat-label">Moyenne</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ getTauxReussite() }}%</div>
+            <div class="stat-label">Taux de réussite</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ getNoteMin() }}/20</div>
+            <div class="stat-label">Note min</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ getNoteMax() }}/20</div>
+            <div class="stat-label">Note max</div>
+        </div>
+    </div>
+
+    <!-- Filtres -->
+    <div class="filters">
+        <div class="search-box">
+            <input 
+                type="text" 
+                [(ngModel)]="searchTerm" 
+                placeholder="🔍 Rechercher un participant..."
+                class="search-input"
+            />
+        </div>
+        <div class="filter-notes">
+            <button 
+                [class.active]="filtreNote === 'TOUS'"
+                (click)="filtreNote = 'TOUS'"
+                class="filter-btn">
+                Tous
+            </button>
+            <button 
+                [class.active]="filtreNote === 'EXCELLENT'"
+                (click)="filtreNote = 'EXCELLENT'"
+                class="filter-btn excellent">
+                 Excellent (≥15)
+            </button>
+            <button 
+                [class.active]="filtreNote === 'BIEN'"
+                (click)="filtreNote = 'BIEN'"
+                class="filter-btn bien">
+                 Bien (12-14)
+            </button>
+            <button 
+                [class.active]="filtreNote === 'PASSABLE'"
+                (click)="filtreNote = 'PASSABLE'"
+                class="filter-btn passable">
+                 Passable (10-11)
+            </button>
+            <button 
+                [class.active]="filtreNote === 'ECHOUE'"
+                (click)="filtreNote = 'ECHOUE'"
+                class="filter-btn echoue">
+                ⚠️ Échoué (&lt;10)
+            </button>
+        </div>
+    </div>
+
+    <!-- Chargement -->
+    <div *ngIf="isLoading" class="loading">
+        <div class="spinner"></div>
+        <p>Chargement des résultats...</p>
+    </div>
+
+    <!-- Liste des résultats -->
+    <div *ngIf="!isLoading && getResultatsFiltres().length > 0" class="resultats-list">
+        <div *ngFor="let resultat of getResultatsFiltres()" class="resultat-card">
+            <div class="resultat-info">
+                <div class="employe-info">
+                    <div class="employe-nom">
+                        {{ resultat.employePrenom }} {{ resultat.employeNom }}
+                    </div>
+                    <div class="employe-email">{{ resultat.employeEmail }}</div>
+                </div>
+                <div class="resultat-details">
+                    <div class="note-container">
+                        <div class="note {{ getNoteClass(resultat.note) }}">
+                            {{ resultat.note }}/20
+                        </div>
+                        <div class="pourcentage">{{ getPourcentage(resultat.note) }}%</div>
+                    </div>
+                    <div class="statut {{ getStatutClass(resultat.note) }}">
+                        {{ getStatutText(resultat.note) }}
+                        <span class="icon">{{ getNoteIcon(resultat.note) }}</span>
+                    </div>
+                    <div class="date-soumission">
+                         {{ resultat.submittedAt | date:'dd/MM/yyyy HH:mm' }}
+                    </div>
+                </div>
+            </div>
+            <div class="resultat-progress">
+                <div class="progress-bar">
+                    <div 
+                        class="progress-fill {{ getNoteClass(resultat.note) }}"
+                        [style.width.%]="getPourcentage(resultat.note)">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Message vide -->
+    <div *ngIf="!isLoading && getResultatsFiltres().length === 0" class="empty-state">
+        <div class="empty-icon"></div>
+        <h3>Aucun résultat trouvé</h3>
+        <p *ngIf="resultats.length === 0">
+            Aucun participant n'a encore passé cet examen.
+        </p>
+        <p *ngIf="resultats.length > 0">
+            Aucun résultat ne correspond aux filtres sélectionnés.
+        </p>
+    </div>
+</div>

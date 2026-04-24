@@ -1,0 +1,75 @@
+<!-- feedback-ia-dialog.component.html -->
+<div class="feedback-ia-dialog">
+    <div class="dialog-header">
+        <h2>🤖 Feedback détaillé de l'IA</h2>
+        <button class="close-btn" (click)="close()">✕</button>
+    </div>
+
+    <div class="dialog-content">
+        <!-- Feedback global -->
+        <div class="feedback-global" *ngIf="data.resultat.feedbackIA">
+            <div class="global-icon">📊</div>
+            <div class="global-text">
+                <strong>Résultat global :</strong> {{ data.resultat.note }}/20
+                <span class="badge" [class.success]="data.resultat.valide" [class.fail]="!data.resultat.valide">
+                    {{ data.resultat.valide ? '✅ Réussi' : '❌ Échoué' }}
+                </span>
+                <p class="feedback-text">{{ data.resultat.feedbackIA }}</p>
+            </div>
+        </div>
+
+        <!-- Détail par question -->
+        <div class="questions-feedback">
+            <h3>📝 Détail par question</h3>
+            
+            <div *ngFor="let question of examen?.questions; let i = index" class="question-feedback-card"
+                 [class.correct]="getPointsForQuestion(question.id) === getMaxPointsForQuestion(question.id)"
+                 [class.incorrect]="getPointsForQuestion(question.id) === 0"
+                 [class.partial]="getPointsForQuestion(question.id) > 0 && getPointsForQuestion(question.id) < getMaxPointsForQuestion(question.id)">
+                
+                <div class="question-header">
+                    <div class="question-num">Question {{ i + 1 }}</div>
+                    <div class="question-points">
+                        {{ getPointsForQuestion(question.id) }}/{{ getMaxPointsForQuestion(question.id) }} pts
+                    </div>
+                </div>
+                
+                <div class="question-text">
+                    <strong>{{ question.texte }}</strong>
+                    <span class="question-type">{{ getQuestionTypeIcon(question.type) }} {{ question.type }}</span>
+                </div>
+                
+                <div class="reponse-utilisateur">
+                    <div class="label">📝 Votre réponse :</div>
+                    <div class="content">{{ getReponseForQuestion(question.id) }}</div>
+                </div>
+                
+                <!-- Feedback IA pour cette question -->
+                <div class="feedback-ia" *ngIf="getFeedbackForQuestion(question.id)">
+                    <div class="feedback-header">
+                        🤖 Feedback IA
+                        <span class="feedback-points" *ngIf="getPointsForQuestion(question.id) === getMaxPointsForQuestion(question.id)">✅ Parfait !</span>
+                        <span class="feedback-points" *ngIf="getPointsForQuestion(question.id) === 0">❌ À revoir</span>
+                        <span class="feedback-points" *ngIf="getPointsForQuestion(question.id) > 0 && getPointsForQuestion(question.id) < getMaxPointsForQuestion(question.id)">⚠️ Partiel</span>
+                    </div>
+                    <div class="feedback-message">
+                        {{ getFeedbackForQuestion(question.id)?.feedback }}
+                    </div>
+                    <div class="feedback-commentaire" *ngIf="getFeedbackForQuestion(question.id)?.commentaire">
+                        <strong>💡 Détail :</strong> {{ getFeedbackForQuestion(question.id)?.commentaire }}
+                    </div>
+                </div>
+
+                <!-- Réponse attendue pour texte/code -->
+                <div class="reponse-attendue" *ngIf="question.type !== 'QCM' && question.correctAnswer">
+                    <div class="label">📖 Réponse attendue :</div>
+                    <div class="content">{{ question.correctAnswer }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="dialog-footer">
+        <button class="btn-close" (click)="close()">Fermer</button>
+    </div>
+</div>

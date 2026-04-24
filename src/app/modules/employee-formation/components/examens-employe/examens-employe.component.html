@@ -1,0 +1,78 @@
+
+<div class="examens-container">
+    <div class="header">
+        <button class="btn-back" (click)="retour()">
+            ← Retour
+        </button>
+        <h1>Examens de la formation</h1>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="loading-state">
+        <div class="spinner"></div>
+        <p>Chargement des examens...</p>
+    </div>
+
+    <!-- Liste des examens -->
+    <div *ngIf="!isLoading && examens.length > 0" class="examens-list">
+        <div *ngFor="let examen of examens" class="examen-card" [class]="getStatutClass(examen)">
+            <div class="examen-header">
+                <h3>{{ examen.titre }}</h3>
+                <span class="statut-badge" [class]="getStatutClass(examen)">
+                    {{ getStatutLabel(examen) }}
+                </span>
+            </div>
+            
+            <p class="description">{{ examen.description }}</p>
+            
+            <div class="examen-meta">
+                <div class="meta-item">
+                    <span class="label"> Questions:</span>
+                    <span class="value">{{ examen.questions?.length || 0 }}</span>
+                </div>
+                <div class="meta-item">
+                    <span class="label">⭐ Points total:</span>
+                    <span class="value">{{ getTotalPoints(examen) }}</span>
+                </div>
+                <div class="meta-item">
+                    <span class="label"> Durée:</span>
+                    <span class="value">{{ examen.dureeMinutes }} min</span>
+                </div>
+                <div class="meta-item" *ngIf="examen.dateLimite">
+                    <span class="label"> Date limite:</span>
+                    <span class="value">{{ examen.dateLimite | date:'dd/MM/yyyy HH:mm' }}</span>
+                </div>
+                <div class="meta-item" *ngIf="notesExamens[examen.id]">
+                    <span class="label"> Votre note:</span>
+                    <span class="value" [class.success]="notesExamens[examen.id] >= 10" [class.failed]="notesExamens[examen.id] < 10">
+                        {{ notesExamens[examen.id] }}/20
+                    </span>
+                </div>
+            </div>
+            
+            <div class="actions">
+                <button *ngIf="isExamenDisponible(examen)" 
+                        class="btn-passer" 
+                        (click)="passerExamen(examen.id)">
+                     Passer l'examen
+                </button>
+                
+              
+                
+                <div *ngIf="!isExamenDisponible(examen) && !examensDejaPasses[examen.id]" 
+                     class="message-indisponible">
+                    ⚠️ Cet examen n'est plus disponible
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Aucun examen -->
+    <div *ngIf="!isLoading && examens.length === 0" class="empty-state">
+        <i class="fas fa-inbox"></i>
+        <p>Aucun examen disponible pour cette formation.</p>
+        <button class="btn-retour" (click)="retour()">
+            Retour à mes formations
+        </button>
+    </div>
+</div>

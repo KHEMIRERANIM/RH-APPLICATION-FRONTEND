@@ -1,0 +1,166 @@
+<!-- C:\pi\RH-APPLICATION-FRONTEND\src\app\modules\admin\apps\calendar\components\propositions-admin\propositions-admin.component.html -->
+
+<div class="p-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">📋 Gestion des propositions</h1>
+            <p class="text-gray-500 text-sm">Gérez les propositions de formation générées par l'IA et les votes</p>
+        </div>
+        <button (click)="genererPropositionsIA()" 
+                class="px-4 py-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-lg font-semibold hover:opacity-90 transition">
+            🤖 Générer avec l'IA
+        </button>
+    </div>
+
+    <!-- Statistiques -->
+    <div class="grid grid-cols-4 gap-4 mb-6">
+        <div class="bg-yellow-50 rounded-lg p-4 text-center border border-yellow-200">
+            <div class="text-2xl font-bold text-yellow-600">{{ stats.en_attente || 0 }}</div>
+            <div class="text-xs text-gray-500">En attente</div>
+        </div>
+        <div class="bg-blue-50 rounded-lg p-4 text-center border border-blue-200">
+            <div class="text-2xl font-bold text-blue-600">{{ stats.validees || 0 }}</div>
+            <div class="text-xs text-gray-500">Validées</div>
+        </div>
+        <div class="bg-green-50 rounded-lg p-4 text-center border border-green-200">
+            <div class="text-2xl font-bold text-green-600">{{ stats.programmees || 0 }}</div>
+            <div class="text-xs text-gray-500">Programmées</div>
+        </div>
+        <div class="bg-purple-50 rounded-lg p-4 text-center border border-purple-200">
+            <div class="text-2xl font-bold text-purple-600">{{ stats.total_interets || 0 }}</div>
+            <div class="text-xs text-gray-500">Votes totaux</div>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="text-center py-12">
+        <div class="spinner"></div>
+        <p class="text-gray-500 mt-2">Chargement...</p>
+    </div>
+
+    <!-- Section: Propositions en attente de validation -->
+    <div *ngIf="!isLoading && propositionsEnAttente.length > 0" class="mb-8">
+        <h2 class="text-lg font-bold text-gray-700 mb-3">⏳ En attente de validation</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div *ngFor="let prop of propositionsEnAttente" class="bg-white rounded-lg shadow-md p-4 border-l-4 border-yellow-500">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="font-bold text-gray-800">{{ prop.titre }}</h3>
+                        <p class="text-xs text-gray-500 mt-1">🤖 Score IA: {{ prop.scoreIA }}%</p>
+                    </div>
+                    <span class="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-700">{{ prop.type }}</span>
+                </div>
+                <p class="text-sm text-gray-600 mt-2">{{ prop.description }}</p>
+                <div class="flex gap-2 mt-4">
+                    <button (click)="validerProposition(prop)" class="px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600">✅ Valider</button>
+                    <button (click)="rejeterProposition(prop)" class="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600">❌ Rejeter</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section: Propositions validées (avec votes) -->
+    <div *ngIf="!isLoading && propositionsValidees.length > 0" class="mb-8">
+        <h2 class="text-lg font-bold text-gray-700 mb-3">📊 Propositions validées - Votes en cours</h2>
+        <div class="grid grid-cols-1 gap-4">
+            <div *ngFor="let prop of propositionsValidees" class="bg-white rounded-lg shadow-md p-4 border-l-4" 
+                 [class.border-green-500]="prop.statutVote === 'OUVERT'"
+                 [class.border-gray-400]="prop.statutVote !== 'OUVERT'">
+                
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="font-bold text-gray-800">{{ prop.titre }}</h3>
+                        <div class="flex gap-3 mt-1">
+                            <span class="text-xs text-gray-500">📊 {{ prop.totalVotes || 0 }} votes</span>
+                            <span class="text-xs text-gray-500">🎯 Seuil: {{ prop.seuilMinimum || 5 }}</span>
+                            <span class="text-xs" [class.text-green-600]="prop.statutVote === 'OUVERT'" [class.text-gray-500]="prop.statutVote !== 'OUVERT'">
+                                {{ prop.statutVote === 'OUVERT' ? '🔓 Vote ouvert' : (prop.statutVote === 'CLOTURE' ? '🔒 Vote clos' : '⚪ En attente') }}
+                            </span>
+                        </div>
+                    </div>
+                    <span class="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700">{{ prop.type }}</span>
+                </div>
+
+                <p class="text-sm text-gray-600 mt-2">{{ prop.description }}</p>
+
+                <!-- Barre de progression des votes -->
+                <div class="mt-4" *ngIf="prop.totalVotes > 0 || prop.statutVote === 'OUVERT'">
+                    <div class="flex justify-between text-xs mb-1">
+                        <span>👍 Pour: {{ prop.votesPour || 0 }}</span>
+                        <span>👎 Contre: {{ prop.votesContre || 0 }}</span>
+                        <span class="font-semibold">{{ prop.pourcentagePour || 0 }}% pour</span>
+                    </div>
+                    <div class="h-3 bg-gray-200 rounded-full overflow-hidden">
+                        <div class="h-full rounded-full transition-all" 
+                             [class]="getPourcentageClass(prop.pourcentagePour || 0)"
+                             [style.width]="(prop.pourcentagePour || 0) + '%'">
+                        </div>
+                    </div>
+                    <div class="text-xs text-gray-400 mt-1">
+                        Seuil à atteindre: {{ prop.seuilMinimum || 5 }} votes minimum
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex gap-2 mt-4">
+                    <button *ngIf="prop.statutVote !== 'OUVERT' && prop.statutVote !== 'CLOTURE'" 
+                            (click)="ouvrirVote(prop)" 
+                            class="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600">
+                        🗳️ Ouvrir le vote
+                    </button>
+                    <button *ngIf="prop.statutVote === 'OUVERT'" 
+                            (click)="cloturerVote(prop)" 
+                            class="px-3 py-1 bg-orange-500 text-white rounded text-sm hover:bg-orange-600">
+                        🔒 Clôturer le vote
+                    </button>
+                    <button *ngIf="prop.statutVote === 'CLOTURE' && prop.pourcentagePour >= 50" 
+                            (click)="publierFormation(prop)" 
+                            class="px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600">
+                        📢 Publier la formation
+                    </button>
+                </div>
+
+                <!-- Détails des votes (accordéon) -->
+                <details *ngIf="prop.votesDetails && prop.votesDetails.length > 0" class="mt-3">
+                    <summary class="text-xs text-gray-500 cursor-pointer">📋 Voir les détails des votes ({{ prop.votesDetails.length }})</summary>
+                    <div class="mt-2 space-y-1 max-h-40 overflow-y-auto">
+                        <div *ngFor="let vote of prop.votesDetails" class="text-xs border-b py-1">
+                            <span [class.text-green-600]="vote.vote === 'POUR'" 
+                                  [class.text-red-600]="vote.vote === 'CONTRE'"
+                                  [class.text-orange-500]="vote.vote === 'PEUT_ETRE'">
+                                {{ vote.employeNom }}: {{ vote.vote }}
+                            </span>
+                            <span class="text-gray-400 text-[10px] ml-2">{{ vote.dateVote | date:'dd/MM/yyyy HH:mm' }}</span>
+                        </div>
+                    </div>
+                </details>
+            </div>
+        </div>
+    </div>
+
+    <!-- Message vide -->
+    <div *ngIf="!isLoading && propositionsEnAttente.length === 0 && propositionsValidees.length === 0" class="text-center py-12 bg-gray-50 rounded-lg">
+        <div class="text-6xl mb-4">📭</div>
+        <h3 class="text-lg font-semibold text-gray-600">Aucune proposition</h3>
+        <p class="text-gray-400 text-sm mt-1">Cliquez sur "Générer avec l'IA" pour créer des propositions</p>
+    </div>
+</div>
+
+<style>
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #e2e8f0;
+    border-top-color: #6366f1;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+}
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+.bg-green-500 { background-color: #10b981; }
+.bg-yellow-500 { background-color: #f59e0b; }
+.bg-red-500 { background-color: #ef4444; }
+</style>

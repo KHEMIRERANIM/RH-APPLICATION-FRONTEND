@@ -1,376 +1,1922 @@
-<div class="absolute inset-0 flex flex-col min-w-0 overflow-hidden dark:bg-gray-900">
+﻿<div class="absolute inset-0 flex flex-col min-w-0 overflow-hidden cal-root">
 
     <mat-drawer-container class="flex-auto h-full bg-transparent">
-
-        <!-- Drawer -->
-        <mat-drawer
-            class="w-60 dark:bg-gray-900"
-            [autoFocus]="false"
-            [mode]="drawerMode"
-            [opened]="drawerOpened"
-            #drawer>
+        
+        <!-- SIDEBAR - MASQUABLE AVEC TOGGLE -->
+        <mat-drawer #drawer mode="side" [opened]="drawerOpened" (openedChange)="drawerOpened = $event" position="start" class="w-80 border-r bg-white dark:bg-gray-900 shadow-lg">
             <calendar-sidebar (calendarUpdated)="onCalendarUpdated($event)"></calendar-sidebar>
         </mat-drawer>
 
         <mat-drawer-content class="flex">
-
-            <!-- Main -->
             <div class="flex flex-col flex-auto">
 
-                <!-- Header -->
-                <div class="flex flex-0 flex-wrap items-center p-4 border-b bg-card">
-
-                    <button
-                        mat-icon-button
-                        (click)="toggleDrawer()">
-                        <mat-icon [svgIcon]="'heroicons_outline:menu'"></mat-icon>
-                    </button>
-
-                    <div class="ml-4 text-2xl font-semibold tracking-tight whitespace-nowrap">
-                        {{viewTitle}}
-                    </div>
-
-                    <button
-                        class="ml-5"
-                        mat-icon-button
-                        (click)="previous()">
-                        <mat-icon
-                            class="icon-size-5"
-                            [svgIcon]="'heroicons_solid:chevron-left'"></mat-icon>
-                    </button>
-
-                    <button
-                        mat-icon-button
-                        (click)="next()">
-                        <mat-icon
-                            class="icon-size-5"
-                            [svgIcon]="'heroicons_solid:chevron-right'"></mat-icon>
-                    </button>
-
-                    <button
-                        class="hidden md:inline-flex"
-                        mat-icon-button
-                        (click)="today()">
-                        <mat-icon [svgIcon]="'heroicons_outline:calendar'"></mat-icon>
-                    </button>
-
-                    <div class="hidden md:block ml-auto">
-                        <mat-form-field class="fuse-mat-dense fuse-mat-no-subscript w-30 ml-2">
-                            <mat-select
-                                (selectionChange)="changeView(viewChanger.value)"
-                                [value]="view"
-                                #viewChanger="matSelect">
-                                <mat-option [value]="'dayGridMonth'">Month</mat-option>
-                                <mat-option [value]="'timeGridWeek'">Week</mat-option>
-                                <mat-option [value]="'timeGridDay'">Day</mat-option>
-                                <mat-option [value]="'listYear'">Schedule</mat-option>
-                            </mat-select>
-                        </mat-form-field>
-                    </div>
-
-                    <!-- Mobile menu -->
-                    <div class="md:hidden ml-auto">
-                        <button
-                            class=""
-                            [matMenuTriggerFor]="actionsMenu"
-                            mat-icon-button>
-                            <mat-icon [svgIcon]="'heroicons_outline:dots-vertical'"></mat-icon>
-
-                            <mat-menu #actionsMenu="matMenu">
-                                <button
-                                    mat-menu-item
-                                    (click)="today()">
-                                    <mat-icon [svgIcon]="'heroicons_outline:calendar'"></mat-icon>
-                                    <span>Go to today</span>
-                                </button>
-                                <button
-                                    [matMenuTriggerFor]="actionsViewsMenu"
-                                    mat-menu-item>
-                                    <mat-icon [svgIcon]="'heroicons_outline:view-grid'"></mat-icon>
-                                    <span>View</span>
-                                </button>
-                            </mat-menu>
-
-                            <mat-menu #actionsViewsMenu="matMenu">
-                                <button
-                                    mat-menu-item
-                                    [disabled]="view === 'dayGridMonth'"
-                                    (click)="changeView('dayGridMonth')">
-                                    <span>Month</span>
-                                </button>
-                                <button
-                                    mat-menu-item
-                                    [disabled]="view === 'timeGridWeek'"
-                                    (click)="changeView('timeGridWeek')">
-                                    <span>Week</span>
-                                </button>
-                                <button
-                                    mat-menu-item
-                                    [disabled]="view === 'timeGridDay'"
-                                    (click)="changeView('timeGridDay')">
-                                    <span>Day</span>
-                                </button>
-                                <button
-                                    mat-menu-item
-                                    [disabled]="view === 'listYear'"
-                                    (click)="changeView('listYear')">
-                                    <span>Schedule</span>
-                                </button>
-                            </mat-menu>
+                <!-- HEADER ENRICHI -->
+                <div class="cal-header flex flex-0 items-center justify-between px-4 py-2 z-10">
+                 
+                    <div class="flex items-center gap-3">
+                        <button (click)="drawerOpened = !drawerOpened" class="cal-icon-btn hover:bg-slate-100 rounded-full transition-colors" [matTooltip]="drawerOpened ? 'Masquer le tableau de bord' : 'Afficher le tableau de bord'">
+                            <mat-icon>{{drawerOpened ? 'chevron_left' : 'chevron_right'}}</mat-icon>
                         </button>
+                        <div class="flex flex-col leading-tight">
+                            <span class="cal-title text-sm font-semibold">Calendrier</span>
+                            <span class="cal-sub text-xs text-slate-500">Gestion des formations</span>
+                        </div>
                     </div>
-                </div>
 
-                <!-- FullCalendar -->
-                <div class="flex flex-col flex-auto">
-                    <full-calendar
-                        [options]="calendarOptions"
-                        #fullCalendar></full-calendar>
-                </div>
+                    <div class="flex items-center gap-1 cal-nav-group bg-white border border-slate-200 rounded-full px-1 py-0.5 shadow-sm">
+                        <button class="w-7 h-7 rounded-full text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 transition-all flex items-center justify-center text-sm" (click)="previous()" matTooltip="Précédent">◀</button>
+                        <button class="cal-today-btn font-medium text-slate-700 hover:bg-slate-100 rounded-lg px-2 h-7 text-xs normal-case flex items-center gap-1" (click)="today()">📅 Aujourd'hui</button>
+                        <button class="w-7 h-7 rounded-full text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 transition-all flex items-center justify-center text-sm" (click)="next()" matTooltip="Suivant">▶</button>
+                    </div>
 
-                <!-- Event panel -->
-                <ng-template #eventPanel>
+                    <div class="flex items-center gap-2">
 
-                    <!-- Preview mode -->
-                    <ng-container *ngIf="panelMode === 'view'">
-                        <div class="flex-auto p-8">
-                            <!-- Info -->
-                            <div class="flex">
-                                <mat-icon [svgIcon]="'heroicons_outline:information-circle'"></mat-icon>
-                                <div class="flex flex-auto justify-between ml-6">
-                                    <!-- Info -->
-                                    <div>
-                                        <div class="text-3xl font-semibold tracking-tight leading-none">{{event.title || '(No title)'}}</div>
-                                        <div class="mt-0.5 text-secondary">{{event.start | date:'EEEE, MMMM d'}}</div>
-                                        <div class="text-secondary">{{recurrenceStatus}}</div>
-                                    </div>
-                                    <!-- Actions -->
-                                    <div class="flex -mt-2 -mr-2 ml-10">
+                        <!-- 🔍 BARRE DE RECHERCHE RAPIDE -->
+                        <div class="adv-search-bar flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1">
+                            <span class="text-slate-400 text-xs">🔍</span>
+                            <input type="text" [(ngModel)]="searchQuery" (input)="applyFilters()" placeholder="Rechercher..." class="bg-transparent text-xs text-slate-700 outline-none w-32 placeholder-slate-400">
+                            <button *ngIf="searchQuery" (click)="resetFilters()" class="text-slate-400 hover:text-slate-600 text-xs">✕</button>
+                        </div>
 
-                                        <!-- Non-recurring event -->
-                                        <ng-container *ngIf="!event.recurrence">
-                                            <!-- Edit -->
-                                            <button
-                                                mat-icon-button
-                                                (click)="changeEventPanelMode('edit', 'single')">
-                                                <mat-icon [svgIcon]="'heroicons_outline:pencil-alt'"></mat-icon>
-                                            </button>
-                                            <!-- Delete -->
-                                            <button
-                                                mat-icon-button
-                                                (click)="deleteEvent(event)">
-                                                <mat-icon [svgIcon]="'heroicons_outline:trash'"></mat-icon>
-                                            </button>
-                                        </ng-container>
-
-                                        <!-- Recurring event -->
-                                        <ng-container *ngIf="event.recurrence">
-                                            <!-- Edit -->
-                                            <button
-                                                mat-icon-button
-                                                [matMenuTriggerFor]="editMenu">
-                                                <mat-icon [svgIcon]="'heroicons_outline:pencil-alt'"></mat-icon>
-                                            </button>
-                                            <mat-menu #editMenu="matMenu">
-                                                <button
-                                                    mat-menu-item
-                                                    (click)="changeEventPanelMode('edit', 'single')">
-                                                    This event
-                                                </button>
-                                                <button
-                                                    mat-menu-item
-                                                    *ngIf="!event.isFirstInstance"
-                                                    (click)="changeEventPanelMode('edit', 'future')">
-                                                    This and following events
-                                                </button>
-                                                <button
-                                                    mat-menu-item
-                                                    (click)="changeEventPanelMode('edit', 'all')">
-                                                    All events
-                                                </button>
-                                            </mat-menu>
-                                            <!-- Delete -->
-                                            <button
-                                                mat-icon-button
-                                                [matMenuTriggerFor]="deleteMenu">
-                                                <mat-icon [svgIcon]="'heroicons_outline:trash'"></mat-icon>
-                                            </button>
-                                            <mat-menu #deleteMenu="matMenu">
-                                                <button
-                                                    mat-menu-item
-                                                    (click)="deleteEvent(event, 'single')">
-                                                    This event
-                                                </button>
-                                                <button
-                                                    mat-menu-item
-                                                    *ngIf="!event.isFirstInstance"
-                                                    (click)="deleteEvent(event, 'future')">
-                                                    This and following events
-                                                </button>
-                                                <button
-                                                    mat-menu-item
-                                                    (click)="deleteEvent(event, 'all')">
-                                                    All events
-                                                </button>
-                                            </mat-menu>
-                                        </ng-container>
-                                    </div>
+                        <!-- 🔔 CLOCHE NOTIFICATIONS -->
+                        <div class="relative">
+                            <button class="notif-bell w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-all shadow-sm relative" (click)="toggleNotifications()" matTooltip="Notifications">
+                                <span class="text-sm">🔔</span>
+                                <span *ngIf="unreadNotificationsCount > 0" class="notif-badge absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                                    {{unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount}}
+                                </span>
+                            </button>
+                            <div *ngIf="showNotifications" class="notif-panel absolute right-0 top-10 w-80 bg-white rounded-xl border border-slate-200 shadow-xl z-50 overflow-hidden">
+                                <div class="notif-header flex items-center justify-between px-3 py-2 border-b border-slate-100 bg-gradient-to-r from-indigo-50 to-bleu-50">
+                                    <span class="text-xs font-bold text-slate-700">Notifications</span>
+                                    <button (click)="markAllNotificationsRead()" class="text-[10px] text-indigo-600 hover:underline font-medium">Tout marquer lu</button>
                                 </div>
-                            </div>
-
-                            <!-- Description -->
-                            <div
-                                class="flex mt-6"
-                                *ngIf="event.description">
-                                <mat-icon [svgIcon]="'heroicons_outline:menu-alt-2'"></mat-icon>
-                                <div class="flex-auto ml-6">{{event.description}}</div>
-                            </div>
-
-                            <!-- Calendar -->
-                            <div class="flex mt-6">
-                                <mat-icon [svgIcon]="'heroicons_outline:calendar'"></mat-icon>
-                                <div class="flex flex-auto items-center ml-6">
-                                    <div
-                                        class="w-2 h-2 rounded-full"
-                                        [ngClass]="getCalendar(event.calendarId).color"></div>
-                                    <div class="ml-3 leading-none">{{getCalendar(event.calendarId).title}}</div>
+                                <div class="notif-list max-h-64 overflow-y-auto divide-y divide-slate-50">
+                                    <div *ngFor="let n of notifications" class="notif-item px-3 py-2 hover:bg-slate-50 cursor-pointer transition-colors flex gap-2 items-start" [class.unread-notif]="!n.read" (click)="markNotificationRead(n)">
+                                        <span class="text-sm mt-0.5 flex-shrink-0">{{n.icon || (n.type === 'error' ? '🔴' : n.type === 'warning' ? '⚠️' : 'ℹ️')}}</span>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-[11px] font-semibold text-slate-700">{{n.titre}}</p>
+                                            <p class="text-[10px] text-slate-500 leading-relaxed">{{n.message}}</p>
+                                            <p class="text-[9px] text-slate-400 mt-0.5">{{n.time}}</p>
+                                        </div>
+                                        <div *ngIf="!n.read" class="w-2 h-2 bg-indigo-500 rounded-full flex-shrink-0 mt-1"></div>
+                                    </div>
+                                    <div *ngIf="notifications.length === 0" class="px-3 py-6 text-center text-xs text-slate-400">Aucune notification</div>
                                 </div>
                             </div>
                         </div>
-                    </ng-container>
 
-                    <!-- Add / Edit mode -->
-                    <ng-container *ngIf="panelMode === 'add' || panelMode === 'edit'">
-                        <form
-                            class="flex flex-col w-full p-6 pt-8 sm:pt-10 sm:pr-8"
-                            [formGroup]="eventForm">
-
-                            <!-- Title -->
-                            <div class="flex items-center">
-                                <mat-icon
-                                    class="hidden sm:inline-flex mr-6"
-                                    [svgIcon]="'heroicons_outline:pencil-alt'"></mat-icon>
-                                <mat-form-field class="fuse-mat-no-subscript flex-auto">
-                                    <input
-                                        matInput
-                                        [formControlName]="'title'"
-                                        [placeholder]="'Event title'">
-                                </mat-form-field>
+                        <!-- 📊 BOUTON DASHBOARD -->
+                        <button class="dash-btn flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-semibold transition-all shadow-sm" [class.dash-btn--active]="showDashboard" (click)="toggleDashboard()" matTooltip="Tableau de bord">
+                            <span></span> <span>Stats</span>
+                        </button>
+                         <button class="dash-btn flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-semibold transition-all shadow-sm relative"
+            [class.dash-btn--active]="showKPIsPanel"
+            (click)="toggleKPIsPanel()"
+            matTooltip="KPIs & IA">
+        <span>KPIs IA</span>
+        <span *ngIf="kpisData?.alertesFormations && getAlertesCount() > 0" 
+      class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+    {{getAlertesCount()}}
+</span>
+    </button>
+                        <!-- ⬇️ BOUTON EXPORT -->
+                        <div class="relative">
+                            <button class="export-btn flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white transition-all shadow-sm" (click)="showExportMenu = !showExportMenu" matTooltip="Exporter">
+                                <span>⬇</span> <span>Export</span>
+                            </button>
+                            <div *ngIf="showExportMenu" class="export-menu absolute right-0 top-9 w-44 bg-white rounded-xl border border-slate-200 shadow-xl z-50 overflow-hidden">
+                                <button (click)="exportToCSV()" class="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2 transition-colors">📄 Exporter CSV</button>
+                                <button (click)="exportToJSON()" class="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2 transition-colors border-t border-slate-50">🗂️ Exporter JSON</button>
+                                <button (click)="printCalendar()" class="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2 transition-colors border-t border-slate-50">🖨️ Imprimer</button>
                             </div>
+                        </div>
 
-                            <!-- Dates -->
-                            <div class="flex items-start mt-6">
-                                <mat-icon
-                                    class="hidden sm:inline-flex mt-3 mr-6"
-                                    [svgIcon]="'heroicons_outline:calendar'"></mat-icon>
-                                <div class="flex-auto">
-                                    <fuse-date-range
-                                        [formControlName]="'range'"
-                                        [dateFormat]="settings.dateFormat"
-                                        [timeRange]="!eventForm.get('allDay').value"
-                                        [timeFormat]="settings.timeFormat"></fuse-date-range>
-                                    <mat-checkbox
-                                        class="mt-4"
-                                        [color]="'primary'"
-                                        [formControlName]="'allDay'">
-                                        All day
-                                    </mat-checkbox>
+                        <!-- ADMIN FORMATEURS -->
+                        <button *ngIf="isAdmin" class="admin-btn bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded-lg text-xs font-medium flex items-center gap-1 transition-all shadow-sm" (click)="openFormateurManagement()" matTooltip="Gérer les formateurs">
+                            Formateurs
+                        </button>
+                        
+                        <!-- VUES -->
+                        <div class="view-tabs bg-slate-100 p-0.5 rounded-lg flex gap-0.5">
+                            <button class="view-tab text-xs px-2 py-1 rounded" [class.active]="view === 'dayGridMonth'" (click)="changeView('dayGridMonth')">📅 Mois</button>
+                            <button class="view-tab text-xs px-2 py-1 rounded" [class.active]="view === 'timeGridWeek'" (click)="changeView('timeGridWeek')">📆 Semaine</button>
+                            <button class="view-tab text-xs px-2 py-1 rounded" [class.active]="view === 'timeGridDay'" (click)="changeView('timeGridDay')">🗓️ Jour</button>
+                            <button class="view-tab text-xs px-2 py-1 rounded" [class.active]="view === 'listYear'" (click)="changeView('listYear')">📋 Liste</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DASHBOARD STATS PANEL -->
+                <div *ngIf="showDashboard" class="dash-panel mx-3 mt-2 rounded-xl overflow-hidden border border-slate-200 shadow-lg animate-slide-down">
+                    <div class="dash-panel-header flex items-center justify-between px-4 py-2 bg-gradient-to-r from-indigo-600 to-bleu-400">
+                        <div class="flex items-center gap-2"><span class="text-white text-sm">📊</span><span class="text-white text-xs font-bold">Tableau de bord — Vue d'ensemble</span></div>
+                        <button (click)="showDashboard = false" class="text-white/70 hover:text-white text-sm transition-colors">✕</button>
+                    </div>
+                    <div class="dash-content bg-white p-3" style="max-height: 550px; overflow-y: auto;">
+                        <div class="grid grid-cols-4 gap-2 mb-3">
+                            <div class="kpi-card bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl p-3 border border-indigo-200">
+                                <p class="text-[10px] font-bold text-indigo-500 uppercase tracking-wider mb-1">Total formations</p>
+                                <p class="text-2xl font-bold text-indigo-700">{{dashboardStats.totalFormations}}</p>
+                            </div>
+                            <div class="kpi-card bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl p-3 border border-emerald-200">
+                                <p class="text-[10px] font-bold text-emerald-500 uppercase tracking-wider mb-1">Participants</p>
+                                <p class="text-2xl font-bold text-emerald-700">{{dashboardStats.totalParticipants}}</p>
+                            </div>
+                            <div class="kpi-card bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl p-3 border border-amber-200">
+                                <p class="text-[10px] font-bold text-amber-500 uppercase tracking-wider mb-1">Taux occupation</p>
+                                <p class="text-2xl font-bold text-amber-700">{{dashboardStats.tauxOccupationMoyen}}%</p>
+                            </div>
+                            <div class="kpi-card bg-gradient-to-br from-red-50 to-rose-100 rounded-xl p-3 border border-red-200">
+                                <p class="text-[10px] font-bold text-red-500 uppercase tracking-wider mb-1">Alertes</p>
+                                <p class="text-2xl font-bold text-red-600">{{dashboardStats.alertes.length}}</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-3">
+                            <div class="dash-section bg-slate-50 rounded-xl p-3 border border-slate-100">
+                                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Répartition par catégorie</p>
+                                <div class="space-y-1.5">
+                                    <ng-container *ngFor="let cat of ['TECHNIQUE','MANAGERIAL','RSE','SOFT_SKILLS','SECURITE']">
+                                        <div *ngIf="dashboardStats.formationsParCategorie[cat]" class="flex items-center gap-2">
+                                            <span class="w-2 h-2 rounded-full flex-shrink-0" [style.background]="typeColors[cat]"></span>
+                                            <span class="text-[10px] text-slate-600 flex-1 truncate">{{cat}}</span>
+                                            <span class="text-[10px] font-bold text-slate-700">{{dashboardStats.formationsParCategorie[cat]}}</span>
+                                        </div>
+                                    </ng-container>
                                 </div>
                             </div>
-
-                            <!-- Recurrence -->
-                            <div
-                                class="flex items-center mt-6"
-                                *ngIf="!event.recurrence || eventEditMode !== 'single'">
-                                <mat-icon
-                                    class="hidden sm:inline-flex mr-6 transform -scale-x-1"
-                                    [svgIcon]="'heroicons_outline:refresh'"></mat-icon>
-                                <div
-                                    class="flex flex-auto items-center h-12 px-4 rounded-md border cursor-pointer shadow-sm border-gray-300 dark:bg-black dark:bg-opacity-5 dark:border-gray-500"
-                                    (click)="openRecurrenceDialog()">
-                                    <div class="flex-auto">
-                                        {{recurrenceStatus || 'Does not repeat'}}
+                            <div class="dash-section bg-slate-50 rounded-xl p-3 border border-slate-100">
+                                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Formations cette semaine</p>
+                                <div class="space-y-1.5">
+                                    <div *ngFor="let f of dashboardStats.formationsProchaines" class="upcoming-card flex items-center gap-2 bg-white rounded-lg p-2 border border-slate-100 cursor-pointer hover:border-indigo-200 transition-colors" (click)="onEventClick({event: {id: f.id}})">
+                                        <div class="w-1.5 h-8 rounded-full flex-shrink-0" [style.background]="typeColors[f.type]"></div>
+                                        <div class="min-w-0 flex-1"><p class="text-[10px] font-semibold text-slate-700 truncate">{{f.titre}}</p><p class="text-[9px] text-slate-400">{{f.dateDebut | date:'dd/MM HH:mm'}}</p></div>
+                                        <span class="text-[9px] font-bold px-1.5 py-0.5 rounded-full" [style.background]="typeColors[f.type] + '20'" [style.color]="typeColors[f.type]">{{f.placesDisponibles}}p</span>
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- Calendar -->
-                            <div class="flex items-center mt-6">
-                                <mat-icon
-                                    class="hidden sm:inline-flex mr-6"
-                                    [svgIcon]="'heroicons_outline:tag'"></mat-icon>
-                                <mat-form-field class="fuse-mat-no-subscript flex-auto">
-                                    <mat-select
-                                        [formControlName]="'calendarId'"
-                                        (change)="$event.stopImmediatePropagation()">
-                                        <mat-select-trigger class="inline-flex items-center leading-none">
-                                            <span
-                                                class="w-3 h-3 rounded-full"
-                                                [ngClass]="getCalendar(eventForm.get('calendarId').value)?.color"></span>
-                                            <span class="ml-3">{{getCalendar(eventForm.get('calendarId').value)?.title}}</span>
-                                        </mat-select-trigger>
-                                        <ng-container *ngFor="let calendar of calendars">
-                                            <mat-option [value]="calendar.id">
-                                                <div class="inline-flex items-center">
-                                                    <span
-                                                        class="w-3 h-3 rounded-full"
-                                                        [ngClass]="calendar.color"></span>
-                                                    <span class="ml-3">{{calendar.title}}</span>
-                                                </div>
-                                            </mat-option>
-                                        </ng-container>
-                                    </mat-select>
-                                </mat-form-field>
+                            <div class="dash-section bg-slate-50 rounded-xl p-3 border border-slate-100">
+                                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Alertes actives</p>
+                                <div class="space-y-1.5">
+                                    <div *ngFor="let alerte of dashboardStats.alertes" class="alerte-item flex items-start gap-2 rounded-lg p-2 border" [ngClass]="{'bg-red-50 border-red-100': alerte.type === 'error', 'bg-amber-50 border-amber-100': alerte.type === 'warning'}">
+                                        <span class="text-xs flex-shrink-0">{{alerte.icon}}</span>
+                                        <p class="text-[10px] leading-relaxed" [ngClass]="{'text-red-700': alerte.type === 'error', 'text-amber-700': alerte.type === 'warning'}">{{alerte.message}}</p>
+                                    </div>
+                                </div>
                             </div>
-
-                            <!-- Description -->
-                            <div class="flex items-start mt-6">
-                                <mat-icon
-                                    class="hidden sm:inline-flex mr-6 mt-3"
-                                    [svgIcon]="'heroicons_outline:menu-alt-2'"></mat-icon>
-                                <mat-form-field class="fuse-mat-textarea fuse-mat-no-subscript flex-auto">
-                                    <textarea
-                                        matInput
-                                        cdkTextareaAutosize
-                                        [cdkAutosizeMinRows]="1"
-                                        [formControlName]="'description'"
-                                        [placeholder]="'Event description'">
-                                    </textarea>
-                                </mat-form-field>
-                            </div>
-
-                            <!-- Actions -->
-                            <div class="ml-auto mt-6">
-                                <button
-                                    class="add"
-                                    *ngIf="panelMode === 'add'"
-                                    mat-flat-button
-                                    type="button"
-                                    [color]="'primary'"
-                                    (click)="addEvent()">
-                                    Add
-                                </button>
-                                <button
-                                    class="save"
-                                    *ngIf="panelMode === 'edit'"
-                                    mat-flat-button
-                                    type="button"
-                                    [color]="'primary'"
-                                    (click)="updateEvent()">
-                                    Save
-                                </button>
-                            </div>
-                        </form>
-                    </ng-container>
-
-                </ng-template>
-
+                        </div>
+                    </div>
+                </div>
+<!-- ==================== NOUVEAU PANEL KPIs IA - AJOUTER ICI ==================== -->
+<div *ngIf="showKPIsPanel" class="kpis-ia-panel mx-3 mt-2 rounded-xl overflow-hidden border border-slate-200 shadow-lg animate-slide-down">
+    <div class="kpis-panel-header flex items-center justify-between px-4 py-2 bg-gradient-to-r from-violet-600 to-indigo-600">
+        <div class="flex items-center gap-2">
+            <span class="text-white text-xs font-bold">KPIs & Intelligence Artificielle — Prédiction d'échec</span>
+        </div>
+        <button (click)="showKPIsPanel = false" class="text-white/70 hover:text-white text-sm transition-colors">✕</button>
+    </div>
+    
+    <div class="kpis-content bg-white p-4" *ngIf="!isLoadingKPIs && kpisData; else loadingKPIs">
+        <!-- Dans le panel KPIs, modifier l'en-tête -->
+<div class="kpis-panel-header flex items-center justify-between px-4 py-2 bg-gradient-to-r from-violet-600 to-indigo-600">
+    <div class="flex items-center gap-2">
+        <span class="text-white text-xs font-bold">KPIs & Intelligence Artificielle — Prédiction d'échec</span>
+    </div>
+     <div class="flex items-center gap-2">
+            <!-- BOUTON RAPPORT IA -->
+            <button (click)="genererRapportIA()" 
+                    class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded-lg text-white text-[11px] font-medium transition-all flex items-center gap-1.5 shadow-sm">
+                <span>🤖</span>
+                <span>Rapport IA</span>
+            </button>
+            <button (click)="showKPIsPanel = false" class="text-white/70 hover:text-white text-sm transition-colors">✕</button>
+        </div>
+</div>
+        <!-- 4 CARTES KPI GLOBAUX -->
+        <div class="grid grid-cols-4 gap-3 mb-5">
+            <div class="kpi-card bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl p-3 border border-indigo-200">
+                <p class="text-[10px] font-bold text-indigo-500 uppercase tracking-wider mb-1"> Taux remplissage</p>
+                <p class="text-2xl font-bold text-indigo-700">{{kpisData.tauxRemplissageMoyen}}%</p>
+                <p class="text-[9px] text-indigo-400 mt-1">Moyenne toutes formations</p>
             </div>
+         
+            <div class="kpi-card rounded-xl p-3 border" 
+                 [ngClass]="{
+                    'bg-gradient-to-br from-red-50 to-red-100 border-red-200': kpisData.tauxRisqueEchecGlobal >= 70,
+                    'bg-gradient-to-br from-amber-50 to-amber-100 border-amber-200': kpisData.tauxRisqueEchecGlobal >= 40 && kpisData.tauxRisqueEchecGlobal < 70,
+                    'bg-gradient-to-br from-green-50 to-green-100 border-green-200': kpisData.tauxRisqueEchecGlobal < 40
+                 }">
+                <p class="text-[10px] font-bold uppercase tracking-wider mb-1"
+                   [ngClass]="{
+                      'text-red-500': kpisData.tauxRisqueEchecGlobal >= 70,
+                      'text-amber-500': kpisData.tauxRisqueEchecGlobal >= 40 && kpisData.tauxRisqueEchecGlobal < 70,
+                      'text-green-500': kpisData.tauxRisqueEchecGlobal < 40
+                   }">
+                    ⚠️ Risque échec (IA)
+                </p>
+                <p class="text-2xl font-bold"
+                   [ngClass]="{
+                      'text-red-700': kpisData.tauxRisqueEchecGlobal >= 70,
+                      'text-amber-700': kpisData.tauxRisqueEchecGlobal >= 40 && kpisData.tauxRisqueEchecGlobal < 70,
+                      'text-green-700': kpisData.tauxRisqueEchecGlobal < 40
+                   }">
+                    {{kpisData.tauxRisqueEchecGlobal}}%
+                </p>
+                <p class="text-[9px] mt-1"
+                   [ngClass]="{
+                      'text-red-400': kpisData.tauxRisqueEchecGlobal >= 70,
+                      'text-amber-400': kpisData.tauxRisqueEchecGlobal >= 40 && kpisData.tauxRisqueEchecGlobal < 70,
+                      'text-green-400': kpisData.tauxRisqueEchecGlobal < 40
+                   }">
+                    Prédiction IA
+                </p>
+            </div>
+            <div class="kpi-card bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-3 border border-slate-200">
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">💰 CA estimé</p>
+                <p class="text-2xl font-bold text-slate-700">{{kpisData.chiffreAffairesTotal | number}} DT</p>
+                <p class="text-[9px] text-slate-400 mt-1">NPS: {{kpisData.npsMoyen}}/100</p>
+            </div>
+            <!-- Carte Employé le plus actif -->
+<div class="kpi-card bg-gradient-to-br from-bleu-50 to-pink-100 rounded-xl p-3 border border-bleu-200">
+    <p class="text-[10px] font-boldtext-blue-500 mt-0.5 uppercase tracking-wider mb-1"> Employé du mois</p>
+    <div *ngIf="kpisData?.employeLePlusActif; else noEmploye">
+        <p class="text-sm font-bold text-blue-900 mt-0.5">
+            {{kpisData.employeLePlusActif.prenom}} {{kpisData.employeLePlusActif.nom}}
+        </p>
+        <p class="text-[10px]text-blue-400 mt-0.5 mt-0.5">
+            {{kpisData.employeLePlusActif.nombreInscriptions}} inscriptions
+        </p>
+        <p class="text-[9px]text-blue-500 mt-0.5 mt-1 truncate">
+            {{kpisData.employeLePlusActif.formationsSuivies?.join(', ') || '-'}}
+        </p>
+    </div>
+    <ng-template #noEmploye>
+        <p class="text-xs text-blue-900 mt-0.5">Aucune inscription ce mois-ci</p>
+    </ng-template>
+</div>
+        </div>
 
-        </mat-drawer-content>
+        <!-- GRAPHIQUES -->
+      <!-- GRAPHIQUES -->
+<div class="grid grid-cols-2 gap-4 mb-5">
+    
+    <!-- Graphique 1: Taux de remplissage par formation (avec scroll horizontal) -->
+    <div class="chart-card bg-slate-50 rounded-xl p-3 border border-slate-100">
+        <div class="flex items-center justify-between mb-2">
+            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">📊 Taux de remplissage par formation</p>
+            <span class="text-[9px] text-slate-400">{{formations.length}} formations</span>
+        </div>
+        
+        <!-- Conteneur avec scroll horizontal -->
+        <div class="chart-wrapper" style="position: relative; overflow-x: auto; overflow-y: hidden;">
+            <div style="min-width: 100%; width: max-content;">
+                <canvas #barChartCanvas
+                        baseChart
+                        [data]="kpiBarChartData"
+                        [options]="barChartOptions"
+                        type="bar"
+                        style="height: 280px; min-width: 700px; width: 100%;">
+                </canvas>
+            </div>
+        </div>
+        
+        <!-- Indicateur de scroll -->
+        <div class="scroll-indicator text-center mt-2">
+            <span class="text-[9px] text-slate-400 inline-flex items-center gap-1">
+                <span>◀</span> Glisser horizontalement pour voir toutes les formations <span>▶</span>
+            </span>
+        </div>
+    </div>
 
-    </mat-drawer-container>
+    <!-- Graphique 2: Risque d'échec par formation -->
+    <div class="chart-card bg-slate-50 rounded-xl p-3 border border-slate-100">
+        <div class="flex items-center justify-between mb-2">
+            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">⚠️ Risque d'échec par formation (IA)</p>
+            <span class="text-[9px] text-slate-400">{{formations.length}} formations</span>
+        </div>
+        
+        <!-- Conteneur avec scroll horizontal -->
+        <div class="chart-wrapper" style="position: relative; overflow-x: auto; overflow-y: hidden;">
+            <div style="min-width: 100%; width: max-content;">
+                <canvas *ngIf="kpiRiskChartData && kpiRiskChartData.datasets" 
+                        baseChart
+                        [data]="kpiRiskChartData"
+                        [options]="horizontalBarChartOptions"
+                        type="bar"
+                        style="height: 280px; min-width: 700px; width: 100%;">
+                </canvas>
+            </div>
+        </div>
+        
+        <!-- Indicateur de scroll -->
+        <div class="scroll-indicator text-center mt-2">
+            <span class="text-[9px] text-slate-400 inline-flex items-center gap-1">
+                <span>◀</span> Glisser horizontalement pour voir toutes les formations <span>▶</span>
+            </span>
+        </div>
+    </div>
 
 </div>
 
+<!-- Deuxième ligne: Donut + Jauge -->
+<div class="grid grid-cols-2 gap-4 mb-5">
+    
+    <!-- Graphique 3: Donut (répartition) -->
+    <div class="chart-card bg-slate-50 rounded-xl p-3 border border-slate-100">
+        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">🍩 Répartition des inscriptions</p>
+        <div class="flex justify-center">
+            <canvas *ngIf="kpiDonutChartData && kpiDonutChartData.datasets" 
+                    baseChart
+                    [data]="kpiDonutChartData"
+                    [options]="doughnutChartOptions"
+                    type="doughnut"
+                    style="height: 200px; width: 200px;">
+            </canvas>
+        </div>
+        <div class="flex justify-center gap-4 mt-2 text-[9px]">
+            <div class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-blue-500"></div> Inscrits: {{kpisData?.totalInscrits || 0}}</div>
+            <div class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-green-500"></div> Certifiés: {{kpisData?.totalCertifies || 0}}</div>
+            <div class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-red-500"></div> Abandons: {{kpisData?.totalAbandons || 0}}</div>
+        </div>
+    </div>
 
+    <!-- Jauge de risque globale -->
+    <div class="gauge-card bg-slate-50 rounded-xl p-3 border border-slate-100">
+        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">🎯 Jauge de risque globale</p>
+        <div class="flex flex-col items-center">
+            <div class="w-full bg-slate-200 rounded-full h-4 mb-2">
+                <div class="h-4 rounded-full transition-all duration-500 flex items-center justify-center text-[9px] font-bold text-white"
+                     [ngClass]="{
+                        'bg-gradient-to-r from-red-500 to-red-600': (kpisData?.tauxRisqueEchecGlobal || 0) >= 70,
+                        'bg-gradient-to-r from-amber-500 to-amber-600': (kpisData?.tauxRisqueEchecGlobal || 0) >= 40 && (kpisData?.tauxRisqueEchecGlobal || 0) < 70,
+                        'bg-gradient-to-r from-green-500 to-green-600': (kpisData?.tauxRisqueEchecGlobal || 0) < 40
+                     }"
+                     [style.width.%]="kpisData?.tauxRisqueEchecGlobal || 0">
+                    {{kpisData?.tauxRisqueEchecGlobal || 0}}%
+                </div>
+            </div>
+            <p class="text-[11px] font-medium mt-1"
+               [ngClass]="{
+                  'text-red-600': (kpisData?.tauxRisqueEchecGlobal || 0) >= 70,
+                  'text-amber-600': (kpisData?.tauxRisqueEchecGlobal || 0) >= 40 && (kpisData?.tauxRisqueEchecGlobal || 0) < 70,
+                  'text-green-600': (kpisData?.tauxRisqueEchecGlobal || 0) < 40
+               }">
+                <span *ngIf="(kpisData?.tauxRisqueEchecGlobal || 0) >= 70">🔴 Risque critique - Intervention nécessaire</span>
+                <span *ngIf="(kpisData?.tauxRisqueEchecGlobal || 0) >= 40 && (kpisData?.tauxRisqueEchecGlobal || 0) < 70">🟡 Risque modéré - À surveiller</span>
+                <span *ngIf="(kpisData?.tauxRisqueEchecGlobal || 0) < 40">🟢 Risque faible - Bonne performance</span>
+            </p>
+        </div>
+    </div>
+<!-- ==================== MODAL RAPPORT IA ==================== -->
+<div *ngIf="showRapportModal" class="rapport-modal-overlay fixed inset-0 bg-black/60 z-[10000] flex items-center justify-center p-4 animate-fadeIn" (click)="closeRapportModal()">
+    <div class="rapport-modal bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col animate-slideUp" (click)="$event.stopPropagation()">
+        
+        <!-- En-tête -->
+        <div class="rapport-modal-header bg-gradient-to-r from-blue-900 to-indigo-900 px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                    <span class="text-xl">🤖</span>
+                </div>
+                <div>
+                    <h3 class="text-white font-bold text-lg">Rapport IA - Analyse Stratégique</h3>
+                    <p class="text-white/70 text-xs">Généré par Intelligence Artificielle (DeepSeek)</p>
+                </div>
+            </div>
+            <button (click)="closeRapportModal()" class="text-white/70 hover:text-white text-xl transition-colors">✕</button>
+        </div>
+        
+        <!-- Corps -->
+        <div class="rapport-modal-body flex-1 overflow-y-auto p-6 bg-gray-50">
+            
+            <!-- Loading -->
+            <div *ngIf="isGeneratingRapport" class="flex flex-col items-center justify-center py-16">
+                <div class="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+                <p class="text-gray-600 font-medium">Génération du rapport IA en cours...</p>
+                <p class="text-gray-400 text-sm mt-1">DeepSeek analyse vos données de formation</p>
+            </div>
+            
+            <!-- Contenu du rapport -->
+            <div *ngIf="!isGeneratingRapport && rapportContent" class="rapport-content">
+<!-- Après -->
+<div [innerHTML]="rapportContent"></div>
+            </div>
+            
+            <!-- Erreur -->
+            <div *ngIf="!isGeneratingRapport && rapportError && !rapportContent" class="text-center py-12">
+                <div class="text-6xl mb-4">⚠️</div>
+                <p class="text-red-600 font-medium">{{rapportError}}</p>
+                <button (click)="genererRapportIA()" class="mt-4 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-all">
+                    🔄 Réessayer
+                </button>
+            </div>
+        </div>
+        
+        <!-- Pied de page -->
+        <div class="rapport-modal-footer border-t border-gray-200 px-6 py-3 flex justify-between items-center bg-white">
+            <div class="flex items-center gap-2">
+                <span class="text-[10px] text-gray-400">🤖 Généré par IA</span>
+                <span class="w-1 h-1 rounded-full bg-gray-300"></span>
+                <span class="text-[10px] text-gray-400">{{ dateGeneration | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+            <div class="flex gap-2">
+                <button (click)="exporterRapportWord()" 
+                        class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded-lg transition-all flex items-center gap-1">
+                    📄 Word
+                </button>
+                <button (click)="imprimerRapport()" 
+                        class="px-3 py-1.5 bg-gray-600 hover:bg-gray-700 text-white text-xs rounded-lg transition-all flex items-center gap-1">
+                    🖨️ Imprimer
+                </button>
+                <button (click)="closeRapportModal()" 
+                        class="px-3 py-1.5 border border-gray-300 hover:bg-gray-100 text-gray-700 text-xs rounded-lg transition-all">
+                    Fermer
+                </button>
+            </div>
+        </div>
+        
+    </div>
+</div>
+</div>
+
+        <!-- ALERTES IA -->
+        <div class="alertes-section mt-3" *ngIf="getAlertesArray().length > 0">
+            <p class="text-[10px] font-bold text-red-500 uppercase tracking-wider mb-2 flex items-center gap-1">
+                🤖 Alertes IA - Formations critiques
+            </p>
+            <div class="grid grid-cols-3 gap-3">
+                <div *ngFor="let alerte of getAlertesArray()" 
+                     class="alerte-card bg-red-50 border-l-4 border-red-500 rounded-lg p-3">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-sm">⚠️</span>
+                        <strong class="text-xs text-red-700">{{alerte.formation}}</strong>
+                    </div>
+                    <p class="text-[11px] text-red-600">Risque: <strong>{{alerte.data.risque}}%</strong></p>
+                    <p class="text-[10px] text-red-500 mt-1">{{alerte.data.recommandation}}</p>
+                    <p class="text-[9px] text-red-400 mt-1">💡 {{alerte.data.action}}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TABLEAU DÉTAILLÉ -->
+        <div class="table-section mt-4">
+            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">📋 Détail par formation</p>
+            <div class="overflow-x-auto">
+                <table class="w-full text-xs">
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th class="px-2 py-2 text-left text-[10px] font-semibold text-slate-500">Formation</th>
+                            <th class="px-2 py-2 text-center text-[10px] font-semibold text-slate-500">Taux remplissage</th>
+                            <th class="px-2 py-2 text-center text-[10px] font-semibold text-slate-500">Taux réussite</th>
+                            <th class="px-2 py-2 text-center text-[10px] font-semibold text-slate-500">⚠️ Risque IA</th>
+                            <th class="px-2 py-2 text-center text-[10px] font-semibold text-slate-500">Statut</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        <tr *ngFor="let formation of formations" class="hover:bg-slate-50 transition-colors">
+                            <td class="px-2 py-2 text-[11px] font-medium text-slate-700 truncate max-w-[150px]">
+                                {{formation.titre}}
+                            </td>
+                            <td class="px-2 py-2 text-center">
+                                <div class="inline-flex items-center gap-1">
+                                    <div class="w-12 bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                                        <div class="bg-indigo-500 h-1.5 rounded-full" 
+                                             [style.width.%]="kpisData?.tauxRemplissageParFormation[formation.titre] || 0">
+                                        </div>
+                                    </div>
+                                    <span class="text-[10px] font-medium">{{kpisData?.tauxRemplissageParFormation[formation.titre] || 0}}%</span>
+                                </div>
+                            </td>
+                            <td class="px-2 py-2 text-center text-[11px] font-medium">
+                                {{kpisData?.tauxReussiteParFormation[formation.titre] || 0}}%
+                            </td>
+                            <td class="px-2 py-2 text-center">
+                                <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold"
+                                      [ngClass]="{
+                                         'bg-red-100 text-red-700': (kpisData?.risqueEchecParFormation[formation.titre] || 0) >= 70,
+                                         'bg-amber-100 text-amber-700': (kpisData?.risqueEchecParFormation[formation.titre] || 0) >= 40 && (kpisData?.risqueEchecParFormation[formation.titre] || 0) < 70,
+                                         'bg-green-100 text-green-700': (kpisData?.risqueEchecParFormation[formation.titre] || 0) < 40
+                                      }">
+                                    {{kpisData?.risqueEchecParFormation[formation.titre] || 0}}%
+                                </span>
+                            </td>
+                            <td class="px-2 py-2 text-center">
+                                <span *ngIf="(kpisData?.risqueEchecParFormation[formation.titre] || 0) >= 70" class="text-red-600 text-[10px] font-medium">🔴 Critique</span>
+                                <span *ngIf="(kpisData?.risqueEchecParFormation[formation.titre] || 0) >= 40 && (kpisData?.risqueEchecParFormation[formation.titre] || 0) < 70" class="text-amber-600 text-[10px] font-medium">🟡 À surveiller</span>
+                                <span *ngIf="(kpisData?.risqueEchecParFormation[formation.titre] || 0) < 40" class="text-green-600 text-[10px] font-medium">🟢 Bon</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- BOUTON EXPORT KPIs -->
+        <div class="text-right mt-4 pt-3 border-t border-slate-100">
+            <button class="text-[10px] font-semibold text-indigo-600 hover:text-indigo-700 transition-colors flex items-center gap-1 ml-auto"
+                    (click)="exportKPIsToCSV()">
+                <span>📎</span> Exporter les KPIs (CSV)
+            </button>
+        </div>
+    </div>
+
+    <ng-template #loadingKPIs>
+        <div class="flex flex-col items-center justify-center p-8">
+            <div class="w-6 h-6 border-2 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+            <p class="text-xs text-slate-400 mt-2">Calcul des indicateurs IA...</p>
+        </div>
+    </ng-template>
+</div>
+                <!-- BARRE FILTRES -->
+                <div class="filter-bar flex items-center gap-2 px-3 py-1.5 bg-white border-b border-slate-100" *ngIf="formations.length > 0">
+                    <button (click)="showFilters = !showFilters" class="flex items-center gap-1 text-[10px] font-semibold text-slate-500 hover:text-indigo-600 transition-colors px-2 py-1 rounded-lg hover:bg-indigo-50">⚙️ Filtres</button>
+                    <div *ngIf="showFilters" class="flex items-center gap-2 flex-1">
+                        <select [(ngModel)]="filterCategory" (change)="applyFilters()" class="filter-select text-[10px] px-2 py-1 border border-slate-200 rounded-lg bg-white">
+                            <option value="">Toutes catégories</option>
+                            <option value="TECHNIQUE">Technique</option>
+                            <option value="MANAGERIAL">Managerial</option>
+                            <option value="RSE">RSE</option>
+                            <option value="SOFT_SKILLS">Soft Skills</option>
+                            <option value="SECURITE">Sécurité</option>
+                        </select>
+                        <select [(ngModel)]="filterFormateur" (change)="applyFilters()" class="filter-select text-[10px] px-2 py-1 border border-slate-200 rounded-lg bg-white">
+                            <option value="">Tous formateurs</option>
+                            <option *ngFor="let f of getUniqueFormateurs()" [value]="f">{{f}}</option>
+                        </select>
+                        <button *ngIf="filterCategory || filterFormateur || filterStatus || searchQuery" (click)="resetFilters()" class="text-[10px] font-semibold text-red-500 hover:text-red-700">✕ Réinitialiser</button>
+                    </div>
+                </div>
+
+                <!-- CALENDRIER -->
+                <div class="flex flex-col flex-auto cal-body">
+                    <full-calendar [options]="calendarOptions" #fullCalendar></full-calendar>
+                </div>
+
+            </div>
+        </mat-drawer-content>
+    </mat-drawer-container>
+
+    <!-- MODAL PARTICIPANTS -->
+    <div *ngIf="showParticipantsModal && selectedFormationParticipants" class="participants-overlay fixed inset-0 bg-black/40 z-[9999] flex items-center justify-center p-4" (click)="showParticipantsModal = false">
+        <div class="participants-modal bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden z-[10000]" (click)="$event.stopPropagation()">
+            <div class="modal-header p-4 relative overflow-hidden" [style.background]="'linear-gradient(135deg, ' + (typeColors[selectedFormationParticipants.type] || '#6366f1') + ', ' + (typeColors[selectedFormationParticipants.type] || '#6366f1') + '90)'">
+                <div class="flex justify-between items-start">
+                 <!-- Dans le modal participants - header -->
+<div>
+    <span class="text-white/80 text-[10px] font-bold uppercase">Participants</span>
+    <h3 class="text-white font-bold text-sm mt-0.5">{{selectedFormationParticipants.titre}}</h3>
+    <!-- ✅ Correction : utiliser les vrais nombres -->
+    <p class="text-white/70 text-[10px]">
+        {{getOccupancyPercent(selectedFormationParticipants)}}% - 
+        {{getNombreInscrits(selectedFormationParticipants)}} / {{selectedFormationParticipants.nombrePlaces || 0}} inscrits
+    </p>
+</div>
+                    <button (click)="showParticipantsModal = false" class="text-white/70 hover:text-white text-lg leading-none">✕</button>
+                </div>
+                <div class="mt-2 bg-white/20 rounded-full h-1.5"><div class="bg-white rounded-full h-1.5 transition-all" [style.width.%]="getOccupancyPercent(selectedFormationParticipants)"></div></div>
+            </div>
+        <div class="modal-body p-4">
+    <div *ngIf="isLoadingParticipants" class="flex items-center justify-center py-8">
+        <div class="w-4 h-4 border-2 border-indigo-100 border-t-indigo-600 rounded-full animate-spin"></div>
+        <span class="text-xs text-slate-400 ml-2">Chargement des participants...</span>
+    </div>
+    
+    <ng-container *ngIf="!isLoadingParticipants">
+        <!-- Participants confirmés/présents -->
+        <div class="mb-4">
+            <div class="flex items-center justify-between mb-2">
+                <p class="text-[10px] font-bold text-slate-500 uppercase">
+                    👥 Participants
+                </p>
+                <span class="text-[10px] font-bold px-2 py-0.5 bg-emerald-100 text-emerald-600 rounded-full">
+                    {{participantsList.length}}
+                </span>
+            </div>
+            
+            <div class="space-y-2 max-h-64 overflow-y-auto">
+                <div *ngFor="let p of participantsList" 
+                     class="participant-row flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100 hover:shadow-sm transition-all">
+                    
+                    <div class="avatar w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-bleu-500 text-white text-xs font-bold flex items-center justify-center shadow-sm">
+                        {{getInitials(p.nom)}}
+                    </div>
+                    
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-semibold text-slate-800 truncate">{{p.nom}}</p>
+                        <p class="text-[10px] text-slate-500 truncate">{{p.email}}</p>
+                        <p class="text-[9px] text-slate-400 mt-0.5">
+                            Inscrit le {{p.dateInscription | date:'dd/MM/yyyy'}}
+                        </p>
+                    </div>
+                    
+                    <div class="flex flex-col items-end gap-1">
+                        <span class="text-[10px] font-bold px-2 py-1 rounded-full"
+                              [ngClass]="{
+                                  'bg-emerald-100 text-emerald-700': p.statut === 'Confirmé',
+                                  'bg-blue-100 text-blue-700': p.statut === 'Présent',
+                                  'bg-red-100 text-red-700': p.statut === 'Absent',
+                                  'bg-bleu-100 text-bleu-700': p.statut === 'Validé'
+                              }">
+                            {{p.statut}}
+                        </span>
+                        
+                        <!-- Badge présence validée -->
+                        <span *ngIf="p.presenceValidee" 
+                              class="text-[9px] font-medium text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full">
+                              ✓ Présence validée
+                        </span>
+                    </div>
+                </div>
+                
+                <div *ngIf="participantsList.length === 0" class="text-center py-6">
+                    <div class="text-3xl mb-2">👥</div>
+                    <p class="text-xs text-slate-400">Aucun participant inscrit pour le moment</p>
+                    <p class="text-[10px] text-slate-300 mt-1">Les inscriptions apparaîtront ici</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Liste d'attente -->
+        <div *ngIf="listeAttente.length > 0" class="mt-4 pt-3 border-t border-slate-100">
+            <div class="flex items-center justify-between mb-2">
+                <p class="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1">
+                    ⏳ Liste d'attente
+                </p>
+                <span class="text-[10px] font-bold px-2 py-0.5 bg-amber-100 text-amber-600 rounded-full">
+                    {{listeAttente.length}}
+                </span>
+            </div>
+            <div class="space-y-1.5 max-h-32 overflow-y-auto">
+                <div *ngFor="let p of listeAttente" 
+                     class="flex items-center gap-3 p-2 bg-amber-50 rounded-lg border border-amber-100">
+                    <div class="avatar w-6 h-6 rounded-full bg-amber-200 text-amber-700 text-[9px] font-bold flex items-center justify-center">
+                        {{getInitials(p.nom)}}
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-xs font-medium text-slate-700 truncate">{{p.nom}}</p>
+                        <p class="text-[9px] text-slate-500 truncate">{{p.email}}</p>
+                    </div>
+                    <span class="text-[9px] px-2 py-0.5 rounded-full bg-amber-200 text-amber-700">
+                        En attente
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Statistiques rapides -->
+        <div class="mt-4 pt-3 border-t border-slate-100 grid grid-cols-2 gap-2 text-center">
+            <div class="bg-slate-50 rounded-lg p-2">
+                <p class="text-[9px] text-slate-400">Taux remplissage</p>
+                <p class="text-sm font-bold" [ngClass]="{
+                    'text-emerald-600': getOccupancyPercent(selectedFormationParticipants) < 80,
+                    'text-amber-600': getOccupancyPercent(selectedFormationParticipants) >= 80 && getOccupancyPercent(selectedFormationParticipants) < 95,
+                    'text-red-600': getOccupancyPercent(selectedFormationParticipants) >= 95
+                }">
+                    {{getOccupancyPercent(selectedFormationParticipants)}}%
+                </p>
+            </div>
+            <div class="bg-slate-50 rounded-lg p-2">
+                <p class="text-[9px] text-slate-400">Places restantes</p>
+                <p class="text-sm font-bold" [ngClass]="{
+                    'text-emerald-600': selectedFormationParticipants?.placesDisponibles > 5,
+                    'text-amber-600': selectedFormationParticipants?.placesDisponibles <= 5 && selectedFormationParticipants?.placesDisponibles > 0,
+                    'text-red-600': selectedFormationParticipants?.placesDisponibles === 0
+                }">
+                    {{selectedFormationParticipants?.placesDisponibles || 0}}
+                </p>
+            </div>
+        </div>
+    </ng-container>
+</div>
+        </div>
+    </div>
+
+    <!-- PANEL TEMPLATE -->
+    <ng-template #eventPanel>
+
+        <!-- MODE VUE -->
+        <ng-container *ngIf="panelMode === 'view' && selectedEvent">
+            <div class="ep-view">
+                <div class="ep-view-banner relative overflow-hidden p-3" [style.background]="'linear-gradient(135deg, ' + (typeColors[selectedEvent.formation?.type] || '#6366f1') + ' 0%, ' + (typeColors[selectedEvent.formation?.type] || '#6366f1') + '80 100%)'">
+                    <div class="relative z-10 flex justify-between items-start">
+                        <div class="flex-1 pr-3">
+                            <span class="ep-type-chip text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-white/20 backdrop-blur-sm text-white">
+                                {{selectedEvent.formation?.type}}
+                            </span>
+                            <h2 class="ep-view-title text-white text-sm font-bold mt-1">{{selectedEvent.title}}</h2>
+                            <div class="ep-view-dates flex items-center text-white/90 mt-0.5 text-[10px] font-medium">
+                                <span>{{selectedEvent.start | date:'dd/MM/yyyy HH:mm'}} → {{selectedEvent.end | date:'dd/MM/yyyy HH:mm'}}</span>
+                            </div>
+                        </div>
+                        <div class="flex gap-1 relative z-10">
+                            <button class="ep-action-btn w-7 h-7 rounded-full bg-white/20 hover:bg-white/30 transition-all flex items-center justify-center text-sm" (click)="changeEventPanelMode('edit', 'single')" matTooltip="Modifier">✏️</button>
+                            <button class="ep-action-btn w-7 h-7 rounded-full bg-white/20 hover:bg-blue-500/80 transition-all flex items-center justify-center text-sm" (click)="openParticipantsModal(selectedEvent.formation)" matTooltip="Participants">👥</button>
+                            <button class="ep-action-btn w-7 h-7 rounded-full bg-white/20 hover:bg-red-500/80 transition-all flex items-center justify-center text-sm" (click)="deleteEvent(selectedEvent)" matTooltip="Supprimer">🗑️</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ep-view-body p-3">
+                    <div *ngIf="selectedEvent.description" class="mb-3">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Description</p>
+                        <p class="ep-desc bg-slate-50 text-slate-600 p-2 rounded-lg border border-slate-100 text-xs leading-relaxed">{{selectedEvent.description}}</p>
+                    </div>
+
+                    <div *ngIf="selectedEvent.formation?.prerequisFormationId" class="mb-3">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Prérequis</p>
+                        <div class="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-lg p-2">
+                            <span class="text-base">🔗</span>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-xs font-semibold text-amber-800 truncate">{{selectedEvent.formation?.prerequisFormationTitre || 'Formation prérequise'}}</p>
+                                <p class="text-[10px] text-amber-600">Doit être complétée avant cette formation</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ep-info-grid grid grid-cols-2 gap-2 mb-3">
+                        <div *ngIf="selectedEvent.formation?.formateur" class="ep-info-card bg-white p-2 rounded-lg border border-slate-100 shadow-sm flex items-center gap-2">
+                            <span class="text-base">👤</span>
+                            <div class="min-w-0">
+                                <p class="ep-info-label text-[10px] text-slate-400 font-semibold uppercase">Formateur</p>
+                                <p class="ep-info-value text-xs font-medium text-slate-700 truncate">{{selectedEvent.formation?.formateur}}</p>
+                            </div>
+                        </div>
+
+                        <div class="ep-info-card bg-white p-2 rounded-lg border border-slate-100 shadow-sm flex items-center gap-2">
+                            <span class="text-base">🎯</span>
+                            <div class="min-w-0">
+                                <p class="ep-info-label text-[10px] text-slate-400 font-semibold uppercase">Disponibilité</p>
+                                <p class="ep-info-value text-xs font-medium"
+                                   [ngClass]="{
+                                       'text-green-600': (selectedEvent.formation?.placesDisponibles || 0) > 3,
+                                       'text-orange-600': (selectedEvent.formation?.placesDisponibles || 0) <= 3 && (selectedEvent.formation?.placesDisponibles || 0) > 0,
+                                       'text-red-600': (selectedEvent.formation?.placesDisponibles || 0) === 0
+                                   }">
+                                    {{selectedEvent.formation?.placesDisponibles}} / {{selectedEvent.formation?.nombrePlaces}}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="ep-info-card bg-white p-2 rounded-lg border border-slate-100 shadow-sm flex items-center gap-2">
+                            <span class="text-base">⏱️</span>
+                            <div class="min-w-0">
+                                <p class="ep-info-label text-[10px] text-slate-400 font-semibold uppercase">Durée</p>
+                                <p class="ep-info-value text-xs font-medium text-slate-700">{{selectedEvent.formation?.dureeHeures || '—'}} h</p>
+                            </div>
+                        </div>
+
+                        <div class="ep-info-card bg-white p-2 rounded-lg border border-slate-100 shadow-sm flex items-center gap-2">
+                            <span class="text-base">📶</span>
+                            <div class="min-w-0">
+                                <p class="ep-info-label text-[10px] text-slate-400 font-semibold uppercase">Niveau</p>
+                                <p class="ep-info-value text-xs font-medium text-slate-700">{{selectedEvent.formation?.niveau || '—'}}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div *ngIf="selectedEvent.formation?.lieu" class="ep-location-card bg-slate-50 p-2 rounded-lg border border-slate-100 mb-2">
+                        <div class="flex gap-2 items-start">
+                            <span class="text-base">📍</span>
+                            <div class="flex-1 min-w-0">
+                                <p class="ep-info-label text-[10px] text-slate-400 font-bold uppercase mb-0.5">Lieu</p>
+                                <p class="ep-info-value text-xs text-slate-700 font-medium mb-1 truncate">{{selectedEvent.formation?.lieu}}</p>
+                                <div class="flex gap-1 flex-wrap" *ngIf="selectedEvent.formation?.lienGoogleMaps && selectedEvent.formation?.lienGoogleMaps !== ''">
+                                    <a [href]="selectedEvent.formation?.lienGoogleMaps" target="_blank" class="ep-link-btn inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-blue-500 text-white hover:bg-blue-600 transition-all">Itinéraire</a>
+                                    <button class="ep-link-btn inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors" (click)="copierLien(selectedEvent.formation?.lienGoogleMaps)">Copier</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div *ngIf="selectedEvent.formation?.lienVisio" class="ep-visio-card bg-emerald-50 p-2 rounded-lg border border-emerald-100">
+                        <div class="flex gap-2 items-start">
+                            <span class="text-base">🎥</span>
+                            <div class="flex-1">
+                                <p class="ep-info-label text-[10px] text-emerald-600 font-bold uppercase mb-0.5">Visioconférence</p>
+                                <div class="flex gap-1 mt-0.5 flex-wrap">
+                                    <a [href]="selectedEvent.formation?.lienVisio" target="_blank" class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-all">Rejoindre</a>
+                                    <button class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-white border border-emerald-200 text-emerald-700 hover:bg-emerald-50 transition-colors" (click)="copierLien(selectedEvent.formation?.lienVisio)">Copier</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                   <button (click)="openParticipantsModal(selectedEvent.formation)" 
+        class="w-full mt-2 py-2 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1">
+    👥 Voir les participants 
+</button>
+                </div>
+            </div>
+        </ng-container>
+<!-- MODE AJOUT / ÉDITION -->
+<ng-container *ngIf="panelMode === 'add' || panelMode === 'edit'">
+    <div class="ep-form">
+        
+        <!-- HEADER AVEC DÉCORATION -->
+        <div class="ep-form-header" [ngClass]="panelMode === 'add' ? 'ep-form-header--add' : 'ep-form-header--edit'">
+            <!-- Décorations flottantes -->
+            <div class="ep-form-bg-decoration"></div>
+            <div class="ep-form-bg-decoration ep-form-bg-decoration-2"></div>
+            <div class="ep-form-bg-decoration ep-form-bg-decoration-3"></div>
+            
+            <div class="relative z-10 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="ep-form-icon">
+                        <span class="text-xl">{{panelMode === 'add' ? '✨' : '🖊️'}}</span>
+                    </div>
+                    <div>
+                        <h3 class="ep-form-title">
+                            {{panelMode === 'add' ? 'Créer une formation' : 'Modifier la formation'}}
+                        </h3>
+                        <p class="ep-form-sub">
+                            {{panelMode === 'add' ? 'Remplissez les informations ci-dessous' : 'Modifiez les informations de la formation'}}
+                        </p>
+                    </div>
+                </div>
+                <button type="button" (click)="dialog.closeAll()" class="ep-form-close" matTooltip="Fermer">
+                    ✕
+                </button>
+            </div>
+        </div>
+
+        <form [formGroup]="eventForm" (ngSubmit)="panelMode === 'add' ? addEvent() : updateEvent()" class="ep-form-body">
+
+            <!-- SECTION 1: INFORMATIONS GÉNÉRALES -->
+            <div class="ep-form-section">
+                <div class="ep-form-section-header">
+                    <span class="ep-form-section-icon">📋</span>
+                    <div>
+                        <h4 class="ep-form-section-title">Informations générales</h4>
+                        <p class="ep-form-section-desc">Titre, description et détails de base</p>
+                    </div>
+                </div>
+                
+                <div class="ep-form-section-content">
+                    <!-- Titre -->
+                    <div class="ep-field-group">
+                        <label class="ep-field-label">
+                            <span class="ep-field-label-icon"></span>
+                            <span>Titre de la formation <span class="text-red-500">*</span></span>
+                        </label>
+                        <input type="text" formControlName="title" placeholder="Ex: Angular Avancé - Maîtrise complète" class="ep-field-input">
+                        <div *ngIf="hasError('title', 'required')" class="ep-field-error">
+                            <span>⚠️</span> Le titre est requis
+                        </div>
+                        <div *ngIf="hasError('title', 'minlength')" class="ep-field-error">
+                            <span>⚠️</span> Minimum 3 caractères
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="ep-field-group">
+                        <label class="ep-field-label">
+                            <span class="ep-field-label-icon">📝</span>
+                            <span>Description</span>
+                        </label>
+                        <textarea formControlName="description" rows="3" placeholder="Décrivez les objectifs, le contenu et les prérequis de la formation..." class="ep-field-textarea"></textarea>
+                        <div class="ep-field-hint">
+                            <span>💡</span> Une description détaillée aide les participants à mieux comprendre la formation
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 2: DATE ET HORAIRE -->
+            <div class="ep-form-section">
+                <div class="ep-form-section-header">
+                    <span class="ep-form-section-icon">📅</span>
+                    <div>
+                        <h4 class="ep-form-section-title">Date et horaire</h4>
+                        <p class="ep-form-section-desc">Planification de la session</p>
+                    </div>
+                </div>
+                
+                <div class="ep-form-section-content">
+ <!-- Dates avec Material Datepicker -->
+<div class="grid grid-cols-2 gap-4">
+    <mat-form-field appearance="outline" class="ep-field" subscriptSizing="dynamic">
+        <mat-label class="text-slate-500 text-xs">📅 Date de début *</mat-label>
+        <input matInput [matDatepicker]="startPicker" formControlName="start" class="text-slate-700 text-sm">
+        <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+        <mat-datepicker #startPicker></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="ep-field" subscriptSizing="dynamic">
+        <mat-label class="text-slate-500 text-xs">📅 Date de fin *</mat-label>
+        <input matInput [matDatepicker]="endPicker" formControlName="end" class="text-slate-700 text-sm">
+        <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+        <mat-datepicker #endPicker></mat-datepicker>
+    </mat-form-field>
+</div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <!-- Heure début -->
+                        <div class="ep-field-group">
+                            <label class="ep-field-label">
+                                <span class="ep-field-label-icon"></span>
+                                <span>Heure de début</span>
+                            </label>
+                            <div class="ep-time-wrapper">
+                                <input type="time" [value]="startHour | date:'HH:mm'" (change)="onStartHourChange($event)" class="ep-field-input ep-time-input">
+                                <span class="ep-time-icon"></span>
+                            </div>
+                        </div>
+
+                        <!-- Heure fin -->
+                        <div class="ep-field-group">
+                            <label class="ep-field-label">
+                                <span class="ep-field-label-icon"></span>
+                                <span>Heure de fin</span>
+                            </label>
+                            <div class="ep-time-wrapper">
+                                <input type="time" [value]="endHour | date:'HH:mm'" (change)="onEndHourChange($event)" class="ep-field-input ep-time-input">
+                                <span class="ep-time-icon">🕐</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 3: CATÉGORIE ET FORMATEUR -->
+            <div class="ep-form-section">
+                <div class="ep-form-section-header">
+                    <span class="ep-form-section-icon">👥</span>
+                    <div>
+                        <h4 class="ep-form-section-title">Catégorie et formateur</h4>
+                        <p class="ep-form-section-desc">Spécifiez le type et l'intervenant</p>
+                    </div>
+                </div>
+                
+                <div class="ep-form-section-content">
+                    <div class="grid grid-cols-2 gap-4">
+                        <!-- Catégorie -->
+                        <div class="ep-field-group">
+                            <label class="ep-field-label">
+                                <span class="ep-field-label-icon"></span>
+                                <span>Catégorie <span class="text-red-500">*</span></span>
+                            </label>
+                            <div class="ep-select-wrapper">
+                                <select formControlName="calendarId" class="ep-field-select">
+                                    <option value="1"> Technique</option>
+                                    <option value="2"> Managerial</option>
+                                    <option value="3"> RSE</option>
+                                    <option value="4"> Soft Skills</option>
+                                    <option value="5"> Sécurité</option>
+                                </select>
+                                <span class="ep-select-icon">▼</span>
+                            </div>
+                        </div>
+
+                        <!-- Formateur -->
+                        <div class="ep-field-group">
+                            <label class="ep-field-label">
+                                <span class="ep-field-label-icon"></span>
+                                <span>Formateur</span>
+                            </label>
+                            <div class="ep-select-wrapper">
+                                <select formControlName="formateurId" class="ep-field-select">
+                                    <option [value]="null">— Sélectionner un formateur —</option>
+                                    <option *ngFor="let f of formateursList" [value]="f.id">
+                                        {{f.prenom}} {{f.nom}} — {{f.specialite}}
+                                    </option>
+                                </select>
+                                <span class="ep-select-icon">▼</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 4: CAPACITÉ -->
+            <div class="ep-form-section">
+                <div class="ep-form-section-header">
+                    <span class="ep-form-section-icon">👥</span>
+                    <div>
+                        <h4 class="ep-form-section-title">Capacité d'accueil</h4>
+                        <p class="ep-form-section-desc">Nombre de places disponibles</p>
+                    </div>
+                </div>
+                
+                <div class="ep-form-section-content">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="ep-field-group">
+                            <label class="ep-field-label">
+                                <span class="ep-field-label-icon"></span>
+                                <span>Places totales</span>
+                            </label>
+                            <input type="number" formControlName="nombrePlaces" min="1" class="ep-field-input">
+                        </div>
+
+                        <div class="ep-field-group">
+                            <label class="ep-field-label">
+                                <span class="ep-field-label-icon"></span>
+                                <span>Places disponibles</span>
+                            </label>
+                            <input type="number" formControlName="placesDisponibles" min="0" class="ep-field-input">
+                        </div>
+                    </div>
+                    
+                    <!-- Barre de progression visuelle -->
+                    <div class="ep-capacity-bar" *ngIf="eventForm.get('nombrePlaces')?.value && eventForm.get('placesDisponibles')?.value">
+                        <div class="ep-capacity-bar-bg">
+                            <div class="ep-capacity-bar-fill" 
+                                 [style.width.%]="((eventForm.get('nombrePlaces')?.value - eventForm.get('placesDisponibles')?.value) / eventForm.get('nombrePlaces')?.value) * 100"
+                                 [style.background]="'linear-gradient(90deg, #10b981, #34d399)'">
+                            </div>
+                        </div>
+                        <div class="ep-capacity-stats">
+                            <span> Taux de remplissage: <strong>{{((eventForm.get('nombrePlaces')?.value - eventForm.get('placesDisponibles')?.value) / eventForm.get('nombrePlaces')?.value * 100) | number:'1.0-0'}}%</strong></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 5: LIEU ET CARTE -->
+            <div class="ep-form-section">
+                <div class="ep-form-section-header">
+                    <span class="ep-form-section-icon"></span>
+                    <div>
+                        <h4 class="ep-form-section-title">Lieu et localisation</h4>
+                        <p class="ep-form-section-desc">Emplacement de la formation</p>
+                    </div>
+                </div>
+                
+                <div class="ep-form-section-content">
+                    <!-- Carte -->
+                    <div class="ep-map-card">
+                        <div class="ep-map-container">
+                            <div *ngIf="mapLoading" class="ep-map-loading">
+                                <div class="ep-spinner"></div>
+                                <span>Chargement de la carte...</span>
+                            </div>
+                            <div *ngIf="mapLoadError" class="ep-map-error">
+                                <span></span>
+                                <p>Carte temporairement indisponible</p>
+                                <button type="button" (click)="initMap()" class="ep-map-retry">Réessayer</button>
+                            </div>
+                            <div *ngIf="!mapLoading && !mapLoadError" id="location-map" class="ep-map"></div>
+                        </div>
+                        
+                        <div class="ep-map-actions">
+                            <button type="button" class="ep-map-btn ep-map-btn-tunis" (click)="centerMapOnTunis()">
+                                <span></span> Centrer Tunisie
+                            </button>
+                            <button type="button" class="ep-map-btn ep-map-btn-reset" (click)="resetMap()">
+                                <span></span> Réinitialiser
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Lieu -->
+                    <div class="ep-field-group">
+                        <label class="ep-field-label">
+                            <span class="ep-field-label-icon"></span>
+                            <span>Adresse complète</span>
+                        </label>
+                        <input type="text" formControlName="lieu" placeholder="Cliquez sur la carte pour sélectionner l'adresse" class="ep-field-input" readonly>
+                        <div class="ep-field-hint">
+                            <span></span> Cliquez sur la carte pour définir l'emplacement
+                        </div>
+                    </div>
+
+                    <!-- Lien Google Maps généré -->
+                    <div *ngIf="eventForm.get('lienGoogleMaps')?.value" class="ep-link-card">
+                        <span class="ep-link-icon">🗺️</span>
+                        <div class="ep-link-content">
+                            <p class="ep-link-label">Lien Google Maps généré</p>
+                            <a [href]="eventForm.get('lienGoogleMaps')?.value" target="_blank" class="ep-link-value">
+                                Voir l'itinéraire →
+                            </a>
+                        </div>
+                        <button type="button" class="ep-link-copy" (click)="copierLien(eventForm.get('lienGoogleMaps')?.value)" matTooltip="Copier le lien">
+                            📋
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 6: LIENS ET PRÉREQUIS -->
+            <div class="ep-form-section">
+                <div class="ep-form-section-header">
+                    <span class="ep-form-section-icon">🔗</span>
+                    <div>
+                        <h4 class="ep-form-section-title">Liens et prérequis</h4>
+                        <p class="ep-form-section-desc">Ressources complémentaires</p>
+                    </div>
+                </div>
+                
+                <div class="ep-form-section-content">
+                    <!-- Lien Jitsi -->
+                    <div class="ep-field-group">
+                        <label class="ep-field-label">
+                            <span class="ep-field-label-icon">🎥</span>
+                            <span>Lien de visioconférence</span>
+                        </label>
+                        <div class="ep-link-input-wrapper">
+                            <input type="url" formControlName="lienVisio" readonly placeholder="Généré automatiquement à partir du titre" class="ep-field-input ep-field-input-readonly">
+                            <button type="button" class="ep-link-input-btn" (click)="copierLien(eventForm.get('lienVisio')?.value)" matTooltip="Copier le lien">
+                                📋
+                            </button>
+                        </div>
+                        <div class="ep-field-hint">
+                            <span>✨</span> Lien Jitsi généré automatiquement
+                        </div>
+                    </div>
+
+                    <!-- Formation prérequise -->
+                    <div class="ep-field-group">
+                        <label class="ep-field-label">
+                            <span class="ep-field-label-icon"></span>
+                            <span>Formation prérequise</span>
+                        </label>
+                        <div class="ep-select-wrapper">
+                            <select formControlName="prerequisFormationId" class="ep-field-select">
+                                <option [value]="null">— Aucun prérequis —</option>
+                                <option *ngFor="let f of getFormationsDisponiblesCommePrerequisFor(selectedEvent?.id)" [value]="f.id">
+                                    {{f.titre}}
+                                </option>
+                            </select>
+                            <span class="ep-select-icon">▼</span>
+                        </div>
+                        <div class="ep-field-hint">
+                            <span>💡</span> Les participants doivent compléter cette formation avant de s'inscrire
+                        </div>
+                    </div>
+
+                    <!-- Aperçu prérequis sélectionné -->
+                    <div *ngIf="getTitrePrerequisSelectionne()" class="ep-prereq-card">
+                        <span class="ep-prereq-icon">🔗</span>
+                        <div class="ep-prereq-content">
+                            <p class="ep-prereq-label">Prérequis sélectionné</p>
+                            <p class="ep-prereq-value">{{getTitrePrerequisSelectionne()}}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MESSAGES D'ERREUR -->
+            <div class="ep-form-errors">
+                <div *ngIf="eventForm.hasError('sameCategoryOverlap') && (eventForm.dirty || eventForm.touched)" class="ep-error-card ep-error-warning">
+                    <span class="ep-error-icon">⚠️</span>
+                    <div class="ep-error-content">
+                        <strong>{{getFormErrorMessage()}}</strong>
+                        <p>Consultez le calendrier pour trouver un créneau disponible pour cette catégorie.</p>
+                    </div>
+                </div>
+
+                <div *ngIf="eventForm.hasError('formateurUnavailable') && (eventForm.dirty || eventForm.touched)" class="ep-error-card ep-error-warning">
+                    <span class="ep-error-icon">⚠️</span>
+                    <div class="ep-error-content">
+                        <strong>{{getFormErrorMessage()}}</strong>
+                        <p>Sélectionnez un autre créneau horaire ou un autre formateur.</p>
+                    </div>
+                </div>
+
+                <div *ngIf="getFormErrorMessage() && !eventForm.hasError('sameCategoryOverlap') && !eventForm.hasError('formateurUnavailable')" class="ep-error-card ep-error-danger">
+                    <span class="ep-error-icon">❌</span>
+                    <div class="ep-error-content">
+                        <strong>{{getFormErrorMessage()}}</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ACTIONS -->
+            <div class="ep-form-actions">
+                <button type="button" class="ep-btn ep-btn-secondary" (click)="dialog.closeAll()">
+                    <span>✕</span> Annuler
+                </button>
+                <button type="submit" class="ep-btn ep-btn-primary" [disabled]="eventForm.invalid">
+                    <span>{{panelMode === 'add' ? '✨' : ''}}</span>
+                    {{panelMode === 'add' ? 'Créer la formation' : 'Enregistrer les modifications'}}
+                </button>
+            </div>
+
+        </form>
+    </div>
+</ng-container>
+    </ng-template>
+
+</div>
+
+<style>
+    /* ====== NOUVEAUX STYLES POUR LE FORMULAIRE MODERNE ====== */
+
+/* Header avec décorations */
+.ep-form-header {
+    position: relative;
+    overflow: hidden;
+    padding: 24px;
+}
+
+.ep-form-bg-decoration {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+    border-radius: 50%;
+    top: -100px;
+    right: -50px;
+}
+
+.ep-form-bg-decoration-2 {
+    width: 100px;
+    height: 100px;
+    bottom: -50px;
+    left: -30px;
+    top: auto;
+}
+
+.ep-form-bg-decoration-3 {
+    width: 300px;
+    height: 300px;
+    top: -150px;
+    left: -100px;
+    opacity: 0.3;
+}
+
+.ep-form-icon {
+    width: 48px;
+    height: 48px;
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(8px);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.ep-form-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: white;
+    margin: 0;
+    letter-spacing: -0.3px;
+}
+
+.ep-form-sub {
+    font-size: 11px;
+    color: rgba(255,255,255,0.8);
+    margin: 4px 0 0;
+}
+
+.ep-form-close {
+    width: 32px;
+    height: 32px;
+    background: rgba(255,255,255,0.2);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ep-form-close:hover {
+    background: rgba(255,255,255,0.3);
+    transform: scale(1.05);
+}
+
+/* Corps du formulaire */
+.ep-form-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    background: #ffffff;
+}
+
+/* Sections */
+.ep-form-section {
+    margin-bottom: 28px;
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #eef2f6;
+    overflow: hidden;
+    transition: all 0.2s;
+}
+
+.ep-form-section:hover {
+    border-color: #e0e7ff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.ep-form-section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    background: #fafbfc;
+    border-bottom: 1px solid #eef2f6;
+}
+
+.ep-form-section-icon {
+    font-size: 24px;
+}
+
+.ep-form-section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+}
+
+.ep-form-section-desc {
+    font-size: 11px;
+    color: #64748b;
+    margin: 2px 0 0;
+}
+
+.ep-form-section-content {
+    padding: 20px;
+}
+
+/* Champs de formulaire */
+.ep-field-group {
+    margin-bottom: 20px;
+}
+
+.ep-field-group:last-child {
+    margin-bottom: 0;
+}
+
+.ep-field-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #334155;
+    margin-bottom: 8px;
+}
+
+.ep-field-label-icon {
+    font-size: 14px;
+}
+
+.ep-field-input,
+.ep-field-textarea,
+.ep-field-select {
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 13px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    background: #ffffff;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.ep-field-input:focus,
+.ep-field-textarea:focus,
+.ep-field-select:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.ep-field-textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.ep-field-input-readonly {
+    background: #f8fafc;
+    color: #475569;
+    cursor: default;
+}
+
+/* Date et time wrappers */
+.ep-date-wrapper,
+.ep-time-wrapper {
+    position: relative;
+}
+
+.ep-date-input,
+.ep-time-input {
+    padding-right: 40px;
+}
+
+.ep-date-icon,
+.ep-time-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+/* Select wrapper */
+.ep-select-wrapper {
+    position: relative;
+}
+
+.ep-select-icon {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 12px;
+    color: #94a3b8;
+    pointer-events: none;
+}
+
+/* Field hints et erreurs */
+.ep-field-hint {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    color: #94a3b8;
+    margin-top: 6px;
+}
+
+.ep-field-error {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: #ef4444;
+    margin-top: 6px;
+    background: #fef2f2;
+    padding: 6px 10px;
+    border-radius: 8px;
+}
+
+/* Barre de capacité */
+.ep-capacity-bar {
+    margin-top: 16px;
+}
+
+.ep-capacity-bar-bg {
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.ep-capacity-bar-fill {
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.3s ease;
+}
+
+.ep-capacity-stats {
+    margin-top: 8px;
+    font-size: 11px;
+    color: #475569;
+    text-align: right;
+}
+
+/* Carte */
+.ep-map-card {
+    border: 1.5px solid #e2e8f0;
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.ep-map-container {
+    height: 220px;
+    position: relative;
+}
+
+.ep-map-loading,
+.ep-map-error {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 12px;
+}
+
+.ep-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #e2e8f0;
+    border-top-color: #6366f1;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+.ep-map-retry {
+    padding: 6px 14px;
+    background: #6366f1;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.ep-map-retry:hover {
+    background: #4f46e5;
+    transform: scale(1.02);
+}
+
+.ep-map {
+    height: 100%;
+    width: 100%;
+}
+
+.ep-map-actions {
+    display: flex;
+    gap: 8px;
+    padding: 12px;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+}
+
+.ep-map-btn {
+    flex: 1;
+    padding: 8px;
+    border: none;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.ep-map-btn-tunis {
+    background: #ffffff;
+    color: #6366f1;
+    border: 1px solid #e2e8f0;
+}
+
+.ep-map-btn-tunis:hover {
+    background: #eef2ff;
+    border-color: #6366f1;
+}
+
+.ep-map-btn-reset {
+    background: #ffffff;
+    color: #f59e0b;
+    border: 1px solid #e2e8f0;
+}
+
+.ep-map-btn-reset:hover {
+    background: #fffbeb;
+    border-color: #f59e0b;
+}
+
+/* Link card */
+.ep-link-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 12px;
+    margin-top: 16px;
+}
+
+.ep-link-icon {
+    font-size: 20px;
+}
+
+.ep-link-content {
+    flex: 1;
+}
+
+.ep-link-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: #166534;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+}
+
+.ep-link-value {
+    font-size: 12px;
+    color: #22c55e;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.ep-link-value:hover {
+    text-decoration: underline;
+}
+
+.ep-link-copy {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.ep-link-copy:hover {
+    background: rgba(34, 197, 94, 0.1);
+}
+
+/* Link input wrapper */
+.ep-link-input-wrapper {
+    display: flex;
+    gap: 8px;
+}
+
+.ep-link-input-wrapper .ep-field-input {
+    flex: 1;
+}
+
+.ep-link-input-btn {
+    padding: 0 12px;
+    background: #f1f5f9;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.ep-link-input-btn:hover {
+    background: #e2e8f0;
+}
+
+/* Prérequis card */
+.ep-prereq-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 12px;
+    margin-top: 16px;
+}
+
+.ep-prereq-icon {
+    font-size: 20px;
+}
+
+.ep-prereq-content {
+    flex: 1;
+}
+
+.ep-prereq-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: #b45309;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+}
+
+.ep-prereq-value {
+    font-size: 12px;
+    font-weight: 500;
+    color: #92400e;
+    margin: 2px 0 0;
+}
+
+/* Messages d'erreur */
+.ep-form-errors {
+    margin-bottom: 20px;
+}
+
+.ep-error-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+}
+
+.ep-error-card:last-child {
+    margin-bottom: 0;
+}
+
+.ep-error-warning {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+}
+
+.ep-error-danger {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+}
+
+.ep-error-icon {
+    font-size: 20px;
+}
+
+.ep-error-content {
+    flex: 1;
+}
+
+.ep-error-content strong {
+    font-size: 12px;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.ep-error-content p {
+    font-size: 11px;
+    margin: 0;
+    color: #64748b;
+}
+
+.ep-error-warning .ep-error-content strong {
+    color: #d97706;
+}
+
+.ep-error-danger .ep-error-content strong {
+    color: #dc2626;
+}
+
+/* Actions */
+.ep-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding-top: 20px;
+    border-top: 1px solid #eef2f6;
+    margin-top: 8px;
+}
+
+.ep-btn {
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+    border: none;
+}
+
+.ep-btn-primary {
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    color: white;
+    box-shadow: 0 2px 4px rgba(99, 102, 241, 0.2);
+}
+
+.ep-btn-primary:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.ep-btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.ep-btn-secondary {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.ep-btn-secondary:hover {
+    background: #e2e8f0;
+}
+
+/* Grid responsive */
+.grid {
+    display: grid;
+}
+
+.grid-cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.gap-4 {
+    gap: 16px;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .grid-cols-2 {
+        grid-template-columns: 1fr;
+    }
+    
+    .ep-form-section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+    }
+    
+    .ep-form-actions {
+        flex-direction: column-reverse;
+    }
+    
+    .ep-btn {
+        justify-content: center;
+    }
+}
+
+/* Style pour le scroll horizontal */
+.chart-wrapper::-webkit-scrollbar {
+    height: 6px;
+}
+
+.chart-wrapper::-webkit-scrollbar-track {
+    background: #e2e8f0;
+    border-radius: 10px;
+}
+
+.chart-wrapper::-webkit-scrollbar-thumb {
+    background: #94a3b8;
+    border-radius: 10px;
+}
+
+.chart-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #6366f1;
+}
+
+/* Animation pour l'indicateur de scroll */
+.scroll-indicator {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+/* Version mobile responsive */
+@media (max-width: 768px) {
+    .grid-cols-2 {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .chart-wrapper canvas {
+        min-width: 500px;
+    }
+}
+.cal-root { background: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
+.cal-header { background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); border-bottom: 1px solid #e2e8f0; }
+.cal-title { font-size: 0.85rem; font-weight: 600; color: #0f172a; }
+.cal-sub { font-size: 0.7rem; color: #64748b; }
+.view-tabs { background: #f1f5f9; border: 1px solid #e2e8f0; }
+.view-tab { font-size: 0.7rem; font-weight: 500; color: #64748b; padding: 4px 8px; border-radius: 6px; transition: all 0.2s; cursor: pointer; }
+.view-tab.active { color: #4f46e5; background: white; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.cal-body { background: white; border-radius: 12px; margin: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; overflow: hidden; }
+.ep-view { width: 100%; max-width: 100%; background: white; border-radius: 14px; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); max-height: 85vh; display: flex; flex-direction: column; }
+.ep-view-banner { padding: 12px; }
+.ep-view-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 2px; }
+.ep-view-dates { font-size: 0.65rem; }
+.ep-action-btn { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; font-size: 0.85rem; }
+.ep-info-card { transition: all 0.2s; }
+.ep-info-card:hover { transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.ep-form { width: 100%; max-width: 100%; background: white; border-radius: 14px; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); max-height: 85vh; display: flex; flex-direction: column; }
+.ep-form-header { padding: 12px; }
+.ep-form-header--add { background: linear-gradient(135deg, #10b981, #059669); }
+.ep-form-header--edit { background: linear-gradient(135deg, #f59e0b, #d97706); }
+.ep-form-title { font-size: 0.85rem; margin-bottom: 2px; }
+.ep-form-sub { font-size: 0.65rem; }
+.ep-form-body { flex: 1; overflow-y: auto; padding: 12px; }
+.ep-field .mat-mdc-form-field-subscript-wrapper { display: none; }
+.ep-field .mat-mdc-text-field-wrapper { background: #fff; border-radius: 8px; height: 40px; }
+.ep-field .mat-mdc-form-field-flex { height: 40px; align-items: center; }
+.ep-field .mat-mdc-form-field-infix { padding-top: 0 !important; padding-bottom: 0 !important; min-height: auto !important; }
+.ep-map-container { transition: all 0.2s; }
+.ep-map { height: 192px; width: 100%; }
+.ep-map-loading, .ep-map-error { background: #f8fafc; height: 192px; }
+.ep-view::-webkit-scrollbar, .ep-form::-webkit-scrollbar,
+.ep-view-body::-webkit-scrollbar, .ep-form-body::-webkit-scrollbar { width: 4px; }
+.ep-view::-webkit-scrollbar-thumb, .ep-form::-webkit-scrollbar-thumb,
+.ep-view-body::-webkit-scrollbar-thumb, .ep-form-body::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+.ep-time-selector input[type="time"]::-webkit-calendar-picker-indicator { opacity: 0; position: absolute; right: 0; width: 100%; height: 100%; cursor: pointer; }
+.admin-btn { transition: all 0.2s ease; }
+.admin-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
+.dash-btn { background: white; border: 1px solid #e2e8f0; color: #475569; }
+.dash-btn:hover { background: #f8fafc; border-color: #6366f1; color: #6366f1; }
+.dash-btn--active { background: #eef2ff; border-color: #6366f1; color: #6366f1; }
+.kpi-card { transition: transform 0.2s, box-shadow 0.2s; }
+.kpi-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+.notif-panel { animation: fadeIn 0.15s ease; }
+.notif-item.unread-notif { background: #f8f9ff; }
+.notif-badge { font-size: 9px; line-height: 1; }
+.filter-select { font-size: 0.625rem; }
+.participants-overlay { position: fixed !important; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5) !important; z-index: 9999 !important; display: flex !important; align-items: center !important; justify-content: center !important; animation: fadeIn 0.15s ease; }
+.participants-modal { z-index: 10000 !important; animation: slideUp 0.2s ease; }
+.cdk-overlay-container { z-index: 1000 !important; }
+.mat-dialog-container { z-index: 1000 !important; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slide-down { from { opacity: 0; max-height: 0; } to { opacity: 1; max-height: 600px; } }
+.animate-slide-down { animation: slide-down 0.25s ease; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.animate-spin { animation: spin 1s linear infinite; }
+</style>

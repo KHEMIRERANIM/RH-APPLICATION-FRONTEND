@@ -1,0 +1,83 @@
+<!-- components/chatbot/chatbot.component.html -->
+<div class="chatbot-container">
+  <!-- Bouton flottant -->
+  <button class="chatbot-toggle" (click)="toggleChat()" [class.active]="isOpen">
+    <mat-icon *ngIf="!isOpen">chat</mat-icon>
+    <mat-icon *ngIf="isOpen">close</mat-icon>
+    <span class="unread-badge" *ngIf="unreadCount > 0 && !isOpen">{{ unreadCount }}</span>
+  </button>
+
+  <!-- Fenêtre de chat -->
+  <div class="chat-window" *ngIf="isOpen">
+    <!-- En-tête -->
+    <div class="chat-header">
+      <div class="header-info">
+        <div class="avatar">
+          <mat-icon>smart_toy</mat-icon>
+        </div>
+        <div class="title">
+          <h3>Assistant Formations</h3>
+          <p>En ligne • Réponse immédiate</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button mat-icon-button (click)="clearHistory()" matTooltip="Effacer l'historique">
+          <mat-icon>delete_outline</mat-icon>
+        </button>
+        <button mat-icon-button (click)="toggleChat()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- Messages -->
+    <div class="chat-messages" #chatMessagesContainer>
+      <div *ngFor="let message of messages" class="message-wrapper" [class.user]="message.sender === 'USER'" [class.bot]="message.sender === 'BOT'">
+        <div class="message-avatar">
+          <mat-icon *ngIf="message.sender === 'BOT'">smart_toy</mat-icon>
+          <mat-icon *ngIf="message.sender === 'USER'">person</mat-icon>
+        </div>
+        <div class="message-bubble">
+          <div class="message-content" [innerHTML]="message.content | linkify"></div>
+          <div class="message-sources" *ngIf="message.sources && message.sources.length > 0">
+            <span class="sources-label">📚 Sources :</span>
+            <span class="source" *ngFor="let source of message.sources">{{ source }}</span>
+          </div>
+          <div class="message-time">{{ formatTime(message.timestamp) }}</div>
+        </div>
+      </div>
+      
+      <!-- Indicateur de chargement -->
+      <div class="message-wrapper bot" *ngIf="isLoading">
+        <div class="message-avatar">
+          <mat-icon>smart_toy</mat-icon>
+        </div>
+        <div class="message-bubble">
+          <div class="typing-indicator">
+            <span></span><span></span><span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Suggestions -->
+    <div class="quick-suggestions" *ngIf="messages.length < 3">
+      <button *ngFor="let q of quickQuestions" class="suggestion-chip" (click)="sendQuickQuestion(q)">
+        {{ q }}
+      </button>
+    </div>
+
+    <!-- Input -->
+    <div class="chat-input">
+      <form [formGroup]="chatForm" (ngSubmit)="sendMessage()">
+        <mat-form-field appearance="outline" class="input-field">
+          <mat-label>Posez votre question...</mat-label>
+          <input matInput formControlName="message" placeholder="Ex: Quelles formations sont disponibles ?" autocomplete="off">
+          <button mat-icon-button matSuffix type="submit" [disabled]="chatForm.invalid || isLoading">
+            <mat-icon>send</mat-icon>
+          </button>
+        </mat-form-field>
+      </form>
+    </div>
+  </div>
+</div>

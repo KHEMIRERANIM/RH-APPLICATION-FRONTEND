@@ -1,0 +1,124 @@
+<!-- C:\pi\RH-APPLICATION-FRONTEND\src\app\modules\admin\apps\calendar\recommendations\recommendations.component.html -->
+
+<div class="recommendations-container">
+    <div class="header">
+        <h1>🎯 Recommandations Intelligentes</h1>
+        <p>Basées sur votre historique et les tendances du marché</p>
+        <button class="refresh-btn" (click)="refreshRecommendations()" [disabled]="isLoading">
+            🔄 Actualiser
+        </button>
+    </div>
+    
+    <div class="tabs">
+        <button [class.active]="selectedTab === 'personnel'" (click)="selectedTab = 'personnel'">
+            📚 Personnel
+        </button>
+        <button [class.active]="selectedTab === 'technologies'" (click)selectedTab = 'technologies'">
+            🚀 Technologies émergentes
+        </button>
+        <button [class.active]="selectedTab === 'tendances'" (click)="selectedTab = 'tendances'">
+            📈 Tendances marché
+        </button>
+    </div>
+    
+    <!-- Onglet Recommandations Personnalisées -->
+    <div *ngIf="selectedTab === 'personnel' && personalizedRecommendation" class="personalized-section">
+        <div class="profile-summary">
+            <div class="skills-known">
+                <h3>✅ Technologies maîtrisées</h3>
+                <div class="skills-list">
+                    <span *ngFor="let tech of personalizedRecommendation.technologiesConnues" class="skill-badge known">
+                        {{ tech }}
+                    </span>
+                    <span *ngIf="personalizedRecommendation.technologiesConnues.length === 0" class="empty-message">
+                        Aucune technologie enregistrée
+                    </span>
+                </div>
+            </div>
+            
+            <div class="next-level">
+                <h3>🎓 Prochain niveau recommandé</h3>
+                <div class="level-badge" [class]="personalizedRecommendation.prochainNiveau.toLowerCase()">
+                    {{ personalizedRecommendation.prochainNiveau }}
+                </div>
+            </div>
+        </div>
+        
+        <div class="recommended-skills">
+            <h3>💡 Compétences à acquérir</h3>
+            <div class="skills-list">
+                <span *ngFor="let tech of personalizedRecommendation.technologiesRecommandees" class="skill-badge recommended">
+                    {{ tech }}
+                    <button (click)="suggestFormation(tech)" class="suggest-btn" title="Proposer une formation">+</button>
+                </span>
+                <span *ngIf="personalizedRecommendation.technologiesRecommandees.length === 0" class="empty-message">
+                    Félicitations ! Vous êtes à jour technologiquement.
+                </span>
+            </div>
+        </div>
+        
+        <div class="formation-suggestions">
+            <h3>📖 Formations suggérées</h3>
+            <div class="suggestions-grid">
+                <div *ngFor="let suggestion of personalizedRecommendation.suggestionsFormations" class="suggestion-card">
+                    <div class="card-header">
+                        <span class="score" [class]="getScoreClass(suggestion.score)">{{ suggestion.score }}%</span>
+                        <span class="reason">{{ suggestion.raison }}</span>
+                    </div>
+                    <h4>{{ suggestion.titre }}</h4>
+                    <p>{{ suggestion.description }}</p>
+                    <button *ngIf="suggestion.formationId" class="btn-primary" (click)="inscrire(suggestion.formationId)">
+                        S'inscrire
+                    </button>
+                    <button *ngIf="!suggestion.formationId" class="btn-secondary" (click)="suggestFormation(suggestion.titre)">
+                        Proposer au RH
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Onglet Technologies Émergentes -->
+    <div *ngIf="selectedTab === 'technologies'" class="technologies-section">
+        <div class="tech-grid">
+            <div *ngFor="let tech of technologyRecommendations" class="tech-card" [style.border-left-color]="getPriorityColor(tech.priorite)">
+                <div class="tech-header">
+                    <h3>{{ tech.technologie }}</h3>
+                    <span class="priority" [class]="tech.priorite.toLowerCase()">{{ tech.priorite }}</span>
+                </div>
+                <div class="tech-meta">
+                    <span class="source">📡 {{ tech.source }}</span>
+                    <span class="score">📊 Score: {{ tech.score | number:'1.0-0' }}%</span>
+                </div>
+                <div class="tech-suggestions">
+                    <p>Formations suggérées :</p>
+                    <ul>
+                        <li *ngFor="let formation of tech.suggestionsFormations">{{ formation }}</li>
+                    </ul>
+                </div>
+                <button class="btn-outline" (click)="suggestFormation(tech.technologie)">Proposer formation</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Onglet Tendances -->
+    <div *ngIf="selectedTab === 'tendances'" class="trends-section">
+        <div class="trending-list">
+            <div *ngFor="let tech of trendingTechnologies; let i = index" class="trending-item">
+                <span class="rank">#{{ i + 1 }}</span>
+                <span class="tech-name">{{ tech }}</span>
+                <span class="trending-icon">🔥</span>
+            </div>
+        </div>
+        
+        <div class="stats-info">
+            <p>📊 Basé sur les tendances GitHub, LinkedIn et les publications scientifiques</p>
+            <p>🔄 Mis à jour quotidiennement</p>
+        </div>
+    </div>
+    
+    <div *ngIf="isLoading" class="loading-overlay">
+        <div class="spinner"></div>
+        <p>Analyse des compétences et des tendances...</p>
+    </div>
+</div>

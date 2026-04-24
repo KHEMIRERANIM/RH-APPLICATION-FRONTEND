@@ -1,0 +1,10 @@
+﻿:host {
+    display: block;
+    min-width: 300px;
+}
+
+:host-context(.dark) {
+    .bg-white {
+        background-color: #1f2937;
+    }
+}

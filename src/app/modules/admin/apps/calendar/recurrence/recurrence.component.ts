@@ -1,7 +1,7 @@
 import { Component, Inject, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import moment from 'moment';
+import * as moment from 'moment';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { CalendarService } from 'app/modules/admin/apps/calendar/calendar.service';
@@ -111,7 +111,7 @@ export class CalendarRecurrenceComponent implements OnInit, OnDestroy
     ngOnDestroy(): void
     {
         // Unsubscribe from all subscriptions
-        this._unsubscribeAll.next(null);
+        this._unsubscribeAll.next();
         this._unsubscribeAll.complete();
     }
 

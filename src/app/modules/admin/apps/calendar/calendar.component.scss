@@ -119,3 +119,72 @@ calendar {
     border-radius: 8px;
     @apply shadow-2xl bg-card;
 }
+/* Ajouter un scroll au dashboard */
+.dash-content {
+    max-height: 500px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+/* Personnalisation de la scrollbar */
+.dash-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.dash-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.dash-content::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+.dash-content::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn {
+    animation: fadeIn 0.2s ease;
+}
+
+.animate-slideUp {
+    animation: slideUp 0.3s ease;
+}
+
+/* Rapport content styles */
+.rapport-content {
+    line-height: 1.5;
+}
+
+.rapport-content h1 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+}
+
+.rapport-content h2 {
+    font-size: 1.4rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.rapport-content table {
+    width: 100%;
+    margin: 1rem 0;
+}
+
+.rapport-content th,
+.rapport-content td {
+    padding: 0.5rem 0.75rem;
+}

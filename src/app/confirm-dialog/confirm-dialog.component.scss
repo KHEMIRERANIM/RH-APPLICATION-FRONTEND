@@ -1,0 +1,11 @@
+﻿:host {
+    display: block;
+}
+
+button {
+    transition: all 0.2s ease;
+    
+    &:hover {
+        transform: translateY(-1px);
+    }
+}

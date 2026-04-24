@@ -1,0 +1,143 @@
+﻿<div class="dashboard-viewport">
+  <div class="content-wrapper">
+
+    <!-- HEADER -->
+    <header class="header-section">
+      <div class="header-left">
+        <h1>Mes formations</h1>
+        <p class="subtitle">Bienvenue, <strong>{{ formateurNom }}</strong>. Voici votre planning d'animation.</p>
+      </div>
+      <div class="stats-container">
+        <div class="stat-card">
+          <span class="value">{{ formations?.length || 0 }}</span>
+          <span class="label">Total</span>
+        </div>
+        <div class="stat-card ongoing">
+          <span class="value">{{ getFormationsEnCours() }}</span>
+          <span class="label">En cours</span>
+        </div>
+        <div class="stat-card upcoming">
+          <span class="value">{{ getFormationsAVenir() }}</span>
+          <span class="label">À venir</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- STATUS OVERLAY -->
+    <div class="status-overlay" *ngIf="isLoading || errorMessage">
+      <div *ngIf="isLoading" class="spinner-container">
+        <div class="spinner"></div>
+        <p>Chargement de vos données...</p>
+      </div>
+      <div *ngIf="errorMessage" class="error-box">
+        <span class="error-icon">⚠️</span>
+        <p>{{ errorMessage }}</p>
+        <button (click)="retry()" class="btn-retry">Réessayer</button>
+      </div>
+    </div>
+
+    <!-- FORMATIONS GRID -->
+    <div class="formations-grid" *ngIf="!isLoading && !errorMessage">
+
+      <div class="formation-card"
+           *ngFor="let formation of formations"
+           [class.expanded]="selectedFormation?.id === formation.id">
+
+        <!-- CARD HEADER (clickable for description) -->
+        <div class="card-main" (click)="toggleDetails(formation)">
+          <div class="card-badge" [style.background-color]="getTypeBgColor(formation.type)" [style.color]="getTypeColor(formation.type)">
+            {{ formation.type }}
+          </div>
+          <div class="card-body">
+            <div class="card-title-row">
+              <h3>{{ formation.titre }}</h3>
+              <svg class="chevron" [class.rotated]="selectedFormation?.id === formation.id"
+                   width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div class="meta-row">
+              <span class="status-dot" [ngClass]="getStatusClass(formation.dateDebut, formation.dateFin)"></span>
+              <span class="status-text">{{ getStatusText(formation.dateDebut, formation.dateFin) }}</span>
+            </div>
+            <div class="info-chips">
+              <span class="chip"> {{ formatDate(formation.dateDebut) }} → {{ formatDate(formation.dateFin) }}</span>
+              <span class="chip">{{ formation.dureeHeures }}h</span>
+              <span class="chip">{{ formation.nombrePlaces }} places</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ACTION BUTTONS -->
+        <div class="card-footer" (click)="$event.stopPropagation()">
+          <button class="btn-action"
+                  [class.active]="activeSection[formation.id] === 'participants'"
+                  (click)="toggleSection(formation.id, 'participants')">
+            👥 Participants
+            <span class="section-indicator" *ngIf="activeSection[formation.id] === 'participants'"></span>
+          </button>
+          <button class="btn-action"
+                  [class.active]="activeSection[formation.id] === 'documents'"
+                  (click)="toggleSection(formation.id, 'documents')">
+            📄 Documents
+            <span class="section-indicator" *ngIf="activeSection[formation.id] === 'documents'"></span>
+          </button>
+          <button class="btn-action"
+                  [class.active]="activeSection[formation.id] === 'examens'"
+                  (click)="toggleSection(formation.id, 'examens')">
+            📝 Examens
+            <span class="section-indicator" *ngIf="activeSection[formation.id] === 'examens'"></span>
+          </button>
+        </div>
+
+        <!-- INLINE SECTION: PARTICIPANTS -->
+        <div class="inline-section" *ngIf="activeSection[formation.id] === 'participants'"
+             (click)="$event.stopPropagation()">
+          <app-participants-list
+            [formationId]="formation.id"
+            [inlineMode]="true">
+          </app-participants-list>
+        </div>
+
+        <!-- INLINE SECTION: EXAMENS -->
+        <div class="inline-section" *ngIf="activeSection[formation.id] === 'examens'"
+             (click)="$event.stopPropagation()">
+          <app-examens-list
+            [formationId]="formation.id"
+            [inlineMode]="true">
+          </app-examens-list>
+        </div>
+
+        <!-- INLINE SECTION: DOCUMENTS -->
+        <div class="inline-section" *ngIf="activeSection[formation.id] === 'documents'"
+             (click)="$event.stopPropagation()">
+          <app-documents-list
+            [formationId]="formation.id"
+            [formateurId]="formateurId">
+          </app-documents-list>
+        </div>
+
+        <!-- EXPANSION: DESCRIPTION -->
+        <div class="card-expansion" *ngIf="selectedFormation?.id === formation.id"
+             (click)="$event.stopPropagation()">
+          <div class="expansion-inner">
+            <p class="desc-text"><strong>Description :</strong> {{ formation.description }}</p>
+            <div class="visio-row" *ngIf="formation.lienVisio">
+              <a [href]="formation.lienVisio" target="_blank" class="visio-link">
+                🔗 Rejoindre la visio
+              </a>
+              <button class="btn-copy" (click)="copierLien(formation.lienVisio)">Copier</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- EMPTY STATE -->
+      <div class="empty-state" *ngIf="formations.length === 0">
+        <p>Aucune formation trouvée pour le moment.</p>
+      </div>
+
+    </div>
+  </div>
+</div>

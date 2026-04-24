@@ -1,218 +1,418 @@
-import { Component, EventEmitter, OnDestroy, OnInit, Output, TemplateRef, ViewChild, ViewContainerRef, ViewEncapsulation } from '@angular/core';
-import { Overlay, OverlayRef } from '@angular/cdk/overlay';
-import { TemplatePortal } from '@angular/cdk/portal';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
-import { cloneDeep } from 'lodash-es';
-import { Calendar } from 'app/modules/admin/apps/calendar/calendar.types';
-import { CalendarService } from 'app/modules/admin/apps/calendar/calendar.service';
-import { calendarColors } from 'app/modules/admin/apps/calendar/sidebar/calendar-colors';
+﻿// C:\pi\RH-APPLICATION-FRONTEND\src\app\modules\admin\apps\calendar\sidebar\sidebar.component.ts
+
+import { Component, EventEmitter, Output, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { FormationService } from '../../../../../services/formation.service';
+import { AvisService } from '../../../../employee-formation/services/avis.service';
+import { FormationStats } from '../../../../../shared/models/formation.model';
+import { DialogService } from '../../../../../core/services/dialog.service';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../../../environments/environment';
+import { RecommendationService, TechnologyRecommendation } from '../recommendation.service';
+
+interface PropositionVote {
+    id: string;
+    titre: string;
+    description: string;
+    type: string;
+    statutVote: string;
+    pourcentagePour: number;
+    totalVotes: number;
+    votesPour: number;
+    votesContre: number;
+    dateFinVote: Date;
+}
 
 @Component({
-    selector     : 'calendar-sidebar',
-    templateUrl  : './sidebar.component.html',
-    encapsulation: ViewEncapsulation.None
+    selector: 'calendar-sidebar',
+    templateUrl: './sidebar.component.html',
+    styleUrls: ['./sidebar.component.scss']
 })
-export class CalendarSidebarComponent implements OnInit, OnDestroy
-{
-    @Output() readonly calendarUpdated: EventEmitter<any> = new EventEmitter<any>();
-    @ViewChild('editPanel') private _editPanel: TemplateRef<any>;
+export class CalendarSidebarComponent implements OnInit {
+    @Output() calendarUpdated = new EventEmitter<void>();
+    @Output() formationSelected = new EventEmitter<string>();
+    
+    stats: FormationStats = {
+        total: 0,
+        actives: 0,
+        inactives: 0,
+        parType: {},
+        placesTotales: 0,
+        placesDisponibles: 0,
+        placesOccupees: 0,
+        tauxRemplissage: 0
+    };
 
-    calendar: Calendar | null;
-    calendarColors: any = calendarColors;
-    calendars: Calendar[];
-    private _editPanelOverlayRef: OverlayRef;
-    private _unsubscribeAll: Subject<any> = new Subject<any>();
+    formationsTerminees: any[] = [];
+    avisEnAttente: any[] = [];
+    avisValides: any[] = [];
+    selectedFormation: any = null;
+    showAvisDetail: boolean = false;
+    
+    // ========== RECOMMANDATIONS IA ==========
+    technologyRecommendations: TechnologyRecommendation[] = [];
+    isLoadingRecommendations: boolean = false;
+    
+    // ========== PROPOSITIONS AVEC VOTES ==========
+    propositionsVote: PropositionVote[] = [];
+    isLoadingVotes: boolean = false;
+    adminId = 'admin1';
 
-    /**
-     * Constructor
-     */
     constructor(
-        private _calendarService: CalendarService,
-        private _overlay: Overlay,
-        private _viewContainerRef: ViewContainerRef
-    )
-    {
+        private formationService: FormationService,
+        private avisService: AvisService,
+        private dialogService: DialogService,
+        private router: Router,
+        private http: HttpClient,
+        private recommendationService: RecommendationService
+    ) { }
+
+    ngOnInit(): void {
+        this.loadStats();
+        this.loadFormationsTerminees();
+        this.loadAvisEnAttente();
+        this.loadRecommendations();
+        this.loadPropositionsVote();
     }
 
-    // -----------------------------------------------------------------------------------------------------
-    // @ Lifecycle hooks
-    // -----------------------------------------------------------------------------------------------------
+    // ========== RECOMMANDATIONS IA ==========
+    
+    loadRecommendations(): void {
+        this.isLoadingRecommendations = true;
+        this.recommendationService.getTechnologyRecommendations().subscribe({
+            next: (data) => {
+                this.technologyRecommendations = data;
+                this.isLoadingRecommendations = false;
+            },
+            error: (err) => {
+                console.error('Erreur chargement recommandations:', err);
+                this.isLoadingRecommendations = false;
+                // Données mock pour test
+                this.technologyRecommendations = [
+                    { technologie: 'LangChain', score: 92, source: 'GitHub Trends', priorite: 'HAUTE', suggestionsFormations: ['Formation LangChain'] },
+                    { technologie: 'RAG', score: 88, source: 'ArXiv', priorite: 'HAUTE', suggestionsFormations: ['Formation RAG'] },
+                    { technologie: 'WebGPU', score: 75, source: 'GitHub', priorite: 'MOYENNE', suggestionsFormations: ['Formation WebGPU'] }
+                ];
+                this.isLoadingRecommendations = false;
+            }
+        });
+    }
 
-    /**
-     * On init
-     */
-    ngOnInit(): void
-    {
-        // Get calendars
-        this._calendarService.calendars$
-            .pipe(takeUntil(this._unsubscribeAll))
-            .subscribe((calendars) => {
+   // Remplacer la méthode creerPropositionDepuisRecommandation par :
 
-                // Store the calendars
-                this.calendars = calendars;
+creerPropositionDepuisRecommandation(rec: TechnologyRecommendation): void {
+    this.dialogService.confirm({
+        title: 'Créer une proposition',
+        message: `Voulez-vous créer une proposition de formation pour "${rec.technologie}" ?\n\nScore IA: ${rec.score}%\nPriorité: ${rec.priorite}`,
+        confirmText: 'Créer',
+        cancelText: 'Annuler',
+        type: 'info'
+    }).subscribe(confirmed => {
+        if (confirmed) {
+            this.isLoadingRecommendations = true;
+            
+            // Utiliser l'endpoint existant pour générer des propositions
+            // Ou appeler un endpoint POST simple
+            const propositionData = {
+                technologie: rec.technologie,
+                titre: `Formation ${rec.technologie}`,
+                description: rec.suggestionsFormations[0] || `Formation complète sur ${rec.technologie}`,
+                dureeHeures: 14,
+                niveau: 'INTERMEDIAIRE',
+                type: 'TECHNIQUE',
+                source: 'IA_RECOMMENDATION',
+                scoreIA: rec.score,
+                statut: 'EN_ATTENTE_VALIDATION'
+            };
+            
+            // Essayer d'abord avec l'endpoint POST standard
+            this.http.post(`${environment.apiUrl}/formations/propositions`, propositionData).subscribe({
+                next: () => {
+                    this.dialogService.alert({
+                        title: 'Proposition créée',
+                        message: `La formation "${rec.technologie}" a été ajoutée aux propositions.`,
+                        type: 'success',
+                        confirmText: 'Fermer'
+                    });
+                    this.loadPropositionsVote();
+                    this.isLoadingRecommendations = false;
+                },
+                error: (err) => {
+                    console.error('Erreur:', err);
+                    // Si l'endpoint n'existe pas, afficher un message pour créer manuellement
+                    this.dialogService.alert({
+                        title: 'Action requise',
+                        message: `Veuillez créer manuellement la proposition pour "${rec.technologie}" dans l'interface d'administration.`,
+                        type: 'info',
+                        confirmText: 'OK'
+                    });
+                    this.isLoadingRecommendations = false;
+                }
             });
+        }
+    });
+}
+
+    // ========== PROPOSITIONS ET VOTES ==========
+   loadPropositionsVote(): void {
+    this.isLoadingVotes = true;
+    // Récupérer TOUTES les propositions (pas seulement validées)
+    this.http.get<PropositionVote[]>(`${environment.apiUrl}/formations/propositions/en-attente`).subscribe({
+        next: (data) => {
+            // Afficher les propositions en attente et celles avec votes
+            this.propositionsVote = data;
+            this.propositionsVote.forEach(p => {
+                this.loadVoteStats(p.id);
+            });
+            this.isLoadingVotes = false;
+        },
+        error: (err) => {
+            console.error('Erreur:', err);
+            this.isLoadingVotes = false;
+        }
+    });
+}
+    loadVoteStats(propositionId: string): void {
+        this.http.get(`${environment.apiUrl}/formations/propositions/${propositionId}/stats-vote`).subscribe({
+            next: (stats: any) => {
+                const proposition = this.propositionsVote.find(p => p.id === propositionId);
+                if (proposition) {
+                    proposition.totalVotes = stats.totalVotes;
+                    proposition.votesPour = stats.votesPour;
+                    proposition.votesContre = stats.votesContre;
+                    proposition.pourcentagePour = stats.pourcentagePour;
+                    proposition.dateFinVote = stats.dateFinVote;
+                    proposition.statutVote = stats.statutVote;
+                }
+            },
+            error: (err) => console.error(err)
+        });
     }
 
-    /**
-     * On destroy
-     */
-    ngOnDestroy(): void
-    {
-        // Unsubscribe from all subscriptions
-        this._unsubscribeAll.next(null);
-        this._unsubscribeAll.complete();
-
-        // Dispose the overlay
-        if ( this._editPanelOverlayRef )
-        {
-            this._editPanelOverlayRef.dispose();
+    ouvrirVote(proposition: PropositionVote): void {
+        const dureeJours = prompt('Durée du vote (en jours) :', '7');
+        if (dureeJours) {
+            this.http.post(`${environment.apiUrl}/formations/propositions/${proposition.id}/ouvrir-vote`, {
+                dureeJours: parseInt(dureeJours),
+                seuilMinimum: 5
+            }).subscribe({
+                next: () => {
+                    this.dialogService.alert({
+                        title: 'Vote ouvert',
+                        message: `Le vote est ouvert pour ${dureeJours} jours.`,
+                        type: 'success',
+                        confirmText: 'Fermer'
+                    });
+                    this.loadPropositionsVote();
+                },
+                error: (err) => console.error(err)
+            });
         }
     }
 
-    // -----------------------------------------------------------------------------------------------------
-    // @ Public methods
-    // -----------------------------------------------------------------------------------------------------
-
-    /**
-     * Open edit panel
-     */
-    openEditPanel(calendar: Calendar): void
-    {
-        // Set the calendar
-        this.calendar = cloneDeep(calendar);
-
-        // Create the overlay if it doesn't exist
-        if ( !this._editPanelOverlayRef )
-        {
-            this._createEditPanelOverlay();
-        }
-
-        // Attach the portal to the overlay
-        this._editPanelOverlayRef.attach(new TemplatePortal(this._editPanel, this._viewContainerRef));
+    cloturerVote(proposition: PropositionVote): void {
+        this.dialogService.confirm({
+            title: 'Clôturer le vote',
+            message: `Voulez-vous clôturer le vote pour "${proposition.titre}" ?\nRésultat actuel: ${proposition.pourcentagePour}% pour`,
+            confirmText: 'Clôturer',
+            cancelText: 'Annuler',
+            type: 'confirm'
+        }).subscribe(confirmed => {
+            if (confirmed) {
+                this.http.post(`${environment.apiUrl}/formations/propositions/${proposition.id}/cloturer-vote`, {}).subscribe({
+                    next: () => {
+                        this.dialogService.alert({
+                            title: 'Vote clôturé',
+                            message: `Le vote est clôturé. ${proposition.pourcentagePour}% des employés sont pour.`,
+                            type: 'success',
+                            confirmText: 'Fermer'
+                        });
+                        this.loadPropositionsVote();
+                    },
+                    error: (err) => console.error(err)
+                });
+            }
+        });
     }
 
-    /**
-     * Close the edit panel
-     */
-    closeEditPanel(): void
-    {
-        // Detach the overlay from the portal
-        if ( this._editPanelOverlayRef )
-        {
-            this._editPanelOverlayRef.detach();
-        }
+    publierFormation(proposition: PropositionVote): void {
+        this.dialogService.confirm({
+            title: 'Publier la formation',
+            message: `Voulez-vous créer et publier la formation "${proposition.titre}" ?\n\n📊 Résultats:\n• ${proposition.votesPour} votes pour\n• ${proposition.votesContre} votes contre\n• ${proposition.pourcentagePour}% pour`,
+            confirmText: 'Publier',
+            cancelText: 'Annuler',
+            type: 'confirm'
+        }).subscribe(confirmed => {
+            if (confirmed) {
+                this.http.post(`${environment.apiUrl}/formations/propositions/${proposition.id}/publier`, {}).subscribe({
+                    next: () => {
+                        this.dialogService.alert({
+                            title: 'Formation publiée !',
+                            message: `La formation a été ajoutée au catalogue.`,
+                            type: 'success',
+                            confirmText: 'Fermer'
+                        });
+                        this.loadPropositionsVote();
+                        this.calendarUpdated.emit();
+                    },
+                    error: (err) => console.error(err)
+                });
+            }
+        });
     }
 
-    /**
-     * Toggle the calendar visibility
-     *
-     * @param calendar
-     */
-    toggleCalendarVisibility(calendar: Calendar): void
-    {
-        // Toggle the visibility
-        calendar.visible = !calendar.visible;
-
-        // Update the calendar
-        this.saveCalendar(calendar);
-    }
-
-    /**
-     * Add calendar
-     */
-    addCalendar(): void
-    {
-        // Create a new calendar with default values
-        const calendar = {
-            id     : null,
-            title  : '',
-            color  : 'bg-blue-500',
-            visible: true
+    getStatutVoteLabel(statutVote: string): string {
+        const labels: {[key: string]: string} = {
+            'OUVERT': '🔓 Vote ouvert',
+            'CLOTURE': '🔒 Vote clos'
         };
-
-        // Open the edit panel
-        this.openEditPanel(calendar);
+        return labels[statutVote] || '⚪ En attente';
     }
 
-    /**
-     * Save the calendar
-     *
-     * @param calendar
-     */
-    saveCalendar(calendar: Calendar): void
-    {
-        // If there is no id on the calendar...
-        if ( !calendar.id )
-        {
-            // Add calendar to the server
-            this._calendarService.addCalendar(calendar).subscribe(() => {
+    getPourcentageClass(pourcentage: number): string {
+        if (pourcentage >= 70) return 'bg-green-500';
+        if (pourcentage >= 50) return 'bg-yellow-500';
+        return 'bg-red-500';
+    }
 
-                // Close the edit panel
-                this.closeEditPanel();
+    getTypeColor(type: string): string {
+        const colors: { [key: string]: string } = {
+            'TECHNIQUE': '#3b82f6',
+            'MANAGERIAL': '#10b981',
+            'RSE': '#8b5cf6',
+            'SOFT_SKILLS': '#f59e0b',
+            'SECURITE': '#ef4444'
+        };
+        return colors[type] || '#6b7280';
+    }
 
-                // Emit the calendarUpdated event
-                this.calendarUpdated.emit();
-            });
-        }
-        // Otherwise...
-        else
-        {
-            // Update the calendar on the server
-            this._calendarService.updateCalendar(calendar.id, calendar).subscribe(() => {
-
-                // Close the edit panel
-                this.closeEditPanel();
-
-                // Emit the calendarUpdated event
-                this.calendarUpdated.emit();
-            });
+    getPriorityColor(priority: string): string {
+        switch(priority) {
+            case 'HAUTE': return '#ef4444';
+            case 'MOYENNE': return '#f59e0b';
+            default: return '#10b981';
         }
     }
 
-    /**
-     * Delete the calendar
-     *
-     * @param calendar
-     */
-    deleteCalendar(calendar: Calendar): void
-    {
-        // Delete the calendar on the server
-        this._calendarService.deleteCalendar(calendar.id).subscribe(() => {
-
-            // Close the edit panel
-            this.closeEditPanel();
-
-            // Emit the calendarUpdated event
-            this.calendarUpdated.emit();
+    // ========== MÉTHODES EXISTANTES ==========
+    
+    loadStats(): void {
+        this.formationService.getFormationStats().subscribe({
+            next: (stats) => {
+                this.stats = stats;
+            },
+            error: (err) => console.error(err)
         });
     }
 
-    // -----------------------------------------------------------------------------------------------------
-    // @ Private methods
-    // -----------------------------------------------------------------------------------------------------
-
-    /**
-     * Create the edit panel overlay
-     *
-     * @private
-     */
-    private _createEditPanelOverlay(): void
-    {
-        // Create the overlay
-        this._editPanelOverlayRef = this._overlay.create({
-            hasBackdrop     : true,
-            scrollStrategy  : this._overlay.scrollStrategies.reposition(),
-            positionStrategy: this._overlay.position()
-                                  .global()
-                                  .centerHorizontally()
-                                  .centerVertically()
+    loadFormationsTerminees(): void {
+        this.formationService.getFormationsTerminees().subscribe({
+            next: (formations) => {
+                this.formationsTerminees = formations;
+                this.formationsTerminees.forEach(formation => {
+                    this.loadAvisForFormation(formation.id);
+                });
+            },
+            error: (err) => console.error(err)
         });
+    }
 
-        // Detach the overlay from the portal on backdrop click
-        this._editPanelOverlayRef.backdropClick().subscribe(() => {
-            this.closeEditPanel();
-            this.calendar = null;
+    loadAvisForFormation(formationId: string): void {
+        this.avisService.getAvisByFormation(formationId).subscribe({
+            next: (avis) => {
+                const formation = this.formationsTerminees.find(f => f.id === formationId);
+                if (formation) {
+                    formation.avis = avis;
+                    formation.stats = this.calculerStatsAvis(avis);
+                }
+            },
+            error: (err) => console.error(err)
         });
+    }
+
+    loadAvisEnAttente(): void {
+        this.avisService.getAvisEnAttente().subscribe({
+            next: (avis) => {
+                this.avisEnAttente = avis;
+            },
+            error: (err) => console.error(err)
+        });
+    }
+
+    calculerStatsAvis(avis: any[]): any {
+        const valides = avis.filter(a => a.valide);
+        const enAttente = avis.filter(a => !a.valide);
+        const moyenne = valides.length > 0 
+            ? valides.reduce((sum, a) => sum + a.note, 0) / valides.length 
+            : 0;
+        
+        return {
+            total: avis.length,
+            valides: valides.length,
+            enAttente: enAttente.length,
+            moyenne: Math.round(moyenne * 10) / 10,
+            repartition: this.calculerRepartitionNotes(valides)
+        };
+    }
+
+    calculerRepartitionNotes(avis: any[]): { [key: number]: number } {
+        const repartition: { [key: number]: number } = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
+        avis.forEach(a => {
+            if (a.note >= 1 && a.note <= 5) {
+                repartition[a.note]++;
+            }
+        });
+        return repartition;
+    }
+
+    validerAvis(avisId: string): void {
+        this.avisService.validerAvis(avisId).subscribe({
+            next: () => {
+                this.loadAvisEnAttente();
+                this.loadFormationsTerminees();
+                this.dialogService.alert({
+                    title: 'Avis validé',
+                    message: 'L\'avis a été validé avec succès.',
+                    type: 'success',
+                    confirmText: 'Fermer'
+                });
+            },
+            error: (err) => console.error(err)
+        });
+    }
+
+    rejeterAvis(avisId: string): void {
+        this.avisService.supprimerAvis(avisId).subscribe({
+            next: () => {
+                this.loadAvisEnAttente();
+                this.loadFormationsTerminees();
+                this.dialogService.alert({
+                    title: 'Avis rejeté',
+                    message: 'L\'avis a été supprimé avec succès.',
+                    type: 'success',
+                    confirmText: 'Fermer'
+                });
+            },
+            error: (err) => console.error(err)
+        });
+    }
+
+    voirDetailsFormation(formation: any): void {
+        this.selectedFormation = formation;
+        this.showAvisDetail = true;
+    }
+
+    fermerDetails(): void {
+        this.showAvisDetail = false;
+        this.selectedFormation = null;
+    }
+
+    refreshCalendar(): void {
+        this.loadStats();
+        this.loadFormationsTerminees();
+        this.loadAvisEnAttente();
+        this.loadRecommendations();
+        this.loadPropositionsVote();
+        this.calendarUpdated.emit();
     }
 }
