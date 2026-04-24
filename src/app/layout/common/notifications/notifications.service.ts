@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, ReplaySubject, forkJoin, of } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable, ReplaySubject, forkJoin, of, throwError } from 'rxjs';
 import { Notification } from 'app/layout/common/notifications/notifications.types';
 import { map, switchMap, take, tap, catchError } from 'rxjs/operators';
 import { Client } from '@stomp/stompjs';
@@ -9,6 +9,7 @@ import { getWsTrackingSockJsUrl } from 'src/environments/environment';
 
 const NOTIF_API = '/api/transport-notifications';
 const MUTUELLE_API = '/api/mutuelle-notifications';
+const CAREER_API = 'http://localhost:8081/api/notifications';
 
 @Injectable({
     providedIn: 'root'
@@ -27,6 +28,7 @@ export class NotificationsService {
         else if (t === 'RESERVATION') title = 'Mise à jour réservation';
         else if (t === 'ALTERNATIVES_DISPONIBLES' || t === 'ANNULATION_TRAJET') title = 'Trajet annulé';
         else if (t === 'ACTIVATION_BUS') title = 'Activation bus de réserve';
+        else if (bn.title) title = bn.title;
 
         let icon = 'heroicons_outline:bell';
         if (t === 'DEMANDE_CONFIRMATION') icon = 'heroicons_outline:question-mark-circle';
@@ -34,14 +36,18 @@ export class NotificationsService {
         else if (t === 'ACTIVATION_BUS') icon = 'heroicons_outline:truck';
         else if (t === 'PLACES_LIBEREES') icon = 'heroicons_solid:ticket';
         else if (t === 'PRIX_BAISSE') icon = 'heroicons_solid:currency-dollar';
+        else if (t === 'MOBILITY_APPROVED') icon = 'heroicons_solid:check-circle';
+        else if (t === 'MOBILITY_REJECTED') icon = 'heroicons_solid:x-circle';
+        else if (t === 'MOBILITY_ON_HOLD') icon = 'heroicons_solid:pause-circle';
+        else if (t === 'CERTIF_VALIDATED') icon = 'heroicons_solid:academic-cap';
 
         const n: Notification = {
             id: bn.id,
             icon,
             title: bn.titreOffreAvantage || title,
             description: bn.contenu || bn.message || 'Nouvelle notification système',
-            time: bn.dateCreation || new Date().toISOString(),
-            read: bn.lu || false,
+            time: bn.dateCreation || bn.createdAt || new Date().toISOString(),
+            read: bn.lu ?? bn.read ?? false,
             type: t,
             reservationId: bn.reservationId,
             trajetId: bn.trajetId,
@@ -57,6 +63,9 @@ export class NotificationsService {
             n.useRouter = true;
         } else if (t === 'PLACES_LIBEREES' || t === 'PRIX_BAISSE') {
             n.link = '/apps/partnerships/mes-favoris';
+            n.useRouter = true;
+        } else if (t?.startsWith('MOBILITY') || t?.startsWith('CERTIF')) {
+            n.link = '/apps/carriere';
             n.useRouter = true;
         }
 
@@ -165,6 +174,11 @@ export class NotificationsService {
         });
     }
 
+    private getCareerHeaders(): HttpHeaders {
+        const token = localStorage.getItem('accessToken');
+        return new HttpHeaders({ Authorization: `Bearer ${token || ''}` });
+    }
+
     /**
      * Get all notifications
      */
@@ -200,8 +214,16 @@ export class NotificationsService {
                 )
                 : of([] as Notification[]);
 
-            return forkJoin({ mutuelle: mutuelle$, user: user$, admin: admin$ }).pipe(
-                map(({ mutuelle, user, admin }) => this.mergeById(this.mergeById(mutuelle, user), admin)),
+            const career$ = this._httpClient.get<any[]>(CAREER_API, { headers: this.getCareerHeaders() }).pipe(
+                catchError(err => {
+                    if (err.status === 401 || err.status === 403) return of([]);
+                    return of([]);
+                }),
+                map(rows => (rows || []).map(bn => this.mapBackendRow(bn)))
+            );
+
+            return forkJoin({ mutuelle: mutuelle$, user: user$, admin: admin$, career: career$ }).pipe(
+                map(({ mutuelle, user, admin, career }) => this.mergeById(this.mergeById(this.mergeById(mutuelle, user), admin), career)),
                 tap((notifications) => {
                     this._notifications.next(notifications);
                     this.ensureStomp(localUser);
@@ -238,11 +260,19 @@ export class NotificationsService {
         return this.notifications$.pipe(
             take(1),
             switchMap(notifications => {
+                const isCareer = notification?.type?.startsWith('MOBILITY') || notification?.type?.startsWith('CERTIF');
                 const isMutuelle = !!(notification as any)['idUser'];
-                const endpoint = isMutuelle ? `${MUTUELLE_API}/${id}/lire` : `${NOTIF_API}/${id}/lire`;
-                const request$ = isMutuelle ? this._httpClient.patch<Notification>(endpoint, {}) : this._httpClient.put<Notification>(endpoint, {});
                 
-                if (notification.type || isMutuelle) {
+                let request$: Observable<any>;
+                
+                if (isCareer) {
+                    request$ = this._httpClient.patch<void>(`${CAREER_API}/${id}/read`, {}, { headers: this.getCareerHeaders() });
+                } else {
+                    const endpoint = isMutuelle ? `${MUTUELLE_API}/${id}/lire` : `${NOTIF_API}/${id}/lire`;
+                    request$ = isMutuelle ? this._httpClient.patch<Notification>(endpoint, {}) : this._httpClient.put<Notification>(endpoint, {});
+                }
+                
+                if (notification.type || isMutuelle || isCareer) {
                     return request$.pipe(
                         map(() => {
                             const updatedNotification = { ...notification, read: true };
@@ -256,9 +286,9 @@ export class NotificationsService {
                             return this._httpClient.patch<any>(`/api/notifications/${id}/lire`, {}).pipe(
                                 map(() => {
                                     const index = notifications.findIndex(item => item.id === id);
-                                    notifications[index].read = true;
+                                    if (index > -1) notifications[index].read = true;
                                     this._notifications.next(notifications);
-                                    return notifications[index];
+                                    return notifications[index] || notification;
                                 })
                             );
                         })
@@ -288,12 +318,20 @@ export class NotificationsService {
             take(1),
             switchMap(notifications => {
                 const targetNode = notifications.find(n => n.id === id);
-                let request$: Observable<boolean>;
+                let request$: Observable<any>;
 
                 if (targetNode) {
+                    const isCareer = targetNode?.type?.startsWith('MOBILITY') || targetNode?.type?.startsWith('CERTIF');
                     const isMutuelle = !!(targetNode as any)['idUser'];
-                    const endpoint = isMutuelle ? `${MUTUELLE_API}/${id}` : `${NOTIF_API}/${id}`;
-                    request$ = this._httpClient.delete<boolean>(endpoint).pipe(
+                    
+                    if (isCareer) {
+                        request$ = this._httpClient.delete<void>(`${CAREER_API}/${id}`, { headers: this.getCareerHeaders() });
+                    } else {
+                        const endpoint = isMutuelle ? `${MUTUELLE_API}/${id}` : `${NOTIF_API}/${id}`;
+                        request$ = this._httpClient.delete<boolean>(endpoint);
+                    }
+                    
+                    return request$.pipe(
                         map(() => true),
                         catchError(() => {
                             // Fallback to localhost
@@ -304,19 +342,20 @@ export class NotificationsService {
                         })
                     );
                 } else {
-                    request$ = this._httpClient.delete<boolean>('api/common/notifications', { params: { id } });
+                    return this._httpClient.delete<boolean>('api/common/notifications', { params: { id } });
                 }
-
-                return request$.pipe(
-                    map((isDeleted: boolean) => {
-                        const index = notifications.findIndex(item => item.id === id);
+            }),
+            map((isDeleted: boolean) => {
+                if (isDeleted) {
+                    this.notifications$.pipe(take(1)).subscribe(notifs => {
+                        const index = notifs.findIndex(item => item.id === id);
                         if (index > -1) {
-                            notifications.splice(index, 1);
-                            this._notifications.next(notifications);
+                            notifs.splice(index, 1);
+                            this._notifications.next(notifs);
                         }
-                        return isDeleted;
-                    })
-                );
+                    });
+                }
+                return isDeleted;
             })
         );
     }
@@ -340,7 +379,11 @@ export class NotificationsService {
                                 catchError(() => of(undefined))
                             )
                             : of(undefined);
-                        return forkJoin([userMark$, adminMark$]).pipe(
+                        const careerMark$ = this._httpClient.patch<void>(`${CAREER_API}/mark-all-read`, {}, { headers: this.getCareerHeaders() }).pipe(
+                            catchError(() => of(undefined))
+                        );
+                            
+                        return forkJoin([userMark$, adminMark$, careerMark$]).pipe(
                             map(() => {
                                 notifications.forEach((notification, index) => {
                                     notifications[index].read = true;

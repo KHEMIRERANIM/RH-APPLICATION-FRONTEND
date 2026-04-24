@@ -1,0 +1,145 @@
+<div class="rse-page">
+
+  <div class="rse-hero">
+    <div>
+      <h2 class="rse-hero__title">🌱 Mon espace RSE</h2>
+      <p class="rse-hero__subtitle">
+        Participez aux actions responsables de l’entreprise et gagnez des points, badges et niveaux.
+      </p>
+    </div>
+
+    <div class="rse-hero__badge">
+      <span class="rse-hero__score-label">Score RSE</span>
+      <span class="rse-hero__score">{{ userData?.rsePoints || 0 }} pts</span>
+    </div>
+  </div>
+
+  <div class="rse-stats-grid">
+    <div class="rse-stat-card rse-stat-card--green">
+      <p class="rse-stat-card__icon">🏆</p>
+      <p class="rse-stat-card__value">{{ userData?.rseLevel || 'Débutant' }}</p>
+      <p class="rse-stat-card__label">Niveau actuel</p>
+    </div>
+
+    <div class="rse-stat-card rse-stat-card--blue">
+      <p class="rse-stat-card__icon">🎯</p>
+      <p class="rse-stat-card__value">{{ userData?.rsePoints || 0 }}</p>
+      <p class="rse-stat-card__label">Points cumulés</p>
+    </div>
+
+    <div class="rse-stat-card rse-stat-card--amber">
+      <p class="rse-stat-card__icon">🥇</p>
+      <p class="rse-stat-card__value">{{ userData?.badges?.length || 0 }}</p>
+      <p class="rse-stat-card__label">Badges gagnés</p>
+    </div>
+  </div>
+
+  <div class="rse-layout">
+    <div class="rse-card">
+      <div class="rse-card__header">
+        <h3>Soumettre une action RSE</h3>
+        <p>Déclarez une action écologique, sociale ou éthique.</p>
+      </div>
+
+      <div class="rse-form-group">
+        <label>Type d'action</label>
+        <select [(ngModel)]="formData.type">
+          <option value="">Sélectionner</option>
+          <option value="ECO">🌿 Écologique</option>
+          <option value="SOCIAL">🤝 Sociale</option>
+          <option value="ETHICAL">⚖️ Éthique</option>
+        </select>
+      </div>
+
+      <div class="rse-form-group">
+        <label>Description</label>
+        <textarea
+          [(ngModel)]="formData.description"
+          rows="5"
+          placeholder="Décrivez l’action réalisée...">
+        </textarea>
+      </div>
+
+      <button class="rse-btn-primary" (click)="submitAction()" [disabled]="isSubmitting">
+        {{ isSubmitting ? 'Envoi...' : 'Soumettre l’action' }}
+      </button>
+
+      <p class="rse-success" *ngIf="successMessage">{{ successMessage }}</p>
+      <p class="rse-error" *ngIf="errorMessage">{{ errorMessage }}</p>
+    </div>
+
+    <div class="rse-side">
+      <div class="rse-card">
+        <div class="rse-card__header">
+          <h3>Badges obtenus</h3>
+        </div>
+
+        <div class="badge-list" *ngIf="userData?.badges?.length; else noBadges">
+          <div class="badge-pill" *ngFor="let badge of userData?.badges">
+            🏅 {{ badge }}
+          </div>
+        </div>
+
+        <ng-template #noBadges>
+          <p class="empty-state">Aucun badge pour le moment.</p>
+        </ng-template>
+      </div>
+
+      <div class="rse-card">
+        <div class="rse-card__header">
+          <h3>Résumé rapide</h3>
+        </div>
+
+        <div class="summary-box">
+          <p><strong>Nom :</strong> {{ userData?.nom || '—' }} {{ userData?.prenom || '' }}</p>
+          <p><strong>Email :</strong> {{ userData?.email || '—' }}</p>
+          <p><strong>Points :</strong> {{ userData?.rsePoints || 0 }}</p>
+          <p><strong>Niveau :</strong> {{ userData?.rseLevel || 'Débutant' }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rse-card rse-history-section">
+    <div class="rse-card__header">
+      <h3>Mes demandes RSE</h3>
+      <p>Historique de mes actions soumises.</p>
+    </div>
+
+    <div *ngIf="employeeActions.length === 0" class="empty-state">
+      Aucune demande soumise pour le moment.
+    </div>
+
+    <div class="rse-history-grid" *ngIf="employeeActions.length">
+      <div *ngFor="let action of employeeActions" class="rse-history-card">
+
+        <div class="rse-history-card__top">
+          <div class="rse-chip">{{ action.type }}</div>
+
+          <span
+            class="rse-history-status"
+            [ngClass]="{
+              'rse-history-status--pending': action.status === 'PENDING',
+              'rse-history-status--validated': action.status === 'VALIDATED',
+              'rse-history-status--rejected': action.status === 'REJECTED'
+            }"
+          >
+            {{ action.status }}
+          </span>
+        </div>
+
+        <p class="rse-history-card__description">
+          {{ action.description }}
+        </p>
+
+        <div class="rse-history-card__footer">
+          <span class="rse-history-card__date" *ngIf="action.createdAt">
+            🕒 {{ action.createdAt | date:'short' }}
+          </span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>

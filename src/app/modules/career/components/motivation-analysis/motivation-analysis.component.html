@@ -1,0 +1,140 @@
+<!-- Bouton Analyser si pas encore analysé -->
+<div *ngIf="!analyzed && !isLoading"
+     style="margin-top:10px;">
+  <button (click)="analyze()"
+          style="padding:6px 14px;border-radius:8px;border:1px solid #7c3aed;
+                 background:white;color:#7c3aed;cursor:pointer;font-size:12px;
+                 font-weight:600;font-family:inherit;display:inline-flex;align-items:center;gap:6px;">
+    🤖 Analyser la lettre
+  </button>
+</div>
+
+<!-- Loading -->
+<div *ngIf="isLoading"
+     style="margin-top:10px;display:flex;align-items:center;gap:8px;padding:12px;
+            background:#f9fafb;border-radius:10px;border:1px solid #e5e7eb;">
+  <mat-spinner diameter="16"></mat-spinner>
+  <span style="font-size:12px;color:#6b7280;">Analyse IA en cours...</span>
+</div>
+
+<!-- Erreur -->
+<div *ngIf="hasError && !isLoading"
+     style="margin-top:10px;padding:10px 14px;background:#fee2e2;border-radius:10px;
+            border:1px solid #fca5a5;font-size:12px;color:#991b1b;
+            display:flex;align-items:center;justify-content:space-between;">
+  <span>❌ Erreur lors de l'analyse</span>
+  <button (click)="analyze()"
+          style="padding:3px 10px;border-radius:6px;border:1px solid #991b1b;
+                 background:white;color:#991b1b;cursor:pointer;font-size:11px;font-family:inherit;">
+    Réessayer
+  </button>
+</div>
+
+<!-- Résultat -->
+<div *ngIf="result && !isLoading && !hasError"
+     style="margin-top:12px;display:flex;flex-direction:column;gap:10px;">
+
+  <!-- Score global + verdict -->
+  <div style="border:2px solid;border-radius:14px;padding:16px;
+              display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;"
+       [style.border-color]="scoreColor">
+    <div>
+      <p style="font-size:11px;color:#6b7280;margin:0 0 4px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">
+        Analyse IA de la lettre de motivation
+      </p>
+      <p style="font-size:28px;font-weight:800;margin:0;line-height:1;"
+         [style.color]="scoreColor">
+        {{ result.scoreGlobal }}/100
+      </p>
+      <p *ngIf="result.scoreGlobal === 0" style="font-size:11px;color:#9ca3af;margin:2px 0 0;">
+        Service IA indisponible
+      </p>
+      <!-- Barre de progression -->
+      <div style="margin-top:8px;background:#f3f4f6;border-radius:9999px;height:5px;width:200px;overflow:hidden;">
+        <div [style]="'height:100%;border-radius:9999px;background:' + scoreColor + ';width:' + result.scoreGlobal + '%'"></div>
+      </div>
+      <!-- Langue détectée -->
+      <div style="margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <span style="font-size:11px;background:#f3f4f6;color:#374151;
+                     padding:2px 8px;border-radius:9999px;">
+          {{ result.langue === 'Français' ? '🇫🇷' : result.langue === 'Anglais' ? '🇬🇧' : '🌐' }}
+          {{ result.langue }}
+        </span>
+        <button (click)="analyze()"
+                style="font-size:11px;background:#ede9fe;color:#7c3aed;border:none;cursor:pointer;
+                       padding:2px 10px;border-radius:9999px;font-family:inherit;font-weight:600;">
+          🔄 Relancer l'analyse
+        </button>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+      <span style="font-size:32px;">{{ verdictEmoji }}</span>
+      <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:9999px;"
+            [style]="verdictStyle">
+        {{ verdictLabel }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Scores détaillés -->
+  <div style="background:white;border-radius:12px;padding:14px;border:1px solid #e5e7eb;">
+    <p style="font-size:13px;font-weight:700;color:#111827;margin:0 0 12px;">
+      📊 Scores détaillés
+    </p>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div *ngFor="let s of getScoreEntries()"
+           style="display:flex;align-items:center;gap:10px;">
+        <span style="flex:1;font-size:12px;color:#374151;">{{ s.label }}</span>
+        <div style="width:80px;background:#f3f4f6;border-radius:9999px;height:5px;overflow:hidden;">
+          <div [style]="'height:100%;border-radius:9999px;background:' + getScoreColor(s.value) + ';width:' + getBarWidth(s.value)"></div>
+        </div>
+        <span style="font-size:12px;font-weight:700;min-width:32px;text-align:right;"
+              [style.color]="getScoreColor(s.value)">
+          {{ s.value }}/10
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Points forts + à améliorer -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+
+    <div style="background:#f0fdf4;border-radius:12px;padding:12px;border:1px solid #bbf7d0;">
+      <p style="font-size:12px;font-weight:700;color:#166534;margin:0 0 8px;">
+        ✅ Points forts
+      </p>
+      <div *ngIf="!result.pointsForts?.length"
+           style="font-size:12px;color:#9ca3af;font-style:italic;">Aucun point fort identifié</div>
+      <ul style="margin:0;padding-left:16px;display:flex;flex-direction:column;gap:4px;">
+        <li *ngFor="let p of result.pointsForts"
+            style="font-size:11px;color:#166534;">{{ p }}</li>
+      </ul>
+    </div>
+
+    <div style="background:#fff7ed;border-radius:12px;padding:12px;border:1px solid #fed7aa;">
+      <p style="font-size:12px;font-weight:700;color:#c2410c;margin:0 0 8px;">
+        ⚠️ À améliorer
+      </p>
+      <div *ngIf="!result.aAmeliorer?.length"
+           style="font-size:12px;color:#9ca3af;font-style:italic;">Aucun point à améliorer</div>
+      <ul style="margin:0;padding-left:16px;display:flex;flex-direction:column;gap:4px;">
+        <li *ngFor="let p of result.aAmeliorer"
+            style="font-size:11px;color:#c2410c;">{{ p }}</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- Suggestions -->
+  <div *ngIf="result.suggestions?.length"
+       style="background:#eff6ff;border-radius:12px;padding:12px;border:1px solid #bfdbfe;">
+    <p style="font-size:12px;font-weight:700;color:#1d4ed8;margin:0 0 8px;">
+      💡 Suggestions d'amélioration
+    </p>
+    <ul style="margin:0;padding-left:16px;display:flex;flex-direction:column;gap:4px;">
+      <li *ngFor="let s of result.suggestions"
+          style="font-size:11px;color:#1d4ed8;">{{ s }}</li>
+    </ul>
+  </div>
+
+</div>

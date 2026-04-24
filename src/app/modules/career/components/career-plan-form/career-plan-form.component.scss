@@ -1,0 +1,30 @@
+@use '../../styles/career-theme' as career;
+
+/* Dialog container (template is mostly inline styles) */
+:host {
+  display: block;
+}
+
+:host ::ng-deep .mat-mdc-dialog-container,
+:host ::ng-deep .mdc-dialog__surface {
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(59, 130, 246, 0.18) !important;
+  box-shadow:
+    0 20px 60px rgba(2, 6, 23, 0.18),
+    0 1px 0 rgba(2, 6, 23, 0.04) !important;
+}
+
+:host ::ng-deep mat-dialog-content {
+  background:
+    radial-gradient(900px 320px at 12% -10%, rgba(59, 130, 246, 0.12), transparent 55%),
+    radial-gradient(700px 300px at 92% 0%, rgba(37, 99, 235, 0.10), transparent 55%);
+}
+
+:host ::ng-deep button,
+:host ::ng-deep input,
+:host ::ng-deep select,
+:host ::ng-deep textarea {
+  @include career.career-focus-ring;
+}
+

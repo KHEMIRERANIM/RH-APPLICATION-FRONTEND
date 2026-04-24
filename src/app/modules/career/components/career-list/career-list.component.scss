@@ -1,0 +1,168 @@
+@use '../../styles/career-theme' as career;
+
+/* Career list: keep Material table crisp + blue hover */
+
+.career-table-card {
+  position: relative;
+  border-radius: 18px;
+  border: 1px solid rgba(59, 130, 246, 0.16) !important;
+  box-shadow:
+    0 14px 40px rgba(2, 6, 23, 0.08),
+    0 1px 0 rgba(2, 6, 23, 0.03);
+  overflow: hidden;
+
+  /* Navy top accent strip */
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #0b1b3a, #0a255a, #0b3a7a, rgba(59, 130, 246, 0.55));
+  }
+
+  &__toolbar {
+    background:
+      radial-gradient(900px 220px at 10% -40%, rgba(59, 130, 246, 0.16), transparent 55%),
+      linear-gradient(180deg, rgba(15, 23, 42, 0.02), rgba(15, 23, 42, 0.00));
+  }
+}
+
+/* Material table header: more "navy" and modern */
+::ng-deep .mat-mdc-header-row {
+  background: linear-gradient(180deg, rgba(11, 27, 58, 0.06), rgba(11, 27, 58, 0.00)) !important;
+}
+
+.career-topbar {
+  position: relative;
+  margin: 16px 24px 10px;
+  border-radius: 18px;
+  padding-top: 22px;
+  padding-bottom: 18px;
+
+  /* Navy glossy background */
+  background:
+    radial-gradient(1200px 420px at 20% -20%, rgba(255, 255, 255, 0.18), transparent 55%),
+    radial-gradient(900px 360px at 85% 0%, rgba(59, 130, 246, 0.35), transparent 60%),
+    linear-gradient(135deg, #0b1b3a 0%, #0a255a 35%, #0b3a7a 100%);
+  border: 1px solid rgba(59, 130, 246, 0.22);
+  box-shadow:
+    0 18px 55px rgba(2, 6, 23, 0.25),
+    0 1px 0 rgba(255, 255, 255, 0.06) inset;
+  overflow: hidden;
+
+  /* Reflect highlight band */
+  &::after {
+    content: '';
+    position: absolute;
+    inset: -40% -10% auto -10%;
+    height: 120px;
+    transform: rotate(-8deg);
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.20) 35%,
+      rgba(255, 255, 255, 0.05) 60%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    pointer-events: none;
+    filter: blur(0.2px);
+  }
+
+  .career-topbar__title,
+  .career-topbar__subtitle {
+    color: rgba(255, 255, 255, 0.94) !important;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.22);
+  }
+
+  .career-topbar__subtitle {
+    color: rgba(226, 232, 240, 0.88) !important;
+  }
+
+  /* Make header button pop on dark bg */
+  :host ::ng-deep .new-position-btn {
+    box-shadow: 0 10px 26px rgba(37, 99, 235, 0.28);
+  }
+}
+
+/* Positions tab: button above table, right aligned */
+.career-positions-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+::ng-deep {
+
+  .mat-mdc-header-cell {
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    color: rgba(15, 23, 42, 0.65) !important;
+    letter-spacing: 0.05em !important;
+    padding: 0 16px !important;
+  }
+
+  .mat-mdc-cell {
+    padding: 8px 16px !important;
+    overflow: visible !important;
+  }
+
+  .mat-column-title {
+    min-width: 220px !important;
+    flex: 1 1 220px !important;
+    white-space: normal !important;
+  }
+  .mat-column-domain {
+    min-width: 160px !important;
+    flex: 0 0 160px !important;
+    white-space: normal !important;
+  }
+  .mat-column-level {
+    min-width: 130px !important;
+    flex: 0 0 130px !important;
+  }
+  .mat-column-salary {
+    min-width: 190px !important;
+    flex: 0 0 190px !important;
+    white-space: nowrap !important;
+  }
+  .mat-column-options {
+    min-width: 130px !important;
+    flex: 0 0 130px !important;
+  }
+  .mat-column-actions {
+    min-width: 140px !important;
+    flex: 0 0 140px !important;
+  }
+
+  .career-row:hover {
+    background-color: career.$career-blue-50 !important;
+    transition: background-color 150ms ease !important;
+  }
+
+  .mat-mdc-paginator-range-label {
+    font-size: 13px !important;
+  }
+
+  .new-position-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    height: 40px !important;
+    padding: 0 20px !important;
+    border-radius: 8px !important;
+  }
+}
+
+/* Subtle lift on the two table cards (if present) */
+:host ::ng-deep .rounded-2xl.shadow-sm.border {
+  transition: transform 140ms ease, box-shadow 160ms ease;
+}
+
+:host ::ng-deep .rounded-2xl.shadow-sm.border:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 14px 36px rgba(2, 6, 23, 0.08),
+    0 1px 0 rgba(2, 6, 23, 0.03);
+}

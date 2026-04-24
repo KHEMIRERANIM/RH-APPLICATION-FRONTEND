@@ -1,0 +1,316 @@
+@use '../../styles/career-theme' as career;
+
+.employee-plan-shell {
+  border-radius: 18px;
+  background:
+    radial-gradient(1200px 420px at 10% -10%, rgba(59, 130, 246, 0.16), transparent 55%),
+    radial-gradient(900px 380px at 90% 0%, rgba(37, 99, 235, 0.12), transparent 55%),
+    radial-gradient(700px 320px at 40% 110%, rgba(99, 102, 241, 0.10), transparent 55%);
+}
+
+.employee-plan {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px;
+
+  &__loading { display: flex; justify-content: center; padding: 40px; }
+
+  &__score-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid #f3f4f6;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06);
+  }
+
+  &__score-title    { font-size: 18px; font-weight: 700; color: #111827; margin: 0; }
+  &__score-subtitle { font-size: 13px; color: #6b7280; margin: 4px 0 0; }
+  &__arrow          { margin: 0 6px; }
+
+  &__scores { display: flex; gap: 12px; }
+
+  &__score-circle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: 3px solid;
+    &--global { border-color: #7c3aed; }
+    &--tech   { border-color: #2563eb; }
+    &--soft   { border-color: #ea580c; }
+  }
+
+  &__score-value { font-size: 16px; font-weight: 800; color: #111827; }
+  &__score-label { font-size: 10px; color: #6b7280; text-transform: uppercase; font-weight: 600; }
+
+  &__progress-bar {
+    height: 8px;
+    background: #f3f4f6;
+    border-radius: 9999px;
+    overflow: hidden;
+  }
+
+  &__progress-fill {
+    height: 100%;
+    border-radius: 9999px;
+    transition: width .4s ease;
+    &--low  { background: #dc2626; }
+    &--mid  { background: #d97706; }
+    &--high { background: #16a34a; }
+  }
+
+  &__tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  &__tab {
+    padding: 8px 18px;
+    border-radius: 9999px;
+    border: 1px solid #e5e7eb;
+    background: white;
+    color: #374151;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: inherit;
+    font-weight: 500;
+    transition: all .15s;
+    &--active { background: #7c3aed; color: white; border-color: #7c3aed; font-weight: 600; }
+  }
+
+  &__panel {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    border: 1px solid #f3f4f6;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06);
+  }
+
+  &__panel-hint { font-size: 13px; color: #6b7280; margin: 0; }
+
+  &__field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    @media (max-width: 640px) { grid-template-columns: 1fr; }
+  }
+
+  &__field { display: flex; flex-direction: column; gap: 6px; }
+
+  &__label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+  }
+
+  &__input {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    &:focus { border-color: #7c3aed; }
+    &--sm   { width: auto; }
+  }
+
+  &__textarea {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    font-size: 13px;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 80px;
+    width: 100%;
+    &:focus { border-color: #7c3aed; outline: none; }
+  }
+
+  &__gap-title { font-size: 14px; font-weight: 700; color: #111827; margin: 0; }
+  &__gap-list  { display: flex; flex-direction: column; gap: 8px; }
+
+  &__gap-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    &--ok      { background: #dcfce7; }
+    &--missing { background: #fee2e2; }
+  }
+
+  &__gap-icon  { font-size: 14px; font-weight: 700; }
+  &__gap-name  { flex: 1; font-weight: 600; }
+  &__gap-level { font-size: 11px; color: #6b7280; }
+
+  &__gap-certif-badge {
+    font-size: 10px;
+    background: #e0e7ff;
+    color: #3730a3;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-weight: 700;
+  }
+
+  &__comp-add  { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  &__comp-list { display: flex; flex-direction: column; gap: 8px; }
+
+  &__comp-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: #f9fafb;
+    border-radius: 8px;
+    font-size: 13px;
+  }
+
+  &__comp-name  { flex: 1; font-weight: 600; color: #111827; }
+  &__comp-years { font-size: 11px; color: #6b7280; }
+
+  &__comp-level {
+    padding: 3px 10px;
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 700;
+    &--debutant      { background: #fef9c3; color: #854d0e; }
+    &--intermediaire { background: #e0e7ff; color: #3730a3; }
+    &--expert        { background: #dcfce7; color: #166534; }
+  }
+
+  &__certif-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  &__certif-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  &__certif-name   { font-size: 14px; font-weight: 700; color: #111827; }
+  &__certif-fields { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
+  &__certif-upload { display: flex; align-items: center; gap: 10px; }
+  &__certif-file   { font-size: 12px; color: #6b7280; }
+
+  &__certif-link {
+    font-size: 12px;
+    color: #7c3aed;
+    text-decoration: none;
+    &:hover { text-decoration: underline; }
+  }
+
+  &__certif-status {
+    padding: 4px 12px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 700;
+    &--non_commence { background: #f3f4f6; color: #6b7280; }
+    &--en_cours     { background: #fef9c3; color: #854d0e; }
+    &--obtenu       { background: #dcfce7; color: #166534; }
+  }
+
+  &__certif-admin-note {
+    font-size: 12px;
+    color: #6b7280;
+    background: #f9fafb;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border-left: 3px solid #7c3aed;
+  }
+
+  &__certif-extra       { margin-top: 8px; }
+  &__certif-extra-title { font-size: 13px; font-weight: 700; color: #374151; margin: 0 0 10px; }
+
+  &__badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-left: 8px;
+    &--required { background: #fee2e2; color: #991b1b; }
+    &--optional { background: #e0e7ff; color: #3730a3; }
+    &--method   { background: #f3f4f6; color: #374151; }
+  }
+
+  &__btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    transition: opacity .15s;
+    &:hover    { opacity: .85; }
+    &--primary { background: #7c3aed; color: white; }
+    &--add     { background: #ede9fe; color: #5b21b6; }
+    &--upload  { background: #f0fdf4; color: #166534; border: 1px solid #16a34a; cursor: pointer; }
+    &--sm      { padding: 6px 12px; font-size: 12px; align-self: flex-end; }
+  }
+
+  &__btn-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #dc2626;
+    font-size: 14px;
+    padding: 2px 6px;
+  }
+
+  &__empty { text-align: center; padding: 32px; color: #9ca3af; font-size: 14px; }
+}
+
+/* While the template still has lots of inline styles,
+   make the main white panels feel consistent + dynamic. */
+:host ::ng-deep .employee-plan-shell [style*="background:white"][style*="border-radius:16px"] {
+  border: 1px solid rgba(148, 163, 184, 0.25) !important;
+  box-shadow: career.$career-shadow !important;
+}
+
+:host ::ng-deep .employee-plan-shell [style*="background:white"][style*="border-radius:16px"]:hover {
+  border-color: rgba(59, 130, 246, 0.28) !important;
+  box-shadow:
+    0 14px 36px rgba(2, 6, 23, 0.10),
+    0 1px 0 rgba(2, 6, 23, 0.03) !important;
+}
+
+:host ::ng-deep .employee-plan-shell button,
+:host ::ng-deep .employee-plan-shell input,
+:host ::ng-deep .employee-plan-shell select,
+:host ::ng-deep .employee-plan-shell textarea {
+  @include career.career-focus-ring;
+}
+.file-link-btn {
+  border: none;
+  background: transparent;
+  color: #7c3aed;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}

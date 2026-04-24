@@ -521,7 +521,7 @@ export const _legacyNavigation: FuseNavigationItem[] = [
                         id   : 'pages.coming-soon.modern',
                         title: 'Modern',
                         type : 'basic',
-                        link : '/pages/coming-soon/modern'
+                        link : '/pages/coming-soon/modern' 
                     },
                     {
                         id   : 'pages.coming-soon.modern-reversed',

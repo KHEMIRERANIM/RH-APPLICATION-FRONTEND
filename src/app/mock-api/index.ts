@@ -15,7 +15,6 @@ import { MailboxMockApi } from 'app/mock-api/apps/mailbox/api';
 import { MessagesMockApi } from 'app/mock-api/common/messages/api';
 import { NavigationMockApi } from 'app/mock-api/common/navigation/api';
 import { NotesMockApi } from 'app/mock-api/apps/notes/api';
-import { NotificationsMockApi } from 'app/mock-api/common/notifications/api';
 import { ProjectMockApi } from 'app/mock-api/dashboards/project/api';
 import { SearchMockApi } from 'app/mock-api/common/search/api';
 import { ScrumboardMockApi } from 'app/mock-api/apps/scrumboard/api';
@@ -41,7 +40,6 @@ export const mockApiServices = [
     MessagesMockApi,
     NavigationMockApi,
     NotesMockApi,
-    NotificationsMockApi,
     ProjectMockApi,
     SearchMockApi,
     ScrumboardMockApi,

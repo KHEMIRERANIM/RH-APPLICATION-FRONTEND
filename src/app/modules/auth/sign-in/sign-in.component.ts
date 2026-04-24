@@ -94,6 +94,8 @@ export class AuthSignInComponent implements OnInit
                     
                     if (user?.role?.toUpperCase() === 'CANDIDAT') {
                         redirectURL = '/recrutement/offres';
+                    } else if (user?.role?.toUpperCase() === 'EMPLOYE') {
+                        redirectURL = '/apps/restaurant';
                     }
                     
                     this._router.navigateByUrl(redirectURL);

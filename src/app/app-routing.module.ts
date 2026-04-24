@@ -87,7 +87,7 @@ export const appRoutes: Route[] = [
                     { path: 'partnerships', loadChildren: () => import('app/modules/admin/apps/partnerships/partnerships.module').then(m => m.PartnershipsModule) },
                     { path: 'rse', loadChildren: () => import('app/modules/admin/apps/hr-apps/hr-apps.module').then(m => m.HrAppsModule) },
                     { path: 'covoiturage', loadChildren: () => import('app/modules/admin/apps/covoiturage/covoiturage.module').then(m => m.CovoiturageModule) },
-                    { path: 'carriere', loadChildren: () => import('app/modules/admin/apps/hr-apps/hr-apps.module').then(m => m.HrAppsModule) },
+                    { path: 'carriere', loadChildren: () => import('app/modules/career/career.module').then(m => m.CareerModule) },
                     { path: 'file-manager', loadChildren: () => import('app/modules/admin/apps/file-manager/file-manager.module').then(m => m.FileManagerModule) },
                     { path: 'help-center', loadChildren: () => import('app/modules/admin/apps/help-center/help-center.module').then(m => m.HelpCenterModule) },
                     { path: 'mailbox', loadChildren: () => import('app/modules/admin/apps/mailbox/mailbox.module').then(m => m.MailboxModule) },

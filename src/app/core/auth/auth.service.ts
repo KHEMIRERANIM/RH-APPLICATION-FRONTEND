@@ -9,17 +9,10 @@ export class AuthService
     private _authenticated: boolean = false;
     private apiUrl = '/api/auth';
 
-    /**
-     * Constructor
-     */
     constructor(private _httpClient: HttpClient)
     {
         this.check().subscribe();
     }
-
-    // -----------------------------------------------------------------------------------------------------
-    // @ Accessors
-    // -----------------------------------------------------------------------------------------------------
 
     set accessToken(token: string)
     {
@@ -31,9 +24,6 @@ export class AuthService
         return localStorage.getItem('accessToken') ?? '';
     }
 
-    /**
-     * Get access token (alias pour l'intercepteur)
-     */
     getToken(): string | null
     {
         return localStorage.getItem('accessToken');
@@ -51,13 +41,9 @@ export class AuthService
         return user?.role === 'ADMIN';
     }
 
-    // -----------------------------------------------------------------------------------------------------
-    // @ Public methods
-    // -----------------------------------------------------------------------------------------------------
-
     signIn(credentials: { email: string; password: string }): Observable<any>
     {
-        if ( this._authenticated )
+        if (this._authenticated)
         {
             return throwError(() => new Error('User is already logged in.'));
         }
@@ -65,17 +51,18 @@ export class AuthService
         return this._httpClient.post(`${this.apiUrl}/login`, credentials).pipe(
             tap((response: any) => {
                 this.accessToken = response.token;
-                
+
                 localStorage.setItem('currentUser', JSON.stringify({
                     id: response.id,
                     email: response.email,
                     role: response.role,
                     nom: response.nom,
                     prenom: response.prenom,
+                    poste: response.poste,
                     photoUrl: response.photoUrl || response.avatar,
                     isActive: response.isActive
                 }));
-                
+
                 this._authenticated = true;
             }),
             switchMap((response: any) => of(response))
@@ -88,7 +75,7 @@ export class AuthService
             this._authenticated = true;
             return of(true);
         }
-        
+
         return of(false);
     }
 
@@ -104,17 +91,17 @@ export class AuthService
 
     check(): Observable<boolean>
     {
-        if ( this._authenticated )
+        if (this._authenticated)
         {
             return of(true);
         }
 
-        if ( !this.accessToken )
+        if (!this.accessToken)
         {
             return of(false);
         }
 
-        if ( !this.currentUser )
+        if (!this.currentUser)
         {
             return of(false);
         }
@@ -122,7 +109,7 @@ export class AuthService
         this._authenticated = true;
         return of(true);
     }
-    
+
     getProfile(): Observable<any>
     {
         return this._httpClient.get('/api/users/me');

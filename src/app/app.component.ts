@@ -14,7 +14,6 @@ export class AppComponent implements OnInit
     constructor(private schedulerService: RecrutementSchedulerService)
     {
     }
-
     ngOnInit(): void {
         // Démarrage du moteur de tâches planifiées (Mock Frontend pour la soutenance)
         this.schedulerService.demarrer();

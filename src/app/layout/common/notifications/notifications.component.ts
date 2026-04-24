@@ -1,4 +1,14 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, TemplateRef, ViewChild, ViewContainerRef, ViewEncapsulation } from '@angular/core';
+import {
+    ChangeDetectionStrategy,
+    ChangeDetectorRef,
+    Component,
+    OnDestroy,
+    OnInit,
+    TemplateRef,
+    ViewChild,
+    ViewContainerRef,
+    ViewEncapsulation
+} from '@angular/core';
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { MatButton } from '@angular/material/button';
@@ -20,17 +30,14 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class NotificationsComponent implements OnInit, OnDestroy {
     @ViewChild('notificationsOrigin') private _notificationsOrigin: MatButton;
-    @ViewChild('notificationsPanel') private _notificationsPanel: TemplateRef<any>;
+    @ViewChild('notificationsPanel')  private _notificationsPanel: TemplateRef<any>;
 
-    notifications: Notification[];
+    notifications: Notification[] = [];
     unreadCount: number = 0;
     employesMap: Map<string, string> = new Map();
     private _overlayRef: OverlayRef;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
 
-    /**
-     * Constructor
-     */
     constructor(
         private _changeDetectorRef: ChangeDetectorRef,
         private _notificationsService: NotificationsService,
@@ -44,9 +51,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     ) {
     }
 
-    // -----------------------------------------------------------------------------------------------------
-    // @ Lifecycle hooks
-    // -----------------------------------------------------------------------------------------------------
+    // ── Lifecycle ────────────────────────────────────────────────────────
 
     /**
      * On init
@@ -102,8 +107,6 @@ export class NotificationsComponent implements OnInit, OnDestroy {
                         this.notifications = processed;
                 // Calculate the unread count
                 this._calculateUnreadCount();
-
-                // Mark for check
                 this._changeDetectorRef.markForCheck();
             });
             
@@ -134,9 +137,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         }
     }
 
-    // -----------------------------------------------------------------------------------------------------
-    // @ Public methods
-    // -----------------------------------------------------------------------------------------------------
+    // ── Public methods ───────────────────────────────────────────────────
 
     /**
      * Open the notifications panel
@@ -172,10 +173,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
      * Toggle read status of the given notification
      */
     toggleRead(notification: Notification): void {
-        // Toggle the read status
         notification.read = !notification.read;
-
-        // Update the notification
         this._notificationsService.update(notification.id, notification).subscribe();
     }
 
@@ -191,7 +189,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
      * Répond à une demande de covoiturage depuis la notification
      */
     repondreReservation(notification: Notification, statut: 'EN_ATTENTE_PAIEMENT' | 'ANNULE', event: Event): void {
-        event.stopPropagation(); // Ãvite de déclencher le toggleRead parent
+        event.stopPropagation(); // Ã‰vite de déclencher le toggleRead parent
 
         if (!notification.reservationId) {
             this._toastrService.warning("Cette ancienne notification ne possède pas d'identifiant de réservation. Vous devez créer une nouvelle demande.");
@@ -273,7 +271,6 @@ export class NotificationsComponent implements OnInit, OnDestroy {
      * Create the overlay
      */
     private _createOverlay(): void {
-        // Create the overlay
         this._overlayRef = this._overlay.create({
             hasBackdrop: true,
             backdropClass: 'fuse-backdrop-on-mobile',

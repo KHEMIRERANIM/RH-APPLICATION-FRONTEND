@@ -5,7 +5,7 @@ export interface Notification
     image?: string;
     title?: string;
     description?: string;
-    time: string;
+    time: string | Date;
     link?: string;
     useRouter?: boolean;
     read: boolean;

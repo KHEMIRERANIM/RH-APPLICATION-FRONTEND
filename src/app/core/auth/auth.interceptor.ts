@@ -11,8 +11,8 @@ export class AuthInterceptor implements HttpInterceptor
 
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>>
     {
-        // Ignorer les requetes externes (Pexels, etc.)
-        if (!req.url.includes('localhost')) {
+        // Ignorer les requetes externes (Pexels, etc.) ou ws-tracking
+        if (req.url.includes('api.pexels.com') || req.url.includes('/ws-tracking')) {
             return next.handle(req);
         }
 
@@ -28,10 +28,15 @@ export class AuthInterceptor implements HttpInterceptor
         return next.handle(newReq).pipe(
             catchError((error) => {
                 if (error instanceof HttpErrorResponse && error.status === 401) {
+                    console.error('Erreur 401 Unauthorized sur la requete :', req.url);
+                    // On commente la deconnexion agressive car le backend retourne 401 
+                    // au lieu de 403 pour les problemes de permissions
+                    /*
                     if (!window.location.pathname.includes('/sign-in')) {
                         this._authService.signOut();
                         window.location.href = '/sign-in';
                     }
+                    */
                 }
                 return throwError(error);
             })
