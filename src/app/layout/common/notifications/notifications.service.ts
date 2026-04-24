@@ -7,7 +7,8 @@ import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { getWsTrackingSockJsUrl } from 'src/environments/environment';
 
-const NOTIF_API = '/api/notifications';
+const NOTIF_API = '/api/transport-notifications';
+const MUTUELLE_API = '/api/mutuelle-notifications';
 
 @Injectable({
     providedIn: 'root'
@@ -26,14 +27,14 @@ export class NotificationsService {
         else if (t === 'RESERVATION') title = 'Mise à jour réservation';
         else if (t === 'ALTERNATIVES_DISPONIBLES' || t === 'ANNULATION_TRAJET') title = 'Trajet annulé';
         else if (t === 'ACTIVATION_BUS') title = 'Activation bus de réserve';
-        
+
         let icon = 'heroicons_outline:bell';
         if (t === 'DEMANDE_CONFIRMATION') icon = 'heroicons_outline:question-mark-circle';
         else if (t === 'ALTERNATIVES_DISPONIBLES' || t === 'ANNULATION_TRAJET') icon = 'heroicons_outline:arrow-path';
         else if (t === 'ACTIVATION_BUS') icon = 'heroicons_outline:truck';
         else if (t === 'PLACES_LIBEREES') icon = 'heroicons_solid:ticket';
         else if (t === 'PRIX_BAISSE') icon = 'heroicons_solid:currency-dollar';
-        
+
         const n: Notification = {
             id: bn.id,
             icon,
@@ -47,9 +48,10 @@ export class NotificationsService {
             trajetAnnuleId: bn.trajetAnnuleId || bn.trajetId,
             expediteurId: bn.expediteurId,
             destinataireId: bn.destinataireId,
-            contenu: bn.contenu
+            contenu: bn.contenu,
+            idUser: bn.idUser // Add idUser to identify mutuelle
         };
-        
+
         if (t === 'ACTIVATION_BUS') {
             n.link = '/apps/covoiturage/admin';
             n.useRouter = true;
@@ -57,7 +59,7 @@ export class NotificationsService {
             n.link = '/apps/partnerships/mes-favoris';
             n.useRouter = true;
         }
-        
+
         return n;
     }
 
@@ -178,6 +180,12 @@ export class NotificationsService {
 
         try {
             const localUser = JSON.parse(localUserStr);
+            
+            const mutuelle$ = this._httpClient.get<any[]>(`${MUTUELLE_API}`).pipe(
+                catchError(() => of([])),
+                map(rows => (rows || []).map(bn => this.mapBackendRow(bn)))
+            );
+            
             const user$ = this._httpClient.get<any[]>(`${NOTIF_API}/destinataire/${localUser.id}/non-lues`).pipe(
                 catchError((error) => {
                     console.error('Chargement notifications utilisateur', error);
@@ -192,8 +200,8 @@ export class NotificationsService {
                 )
                 : of([] as Notification[]);
 
-            return forkJoin({ user: user$, admin: admin$ }).pipe(
-                map(({ user, admin }) => this.mergeById(user, admin)),
+            return forkJoin({ mutuelle: mutuelle$, user: user$, admin: admin$ }).pipe(
+                map(({ mutuelle, user, admin }) => this.mergeById(this.mergeById(mutuelle, user), admin)),
                 tap((notifications) => {
                     this._notifications.next(notifications);
                     this.ensureStomp(localUser);
@@ -230,8 +238,12 @@ export class NotificationsService {
         return this.notifications$.pipe(
             take(1),
             switchMap(notifications => {
-                if (notification.type) {
-                    return this._httpClient.put<Notification>(`${NOTIF_API}/${id}/lire`, {}).pipe(
+                const isMutuelle = !!(notification as any)['idUser'];
+                const endpoint = isMutuelle ? `${MUTUELLE_API}/${id}/lire` : `${NOTIF_API}/${id}/lire`;
+                const request$ = isMutuelle ? this._httpClient.patch<Notification>(endpoint, {}) : this._httpClient.put<Notification>(endpoint, {});
+                
+                if (notification.type || isMutuelle) {
+                    return request$.pipe(
                         map(() => {
                             const updatedNotification = { ...notification, read: true };
                             const index = notifications.findIndex(item => item.id === id);
@@ -277,9 +289,11 @@ export class NotificationsService {
             switchMap(notifications => {
                 const targetNode = notifications.find(n => n.id === id);
                 let request$: Observable<boolean>;
-                
-                if (targetNode?.type) {
-                    request$ = this._httpClient.delete<boolean>(`${NOTIF_API}/${id}`).pipe(
+
+                if (targetNode) {
+                    const isMutuelle = !!(targetNode as any)['idUser'];
+                    const endpoint = isMutuelle ? `${MUTUELLE_API}/${id}` : `${NOTIF_API}/${id}`;
+                    request$ = this._httpClient.delete<boolean>(endpoint).pipe(
                         map(() => true),
                         catchError(() => {
                             // Fallback to localhost
@@ -347,9 +361,9 @@ export class NotificationsService {
                                 );
                             })
                         );
-                    } catch (e) {}
+                    } catch (e) { }
                 }
-                
+
                 return this._httpClient.get<boolean>('api/common/notifications/mark-all-as-read').pipe(
                     map((isUpdated: boolean) => {
                         notifications.forEach((notification, index) => {

@@ -20,4 +20,5 @@ export interface Notification
     contenu?: string;
     lu?: boolean;
     dateCreation?: string;
+    idUser?: string;
 }
