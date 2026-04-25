@@ -9,7 +9,7 @@ import { getWsTrackingSockJsUrl } from 'src/environments/environment';
 
 const NOTIF_API = '/api/transport-notifications';
 const MUTUELLE_API = '/api/mutuelle-notifications';
-const CAREER_API = 'http://localhost:8081/api/notifications';
+const CAREER_API = 'http://localhost:8081/api/notifications/carriere';
 
 @Injectable({
     providedIn: 'root'

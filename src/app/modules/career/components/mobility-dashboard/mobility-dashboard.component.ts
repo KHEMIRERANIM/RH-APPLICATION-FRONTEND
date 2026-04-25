@@ -4,6 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 
 import { MobilityService } from '../../services/mobility.service';
 import { CareerService } from '../../services/career.service';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 import { MobilityRequest, MobilityStatus } from '../../models/mobility.model';
 import { Career } from '../../models/career.model';
@@ -54,7 +55,8 @@ export class MobilityDashboardComponent implements OnInit {
     private mobilityService: MobilityService,
     private careerService: CareerService,
     private snackBar: MatSnackBar,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private http: HttpClient
   ) {}
 
   ngOnInit(): void {
