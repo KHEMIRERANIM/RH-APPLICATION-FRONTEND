@@ -2,8 +2,7 @@
     <!-- Bouton pour ouvrir/fermer -->
     <button *ngIf="!isOpen" 
             (click)="toggleChat()"
-            class="bg-primary-600 hover:bg-primary-700 text-white rounded-full p-4 shadow-lg transition-all">
-        <mat-icon>chat</mat-icon>
+class="bg-blue-600 hover:bg-blue-700        <mat-icon>chat</mat-icon>
     </button>
 
     <!-- Fenêtre de chat -->
@@ -11,7 +10,7 @@
          class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-96 h-[500px] flex flex-col overflow-hidden border">
         
         <!-- En-tête -->
-        <div class="bg-primary-600 text-white p-4 flex justify-between items-center">
+        <div class="bg-blue-600 text-white p-4 flex justify-between items-center">
             <div class="flex items-center gap-2">
                 <mat-icon>smart_toy</mat-icon>
                 <span class="font-semibold">Assistant RH 🤖</span>
@@ -28,11 +27,11 @@
                  class="flex items-start gap-2">
                 
                 <div *ngIf="msg.role === 'assistant'" 
-                     class="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center">
-                    <mat-icon class="text-primary-600 text-sm">smart_toy</mat-icon>
+                     class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                    <mat-icon class="text-blue-600 text-sm">smart_toy</mat-icon>
                 </div>
                 
-                <div [class.bg-primary-600]="msg.role === 'user'"
+                <div [class.bg-blue-600]="msg.role === 'user'"
                      [class.bg-gray-100]="msg.role === 'assistant'"
                      [class.text-white]="msg.role === 'user'"
                      class="max-w-[80%] rounded-2xl px-4 py-2">

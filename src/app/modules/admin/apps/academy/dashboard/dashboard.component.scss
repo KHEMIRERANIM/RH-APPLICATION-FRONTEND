@@ -45,3 +45,8 @@
         background: #a1a1a1;
     }
 }
+.modern-tabs {
+    ::ng-deep .mat-tab-label.mat-tab-label-active {
+        color: #3b82f6;  /* bleu */
+    }
+}
