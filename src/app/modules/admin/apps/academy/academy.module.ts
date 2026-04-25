@@ -9,19 +9,50 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatTableModule } from '@angular/material/table';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatCardModule } from '@angular/material/card';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 import { FuseFindByKeyPipeModule } from '@fuse/pipes/find-by-key';
 import { SharedModule } from 'app/shared/shared.module';
 import { academyRoutes } from 'app/modules/admin/apps/academy/academy.routing';
 import { AcademyComponent } from 'app/modules/admin/apps/academy/academy.component';
-import { AcademyDetailsComponent } from 'app/modules/admin/apps/academy/details/details.component';
 import { AcademyListComponent } from 'app/modules/admin/apps/academy/list/list.component';
-import { MatTabsModule } from '@angular/material/tabs';
+import { AcademyDetailsComponent } from 'app/modules/admin/apps/academy/details/details.component';
+import { AcademyDashboardComponent } from 'app/modules/admin/apps/academy/dashboard/dashboard.component';
+import { CreateBulletinDialogComponent } from './dashboard/dialogs/create-bulletin-dialog.component';
+import { ValidateCongeDialogComponent } from './dashboard/dialogs/validate-conge-dialog.component';
+import { BulletinDetailDialogComponent } from './dashboard/dialogs/bulletin-detail-dialog.component';
+import { SoldeCongeDialogComponent } from './dashboard/dialogs/solde-conge-dialog.component';
+import { ConfirmDialogComponent } from './dashboard/dialogs/confirm-dialog.component';
+import { EditBulletinDialogComponent } from './dashboard/dialogs/edit-bulletin-dialog.component';
+import { EmployeeComponent } from './employee/employee.component';
+import { NewDemandeDialogComponent } from './employee/dialogs/new-demande-dialog.component';
+import { AcademyRedirectComponent } from './redirect.component';
+import { EditDemandeDialogComponent } from './employee/dialogs/edit-demande-dialog.component';
+import { ConfirmDeleteDialogComponent } from './employee/dialogs/confirm-delete-dialog.component';
+import { ChatbotComponent } from './chatbot/chatbot.component';
 
 @NgModule({
     declarations: [
         AcademyComponent,
+        AcademyListComponent,
         AcademyDetailsComponent,
-        AcademyListComponent
+        AcademyDashboardComponent,
+        CreateBulletinDialogComponent,
+        ValidateCongeDialogComponent,
+        BulletinDetailDialogComponent,
+        SoldeCongeDialogComponent,
+        ChatbotComponent,
+        ConfirmDialogComponent,
+        EditDemandeDialogComponent,
+        EditBulletinDialogComponent,
+        EmployeeComponent,
+        NewDemandeDialogComponent,
+        AcademyRedirectComponent,  
+        ConfirmDeleteDialogComponent,
     ],
     imports     : [
         RouterModule.forChild(academyRoutes),
@@ -36,9 +67,12 @@ import { MatTabsModule } from '@angular/material/tabs';
         MatTooltipModule,
         FuseFindByKeyPipeModule,
         SharedModule,
-        MatTabsModule
+        MatTabsModule,
+        MatTableModule,
+        MatDialogModule,
+        MatCardModule,
+        MatDatepickerModule,
+        MatNativeDateModule
     ]
 })
-export class AcademyModule
-{
-}
+export class AcademyModule {}
