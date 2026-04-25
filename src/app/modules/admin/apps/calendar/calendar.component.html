@@ -441,7 +441,7 @@
         <!-- ALERTES IA -->
         <div class="alertes-section mt-3" *ngIf="getAlertesArray().length > 0">
             <p class="text-[10px] font-bold text-red-500 uppercase tracking-wider mb-2 flex items-center gap-1">
-                🤖 Alertes IA - Formations critiques
+                 Alertes IA - Formations critiques
             </p>
             <div class="grid grid-cols-3 gap-3">
                 <div *ngFor="let alerte of getAlertesArray()" 
@@ -459,7 +459,7 @@
 
         <!-- TABLEAU DÉTAILLÉ -->
         <div class="table-section mt-4">
-            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">📋 Détail par formation</p>
+            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2"> Détail par formation</p>
             <div class="overflow-x-auto">
                 <table class="w-full text-xs">
                     <thead class="bg-slate-50">
@@ -734,7 +734,7 @@
 
                     <div class="ep-info-grid grid grid-cols-2 gap-2 mb-3">
                         <div *ngIf="selectedEvent.formation?.formateur" class="ep-info-card bg-white p-2 rounded-lg border border-slate-100 shadow-sm flex items-center gap-2">
-                            <span class="text-base">👤</span>
+                            <span class="text-base"></span>
                             <div class="min-w-0">
                                 <p class="ep-info-label text-[10px] text-slate-400 font-semibold uppercase">Formateur</p>
                                 <p class="ep-info-value text-xs font-medium text-slate-700 truncate">{{selectedEvent.formation?.formateur}}</p>
@@ -757,7 +757,7 @@
                         </div>
 
                         <div class="ep-info-card bg-white p-2 rounded-lg border border-slate-100 shadow-sm flex items-center gap-2">
-                            <span class="text-base">⏱️</span>
+                            <span class="text-base"></span>
                             <div class="min-w-0">
                                 <p class="ep-info-label text-[10px] text-slate-400 font-semibold uppercase">Durée</p>
                                 <p class="ep-info-value text-xs font-medium text-slate-700">{{selectedEvent.formation?.dureeHeures || '—'}} h</p>
@@ -883,7 +883,7 @@
             <!-- SECTION 2: DATE ET HORAIRE -->
             <div class="ep-form-section">
                 <div class="ep-form-section-header">
-                    <span class="ep-form-section-icon">📅</span>
+                    <span class="ep-form-section-icon"></span>
                     <div>
                         <h4 class="ep-form-section-title">Date et horaire</h4>
                         <p class="ep-form-section-desc">Planification de la session</p>
@@ -894,14 +894,14 @@
  <!-- Dates avec Material Datepicker -->
 <div class="grid grid-cols-2 gap-4">
     <mat-form-field appearance="outline" class="ep-field" subscriptSizing="dynamic">
-        <mat-label class="text-slate-500 text-xs">📅 Date de début *</mat-label>
+        <mat-label class="text-slate-500 text-xs"> Date de début *</mat-label>
         <input matInput [matDatepicker]="startPicker" formControlName="start" class="text-slate-700 text-sm">
         <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
         <mat-datepicker #startPicker></mat-datepicker>
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="ep-field" subscriptSizing="dynamic">
-        <mat-label class="text-slate-500 text-xs">📅 Date de fin *</mat-label>
+        <mat-label class="text-slate-500 text-xs"> Date de fin *</mat-label>
         <input matInput [matDatepicker]="endPicker" formControlName="end" class="text-slate-700 text-sm">
         <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
         <mat-datepicker #endPicker></mat-datepicker>
@@ -939,7 +939,7 @@
             <!-- SECTION 3: CATÉGORIE ET FORMATEUR -->
             <div class="ep-form-section">
                 <div class="ep-form-section-header">
-                    <span class="ep-form-section-icon">👥</span>
+                    <span class="ep-form-section-icon"></span>
                     <div>
                         <h4 class="ep-form-section-title">Catégorie et formateur</h4>
                         <p class="ep-form-section-desc">Spécifiez le type et l'intervenant</p>
