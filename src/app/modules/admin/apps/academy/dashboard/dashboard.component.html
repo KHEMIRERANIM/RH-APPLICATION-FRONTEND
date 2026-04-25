@@ -1,0 +1,456 @@
+<div class="absolute inset-0 flex flex-col min-w-0 overflow-y-auto bg-gray-50 dark:bg-gray-900" cdkScrollable>
+    
+    <!-- Header avec dégradé animé -->
+    <div class="relative flex-0 py-8 px-4 sm:p-12 overflow-hidden bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32"></div>
+        <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full -ml-24 -mb-24"></div>
+        
+        <div class="relative z-10">
+            <div class="flex items-center justify-between flex-wrap gap-4">
+                <div>
+                    <h1 class="text-3xl sm:text-4xl font-bold text-white tracking-tight">
+                        Tableau de bord RH
+                    </h1>
+                    <p class="text-white/80 mt-2">
+                        Gérez les congés, bulletins et suivez les indicateurs clés
+                    </p>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex flex-auto p-6 sm:p-8">
+        <div class="flex flex-col w-full max-w-7xl mx-auto gap-6">
+            
+            <!-- ==================== WIDGET PRÉDICTION IA ==================== -->
+            <div class="rounded-2xl overflow-hidden shadow-xl transition-all duration-300 hover:shadow-2xl" *ngIf="prediction">
+<div class="bg-gradient-to-r from-blue-600 to-cyan-500 p-5 text-white">                    <div class="flex justify-between items-center flex-wrap gap-4">
+                        <div class="flex items-center gap-3">
+                            
+                            <div>
+                                <div class="text-sm font-medium opacity-90">Analyse IA en temps réel</div>
+                                <div class="text-xs opacity-70">Basé sur {{prediction.totalDemandesHistorique}} demandes</div>
+                            </div>
+                        </div>
+                        <div class="bg-white/20 rounded-full px-3 py-1 text-sm font-semibold">
+                            {{prediction.mois}}/{{prediction.annee}}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white dark:bg-gray-800 p-6">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                        <div>
+                            <div class="text-2xl font-bold text-gray-800 dark:text-white">{{prediction.message}}</div>
+                            <div class="text-gray-500 dark:text-gray-400 mt-1">{{prediction.recommandation}}</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="relative w-24 h-24">
+                                <svg class="w-24 h-24 transform -rotate-90">
+                                    <circle cx="48" cy="48" r="42" fill="none" stroke="#e5e7eb" stroke-width="8"/>
+                                    <circle cx="48" cy="48" r="42" fill="none" 
+                                            [attr.stroke]="getRiskColor(prediction.pourcentage)"
+                                            stroke-width="8"
+                                            stroke-dasharray="264"
+                                            [attr.stroke-dashoffset]="264 - (264 * prediction.pourcentage / 100)"/>
+                                </svg>
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <span class="text-2xl font-bold">{{prediction.pourcentage}}%</span>
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-500 mt-1">Risque</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span>Calme</span>
+                            <span>Modéré</span>
+                            <span>Élevé</span>
+                            <span>Critique</span>
+                        </div>
+                        <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <div class="h-full rounded-full transition-all duration-500"
+                                 [style.width.%]="prediction.pourcentage"
+                                 [style.background]="getRiskColor(prediction.pourcentage)">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div *ngFor="let facteur of prediction.facteurs" 
+                             class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 text-center hover:scale-105 transition-transform cursor-pointer">
+                            <div class="text-2xl mb-1">{{facteur.nom}}</div>
+                            <div class="text-xl font-bold" 
+                                 [class.text-red-500]="facteur.impact > 70"
+                                 [class.text-orange-500]="facteur.impact > 40 && facteur.impact <= 70"
+                                 [class.text-green-500]="facteur.impact <= 40">
+                                {{facteur.impact}}%
+                            </div>
+                            <div class="text-xs text-gray-500 mt-2">{{facteur.description}}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ==================== STATS CARDS ==================== -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all group">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            
+                            <div class="text-3xl font-bold mt-4">{{stats?.totalDemandesEnAttente || 0}}</div>
+                            <div class="text-gray-500 text-sm">Demandes en attente</div>
+                        </div>
+                        <div class="text-amber-400 opacity-0 group-hover:opacity-100 transition">
+                            <span class="text-xl">→</span>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-xs text-gray-400">À valider cette semaine</div>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all group">
+                    <div class="flex justify-between items-start">
+                        <div>
+                           
+                            <div class="text-3xl font-bold mt-4">{{stats?.totalDemandesApprouvees || 0}}</div>
+                            <div class="text-gray-500 text-sm">Demandes approuvées</div>
+                        </div>
+                        <div class="text-green-400 opacity-0 group-hover:opacity-100 transition">
+                            <span class="text-xl">→</span>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-xs text-gray-400">Cette année</div>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all group">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            
+                            <div class="text-3xl font-bold mt-4">{{stats?.totalEmployes || 0}}</div>
+                            <div class="text-gray-500 text-sm">Employés actifs</div>
+                        </div>
+                        <div class="text-blue-400 opacity-0 group-hover:opacity-100 transition">
+                            <span class="text-xl">→</span>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-xs text-gray-400">Tous départements</div>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all group">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            
+                            <div class="text-3xl font-bold mt-4">{{stats?.moyenneJoursConge || 0 | number:'1.1-1'}}</div>
+                            <div class="text-gray-500 text-sm">Jours de congé moyens</div>
+                        </div>
+                        <div class="text-purple-400 opacity-0 group-hover:opacity-100 transition">
+                            <span class="text-xl">→</span>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-xs text-gray-400">Par employé</div>
+                </div>
+            </div>
+
+            <!-- ==================== ACTIONS RAPIDES + ALERTES ==================== -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+                    <div class="flex items-center gap-2 mb-4">
+<div class="w-1 h-6 bg-blue-500 rounded-full"></div>                        <h3 class="text-lg font-semibold">Actions rapides</h3>
+                    </div>
+                    <div class="flex flex-wrap gap-3">
+                        <button mat-raised-button color="primary" (click)="goToDemandes()" class="!rounded-xl">
+                            <span class="text-lg">📋</span>
+                            <span class="ml-2">Valider des congés</span>
+                            <span *ngIf="demandesEnAttenteCount > 0" class="ml-2 bg-white/30 rounded-full px-2 py-0.5 text-xs">
+                                {{demandesEnAttenteCount}}
+                            </span>
+                        </button>
+                        <button mat-stroked-button color="primary" (click)="openCreateBulletinDialog()" class="!rounded-xl">
+                            <span class="text-lg">➕</span>
+                            <span class="ml-2">Créer bulletin</span>
+                        </button>
+                        <button mat-stroked-button (click)="refreshData()" class="!rounded-xl">
+                            <span class="text-lg">🔄</span>
+                            <span class="ml-2">Actualiser</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-1 h-6 bg-amber-500 rounded-full"></div>
+                        <h3 class="text-lg font-semibold">Alertes & Tendances</h3>
+                        <span class="text-amber-500">🔔</span>
+                    </div>
+                    <div *ngIf="alertes.length === 0" class="text-center text-gray-500 py-8">
+                        <span class="text-5xl text-gray-300 mb-2">✅</span>
+                        <div>Aucune alerte détectée</div>
+                        <div class="text-xs mt-1">Tout est sous contrôle</div>
+                    </div>
+                    <div *ngFor="let alerte of alertes" class="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-3 mb-2">
+                        <div class="flex gap-2 text-sm text-amber-700 dark:text-amber-400">
+                            <span>⚠️</span>
+                            <span>
+                                ⚠️ <strong>{{getEmployeNom(alerte.employeId)}}</strong> 
+                                demande souvent un congé le {{alerte.jourSuspect}}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== ONGLETS ==================== -->
+            <mat-tab-group class="modern-tabs" animationDuration="200ms" #adminTabs>
+                
+                <!-- Tab Demandes de congé -->
+                <mat-tab>
+                    <ng-template mat-tab-label>
+                        <div class="flex items-center gap-2 py-2">
+                            <span class="text-lg">📅</span>
+                            <span>Demandes de congé</span>
+                            <span *ngIf="demandesEnAttenteCount > 0" class="bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full">
+                                {{demandesEnAttenteCount}}
+                            </span>
+                        </div>
+                    </ng-template>
+                    
+                    <div class="mt-6">
+                        <div class="flex flex-wrap justify-between gap-4 mb-6">
+                            <div class="flex gap-2 bg-gray-100 dark:bg-gray-800 rounded-xl p-1">
+                                <button class="px-4 py-2 rounded-lg transition-all" 
+                                        [class.bg-white]="filtreStatut === 'all'"
+                                        [class.shadow-sm]="filtreStatut === 'all'"
+                                        (click)="setFiltreStatut('all')">
+                                    Tous
+                                </button>
+                                <button class="px-4 py-2 rounded-lg transition-all" 
+                                        [class.bg-amber-100]="filtreStatut === 'EN_ATTENTE'"
+                                        (click)="setFiltreStatut('EN_ATTENTE')">
+                                    En attente
+                                </button>
+                                <button class="px-4 py-2 rounded-lg transition-all" 
+                                        [class.bg-green-100]="filtreStatut === 'APPROUVE'"
+                                        (click)="setFiltreStatut('APPROUVE')">
+                                    Approuvés
+                                </button>
+                                <button class="px-4 py-2 rounded-lg transition-all" 
+                                        [class.bg-red-100]="filtreStatut === 'REFUSE'"
+                                        (click)="setFiltreStatut('REFUSE')">
+                                    Refusés
+                                </button>
+                            </div>
+                            
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">🔍</span>
+                                <input type="text" 
+                                       placeholder="Rechercher un employé..." 
+                                       class="pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl w-64 bg-white dark:bg-gray-800"
+                                       (input)="searchDemandes($event)">
+                            </div>
+                        </div>
+
+                        <div class="rounded-2xl shadow-lg overflow-hidden bg-card">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full">
+                                    <thead class="bg-gray-50 dark:bg-gray-800 border-b">
+                                        <tr>
+                                            <th class="px-6 py-4 text-left text-xs font-semibold text-secondary uppercase">Employé</th>
+                                            <th class="px-6 py-4 text-left text-xs font-semibold text-secondary uppercase">Type</th>
+                                            <th class="px-6 py-4 text-left text-xs font-semibold text-secondary uppercase">Période</th>
+                                            <th class="px-6 py-4 text-center text-xs font-semibold text-secondary uppercase">Jours</th>
+                                            <th class="px-6 py-4 text-left text-xs font-semibold text-secondary uppercase">Statut</th>
+                                            <th class="px-6 py-4 text-center text-xs font-semibold text-secondary uppercase">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                                        <tr *ngFor="let demande of demandesFiltrees" class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                            <td class="px-6 py-4">
+                                                <div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center text-white text-sm font-bold">                                                        {{getEmployeNom(demande.employeId).charAt(0)}}
+                                                    </div>
+                                                    <div>
+                                                        <div class="font-medium">{{getEmployeNom(demande.employeId)}}</div>
+                                                        <div class="text-xs text-gray-400">{{demande.employeId}}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4">
+                                                <span class="px-3 py-1 rounded-full text-xs font-medium" 
+                                                      [class.bg-blue-100]="demande.type === 'CONGE_ANNUEL'"
+                                                      [class.bg-red-100]="demande.type === 'CONGE_MALADIE'"
+                                                      [class.bg-purple-100]="demande.type === 'CONGE_MATERNITE'">
+                                                    {{getTypeCongeLabel(demande.type)}}
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 text-sm">
+                                                <div>{{demande.dateDebut | date:'dd/MM/yyyy'}}</div>
+                                                <div class="text-xs text-gray-400">→ {{demande.dateFin | date:'dd/MM/yyyy'}}</div>
+                                            </td>
+                                            <td class="px-6 py-4 text-center font-semibold">{{demande.nombreJours}} j</td>
+                                            <td class="px-6 py-4">
+                                                <span class="px-3 py-1 rounded-full text-xs font-medium" 
+                                                      [class.bg-amber-100]="demande.statut === 'EN_ATTENTE'"
+                                                      [class.bg-green-100]="demande.statut === 'APPROUVE'"
+                                                      [class.bg-red-100]="demande.statut === 'REFUSE'">
+                                                    {{getStatutLabel(demande.statut)}}
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 text-center">
+                                                <div class="flex justify-center gap-2">
+                                                    <button *ngIf="demande.statut === 'EN_ATTENTE'" 
+                                                            mat-icon-button color="primary"
+                                                            (click)="openValidationDialog(demande, 'APPROUVE')"
+                                                            matTooltip="Approuver">
+                                                        <span class="text-green-500">✓</span>
+                                                    </button>
+                                                    <button *ngIf="demande.statut === 'EN_ATTENTE'" 
+                                                            mat-icon-button color="warn"
+                                                            (click)="openValidationDialog(demande, 'REFUSE')"
+                                                            matTooltip="Refuser">
+                                                        <span class="text-red-500">✗</span>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr *ngIf="demandesFiltrees.length === 0">
+                                            <td colspan="6" class="px-6 py-12 text-center text-secondary">
+                                                <span class="text-5xl mb-2">📭</span>
+                                                <div>Aucune demande de congé</div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </mat-tab>
+
+                <!-- Tab Bulletins de salaire -->
+                <mat-tab>
+                    <ng-template mat-tab-label>
+                        <div class="flex items-center gap-2 py-2">
+                            <span class="text-lg">📄</span>
+                            <span>Bulletins de salaire</span>
+                        </div>
+                    </ng-template>
+                    <div class="mt-6">
+                        <div class="mb-6 flex justify-end">
+                            <button mat-flat-button color="primary" (click)="openCreateBulletinDialog()" class="!rounded-xl">
+                                <span class="text-lg">➕</span>
+                                <span class="ml-2">Nouveau bulletin</span>
+                            </button>
+                        </div>
+
+                        <div class="rounded-2xl shadow-lg overflow-hidden bg-card">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full">
+                                    <thead class="bg-gray-50 dark:bg-gray-800 border-b">
+                                        <tr>
+                                            <th class="px-6 py-4 text-left text-xs font-semibold text-secondary uppercase">Employé</th>
+                                            <th class="px-6 py-4 text-left text-xs font-semibold text-secondary uppercase">Période</th>
+                                            <th class="px-6 py-4 text-right text-xs font-semibold text-secondary uppercase">Salaire Brut</th>
+                                            <th class="px-6 py-4 text-right text-xs font-semibold text-secondary uppercase">CNSS</th>
+                                            <th class="px-6 py-4 text-right text-xs font-semibold text-secondary uppercase">IRPP</th>
+                                            <th class="px-6 py-4 text-right text-xs font-semibold text-secondary uppercase">Salaire Net</th>
+                                            <th class="px-6 py-4 text-center text-xs font-semibold text-secondary uppercase">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                                        <tr *ngFor="let bulletin of bulletins" class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                                            <td class="px-6 py-4 font-medium">{{getEmployeNom(bulletin.employeId)}}</td>
+                                            <td class="px-6 py-4">{{getMoisLabel(bulletin.mois)}} {{bulletin.annee}}</td>
+                                            <td class="px-6 py-4 text-right">{{bulletin.salaireBrut | number:'1.2-2'}} TND</td>
+                                            <td class="px-6 py-4 text-right text-red-600">{{bulletin.cotisationsCNSS | number:'1.2-2'}} TND</td>
+                                            <td class="px-6 py-4 text-right text-orange-600">{{bulletin.irpp | number:'1.2-2'}} TND</td>
+                                            <td class="px-6 py-4 text-right font-bold text-green-600">{{bulletin.salaireNet | number:'1.2-2'}} TND</td>
+                                            <td class="px-6 py-4 text-center">
+                                                <div class="flex justify-center gap-2">
+                                                    <button mat-icon-button color="primary" (click)="editBulletin(bulletin)" matTooltip="Modifier">
+                                                        <span>✏️</span>
+                                                    </button>
+                                                    <button mat-icon-button color="primary" (click)="viewBulletinDetail(bulletin)" matTooltip="Détails">
+                                                        <span>👁️</span>
+                                                    </button>
+                                                    <button mat-icon-button color="primary" (click)="telechargerPDF(bulletin.id)" matTooltip="Télécharger PDF">
+                                                        <span>📄</span>
+                                                    </button>
+                                                    <button mat-icon-button color="warn" (click)="deleteBulletin(bulletin.id, bulletin.mois, bulletin.annee)" matTooltip="Supprimer">
+                                                        <span>🗑️</span>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr *ngIf="bulletins.length === 0">
+                                            <td colspan="7" class="px-6 py-12 text-center text-secondary">
+                                                <span class="text-5xl mb-2">📄</span>
+                                                <div>Aucun bulletin de salaire</div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </mat-tab>
+
+                <!-- Tab Employés -->
+                <mat-tab>
+                    <ng-template mat-tab-label>
+                        <div class="flex items-center gap-2 py-2">
+                            <span class="text-lg">👥</span>
+                            <span>Employés</span>
+                        </div>
+                    </ng-template>
+                    <div class="mt-6">
+                        <div class="rounded-2xl shadow-lg overflow-hidden bg-card">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full">
+                                    <thead class="bg-gray-50 dark:bg-gray-800 border-b">
+                                        <tr>
+                                            <th class="px-6 py-4 text-left text-xs font-semibold text-secondary uppercase">Employé</th>
+                                            <th class="px-6 py-4 text-left text-xs font-semibold text-secondary uppercase">Email</th>
+                                            <th class="px-6 py-4 text-left text-xs font-semibold text-secondary uppercase">Département</th>
+                                            <th class="px-6 py-4 text-left text-xs font-semibold text-secondary uppercase">Poste</th>
+                                            <th class="px-6 py-4 text-left text-xs font-semibold text-secondary uppercase">Rôle</th>
+                                            <th class="px-6 py-4 text-center text-xs font-semibold text-secondary uppercase">Solde Congé</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                                        <tr *ngFor="let employe of employes" class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                                            <td class="px-6 py-4">
+                                                <div class="flex items-center gap-3">
+                                                    <div class="w-8 h-8 rounded-full bg-gradient-to-r from-green-500 to-teal-500 flex items-center justify-center text-white text-sm font-bold">
+                                                        {{employe.prenom?.charAt(0)}}{{employe.nom?.charAt(0)}}
+                                                    </div>
+                                                    <div class="font-medium">{{employe.prenom}} {{employe.nom}}</div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4">{{employe.email}}</td>
+                                            <td class="px-6 py-4">{{employe.departement || '-'}}</td>
+                                            <td class="px-6 py-4">{{employe.poste || '-'}}</td>
+                                            <td class="px-6 py-4">
+                                                <span class="px-2 py-1 rounded-full text-xs font-medium" 
+                                                      [ngClass]="employe.role === 'ADMIN' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'">
+                                                    {{employe.role}}
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 text-center">
+                                                <button mat-button color="primary" (click)="viewSoldeConge(employe.id)" class="!rounded-xl">
+                                                    <span class="text-lg">📅</span>
+                                                    <span class="ml-1">Voir solde</span>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </mat-tab>
+            </mat-tab-group>
+        </div>
+    </div>
+</div>
