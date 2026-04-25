@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, AfterViewInit, OnDestroy, ElementRef, Renderer2, ViewChild, ChangeDetectorRef, NgZone, ApplicationRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, ElementRef, Renderer2, ViewChild, ChangeDetectorRef, NgZone, ApplicationRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CovoiturageService, Vehicule, Trajet, ReservationResponse, ReservationRequest } from '../covoiturage.service';
@@ -402,7 +402,7 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
   activeResTab: 'covoiturage' | 'navette' | 'archive' = 'covoiturage';
 
   /** Statuts à masquer de la liste active (vont dans l'archive automatiquement) */
-private readonly STATUTS_MASQUES = new Set(['INACTIF']);
+  private readonly STATUTS_MASQUES = new Set(['INACTIF']);
 
   /** Covoiturage : actives seulement (hors annulées, inactives, effectuées, archivées) */
   get visibleCovReservations(): ReservationResponse[] {
@@ -421,18 +421,18 @@ private readonly STATUTS_MASQUES = new Set(['INACTIF']);
   }
 
   /** Archive : réservations annulées/effectuées + archivées manuellement */
-// APRÈS ✅
-get archiveReservations(): { type: 'cov' | 'nav'; data: any }[] {
-  const covArchive = this.mesReservations
-    .filter(r => this.archivedResIds.has(r.id!))
-    .map(r => ({ type: 'cov' as const, data: r }));
+  // APRÈS ✅
+  get archiveReservations(): { type: 'cov' | 'nav'; data: any }[] {
+    const covArchive = this.mesReservations
+      .filter(r => this.archivedResIds.has(r.id!))
+      .map(r => ({ type: 'cov' as const, data: r }));
 
-  const navArchive = this.myShuttleReservations
-    .filter(r => this.archivedResIds.has(r.id))
-    .map(r => ({ type: 'nav' as const, data: r }));
+    const navArchive = this.myShuttleReservations
+      .filter(r => this.archivedResIds.has(r.id))
+      .map(r => ({ type: 'nav' as const, data: r }));
 
-  return [...covArchive, ...navArchive];
-}
+    return [...covArchive, ...navArchive];
+  }
 
   userLevel: string = 'OR';
   totalPointsEco: number = 425;
@@ -488,7 +488,7 @@ get archiveReservations(): { type: 'cov' | 'nav'; data: any }[] {
 
             this.loadTrajets();
             this.loadAllTrajets();
-              this.loadMesReservations(); // ← AJOUTER ICI
+            this.loadMesReservations(); // ← AJOUTER ICI
 
             this.showToast('✅ Trajet annulé', 'Passagers notifiés et remboursés !', 'success');
             this.cdr.detectChanges();
@@ -904,7 +904,7 @@ get archiveReservations(): { type: 'cov' | 'nav'; data: any }[] {
     const out = [...(apiAlts || [])].filter(a => {
       // Priorité : vérifier le statut réel depuis allTrajets/lookupTrajets (source de vérité)
       const localTrajet = this.allTrajets.find(t => t.id === a.id)
-                       || this.lookupTrajets.find(t => t.id === a.id);
+        || this.lookupTrajets.find(t => t.id === a.id);
       const st = String(
         localTrajet?.statut || a.statut || a.statut_trajet || ''
       ).toUpperCase();
@@ -970,8 +970,8 @@ get archiveReservations(): { type: 'cov' | 'nav'; data: any }[] {
     // ── Vérification du jour de la semaine ──────────────────────────
     // Le trajet annulé avait des jours disponibles ; l'alternative doit
     // couvrir au moins l'un des jours du trajet référence.
-    const joursRef   = this.normaliserJours(ref.joursDisponibles);
-    const joursAlt   = this.normaliserJours(alt.joursDisponibles || alt.jours_disponibles || '');
+    const joursRef = this.normaliserJours(ref.joursDisponibles);
+    const joursAlt = this.normaliserJours(alt.joursDisponibles || alt.jours_disponibles || '');
     // Si les deux ont des jours renseignés → vérifier l'intersection
     if (joursRef.length > 0 && joursAlt.length > 0) {
       const intersection = joursRef.filter(j => joursAlt.includes(j));
@@ -1062,13 +1062,13 @@ get archiveReservations(): { type: 'cov' | 'nav'; data: any }[] {
     if (na.includes(nr) || nr.includes(na)) return true;
 
     // Test 2 : intersection sur tokens significatifs (sans stopwords)
-    const tokA   = this.extraireTokensAdresse(a);
+    const tokA = this.extraireTokensAdresse(a);
     const tokRef = this.extraireTokensAdresse(ref);
 
     // Si l'une des adresses n'a pas de token significatif → données insuffisantes
     if (tokA.length === 0 || tokRef.length === 0) return false;
 
-    const setRef  = new Set(tokRef);
+    const setRef = new Set(tokRef);
     const communs = tokA.filter(t => setRef.has(t));
 
     // Exige au moins 2 tokens communs si les deux adresses sont "riches"
@@ -1280,7 +1280,27 @@ get archiveReservations(): { type: 'cov' | 'nav'; data: any }[] {
   }
 
   getEmployeeName(id: string): string {
-    return this.employesMap.get(String(id)) || `Employé Inconnu`;
+    if (!id) return 'Employé Inconnu';
+    if (this.employesMap.has(String(id))) {
+      return this.employesMap.get(String(id))!;
+    }
+    
+    // Lazy load the user if not found in map (bypass 403 on getAllEmployees for EMPLOYE)
+    this.employesMap.set(String(id), 'Chargement...');
+    this.userService.getUserById(id).subscribe({
+      next: (resp) => {
+        const user = resp.user || resp; // handle UserResponse or Employee wrapper
+        const nomComplet = `${user.prenom || user.firstName || ''} ${user.nom || user.lastName || ''}`.trim();
+        this.employesMap.set(String(id), nomComplet || 'Employé Inconnu');
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.employesMap.set(String(id), 'Employé Inconnu');
+        this.cdr.detectChanges();
+      }
+    });
+
+    return 'Chargement...';
   }
 
   /** Déduplique les réservations par employeId.
@@ -1499,21 +1519,21 @@ get archiveReservations(): { type: 'cov' | 'nav'; data: any }[] {
     });
   }
 
- 
-// APRÈS ✅
-private getReservationIdByTrajetId(trajetId: string): string {
-  if (!trajetId) return '';
-  // Cherche d'abord une réservation non annulée
-  const active = this.mesReservations.find(
-    r => r.trajetId === trajetId && r.statut !== 'ANNULE'
-  );
-  if (active) return active.id;
-  // Sinon accepte aussi l'annulée (cas annulation conducteur)
-  const annulee = this.mesReservations.find(
-    r => r.trajetId === trajetId
-  );
-  return annulee?.id || '';
-}
+
+  // APRÈS ✅
+  private getReservationIdByTrajetId(trajetId: string): string {
+    if (!trajetId) return '';
+    // Cherche d'abord une réservation non annulée
+    const active = this.mesReservations.find(
+      r => r.trajetId === trajetId && r.statut !== 'ANNULE'
+    );
+    if (active) return active.id;
+    // Sinon accepte aussi l'annulée (cas annulation conducteur)
+    const annulee = this.mesReservations.find(
+      r => r.trajetId === trajetId
+    );
+    return annulee?.id || '';
+  }
 
   loadTotalPoints(): void {
     if (!this.employeId) return;
@@ -1593,7 +1613,7 @@ private getReservationIdByTrajetId(trajetId: string): string {
       ? 'Annuler cette réservation ? Un remboursement sera effectué car vous avez déjà payé.'
       : 'Annuler cette réservation ?';
 
-this.showToast('ℹ️ Info', message, 'info');
+    this.showToast('ℹ️ Info', message, 'info');
     const update: Partial<ReservationRequest> = { statut: 'ANNULE' };
     this.covoiturageService.updateReservationStatus(reservationId, update).subscribe({
       next: () => {

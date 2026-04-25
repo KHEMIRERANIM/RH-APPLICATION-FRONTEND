@@ -78,6 +78,10 @@ export class UserService {
     return this.http.get<any[]>(`${this.apiUrl}/users`);
 }
 
+    getUserById(id: string): Observable<any> {
+        return this.http.get<any>(`${this.apiUrl}/users/${id}`);
+    }
+
     getEmployeeById(id: string): Observable<Employee> {
         return this.http.get<Employee>(`${this.apiUrl}/employees/${id}`);
     }
