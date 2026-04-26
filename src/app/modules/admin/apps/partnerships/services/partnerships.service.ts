@@ -217,5 +217,37 @@ export class PartnershipsService {
     getStatStatuts(): Observable<StatStatut[]> {
         return this._http.get<StatStatut[]>(`${this.BASE_URL}/avantages/stats/statuts`);
     }
+
+    /**
+     * Appelle l'IA (Groq) pour générer un programme ou des recommandations.
+     * @param idOffre L'ID de l'offre (Voyage ou Hôtel)
+     */
+    genererProgrammeIA(idOffre: string): Observable<AiItineraryResponse> {
+        let params = new HttpParams().set('idOffre', idOffre);
+        return this._http.get<AiItineraryResponse>(`${this.BASE_URL}/avantages/ia/programme`, { params });
+    }
+}
+
+// Modèles pour l'IA
+export interface AiItineraryResponse {
+    type: 'VOYAGE' | 'HOTEL';
+    jours?: AiDay[];
+    attractions?: AiActivity[];
+    restaurants?: AiActivity[];
+}
+
+export interface AiDay {
+    jour: number;
+    titre: string;
+    matin: string;
+    apresMidi: string;
+    soir: string;
+}
+
+export interface AiActivity {
+    nom: string;
+    description?: string;
+    specialite?: string;
+    icon: string;
 }
 

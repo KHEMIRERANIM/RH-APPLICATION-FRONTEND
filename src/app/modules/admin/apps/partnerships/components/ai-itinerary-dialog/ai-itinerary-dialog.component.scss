@@ -1,0 +1,192 @@
+.ai-dialog-container {
+    display: flex;
+    flex-direction: column;
+    max-height: 85vh;
+    background: #ffffff;
+    
+    .dialog-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 24px;
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        border-bottom: 1px solid #e2e8f0;
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+
+            .ai-icon {
+                color: #3b82f6;
+                transform: scale(1.5);
+            }
+
+            h2 {
+                margin: 0;
+                font-size: 1.5rem;
+                font-weight: 700;
+                color: #1e293b;
+            }
+
+            p {
+                margin: 4px 0 0;
+                color: #475569;
+                font-size: 0.9rem;
+            }
+        }
+    }
+
+    .dialog-content {
+        padding: 24px;
+        overflow-y: auto;
+        flex: 1;
+
+        /* TIMELINE STYLES */
+        .timeline {
+            position: relative;
+            padding-left: 16px;
+            
+            .timeline-item {
+                display: flex;
+                gap: 24px;
+                margin-bottom: 32px;
+
+                &:last-child {
+                    margin-bottom: 0;
+                    .line { display: none; }
+                }
+
+                .timeline-marker {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+
+                    .circle {
+                        width: 40px;
+                        height: 40px;
+                        border-radius: 50%;
+                        background: #3b82f6;
+                        color: white;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-weight: 700;
+                        font-size: 1.1rem;
+                        box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+                        z-index: 1;
+                    }
+
+                    .line {
+                        width: 2px;
+                        flex: 1;
+                        background: #e2e8f0;
+                        margin-top: 8px;
+                    }
+                }
+
+                .timeline-content {
+                    flex: 1;
+                    background: #f8fafc;
+                    padding: 20px;
+                    border-radius: 12px;
+                    border: 1px solid #e2e8f0;
+
+                    h3 {
+                        margin: 0 0 16px 0;
+                        color: #0f172a;
+                        font-size: 1.25rem;
+                        font-weight: 600;
+                    }
+
+                    .activity {
+                        margin-bottom: 12px;
+
+                        &:last-child { margin-bottom: 0; }
+
+                        .activity-time {
+                            display: inline-block;
+                            font-size: 0.85rem;
+                            font-weight: 600;
+                            color: #64748b;
+                            margin-bottom: 4px;
+                        }
+
+                        p {
+                            margin: 0;
+                            color: #334155;
+                            line-height: 1.5;
+                        }
+                    }
+                }
+            }
+        }
+
+        /* CONCIERGE STYLES */
+        .hotel-concierge {
+            .section-card {
+                background: #f8fafc;
+                border: 1px solid #e2e8f0;
+                border-radius: 12px;
+                padding: 24px;
+
+                .section-header {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    margin-bottom: 20px;
+
+                    .section-icon {
+                        font-size: 1.5rem;
+                    }
+
+                    h3 {
+                        margin: 0;
+                        font-size: 1.25rem;
+                        color: #0f172a;
+                        font-weight: 600;
+                    }
+                }
+
+                .item-list {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 16px;
+
+                    .item {
+                        display: flex;
+                        gap: 16px;
+                        align-items: flex-start;
+                        padding: 16px;
+                        background: white;
+                        border-radius: 8px;
+                        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+
+                        .item-icon {
+                            font-size: 1.75rem;
+                            background: #f1f5f9;
+                            padding: 12px;
+                            border-radius: 8px;
+                        }
+
+                        .item-details {
+                            h4 {
+                                margin: 0 0 4px 0;
+                                color: #1e293b;
+                                font-size: 1.1rem;
+                                font-weight: 600;
+                            }
+                            p {
+                                margin: 0;
+                                color: #475569;
+                                font-size: 0.95rem;
+                                line-height: 1.4;
+                            }
+                        }
+                    }
+                }
+            }
+            .mt-4 { margin-top: 24px; }
+        }
+    }
+}

@@ -162,6 +162,13 @@
                         </span>
 
                         <button *ngIf="r.statut === 'CONFIRMEE'"
+                            mat-stroked-button class="btn-ia"
+                            (click)="genererProgrammeIA(r)">
+                            <mat-icon svgIcon="heroicons_outline:sparkles"></mat-icon>
+                            Programme IA
+                        </button>
+
+                        <button *ngIf="r.statut === 'CONFIRMEE'"
                             mat-stroked-button class="btn-annuler"
                             (click)="annuler(r)"
                             [disabled]="isAnnulating[r.id!]">

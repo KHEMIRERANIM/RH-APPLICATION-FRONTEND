@@ -53,6 +53,9 @@ import { partnershipsRoutes } from './partnerships-routing';
 // Stats Component
 import { StatAvantageComponent } from './components/stat-avantage/stat-avantage.component';
 
+// AI Dialog
+import { AiItineraryDialogComponent } from './components/ai-itinerary-dialog/ai-itinerary-dialog.component';
+
 @NgModule({
     declarations: [
         CatalogueComponent,
@@ -63,7 +66,8 @@ import { StatAvantageComponent } from './components/stat-avantage/stat-avantage.
         PartenaireFormComponent,
         OffreAvantageFormComponent,
         ConfirmDialogComponent,
-        StatAvantageComponent
+        StatAvantageComponent,
+        AiItineraryDialogComponent
     ],
     imports: [
         RouterModule.forChild(partnershipsRoutes),

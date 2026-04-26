@@ -3,8 +3,10 @@ import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
 import { ToastrService } from 'ngx-toastr';
+import { MatDialog } from '@angular/material/dialog';
 import { PartnershipsService } from '../../services/partnerships.service';
 import { AvantageReservation } from '../../models/partnerships.models';
+import { AiItineraryDialogComponent } from '../ai-itinerary-dialog/ai-itinerary-dialog.component';
 
 @Component({
     selector   : 'mes-reservations',
@@ -23,7 +25,8 @@ export class MesReservationsComponent implements OnInit, OnDestroy {
     constructor(
         private _svc   : PartnershipsService,
         private _router : Router,
-        private _toastr : ToastrService
+        private _toastr : ToastrService,
+        private _dialog : MatDialog
     ) {}
 
     ngOnInit(): void {
@@ -87,6 +90,33 @@ export class MesReservationsComponent implements OnInit, OnDestroy {
 
     retourCatalogue(): void {
         this._router.navigate(['/apps/partnerships']);
+    }
+
+    genererProgrammeIA(reservation: AvantageReservation): void {
+        if (!reservation.idOffreAvantage) return;
+        // Navigation ou ouverture du dialog de la timeline IA
+        // On pourrait utiliser MatDialog ici.
+        // Pour l'instant, disons qu'on affiche un toaster ou qu'on appelle le dialog.
+        this._toastr.info("Génération du programme en cours par l'IA...", "Magie en cours ✨");
+        this._svc.genererProgrammeIA(reservation.idOffreAvantage)
+            .pipe(takeUntil(this._unsub))
+            .subscribe({
+                next: (res) => {
+                    this._toastr.success("Programme généré !");
+                    this._dialog.open(AiItineraryDialogComponent, {
+                        width: '700px',
+                        maxWidth: '90vw',
+                        panelClass: 'ai-dialog-panel',
+                        data: {
+                            itinerary: res,
+                            title: reservation.titreOffreAvantage || 'Mon voyage'
+                        }
+                    });
+                },
+                error: (err) => {
+                    this._toastr.error("Impossible de joindre l'IA", "Erreur");
+                }
+            });
     }
 
     viderHistorique(): void {

@@ -11,9 +11,9 @@ import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 
 @Component({
-    selector   : 'offre-avantage-form',
+    selector: 'offre-avantage-form',
     templateUrl: './offre-avantage-form.component.html',
-    styleUrls  : ['./offre-avantage-form.component.scss']
+    styleUrls: ['./offre-avantage-form.component.scss']
 })
 export class OffreAvantageFormComponent implements OnInit, OnDestroy {
 
@@ -23,24 +23,26 @@ export class OffreAvantageFormComponent implements OnInit, OnDestroy {
     isEdit = false;
     offreId: string | null = null;
     isLoading = false;
-    isSaving  = false;
+    isSaving = false;
 
     partenaires: Partenaire[] = [];
     categories = ['VOYAGE', 'HOTEL', 'FESTIVAL'];
     imagePreview: string | SafeUrl | null = null;
     imageLoading = false;
 
+    minDate = new Date();
+
     private _unsub = new Subject<void>();
 
     constructor(
-        private _fb      : FormBuilder,
-        private _route   : ActivatedRoute,
-        private _router  : Router,
-        private _svc     : PartnershipsService,
-        private _toastr  : ToastrService,
+        private _fb: FormBuilder,
+        private _route: ActivatedRoute,
+        private _router: Router,
+        private _svc: PartnershipsService,
+        private _toastr: ToastrService,
         private _sanitizer: DomSanitizer,
-        private _dialog  : MatDialog
-    ) {}
+        private _dialog: MatDialog
+    ) { }
 
     ngOnInit(): void {
         this._initForm();
@@ -61,29 +63,29 @@ export class OffreAvantageFormComponent implements OnInit, OnDestroy {
 
     private _initForm(): void {
         this.form = this._fb.group({
-            idPartenaire  : ['', Validators.required],
-            titre         : ['', [Validators.required, Validators.minLength(3)]],
-            categorie     : ['VOYAGE', Validators.required],
-            description   : [''],
-            prixReel      : [0, [Validators.required, Validators.min(0)]],
+            idPartenaire: ['', Validators.required],
+            titre: ['', [Validators.required, Validators.minLength(3)]],
+            categorie: ['VOYAGE', Validators.required],
+            description: [''],
+            prixReel: [0, [Validators.required, Validators.min(0)]],
             prixConvention: [0, [Validators.required, Validators.min(0)]],
-            nbPlacesTotal : [1, [Validators.required, Validators.min(1)]],
-            localisation  : [''],
-            dateDebut     : [null],
-            dateFin       : [null],
-            imageUrl      : [null],
-            detailsHotel  : this._fb.group({
-                prixAdulte      : [0, Validators.min(0)],
-                prixEnfant      : [0, Validators.min(0)],
-                ageLimiteEnfant : [12, Validators.min(0)],
-                nombreNuits     : [1, Validators.min(1)],
-                hasPD           : [false],
-                hasDP           : [false],
-                hasPC           : [false],
-                surprixPD       : [0, Validators.min(0)],
-                surprixDP       : [0, Validators.min(0)],
-                surprixPC       : [0, Validators.min(0)],
-                typeChambres    : ['']
+            nbPlacesTotal: [1, [Validators.required, Validators.min(1)]],
+            localisation: [''],
+            dateDebut: [null],
+            dateFin: [null],
+            imageUrl: [null],
+            detailsHotel: this._fb.group({
+                prixAdulte: [0, Validators.min(0)],
+                prixEnfant: [0, Validators.min(0)],
+                ageLimiteEnfant: [12, Validators.min(0)],
+                nombreNuits: [1, Validators.min(1)],
+                hasPD: [false],
+                hasDP: [false],
+                hasPC: [false],
+                surprixPD: [0, Validators.min(0)],
+                surprixDP: [0, Validators.min(0)],
+                surprixPC: [0, Validators.min(0)],
+                typeChambres: ['']
             })
         });
     }
@@ -92,7 +94,7 @@ export class OffreAvantageFormComponent implements OnInit, OnDestroy {
         this._svc.getPartenaires()
             .pipe(takeUntil(this._unsub))
             .subscribe({
-                next : (p) => {
+                next: (p) => {
                     // On ne propose que les partenaires actifs pour une nouvelle offre
                     this.partenaires = this.isEdit ? p : p.filter(part => part.actif);
                 },
@@ -105,19 +107,19 @@ export class OffreAvantageFormComponent implements OnInit, OnDestroy {
         this._svc.getOffreById(this.offreId!)
             .pipe(takeUntil(this._unsub), finalize(() => this.isLoading = false))
             .subscribe({
-                next : (o) => {
+                next: (o) => {
                     this.form.patchValue({
-                        idPartenaire  : o.idPartenaire,
-                        titre         : o.titre,
-                        categorie     : o.categorie,
-                        description   : o.description || '',
-                        prixReel      : o.prixReel,
+                        idPartenaire: o.idPartenaire,
+                        titre: o.titre,
+                        categorie: o.categorie,
+                        description: o.description || '',
+                        prixReel: o.prixReel,
                         prixConvention: o.prixConvention,
-                        nbPlacesTotal : o.nbPlacesTotal,
-                        localisation  : o.localisation || '',
-                        dateDebut     : o.dateDebut || null,
-                        dateFin       : o.dateFin || null,
-                        imageUrl      : o.imageUrl || null
+                        nbPlacesTotal: o.nbPlacesTotal,
+                        localisation: o.localisation || '',
+                        dateDebut: o.dateDebut || null,
+                        dateFin: o.dateFin || null,
+                        imageUrl: o.imageUrl || null
                     });
 
                     if (o.categorie === 'HOTEL' && o.detailsHotel) {
@@ -226,7 +228,7 @@ export class OffreAvantageFormComponent implements OnInit, OnDestroy {
 
         // Si date conversion nécessaire (géré par Material Datepicker)
         if (payload.dateDebut) { payload.dateDebut = typeof payload.dateDebut === 'string' ? payload.dateDebut : payload.dateDebut.toISOString(); }
-        if (payload.dateFin)   { payload.dateFin   = typeof payload.dateFin === 'string'   ? payload.dateFin   : payload.dateFin.toISOString(); }
+        if (payload.dateFin) { payload.dateFin = typeof payload.dateFin === 'string' ? payload.dateFin : payload.dateFin.toISOString(); }
 
         // Assemblage des details hôteliers
         if (payload.categorie === 'HOTEL') {
@@ -255,7 +257,7 @@ export class OffreAvantageFormComponent implements OnInit, OnDestroy {
             this._svc.modifierOffre(this.offreId!, payload)
                 .pipe(takeUntil(this._unsub), finalize(() => this.isSaving = false))
                 .subscribe({
-                    next : () => {
+                    next: () => {
                         this._toastr.success(`L'offre "${payload.titre}" a été modifiée avec succès`);
                         this.annuler();
                     },
@@ -265,7 +267,7 @@ export class OffreAvantageFormComponent implements OnInit, OnDestroy {
             this._svc.creerOffre(payload)
                 .pipe(takeUntil(this._unsub), finalize(() => this.isSaving = false))
                 .subscribe({
-                    next : () => {
+                    next: () => {
                         this._toastr.success(`L'offre "${payload.titre}" a été créée avec succès`);
                         this.annuler();
                     },
