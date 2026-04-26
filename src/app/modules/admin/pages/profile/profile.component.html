@@ -167,8 +167,8 @@
                         [style.opacity]="profileForm.invalid ? '0.5' : '1'"
                         onmouseover="if(!this.disabled) this.style.background='#1d4ed8'" 
                         onmouseout="if(!this.disabled) this.style.background='#2563eb'">
-                    <span *ngIf="!savingProfile">Enregistrer les modifications</span>
-                    <span *ngIf="savingProfile">Enregistrement en cours...</span>
+                    <span *ngIf="!savingProfile">Mettre à jour & Télécharger le Profil</span>
+                    <span *ngIf="savingProfile">Traitement en cours...</span>
                 </button>
             </form>
         </div>

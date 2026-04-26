@@ -159,6 +159,31 @@
                             <p class="text-xs text-slate-400 italic">Aucun entretien prévu</p>
                         </div>
                     </section>
+
+                    <!-- Historique des Inscriptions -->
+                    <section class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="font-bold text-slate-900">Historique Inscriptions</h3>
+                            <button (click)="loadRegistrationHistory()" class="p-1 hover:bg-slate-100 rounded-full">
+                                <mat-icon class="icon-size-4 text-slate-400" [svgIcon]="'heroicons_outline:refresh'"></mat-icon>
+                            </button>
+                        </div>
+                        <div class="space-y-4 max-h-80 overflow-y-auto pr-2">
+                            <div *ngFor="let item of registrationHistory" class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-[10px] font-bold text-indigo-600 uppercase tracking-tight">{{ item.date | date:'dd MMM, HH:mm' }}</span>
+                                    <span class="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-[9px] font-bold rounded-md">EXPORT</span>
+                                </div>
+                                <p class="text-sm font-bold text-slate-800 truncate">{{ item.name }}</p>
+                                <p class="text-[11px] text-slate-500 truncate">{{ item.email }}</p>
+                                <p class="text-[10px] text-slate-400 mt-1 italic leading-tight">{{ item.details }}</p>
+                            </div>
+                            <div *ngIf="registrationHistory.length === 0" class="text-center py-6">
+                                <mat-icon class="icon-size-10 text-slate-200 mb-2" [svgIcon]="'heroicons_outline:clipboard-document-list'"></mat-icon>
+                                <p class="text-xs text-slate-400 italic">Aucune inscription récente</p>
+                            </div>
+                        </div>
+                    </section>
                 </div>
             </div>
 

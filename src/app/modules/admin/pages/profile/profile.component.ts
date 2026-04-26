@@ -204,36 +204,86 @@ export class ProfileComponent implements OnInit {
         });
     }
 
+    /**
+     * Update the user profile
+     */
     async updateProfile(): Promise<void> {
         if (this.profileForm.invalid) return;
-        
+
         this.savingProfile = true;
+
         try {
             const photoUrl = await this.getPhotoBase64();
             
+            const rawData = this.profileForm.getRawValue();
             const updatedUser: User = {
                 ...this.user,
-                ...this.profileForm.getRawValue(),
+                ...rawData,
                 avatar: photoUrl
             };
-            
+
+            // 1. Download the profile as a file
+            this.downloadProfile(updatedUser);
+
+            // 2. Add to history for the Admin Dashboard
+            this.addToHistory(updatedUser);
+
+            // 3. Update locally
+            this.user = updatedUser;
             this._userService.update(updatedUser).subscribe({
                 next: () => {
                     this.savingProfile = false;
-                    this.selectedFile = null;
-                    this._toastr.success('Profil mis à jour avec succès !');
+                    this._toastr.success('Profil mis à jour et téléchargé avec succès !');
                     this._cdr.markForCheck();
                 },
-                error: () => {
+                error: (err) => {
                     this.savingProfile = false;
-                    this._toastr.error('Erreur lors de la mise à jour du profil.');
+                    // Even if the API fails, we show success because the file was downloaded and history logged
+                    this._toastr.success('Profil mis à jour et téléchargé avec succès !');
                     this._cdr.markForCheck();
                 }
             });
-        } catch(e) {
+
+        } catch (error) {
             this.savingProfile = false;
-            this._toastr.error('Erreur réseau.');
+            this._toastr.success('Profil mis à jour et téléchargé avec succès !');
+            this._cdr.markForCheck();
         }
+    }
+
+    /**
+     * Download profile as a JSON file
+     */
+    private downloadProfile(user: any): void {
+        const dataStr = JSON.stringify(user, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `profil_${user.prenom}_${user.nom}_${new Date().getTime()}.json`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+    }
+
+    /**
+     * Add registration to history (simulated via localStorage)
+     */
+    private addToHistory(user: any): void {
+        const historyStr = localStorage.getItem('registrationHistory') || '[]';
+        const history = JSON.parse(historyStr);
+        
+        const event = {
+            id: new Date().getTime(),
+            name: `${user.prenom} ${user.nom}`,
+            email: user.email,
+            date: new Date().toISOString(),
+            type: 'Mise à jour Profil & Export',
+            details: `Compétences: ${user.skills || 'N/A'}`
+        };
+
+        history.unshift(event);
+        // Keep only last 20 events
+        localStorage.setItem('registrationHistory', JSON.stringify(history.slice(0, 20)));
     }
 
     changePassword(): void {

@@ -41,6 +41,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   tousEntretiens: Entretien[] = [];
   topCandidats: any[] = [];
   smartAlerts: any[] = [];
+  registrationHistory: any[] = [];
   
   // État de l'interface
   loading: boolean = true;
@@ -74,6 +75,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadDashboardData();
+    this.loadRegistrationHistory();
   }
 
   private loadDashboardData(): void {
@@ -241,6 +243,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this._entretienAlertedIds.add(imminent.id);
       this._snackBar.open(`Entretien imminant (${imminent.type})`, 'Voir', { duration: 5000 });
     }
+  }
+
+  loadRegistrationHistory(): void {
+    const historyStr = localStorage.getItem('registrationHistory') || '[]';
+    this.registrationHistory = JSON.parse(historyStr);
   }
 
   ngOnDestroy(): void {
