@@ -141,7 +141,7 @@ export class CommandesComponent implements OnInit, OnDestroy {
       const notif = {
         id: 'commande-prete-' + alerte.commandeId,
         icon: 'heroicons_outline:bell',
-        title: alerte.enRetard ? 'Recuperez votre repas rapidement !' : 'Votre commande est prete !',
+        title: alerte.enRetard ? 'Récupérez votre repas rapidement !' : 'Votre commande est prête !',
         description: alerte.enRetard
           ? 'Annulation dans ' + alerte.minutesRestantes + ' min - Code : ' + alerte.codeRetrait
           : 'Presentez le code ' + alerte.codeRetrait + ' au comptoir',
@@ -201,7 +201,7 @@ export class CommandesComponent implements OnInit, OnDestroy {
     ).subscribe({
       next: () => {
         this.fermerModalPaiement();
-        this.successMsg = 'Paiement enregistre - commande livree !';
+        this.successMsg = 'Paiement enregistré - commande livrée !';
         setTimeout(() => this.successMsg = '', 4000);
         this.loadCommandes();
         this.loadFidelites();
@@ -216,7 +216,7 @@ export class CommandesComponent implements OnInit, OnDestroy {
   validerParCode(): void {
     this.codeErreur = '';
     if (!this.codeRetrait || this.codeRetrait.length < 4) {
-      this.codeErreur = 'Entrez un code a 4 caracteres.';
+      this.codeErreur = 'Entrez un code à 4 caractères.';
       return;
     }
     const commande = this.commandes.find(c =>
@@ -224,7 +224,7 @@ export class CommandesComponent implements OnInit, OnDestroy {
       (c.codeRetrait || (c.id || '').slice(-4).toUpperCase()) === this.codeRetrait.toUpperCase()
     );
     if (!commande) {
-      this.codeErreur = 'Aucune commande prete avec ce code.';
+      this.codeErreur = 'Aucune commande prête avec ce code.';
       return;
     }
     this.codeRetrait = '';
@@ -325,7 +325,7 @@ export class CommandesComponent implements OnInit, OnDestroy {
         { plats: this.platsSelectionnes }
       ).subscribe({
         next: () => {
-          this.successMsg = 'Commande modifiee avec succes !';
+          this.successMsg = 'Commande modifiée avec succès !';
           setTimeout(() => this.successMsg = '', 4000);
           this.showForm = false;
           this.commandeEnModification = null;
@@ -344,12 +344,12 @@ export class CommandesComponent implements OnInit, OnDestroy {
     };
     this.commandeService.createCommande(commande).subscribe({
       next: () => {
-        this.successMsg = 'Commande envoyee avec succes !';
+        this.successMsg = 'Commande envoyée avec succès !';
         setTimeout(() => this.successMsg = '', 4000);
         this.showForm = false;
         this.loadCommandes();
       },
-      error: (err) => { this.errorMsg = err.error?.message || 'Erreur creation commande.'; }
+      error: (err) => { this.errorMsg = err.error?.message || 'Erreur création commande.'; }
     });
   }
 
@@ -378,7 +378,7 @@ export class CommandesComponent implements OnInit, OnDestroy {
         });
       }
     }
-    if (tousLesPlats.length === 0) { this.errorMsg = 'Aucun plat avec ingredients disponible.'; return; }
+    if (tousLesPlats.length === 0) { this.errorMsg = 'Aucun plat avec ingrédients disponible.'; return; }
     this.analyseEnCours = true;
     this.alertesAllergie = [];
     this.allergieIa.verifierAllergies(this.allergiesEmploye, tousLesPlats).subscribe({
@@ -386,7 +386,7 @@ export class CommandesComponent implements OnInit, OnDestroy {
         this.alertesAllergie = res.filter(r => !r.sur);
         this.analyseEnCours = false;
         if (this.alertesAllergie.length === 0) {
-          this.successMsg = 'Aucun conflit allergie detecte !';
+          this.successMsg = 'Aucun conflit allergie détecté !';
           setTimeout(() => this.successMsg = '', 4000);
         }
       },
@@ -411,11 +411,11 @@ export class CommandesComponent implements OnInit, OnDestroy {
   updateStatut(id: string, statut: string): void {
     this.commandeService.updateStatut(id, statut).subscribe({
       next: () => {
-        this.successMsg = 'Statut mis a jour !';
+        this.successMsg = 'Statut mis à jour !';
         setTimeout(() => this.successMsg = '', 3000);
         this.loadCommandes();
       },
-      error: () => { this.errorMsg = 'Erreur mise a jour statut.'; }
+      error: () => { this.errorMsg = 'Erreur mise à jour statut.'; }
     });
   }
 
@@ -423,7 +423,7 @@ export class CommandesComponent implements OnInit, OnDestroy {
     if (!confirm('Supprimer cette commande ?')) return;
     this.commandeService.deleteCommande(id).subscribe({
       next: () => {
-        this.successMsg = 'Commande supprimee.';
+        this.successMsg = 'Commande supprimée.';
         setTimeout(() => this.successMsg = '', 3000);
         this.loadCommandes();
       },
@@ -449,7 +449,7 @@ export class CommandesComponent implements OnInit, OnDestroy {
   }
 
   getNextStatutLabel(statut: string): string {
-    const labels: any = { confirmee: 'Confirmer', prete: 'Marquer Prete' };
+    const labels: any = { confirmee: 'Confirmer', prete: 'Marquer Prête' };
     const next = this.getNextStatut(statut);
     return next ? labels[next] : '';
   }
@@ -494,16 +494,16 @@ export class CommandesComponent implements OnInit, OnDestroy {
 
   utiliserReduction(): void {
     if (!this.fidelite || !this.fidelite.reductionDisponible) return;
-    if (!confirm('Utiliser votre reduction de ' + this.fidelite.montantReduction + ' TND ?')) return;
+    if (!confirm('Utiliser votre réduction de ' + this.fidelite.montantReduction + ' TND ?')) return;
     this.reductionEnCours = true;
     this.fideliteService.utiliserReduction(this.roleService.userId).subscribe({
       next: (f) => {
         this.fidelite = f;
         this.reductionEnCours = false;
-        this.successMsg = 'Reduction de ' + f.montantReduction + ' TND sera appliquee a votre prochain paiement !';
+        this.successMsg = 'Réduction de ' + f.montantReduction + ' TND sera appliquée à votre prochain paiement !';
         setTimeout(() => this.successMsg = '', 5000);
       },
-      error: () => { this.reductionEnCours = false; this.errorMsg = 'Erreur reduction.'; }
+      error: () => { this.reductionEnCours = false; this.errorMsg = 'Erreur réduction.'; }
     });
   }
 

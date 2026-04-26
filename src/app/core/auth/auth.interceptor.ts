@@ -28,15 +28,15 @@ export class AuthInterceptor implements HttpInterceptor
         return next.handle(newReq).pipe(
             catchError((error) => {
                 if (error instanceof HttpErrorResponse && error.status === 401) {
-                    console.error('Erreur 401 Unauthorized sur la requete :', req.url);
-                    // On commente la deconnexion agressive car le backend retourne 401 
-                    // au lieu de 403 pour les problemes de permissions
-                    /*
-                    if (!window.location.pathname.includes('/sign-in')) {
-                        this._authService.signOut();
-                        window.location.href = '/sign-in';
+                    // Only sign out if the token is actually expired or missing.
+                    // If the token is still valid, let the error pass through
+                    // so individual services can handle it with their own catchError.
+                    if (this._authService.isTokenExpired()) {
+                        if (!window.location.pathname.includes('/sign-in')) {
+                            this._authService.signOut();
+                            window.location.href = '/sign-in';
+                        }
                     }
-                    */
                 }
                 return throwError(error);
             })

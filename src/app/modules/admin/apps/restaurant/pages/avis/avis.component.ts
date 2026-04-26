@@ -152,7 +152,7 @@ export class AvisComponent implements OnInit {
   createAvis(): void {
     if (!this.newAvis.platId) { this.errorMsg = 'Choisissez un plat.'; return; }
     if (this.dejaAvis(this.newAvis.platId)) {
-      this.errorMsg = 'Vous avez deja donne un avis pour ce plat.'; return;
+      this.errorMsg = 'Vous avez déjà donné un avis pour ce plat.'; return;
     }
     const avis: Avis = {
       userId: this.roleService.userId,
@@ -175,7 +175,7 @@ export class AvisComponent implements OnInit {
           },
           error: () => {
             this.analyseEnCours = false;
-            this.successMsg = 'Avis envoye !';
+            this.successMsg = 'Avis envoyé !';
             setTimeout(() => this.successMsg = '', 3000);
             this.showForm = false;
             this.loadAvis();
@@ -193,7 +193,7 @@ export class AvisComponent implements OnInit {
     if (!confirm('Supprimer cet avis ?')) return;
     this.avisService.deleteAvis(id).subscribe({
       next: () => {
-        this.successMsg = 'Avis supprime.';
+        this.successMsg = 'Avis supprimé.';
         setTimeout(() => this.successMsg = '', 3000);
         this.loadAvis();
       },

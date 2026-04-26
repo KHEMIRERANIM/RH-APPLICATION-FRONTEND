@@ -26,5 +26,6 @@ export interface Menu {
   titre: string;
   date: string;
   statut: string;
+  categorie?: string;
   plats: Plat[];
 }

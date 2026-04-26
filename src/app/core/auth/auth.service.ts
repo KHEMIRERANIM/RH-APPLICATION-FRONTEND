@@ -71,9 +71,14 @@ export class AuthService
 
     signInUsingToken(): Observable<any>
     {
-        if (this.accessToken && this.currentUser) {
+        if (this.accessToken && this.currentUser && !this.isTokenExpired()) {
             this._authenticated = true;
             return of(true);
+        }
+
+        // Token absent or expired — clean up
+        if (this.isTokenExpired()) {
+            this.signOut();
         }
 
         return of(false);
@@ -91,7 +96,7 @@ export class AuthService
 
     check(): Observable<boolean>
     {
-        if (this._authenticated)
+        if (this._authenticated && !this.isTokenExpired())
         {
             return of(true);
         }
@@ -106,8 +111,37 @@ export class AuthService
             return of(false);
         }
 
+        // If token is expired, sign out and deny access
+        if (this.isTokenExpired())
+        {
+            this.signOut();
+            return of(false);
+        }
+
         this._authenticated = true;
         return of(true);
+    }
+
+    /**
+     * Decode the JWT payload and check if the token has expired.
+     * Returns true if the token is expired or cannot be decoded.
+     * Public so the interceptor can use it.
+     */
+    isTokenExpired(): boolean
+    {
+        const token = this.accessToken;
+        if (!token) {
+            return true;
+        }
+
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            // exp is in seconds, Date.now() is in milliseconds
+            // 60-second buffer to avoid edge-case clock drift
+            return (payload.exp * 1000) < (Date.now() - 60000);
+        } catch (e) {
+            return true;
+        }
     }
 
     getProfile(): Observable<any>

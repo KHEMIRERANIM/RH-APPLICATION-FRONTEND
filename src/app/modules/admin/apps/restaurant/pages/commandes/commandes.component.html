@@ -1,26 +1,26 @@
 <div class="flex flex-col flex-auto min-w-0">
 
   <!-- HEADER Fuse -->
-  <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-6 sm:px-10 border-b bg-card">
+  <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-6 sm:px-10 border-b bg-card shadow-sm" style="background: linear-gradient(135deg, #4c1d95 0%, #6d28d9 50%, #8b5cf6 100%);">
     <div class="flex items-center min-w-0">
-      <div class="flex items-center justify-center w-12 h-12 rounded-lg bg-primary-100 dark:bg-primary-900">
-        <mat-icon svgIcon="heroicons_outline:shopping-cart" class="icon-size-6 text-primary-600 dark:text-primary-400"></mat-icon>
+      <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm shadow-lg border border-white/20">
+        <mat-icon svgIcon="heroicons_outline:shopping-cart" class="icon-size-7 text-white"></mat-icon>
       </div>
       <div class="ml-4 min-w-0">
-        <h2 class="text-xl font-semibold truncate">
+        <h2 class="text-2xl font-bold text-white tracking-tight truncate">
           {{ roleService.isAdmin() ? 'Gestion des Commandes' : 'Mes Commandes' }}
         </h2>
-        <p class="text-secondary truncate">
+        <p class="text-purple-200 text-sm truncate">
           {{ roleService.isAdmin() ? 'Suivez et gérez toutes les commandes' : 'Passez et suivez vos commandes' }}
         </p>
       </div>
     </div>
     <div class="flex items-center gap-3 mt-4 sm:mt-0">
-      <button *ngIf="roleService.isAdmin()" (click)="exportPdf()" mat-stroked-button class="text-sm">
+      <button *ngIf="roleService.isAdmin()" (click)="exportPdf()" mat-stroked-button class="text-sm text-white border-white/50 hover:bg-white/10">
         <mat-icon svgIcon="heroicons_outline:arrow-down-tray" class="icon-size-5 mr-1"></mat-icon>
         Exporter PDF
       </button>
-      <button *ngIf="roleService.isEmploye()" mat-flat-button [color]="'primary'" (click)="ouvrirFormulaire()">
+      <button *ngIf="roleService.isEmploye()" mat-flat-button class="bg-white text-purple-700 font-bold shadow-lg hover:bg-purple-50" (click)="ouvrirFormulaire()">
         <mat-icon svgIcon="heroicons_outline:plus" class="icon-size-5 mr-1"></mat-icon>
         Nouvelle Commande
       </button>
@@ -147,21 +147,21 @@
 
     <!-- STATS EMPLOYE -->
     <div *ngIf="roleService.isEmploye()" class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-      <div class="bg-card shadow rounded-2xl p-5 text-center">
-        <p class="text-4xl font-semibold text-primary">{{ commandes.length }}</p>
-        <p class="text-sm text-secondary mt-1 uppercase tracking-wide">Commandes</p>
+      <div class="rounded-2xl p-5 text-center shadow-lg" style="background: linear-gradient(135deg, #4c1d95, #7c3aed);">
+        <p class="text-4xl font-semibold text-white">{{ commandes.length }}</p>
+        <p class="text-sm text-purple-200 mt-1 uppercase tracking-wide">Commandes</p>
       </div>
-      <div class="bg-card shadow rounded-2xl p-5 text-center">
-        <p class="text-4xl font-semibold text-amber-500">{{ getCountByStatut('en_attente') }}</p>
-        <p class="text-sm text-secondary mt-1 uppercase tracking-wide">En attente</p>
+      <div class="rounded-2xl p-5 text-center shadow-lg" style="background: linear-gradient(135deg, #d97706, #fbbf24);">
+        <p class="text-4xl font-semibold text-white">{{ getCountByStatut('en_attente') }}</p>
+        <p class="text-sm text-amber-100 mt-1 uppercase tracking-wide">En attente</p>
       </div>
-      <div class="bg-card shadow rounded-2xl p-5 text-center">
-        <p class="text-4xl font-semibold text-indigo-600">{{ getTotalMontant() | number:'1.2-2' }} TND</p>
-        <p class="text-sm text-secondary mt-1 uppercase tracking-wide">Total dépensé</p>
+      <div class="rounded-2xl p-5 text-center shadow-lg" style="background: linear-gradient(135deg, #4f46e5, #818cf8);">
+        <p class="text-4xl font-semibold text-white">{{ getTotalMontant() | number:'1.2-2' }} TND</p>
+        <p class="text-sm text-indigo-200 mt-1 uppercase tracking-wide">Total dépensé</p>
       </div>
-      <div *ngIf="fidelite" class="bg-primary shadow rounded-2xl p-5 text-center">
+      <div *ngIf="fidelite" class="rounded-2xl p-5 text-center shadow-lg" style="background: linear-gradient(135deg, #7c3aed, #a78bfa);">
         <p class="text-4xl font-semibold text-white">{{ fidelite.points }}</p>
-        <p class="text-sm text-blue-200 mt-1 uppercase tracking-wide">Points fidélité</p>
+        <p class="text-sm text-purple-200 mt-1 uppercase tracking-wide">Points fidélité</p>
       </div>
     </div>
 
@@ -203,7 +203,7 @@
     <div *ngIf="roleService.isAdmin()" class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
       <div *ngFor="let s of statuts"
         (click)="selectedStatut = selectedStatut === s ? '' : s"
-        class="bg-card shadow rounded-2xl p-5 cursor-pointer transition-all hover:shadow-md"
+        class="bg-card shadow-md rounded-2xl p-5 cursor-pointer transition-all duration-300 hover:shadow-lg"
         [ngClass]="selectedStatut === s ? 'ring-2 ring-primary' : ''">
         <p class="text-4xl font-semibold mb-1"
           [ngClass]="{
@@ -475,7 +475,7 @@
     <!-- LISTE COMMANDES -->
     <div class="space-y-4" *ngIf="!loading">
       <div *ngFor="let c of getFiltered()"
-        class="bg-card rounded-2xl shadow hover:shadow-md transition-all overflow-hidden">
+        class="bg-card rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden">
         <div class="h-1 w-full"
           [ngClass]="{
             'bg-amber-400': c.statut === 'en_attente',

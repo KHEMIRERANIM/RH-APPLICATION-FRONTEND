@@ -27,7 +27,7 @@ export class MenusComponent implements OnInit, OnDestroy {
   showEditPlatForm = false;
   selectedMenuId: string | null = null;
   selectedPlatId: string | null = null;
-  newMenu: Partial<Menu> = { titre: '', date: '', statut: 'publie' };
+  newMenu: Partial<Menu> = { titre: '', date: '', statut: 'publie', categorie: '' };
   editMenu: Partial<Menu> = {};
   newPlat: Partial<Plat> = { nom: '', description: '', prix: 0, tags: [], quantite: 1, disponible: true, ingredients: '' };
   editPlat: Partial<Plat> = {};
@@ -36,6 +36,13 @@ export class MenusComponent implements OnInit, OnDestroy {
   loading = false;
   errorMsg = '';
   successMsg = '';
+
+  categories = [
+    { value: 'petit_dejeuner', label: 'Petit Déjeuner' },
+    { value: 'dejeuner', label: 'Déjeuner' },
+    { value: 'dessert', label: 'Dessert' },
+    { value: 'snack', label: 'Snack' }
+  ];
 
   analyseEnCours = false;
   analyseResultat: AnalyseAllergene | null = null;
@@ -56,7 +63,7 @@ export class MenusComponent implements OnInit, OnDestroy {
     if (this.roleService.isEmploye()) {
       this.panier.commandePassee$.pipe(takeUntil(this.destroy$)).subscribe(() => {
         this.loadMenus();
-        this.successMsg = 'Commande passee avec succes !';
+        this.successMsg = 'Commande passée avec succès !';
         setTimeout(() => this.successMsg = '', 4000);
       });
     }
@@ -95,7 +102,7 @@ export class MenusComponent implements OnInit, OnDestroy {
           }
         }
       },
-      error: () => { this.analyseEnCours = false; this.errorMsg = 'Erreur connexion IA. Verifiez que le serveur Python tourne.'; }
+      error: () => { this.analyseEnCours = false; this.errorMsg = 'Erreur connexion IA. Vérifiez que le serveur Python tourne.'; }
     });
     this.allergieIa.analyserNutrition(
       this.newPlat.ingredients || '',
@@ -241,13 +248,13 @@ export class MenusComponent implements OnInit, OnDestroy {
   createMenu(): void {
     if (!this.newMenu.titre || !this.newMenu.date) { this.errorMsg = 'Titre et date obligatoires.'; return; }
     this.menuService.createMenu(this.newMenu).subscribe({
-      next: () => { this.loadMenus(); this.showCreateForm = false; this.newMenu = { titre: '', date: '', statut: 'publie' }; this.successMsg = 'Menu cree !'; setTimeout(() => this.successMsg = '', 3000); },
-      error: () => { this.errorMsg = 'Erreur creation menu.'; }
+      next: () => { this.loadMenus(); this.showCreateForm = false; this.newMenu = { titre: '', date: '', statut: 'publie', categorie: '' }; this.successMsg = 'Menu créé !'; setTimeout(() => this.successMsg = '', 3000); },
+      error: () => { this.errorMsg = 'Erreur création menu.'; }
     });
   }
 
   openEditMenu(menu: Menu): void {
-    this.editMenu = { titre: menu.titre, date: menu.date, statut: menu.statut, plats: menu.plats };
+    this.editMenu = { titre: menu.titre, date: menu.date, statut: menu.statut, categorie: menu.categorie || '', plats: menu.plats };
     this.selectedMenuId = menu.id!;
     this.showEditMenuForm = true;
   }
@@ -257,7 +264,7 @@ export class MenusComponent implements OnInit, OnDestroy {
     const orig = this.menus.find(m => m.id === this.selectedMenuId);
     if (orig) this.editMenu.plats = orig.plats;
     this.menuService.updateMenu(this.selectedMenuId, this.editMenu).subscribe({
-      next: () => { this.loadMenus(); this.showEditMenuForm = false; this.successMsg = 'Menu modifie !'; setTimeout(() => this.successMsg = '', 3000); },
+      next: () => { this.loadMenus(); this.showEditMenuForm = false; this.successMsg = 'Menu modifié !'; setTimeout(() => this.successMsg = '', 3000); },
       error: () => { this.errorMsg = 'Erreur modification menu.'; }
     });
   }
@@ -265,7 +272,7 @@ export class MenusComponent implements OnInit, OnDestroy {
   deleteMenu(id: string): void {
     if (!confirm('Supprimer ce menu ?')) return;
     this.menuService.deleteMenu(id).subscribe({
-      next: () => { this.loadMenus(); this.successMsg = 'Menu supprime.'; setTimeout(() => this.successMsg = '', 3000); },
+      next: () => { this.loadMenus(); this.successMsg = 'Menu supprimé.'; setTimeout(() => this.successMsg = '', 3000); },
       error: () => { this.errorMsg = 'Erreur suppression.'; }
     });
   }
@@ -298,7 +305,7 @@ export class MenusComponent implements OnInit, OnDestroy {
       this.newPlat.niveauCalories = this.nutritionResultat.niveau_calories;
     }
     this.menuService.addPlat(this.selectedMenuId!, this.newPlat).subscribe({
-      next: () => { this.loadMenus(); this.showAddPlatForm = false; this.expandedMenu = this.selectedMenuId; this.successMsg = 'Plat ajoute !'; setTimeout(() => this.successMsg = '', 3000); },
+      next: () => { this.loadMenus(); this.showAddPlatForm = false; this.expandedMenu = this.selectedMenuId; this.successMsg = 'Plat ajouté !'; setTimeout(() => this.successMsg = '', 3000); },
       error: () => { this.errorMsg = 'Erreur ajout plat.'; }
     });
   }
@@ -335,7 +342,7 @@ export class MenusComponent implements OnInit, OnDestroy {
       this.editPlat.niveauCalories = this.nutritionEditResultat.niveau_calories;
     }
     this.menuService.updatePlat(this.selectedMenuId, this.selectedPlatId, this.editPlat).subscribe({
-      next: () => { this.loadMenus(); this.showEditPlatForm = false; this.successMsg = 'Plat modifie !'; setTimeout(() => this.successMsg = '', 3000); },
+      next: () => { this.loadMenus(); this.showEditPlatForm = false; this.successMsg = 'Plat modifié !'; setTimeout(() => this.successMsg = '', 3000); },
       error: () => { this.errorMsg = 'Erreur modification plat.'; }
     });
   }
@@ -343,7 +350,7 @@ export class MenusComponent implements OnInit, OnDestroy {
   deletePlat(menuId: string, platId: string): void {
     if (!confirm('Supprimer ce plat ?')) return;
     this.menuService.deletePlat(menuId, platId).subscribe({
-      next: () => { this.loadMenus(); this.successMsg = 'Plat supprime.'; setTimeout(() => this.successMsg = '', 3000); },
+      next: () => { this.loadMenus(); this.successMsg = 'Plat supprimé.'; setTimeout(() => this.successMsg = '', 3000); },
       error: () => { this.errorMsg = 'Erreur suppression.'; }
     });
   }

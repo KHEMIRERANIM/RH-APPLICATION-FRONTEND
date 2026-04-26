@@ -110,7 +110,7 @@ export class PlatsComponent implements OnInit, OnDestroy {
     if (this.roleService.isEmploye()) {
       this.panier.commandePassee$.pipe(takeUntil(this.destroy$)).subscribe(() => {
         this.loadPlats();
-        this.successMsg = 'Commande passee avec succes !';
+        this.successMsg = 'Commande passée avec succès !';
         setTimeout(() => this.successMsg = '', 4000);
       });
     }
@@ -193,7 +193,7 @@ export class PlatsComponent implements OnInit, OnDestroy {
     if (!confirm('Supprimer "' + plat.nom + '" ?')) return;
     this.menuService.deletePlat(plat.menuId, plat.platId!).subscribe({
       next: () => {
-        this.successMsg = '"' + plat.nom + '" supprime avec succes.';
+        this.successMsg = '"' + plat.nom + '" supprimé avec succès.';
         setTimeout(() => this.successMsg = '', 4000);
         this.loadPlats();
       },
@@ -221,13 +221,13 @@ export class PlatsComponent implements OnInit, OnDestroy {
       this.platEnEdition
     ).subscribe({
       next: () => {
-        this.successMsg = '"' + this.platEnEdition.nom + '" mis a jour avec succes.';
+        this.successMsg = '"' + this.platEnEdition.nom + '" mis à jour avec succès.';
         setTimeout(() => this.successMsg = '', 4000);
         this.showEditModal = false;
         this.platEnEdition = {};
         this.loadPlats();
       },
-      error: () => { this.errorMsg = 'Erreur lors de la mise a jour.'; }
+      error: () => { this.errorMsg = 'Erreur lors de la mise à jour.'; }
     });
   }
 }

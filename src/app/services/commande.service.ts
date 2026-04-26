@@ -52,6 +52,20 @@ export class CommandeService {
   }
 
   exportPdf(): void {
-    window.open(this.apiUrl + '/export/pdf', '_blank');
+    this.http.get(this.apiUrl + '/export/pdf', { responseType: 'blob' }).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'commandes_' + new Date().toISOString().split('T')[0] + '.pdf';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => {
+        console.error('Erreur export PDF:', err);
+      }
+    });
   }
 }

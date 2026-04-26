@@ -1,28 +1,28 @@
 <div class="flex flex-col flex-auto min-w-0">
-  <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-6 sm:px-10 border-b bg-card">
+  <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-6 sm:px-10 border-b bg-card shadow-sm">
     <div class="flex flex-1 items-center">
-      <div class="w-12 h-12 rounded-lg bg-primary-100 dark:bg-primary-900 flex items-center justify-center mr-4">
-        <mat-icon svgIcon="heroicons_outline:office-building" class="text-primary-600 dark:text-primary-400"></mat-icon>
+      <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-600 to-purple-700 flex items-center justify-center mr-4 shadow-lg shadow-purple-500/20">
+        <mat-icon svgIcon="heroicons_outline:office-building" class="text-white"></mat-icon>
       </div>
       <div>
-        <h2 class="text-xl font-semibold">Restaurant</h2>
-        <p class="text-secondary mt-1">Menus, catalogue et commandes</p>
+        <h2 class="text-xl font-bold tracking-tight">Restaurant</h2>
+        <p class="text-secondary mt-0.5 text-sm">Menus, catalogue et commandes</p>
       </div>
     </div>
-    <nav class="flex items-center space-x-6 mt-6 sm:mt-0 font-medium text-secondary" aria-label="Navigation restaurant">
-      <a routerLink="menus" routerLinkActive="text-primary-600 font-semibold" class="flex items-center hover:text-primary-600 transition-colors">
+    <nav class="flex items-center space-x-1 mt-6 sm:mt-0 font-medium text-secondary" aria-label="Navigation restaurant">
+      <a routerLink="menus" routerLinkActive="text-purple-700 font-semibold bg-purple-50 dark:bg-purple-900/30" class="flex items-center px-4 py-2.5 rounded-xl hover:text-purple-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200">
         <mat-icon class="icon-size-5 mr-2" svgIcon="heroicons_outline:clipboard-list"></mat-icon>
         Menus
       </a>
-      <a routerLink="plats" routerLinkActive="text-primary-600 font-semibold" class="flex items-center hover:text-primary-600 transition-colors">
+      <a routerLink="plats" routerLinkActive="text-purple-700 font-semibold bg-purple-50 dark:bg-purple-900/30" class="flex items-center px-4 py-2.5 rounded-xl hover:text-purple-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200">
         <mat-icon class="icon-size-5 mr-2" svgIcon="heroicons_outline:view-grid"></mat-icon>
         Catalogue
       </a>
-      <a routerLink="commandes" routerLinkActive="text-primary-600 font-semibold" class="flex items-center hover:text-primary-600 transition-colors">
+      <a routerLink="commandes" routerLinkActive="text-purple-700 font-semibold bg-purple-50 dark:bg-purple-900/30" class="flex items-center px-4 py-2.5 rounded-xl hover:text-purple-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200">
         <mat-icon class="icon-size-5 mr-2" svgIcon="heroicons_outline:shopping-bag"></mat-icon>
         Commandes
       </a>
-      <a routerLink="avis" routerLinkActive="text-primary-600 font-semibold" class="flex items-center hover:text-primary-600 transition-colors">
+      <a routerLink="avis" routerLinkActive="text-purple-700 font-semibold bg-purple-50 dark:bg-purple-900/30" class="flex items-center px-4 py-2.5 rounded-xl hover:text-purple-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200">
         <mat-icon class="icon-size-5 mr-2" svgIcon="heroicons_outline:star"></mat-icon>
         Avis
       </a>

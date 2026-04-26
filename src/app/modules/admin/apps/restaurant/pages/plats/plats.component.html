@@ -95,14 +95,14 @@
     </div>
   </div>
 
-  <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between mb-6">
+  <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-8 sm:px-10 mb-8 rounded-2xl" style="background: linear-gradient(135deg, #4c1d95 0%, #6d28d9 50%, #8b5cf6 100%);">
     <div class="flex flex-1 items-center">
-      <div class="w-12 h-12 rounded-lg bg-primary-100 dark:bg-primary-900 flex items-center justify-center mr-4">
-        <mat-icon svgIcon="heroicons_outline:view-grid" class="text-primary-600 dark:text-primary-400"></mat-icon>
+      <div class="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mr-5 shadow-lg border border-white/20">
+        <mat-icon svgIcon="heroicons_outline:view-grid" class="text-white icon-size-7"></mat-icon>
       </div>
       <div>
-        <h1 class="text-xl font-semibold text-gray-900">Catalogue des Plats</h1>
-        <p class="text-secondary mt-1">
+        <h1 class="text-2xl font-bold text-white tracking-tight">Catalogue des Plats</h1>
+        <p class="text-purple-200 mt-1 text-sm">
           {{ roleService.isEmploye() ? 'Survolez un plat pour voir ses apports nutritionnels' : 'Vue globale de tous les plats disponibles' }}
         </p>
       </div>
@@ -126,17 +126,17 @@
 
   <!-- Stats -->
   <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-    <div class="bg-card shadow rounded-2xl p-6 text-center">
-      <p class="text-4xl font-extrabold text-primary-600">{{ allPlats.length }}</p>
-      <p class="text-sm font-medium text-secondary mt-2 uppercase tracking-wider">Total plats</p>
+    <div class="rounded-2xl p-6 text-center shadow-lg" style="background: linear-gradient(135deg, #4c1d95, #7c3aed);">
+      <p class="text-4xl font-extrabold text-white">{{ allPlats.length }}</p>
+      <p class="text-sm font-medium text-purple-200 mt-2 uppercase tracking-wider">Total plats</p>
     </div>
-    <div class="bg-card shadow rounded-2xl p-6 text-center">
-      <p class="text-4xl font-extrabold text-green-600">{{ getTotalDispos() }}</p>
-      <p class="text-sm font-medium text-secondary mt-2 uppercase tracking-wider">Disponibles</p>
+    <div class="rounded-2xl p-6 text-center shadow-lg" style="background: linear-gradient(135deg, #059669, #34d399);">
+      <p class="text-4xl font-extrabold text-white">{{ getTotalDispos() }}</p>
+      <p class="text-sm font-medium text-green-200 mt-2 uppercase tracking-wider">Disponibles</p>
     </div>
-    <div class="bg-card shadow rounded-2xl p-6 text-center">
-      <p class="text-4xl font-extrabold text-accent-600">{{ getPrixMoyen() | number:'1.2-2' }} <span class="text-xl">TND</span></p>
-      <p class="text-sm font-medium text-secondary mt-2 uppercase tracking-wider">Prix moyen</p>
+    <div class="rounded-2xl p-6 text-center shadow-lg" style="background: linear-gradient(135deg, #7c3aed, #a78bfa);">
+      <p class="text-4xl font-extrabold text-white">{{ getPrixMoyen() | number:'1.2-2' }} <span class="text-xl">TND</span></p>
+      <p class="text-sm font-medium text-purple-200 mt-2 uppercase tracking-wider">Prix moyen</p>
     </div>
   </div>
 
@@ -171,7 +171,7 @@
   <!-- Grille -->
   <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6" *ngIf="!loading">
     <div *ngFor="let plat of filtered"
-      class="group relative bg-card shadow rounded-2xl overflow-hidden transition-all hover:shadow-xl hover:-translate-y-1 flex flex-col">
+      class="group relative bg-card shadow-md rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1.5 flex flex-col">
 
       <!-- Image -->
       <div class="relative overflow-hidden h-48 flex-shrink-0">
