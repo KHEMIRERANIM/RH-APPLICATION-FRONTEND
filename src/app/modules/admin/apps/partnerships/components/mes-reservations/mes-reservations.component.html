@@ -115,12 +115,12 @@
                 <div class="card-header-row">
                     <div class="offer-name">
                         <mat-icon svgIcon="heroicons_mini:tag" class="offer-icon"></mat-icon>
-                        <span>{{ r.titreOffreAvantage || ('OffreAvantage #' + r.idOffreAvantage?.slice(-6)) }}</span>
+                        <span>{{ r.titreOffreAvantage || ('Offre #' + r.idOffreAvantage?.slice(-6)) }}</span>
                     </div>
                     <span class="status-badge"
                         [class.badge-confirmee]="r.statut === 'CONFIRMEE'"
                         [class.badge-annulee]="r.statut === 'ANNULEE'">
-                        {{ r.statut === 'CONFIRMEE' ? '? CONFIRMÉEE' : '? ANNULÉEE' }}
+                        {{ r.statut === 'CONFIRMEE' ? 'CONFIRMÉE' : 'ANNULÉE' }}
                     </span>
                 </div>
 

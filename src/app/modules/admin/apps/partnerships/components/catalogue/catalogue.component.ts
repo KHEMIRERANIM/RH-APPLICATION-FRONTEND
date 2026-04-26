@@ -153,25 +153,25 @@ export class CatalogueComponent implements OnInit, OnDestroy {
         if (estFavori) {
             this._svc.retirerFavori(offre.id).subscribe({
                 next: () => {
-                    this.favoriMap[offre.id] = false;
-                    this._toastr.info('OffreAvantage retirée de vos favoris', 'Favoris');
-                    this.isTogglingFavori[offre.id] = false;
+                    this.favoriMap[offre.id!] = false;
+                    this._toastr.info(`L'offre "${offre.titre}" a été retirée de vos favoris`, 'Favoris');
+                    this.isTogglingFavori[offre.id!] = false;
                 },
                 error: () => {
                     this._toastr.error('Erreur lors du retrait du favori', 'Erreur');
-                    this.isTogglingFavori[offre.id] = false;
+                    this.isTogglingFavori[offre.id!] = false;
                 }
             });
         } else {
             this._svc.ajouterFavori(offre.id).subscribe({
                 next: () => {
-                    this.favoriMap[offre.id] = true;
-                    this._toastr.success('OffreAvantage ajoutée - vos favoris ?', 'Favoris');
-                    this.isTogglingFavori[offre.id] = false;
+                    this.favoriMap[offre.id!] = true;
+                    this._toastr.success(`L'offre "${offre.titre}" a été ajoutée à vos favoris`, 'Favoris');
+                    this.isTogglingFavori[offre.id!] = false;
                 },
                 error: (err) => {
                     this._toastr.error('Erreur ou offre déjé en favoris', 'Erreur');
-                    this.isTogglingFavori[offre.id] = false;
+                    this.isTogglingFavori[offre.id!] = false;
                 }
             });
         }

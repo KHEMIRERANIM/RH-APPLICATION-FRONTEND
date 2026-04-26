@@ -81,7 +81,7 @@ export class MesFavorisComponent implements OnInit, OnDestroy {
         this._svc.retirerFavori(offre.id).subscribe({
             next: () => {
                 this.offresFavorites = this.offresFavorites.filter(o => o.id !== offre.id);
-                this._toastr.success('OffreAvantage retirée des favoris');
+                this._toastr.success(`L'offre "${offre.titre}" a été retirée des favoris`);
                 delete this.isRemoving[offre.id!];
             },
             error: () => {

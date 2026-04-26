@@ -147,13 +147,15 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     }
 
     supprimerOffre(id: string): void {
-        if (!confirm('Confirmer la suppression de cette offre ?')) { return; }
+        const offre = this.offres.find(o => o.id === id);
+        const titre = offre ? offre.titre : 'Cette offre';
+        if (!confirm(`Confirmer la suppression de l'offre "${titre}" ?`)) { return; }
         this.deletingO[id] = true;
         this._svc.supprimerOffre(id)
             .pipe(takeUntil(this._unsub), finalize(() => delete this.deletingO[id]))
             .subscribe({
                 next: () => {
-                    this._toastr.success('OffreAvantage supprimée');
+                    this._toastr.success(`L'offre "${titre}" a été supprimée`);
                     this._loadOffres();
                 },
                 error: () => this._toastr.error('Erreur lors de la suppression')
@@ -167,7 +169,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
                 next: (updated) => {
                     const i = this.offres.findIndex(o => o.id === updated.id);
                     if (i !== -1) { this.offres[i] = updated; this.offresDS.data = [...this.offres]; }
-                    this._toastr.success(updated.statut === 'ACTIVE' ? 'OffreAvantage activée' : 'OffreAvantage désactivée');
+                    this._toastr.success(updated.statut === 'ACTIVE' ? `L'offre "${updated.titre}" a été activée` : `L'offre "${updated.titre}" a été désactivée`);
                 },
                 error: () => this._toastr.error('Erreur mise - jour statut')
             });

@@ -58,7 +58,7 @@ export class MesReservationsComponent implements OnInit, OnDestroy {
                     .pipe(takeUntil(this._unsub))
                     .subscribe({
                         next : (o) => { r.titreOffreAvantage = o.titre; },
-                        error: ()  => { r.titreOffreAvantage = 'OffreAvantage'; }
+                        error: ()  => { r.titreOffreAvantage = 'Offre introuvable'; }
                     });
             }
         });

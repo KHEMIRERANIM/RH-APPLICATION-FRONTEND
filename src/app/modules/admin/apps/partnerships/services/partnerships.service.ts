@@ -116,7 +116,7 @@ export class PartnershipsService {
      * Crée ou modifie une réservation existante - ADMIN + EMPLOYÉ
      */
     reserverOuModifier(idOffreAvantage: string, nbPersonnes: number): Observable<AvantageReservation> {
-        const params = new HttpParams()
+        let params = new HttpParams()
             .set('idOffreAvantage', idOffreAvantage)
             .set('nbPersonnes', nbPersonnes.toString());
         return this._http.post<AvantageReservation>(`${this.BASE_URL}/avantages/reservations`, null, { params });

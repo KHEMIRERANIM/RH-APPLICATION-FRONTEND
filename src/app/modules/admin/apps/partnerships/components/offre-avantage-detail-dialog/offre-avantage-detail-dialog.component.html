@@ -75,8 +75,8 @@
                 <mat-icon svgIcon="heroicons_solid:sparkles"></mat-icon>
             </div>
             <div class="ia-alert-content">
-                <h4 class="ia-alert-title">Diagnostic de l'Intelligence Artificielle</h4>
-                <p class="ia-alert-text">Selon l'historique de notre entreprise et les algorithmes prédictifs, le risque de rupture de stock sur cette offre atteint <strong>{{ probaRupture }}%</strong>. Il vous est conseillé de réserver dès aujourd'hui.</p>
+                <h4 class="ia-alert-title">Offre très demandée 🔥</h4>
+                <p class="ia-alert-text">Notre IA estime un risque de rupture imminent de <strong>{{ probaRupture }}%</strong>. Ne tardez pas à réserver !</p>
             </div>
         </div>
 
@@ -103,6 +103,8 @@
                     </button>
                 </div>
             </div>
+
+
 
             <!-- CAS HÔTEL -->
             <div class="hotel-reservation-block" *ngIf="isHotel">
@@ -204,7 +206,7 @@
 
             <div class="recap-list">
                 <div class="recap-row">
-                    <span class="recap-key">OffreAvantage</span>
+                    <span class="recap-key">Offre</span>
                     <span class="recap-val">{{ offre.titre }}</span>
                 </div>
                 <div class="recap-row" *ngIf="!isHotel">
@@ -222,6 +224,10 @@
                 <div class="recap-row" *ngIf="!isHotel">
                     <span class="recap-key">Nombre de personnes</span>
                     <span class="recap-val">{{ form.get('nbPersonnes')?.value }} pers. × {{ offre.prixConvention | number:'1.0-2' }} DT</span>
+                </div>
+                <div class="recap-row" *ngIf="!isHotel && form.get('inclureNavette')?.value">
+                    <span class="recap-key">Transport RSE</span>
+                    <span class="recap-val" style="color: #10b981; font-weight: 500;">Navette incluse ✅</span>
                 </div>
                 <ng-container *ngIf="isHotel">
                     <div class="recap-row">

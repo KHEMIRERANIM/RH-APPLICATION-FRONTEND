@@ -256,7 +256,7 @@ export class OffreAvantageFormComponent implements OnInit, OnDestroy {
                 .pipe(takeUntil(this._unsub), finalize(() => this.isSaving = false))
                 .subscribe({
                     next : () => {
-                        this._toastr.success('OffreAvantage modifiée avec succès');
+                        this._toastr.success(`L'offre "${payload.titre}" a été modifiée avec succès`);
                         this.annuler();
                     },
                     error: err => this._toastr.error(err?.error?.message || 'Erreur modification')
@@ -266,7 +266,7 @@ export class OffreAvantageFormComponent implements OnInit, OnDestroy {
                 .pipe(takeUntil(this._unsub), finalize(() => this.isSaving = false))
                 .subscribe({
                     next : () => {
-                        this._toastr.success('OffreAvantage créée avec succès');
+                        this._toastr.success(`L'offre "${payload.titre}" a été créée avec succès`);
                         this.annuler();
                     },
                     error: err => this._toastr.error(err?.error?.message || 'Erreur création')

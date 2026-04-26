@@ -86,10 +86,10 @@ const routerConfig: ExtraOptions = {
         
         ToastrModule.forRoot({
             positionClass: 'toast-top-right',
-            timeOut: 0,
-            extendedTimeOut: 0,
-            disableTimeOut: true,
-            progressBar: false,
+            timeOut: 3000,
+            extendedTimeOut: 1000,
+            disableTimeOut: false,
+            progressBar: true,
             closeButton: true,
             preventDuplicates: true,
             newestOnTop: true
