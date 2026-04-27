@@ -1,13 +1,15 @@
 <div class="auth-sign-in-page flex flex-col lg:flex-row flex-auto min-w-0 relative overflow-hidden">
 
     <!-- Colonne gauche : formulaire -->
-    <div class="relative z-10 flex flex-col flex-auto lg:w-1/2 items-center justify-center px-4 py-10 sm:py-14 lg:py-16 lg:px-12">
+    <div
+        class="relative z-10 flex flex-col flex-auto lg:w-1/2 items-center justify-center px-4 py-10 sm:py-14 lg:py-16 lg:px-12">
         <div class="auth-glass-card w-full max-w-md rounded-3xl p-8 sm:p-10">
 
             <!-- Logo + titre -->
             <div class="flex flex-col items-center text-center">
                 <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-sky-100 ring-1 ring-sky-200">
-                    <mat-icon class="icon-size-8 text-sky-600" [svgIcon]="'heroicons_outline:office-building'"></mat-icon>
+                    <mat-icon class="icon-size-8 text-sky-600"
+                        [svgIcon]="'heroicons_outline:office-building'"></mat-icon>
                 </div>
                 <h1 class="mt-6 text-3xl sm:text-4xl font-bold tracking-tight auth-gradient-title">
                     Portail RH & RSE
@@ -20,13 +22,8 @@
             <div class="mt-8"></div>
 
             <!-- Alert -->
-            <fuse-alert
-                class="mt-6 -mb-2"
-                *ngIf="showAlert"
-                [appearance]="'outline'"
-                [showIcon]="false"
-                [type]="alert.type"
-                [@shake]="alert.type === 'error'">
+            <fuse-alert class="mt-6 -mb-2" *ngIf="showAlert" [appearance]="'outline'" [showIcon]="false"
+                [type]="alert.type" [@shake]="alert.type === 'error'">
                 {{alert.message}}
             </fuse-alert>
 
@@ -35,23 +32,26 @@
 
                 <mat-form-field class="w-full fuse-mat-dense">
                     <mat-label>Adresse email</mat-label>
-                    <mat-icon matPrefix class="icon-size-5 mr-2 text-slate-500" [svgIcon]="'heroicons_outline:mail'"></mat-icon>
-                    <input id="email" matInput [formControlName]="'email'" autocomplete="email" placeholder="exemple@entreprise.com">
+                    <mat-icon matPrefix class="icon-size-5 mr-2 text-slate-500"
+                        [svgIcon]="'heroicons_outline:mail'"></mat-icon>
+                    <input id="email" matInput [formControlName]="'email'" autocomplete="email"
+                        placeholder="exemple@entreprise.com">
                     <mat-error *ngIf="signInForm.get('email').hasError('required')">L'email est requis</mat-error>
                     <mat-error *ngIf="signInForm.get('email').hasError('email')">Adresse email invalide</mat-error>
                 </mat-form-field>
 
                 <mat-form-field class="w-full fuse-mat-dense mt-2">
                     <mat-label>Mot de passe</mat-label>
-                    <mat-icon matPrefix class="icon-size-5 mr-2 text-slate-500" [svgIcon]="'heroicons_outline:lock-closed'"></mat-icon>
-                    <input id="password" matInput type="password" [formControlName]="'password'" #passwordField autocomplete="current-password">
-                    <button
-                        mat-icon-button
-                        type="button"
-                        matSuffix
+                    <mat-icon matPrefix class="icon-size-5 mr-2 text-slate-500"
+                        [svgIcon]="'heroicons_outline:lock-closed'"></mat-icon>
+                    <input id="password" matInput type="password" [formControlName]="'password'" #passwordField
+                        autocomplete="current-password">
+                    <button mat-icon-button type="button" matSuffix
                         (click)="passwordField.type === 'password' ? passwordField.type = 'text' : passwordField.type = 'password'">
-                        <mat-icon class="icon-size-5" *ngIf="passwordField.type === 'password'" [svgIcon]="'heroicons_outline:eye'"></mat-icon>
-                        <mat-icon class="icon-size-5" *ngIf="passwordField.type === 'text'" [svgIcon]="'heroicons_outline:eye-off'"></mat-icon>
+                        <mat-icon class="icon-size-5" *ngIf="passwordField.type === 'password'"
+                            [svgIcon]="'heroicons_outline:eye'"></mat-icon>
+                        <mat-icon class="icon-size-5" *ngIf="passwordField.type === 'text'"
+                            [svgIcon]="'heroicons_outline:eye-off'"></mat-icon>
                     </button>
                     <mat-error>Le mot de passe est requis</mat-error>
                 </mat-form-field>
@@ -65,14 +65,11 @@
                     </a>
                 </div>
 
-                <button
-                    type="submit"
-                    class="fuse-mat-button-large w-full mt-6 h-12 text-base font-semibold rounded-xl"
-                    mat-flat-button
-                    [color]="'primary'"
-                    [disabled]="signInForm.disabled">
+                <button type="submit" class="fuse-mat-button-large w-full mt-6 h-12 text-base font-semibold rounded-xl"
+                    mat-flat-button [color]="'primary'" [disabled]="signInForm.disabled">
                     <span *ngIf="!signInForm.disabled">Entrer dans l’application</span>
-                    <mat-progress-spinner *ngIf="signInForm.disabled" [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+                    <mat-progress-spinner *ngIf="signInForm.disabled" [diameter]="24"
+                        [mode]="'indeterminate'"></mat-progress-spinner>
                 </button>
 
                 <div class="mt-6 pt-6 border-t border-slate-200 text-center">
@@ -88,7 +85,8 @@
     <!-- Colonne droite : visuel clair -->
     <div class="auth-hero-panel relative hidden lg:flex lg:w-1/2 flex-col justify-center p-12 xl:p-20 overflow-hidden">
         <div class="absolute top-10 right-10 w-64 h-64 rounded-full bg-sky-200/40 blur-3xl pointer-events-none"></div>
-        <div class="absolute bottom-10 left-10 w-48 h-48 rounded-full bg-indigo-200/35 blur-3xl pointer-events-none"></div>
+        <div class="absolute bottom-10 left-10 w-48 h-48 rounded-full bg-indigo-200/35 blur-3xl pointer-events-none">
+        </div>
 
         <div class="relative z-10 max-w-lg">
             <p class="text-sky-700 text-sm font-semibold tracking-wide uppercase mb-4">Une plateforme tout-en-un</p>
@@ -96,7 +94,8 @@
                 Pilotez vos ressources humaines avec sérénité
             </h2>
             <p class="mt-6 text-lg text-slate-600 leading-relaxed">
-                Après connexion, vous accédez au tableau de bord, aux formations, congés, recrutement et à tous les modules RH.
+                Après connexion, vous accédez au tableau de bord, aux formations, congés, recrutement et à tous les
+                modules RH.
             </p>
 
             <div class="mt-10 grid grid-cols-2 gap-4">
@@ -111,9 +110,12 @@
             </div>
 
             <div class="flex items-center mt-10 -space-x-2">
-                <img class="w-11 h-11 rounded-full ring-2 ring-white shadow object-cover" src="assets/images/avatars/female-18.jpg" alt="">
-                <img class="w-11 h-11 rounded-full ring-2 ring-white shadow object-cover" src="assets/images/avatars/male-09.jpg" alt="">
-                <img class="w-11 h-11 rounded-full ring-2 ring-white shadow object-cover" src="assets/images/avatars/female-11.jpg" alt="">
+                <img class="w-11 h-11 rounded-full ring-2 ring-white shadow object-cover"
+                    src="assets/images/avatars/female-18.jpg" alt="">
+                <img class="w-11 h-11 rounded-full ring-2 ring-white shadow object-cover"
+                    src="assets/images/avatars/male-09.jpg" alt="">
+                <img class="w-11 h-11 rounded-full ring-2 ring-white shadow object-cover"
+                    src="assets/images/avatars/female-11.jpg" alt="">
                 <span class="pl-6 text-sm text-slate-600">Des entreprises nous font confiance</span>
             </div>
         </div>

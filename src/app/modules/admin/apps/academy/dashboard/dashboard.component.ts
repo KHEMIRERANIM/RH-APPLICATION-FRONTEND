@@ -6,11 +6,11 @@ import { ToastrService } from 'ngx-toastr';
 import { AcademyService } from '../academy.service';
 import { NotificationService } from 'src/app/services/notification.service';
 import { PredictionResponse, FacteurPrediction, RecommandationEmployeResponse } from '../academy.types';
-import { 
-    DemandeConge, 
-    BulletinSalaire, 
-    User, 
-    AlerteTendance, 
+import {
+    DemandeConge,
+    BulletinSalaire,
+    User,
+    AlerteTendance,
     AdminStats,
     StatutConge,
     TypeConge
@@ -29,9 +29,9 @@ import { EditBulletinDialogComponent } from './dialogs/edit-bulletin-dialog.comp
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AcademyDashboardComponent implements OnInit, OnDestroy {
-    
+
     @ViewChild('adminTabs', { static: false }) adminTabs?: MatTabGroup;
-    
+
     demandes: DemandeConge[] = [];
     demandesFiltrees: DemandeConge[] = [];
     bulletins: BulletinSalaire[] = [];
@@ -43,7 +43,7 @@ export class AcademyDashboardComponent implements OnInit, OnDestroy {
     filtreStatut: string = 'all';
     searchQuery: string = '';
     demandesEnAttenteCount: number = 0;
-    
+
     private _unsubscribeAll: Subject<any> = new Subject();
 
     constructor(
@@ -52,7 +52,7 @@ export class AcademyDashboardComponent implements OnInit, OnDestroy {
         private _dialog: MatDialog,
         private toastr: ToastrService,
         private notificationService: NotificationService
-    ) {}
+    ) { }
 
     ngOnInit(): void {
         this.loadData();
@@ -67,28 +67,28 @@ export class AcademyDashboardComponent implements OnInit, OnDestroy {
                 this.applyFilters();
                 this._changeDetectorRef.markForCheck();
             });
-        
+
         this._academyService.bulletins$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe(bulletins => {
                 this.bulletins = bulletins || [];
                 this._changeDetectorRef.markForCheck();
             });
-        
+
         this._academyService.employes$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe(employes => {
                 this.employes = employes || [];
                 this._changeDetectorRef.markForCheck();
             });
-        
+
         this._academyService.stats$
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe(stats => {
                 this.stats = stats;
                 this._changeDetectorRef.markForCheck();
             });
-        
+
         this.loadAlertes();
 
         // S'abonner aux notifications WebSocket
@@ -103,25 +103,25 @@ export class AcademyDashboardComponent implements OnInit, OnDestroy {
             }
         });
     }
-    
+
     ngOnDestroy(): void {
         this._unsubscribeAll.next(null);
         this._unsubscribeAll.complete();
         this.notificationService.disconnect();
     }
-    
+
     loadData(): void {
         this._academyService.loadAdminData();
     }
-    
+
     refreshData(): void {
         this.loadData();
         this.loadAlertes();
     }
-    
+
     loadAlertes(): void {
         const managerId = "69c9c83763d00230b5311df9";
-        
+
         this._academyService.detecterTendances(managerId).subscribe({
             next: (result) => {
                 console.log('Alertes reçues du backend:', result);
@@ -136,29 +136,29 @@ export class AcademyDashboardComponent implements OnInit, OnDestroy {
             }
         });
     }
-    
+
     onTabChange(index: number): void {
         if (index === 0 && this.demandes.length === 0) this.loadData();
         if (index === 1 && this.bulletins.length === 0) this.loadData();
         if (index === 2 && this.employes.length === 0) this.loadData();
     }
-    
+
     goToDemandes(): void {
         if (this.adminTabs) {
             this.adminTabs.selectedIndex = 0;
         }
     }
-    
+
     setFiltreStatut(statut: string): void {
         this.filtreStatut = statut;
         this.applyFilters();
     }
-    
+
     searchDemandes(event: Event): void {
         this.searchQuery = (event.target as HTMLInputElement).value;
         this.applyFilters();
     }
-    
+
     applyFilters(): void {
         let filtered = [...this.demandes];
         if (this.filtreStatut !== 'all') {
@@ -166,7 +166,7 @@ export class AcademyDashboardComponent implements OnInit, OnDestroy {
         }
         if (this.searchQuery) {
             const query = this.searchQuery.toLowerCase();
-            filtered = filtered.filter(d => 
+            filtered = filtered.filter(d =>
                 this.getEmployeNom(d.employeId).toLowerCase().includes(query) ||
                 d.motif?.toLowerCase().includes(query) ||
                 d.type?.toLowerCase().includes(query)
@@ -175,7 +175,7 @@ export class AcademyDashboardComponent implements OnInit, OnDestroy {
         this.demandesFiltrees = filtered;
         this._changeDetectorRef.markForCheck();
     }
-    
+
     openValidationDialog(demande: DemandeConge, decision: 'APPROUVE' | 'REFUSE'): void {
         const dialogRef = this._dialog.open(ValidateCongeDialogComponent, {
             width: '500px',
@@ -187,14 +187,14 @@ export class AcademyDashboardComponent implements OnInit, OnDestroy {
             if (result === true) {
                 this.loadData();
                 this.loadAlertes();
-                const message = decision === 'APPROUVE' 
-                    ? '✅ Demande approuvée avec succès' 
+                const message = decision === 'APPROUVE'
+                    ? '✅ Demande approuvée avec succès'
                     : '❌ Demande refusée';
                 this.toastr.success(message, 'Succès');
             }
         });
     }
-    
+
     openCreateBulletinDialog(): void {
         const dialogRef = this._dialog.open(CreateBulletinDialogComponent, {
             width: '600px'
@@ -203,14 +203,14 @@ export class AcademyDashboardComponent implements OnInit, OnDestroy {
             if (result) this.loadData();
         });
     }
-    
+
     viewBulletinDetail(bulletin: BulletinSalaire): void {
         this._dialog.open(BulletinDetailDialogComponent, {
             width: '550px',
             data: bulletin
         });
     }
-    
+
     deleteBulletin(id: string, mois?: number, annee?: number): void {
         const dialogRef = this._dialog.open(ConfirmDialogComponent, {
             width: '400px',
@@ -228,7 +228,7 @@ export class AcademyDashboardComponent implements OnInit, OnDestroy {
             }
         });
     }
-    
+
     editBulletin(bulletin: BulletinSalaire): void {
         const dialogRef = this._dialog.open(EditBulletinDialogComponent, {
             width: '550px',
@@ -241,7 +241,7 @@ export class AcademyDashboardComponent implements OnInit, OnDestroy {
             }
         });
     }
-    
+
     viewSoldeConge(employeId: string): void {
         this._academyService.getSoldeConge(employeId).subscribe({
             next: (solde) => {
@@ -266,17 +266,17 @@ export class AcademyDashboardComponent implements OnInit, OnDestroy {
             }
         });
     }
-    
+
     getEmployeNom(employeId: string): string {
         const employe = this.employes.find(e => e.id === employeId);
         return employe ? `${employe.prenom} ${employe.nom}` : employeId.substring(0, 8);
     }
-    
+
     getMoisLabel(mois: number): string {
         const moisLabels = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
         return moisLabels[mois - 1] || `${mois}`;
     }
-    
+
     getStatutLabel(statut: string): string {
         const labels: Record<string, string> = {
             'EN_ATTENTE': 'En attente',
@@ -286,7 +286,7 @@ export class AcademyDashboardComponent implements OnInit, OnDestroy {
         };
         return labels[statut] || statut;
     }
-    
+
     getStatutClass(statut: string): string {
         const classes: Record<string, string> = {
             'EN_ATTENTE': 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
@@ -296,7 +296,7 @@ export class AcademyDashboardComponent implements OnInit, OnDestroy {
         };
         return classes[statut] || '';
     }
-    
+
     getTypeCongeLabel(type: string): string {
         const labels: Record<string, string> = {
             'CONGE_ANNUEL': 'Annuel',
@@ -308,7 +308,7 @@ export class AcademyDashboardComponent implements OnInit, OnDestroy {
         };
         return labels[type] || type;
     }
-    
+
     getTypeCongeClass(type: string): string {
         const classes: Record<string, string> = {
             'CONGE_ANNUEL': 'bg-blue-100 text-blue-800',

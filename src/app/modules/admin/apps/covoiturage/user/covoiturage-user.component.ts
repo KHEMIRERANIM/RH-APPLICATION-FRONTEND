@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, OnDestroy, ElementRef, Renderer2, ViewChild, ChangeDetectorRef, NgZone, ApplicationRef } from '@angular/core';
+﻿import { Component, OnInit, AfterViewInit, OnDestroy, ElementRef, Renderer2, ViewChild, ChangeDetectorRef, NgZone, ApplicationRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CovoiturageService, Vehicule, Trajet, ReservationResponse, ReservationRequest } from '../covoiturage.service';
@@ -1284,7 +1284,7 @@ export class CovoiturageUserComponent implements OnInit, AfterViewInit, OnDestro
     if (this.employesMap.has(String(id))) {
       return this.employesMap.get(String(id))!;
     }
-    
+
     // Lazy load the user if not found in map (bypass 403 on getAllEmployees for EMPLOYE)
     this.employesMap.set(String(id), 'Chargement...');
     this.userService.getUserById(id).subscribe({

@@ -101,7 +101,7 @@ export class PipelineComponent implements OnInit {
         this.kanban = data;
         // Appliquer le tri par défaut
         for (const statut of this.allStatuts) {
-           this.applySort(statut as StatutCandidature);
+          this.applySort(statut as StatutCandidature);
         }
         this.loading = false;
       },
@@ -173,11 +173,11 @@ export class PipelineComponent implements OnInit {
         type: "radar",
         toolbar: { show: false },
         dropShadow: {
-            enabled: true,
-            blur: 8,
-            left: 1,
-            top: 1,
-            opacity: 0.2
+          enabled: true,
+          blur: 8,
+          left: 1,
+          top: 1,
+          opacity: 0.2
         }
       },
       plotOptions: {
@@ -210,12 +210,12 @@ export class PipelineComponent implements OnInit {
       xaxis: {
         categories: ["Leadership", "Innovation", "Empathie", "Adaptabilité", "Communication"],
         labels: {
-            show: true,
-            style: {
-                colors: ["#64748b", "#64748b", "#64748b", "#64748b", "#64748b"],
-                fontSize: "11px",
-                fontWeight: 800
-            }
+          show: true,
+          style: {
+            colors: ["#64748b", "#64748b", "#64748b", "#64748b", "#64748b"],
+            fontSize: "11px",
+            fontWeight: 800
+          }
         }
       }
     };
@@ -223,7 +223,7 @@ export class PipelineComponent implements OnInit {
 
   private updateRadarChart(c: Candidature): void {
     if (!c.scoreLeadership) return;
-    
+
     this.radarChartOptions.series = [{
       name: "Score IA",
       data: [
@@ -247,10 +247,10 @@ export class PipelineComponent implements OnInit {
 
   directMove(c: Candidature, nouveauStatut: StatutCandidature): void {
     if (this.changingStatut || c.statut === nouveauStatut) return;
-    
+
     this.changingStatut = true;
     const req: ChangerStatutRequest = { nouveauStatut, commentaire: 'Mouvement rapide via Pipeline' };
-    
+
     this.candidatureService.changerStatut(c.id, req).subscribe({
       next: () => {
         this.changingStatut = false;

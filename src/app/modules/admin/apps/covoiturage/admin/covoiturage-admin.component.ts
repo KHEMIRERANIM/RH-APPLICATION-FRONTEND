@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { BusService, Bus, BusPackRequest } from '../bus.service';
 import { CovoiturageService } from '../covoiturage.service';
 import { forkJoin, of } from 'rxjs';

@@ -170,10 +170,10 @@ export class ChauffeurTrackingComponent implements OnInit, AfterViewInit, OnDest
     this.isLoading = true;
     this.covoiturageService.getAllTrajets().subscribe(trajets => {
       this.trajetsActifs = trajets.filter(t => t.statut === 'ACTIF' || t.statut === 'EN_ROUTE');
-      
+
       // Essayer de trouver dans la liste active d'abord
       this.selectedTrajet = this.trajetsActifs.find(t => t.id === this.trajetId);
-      
+
       if (this.selectedTrajet) {
         this.vehiculeId = this.selectedTrajet.vehiculeId;
         this.chargerArretPourVehicule();
@@ -220,7 +220,7 @@ export class ChauffeurTrackingComponent implements OnInit, AfterViewInit, OnDest
 
     let trajet = this.trajetsActifs.find(t => t.vehiculeId === this.vehiculeId);
     let adresseDepart = (trajet?.adresseDepart || '').trim();
-    
+
     // ✅ Repli sur position actuelle si aucune adresse n'est configurée
     if (!adresseDepart) {
       if (this.lastLat && this.lastLng) {
@@ -324,7 +324,7 @@ export class ChauffeurTrackingComponent implements OnInit, AfterViewInit, OnDest
     } catch (error) {
       console.warn('Erreur OSRM démo, utilisation ligne droite:', error);
       this.trajetsSimule = this.pointsLigneDroite(startLat, startLng, destLat, destLng, 100);
-      
+
       // Affichage immédiat de la ligne droite de secours
       if (this.chauffeurMap) {
         const points = this.trajetsSimule.map(p => [p.lat, p.lng]);
@@ -396,9 +396,9 @@ export class ChauffeurTrackingComponent implements OnInit, AfterViewInit, OnDest
         if (this.stompClient?.connected && this.isValidCoordinate(lat, lng)) {
           this.stompClient.publish({
             destination: `/topic/navette/${this.vehiculeId}`,
-            body: JSON.stringify({ 
-              vehiculeId: this.vehiculeId, 
-              latitude: lat, 
+            body: JSON.stringify({
+              vehiculeId: this.vehiculeId,
+              latitude: lat,
               longitude: lng,
               statut: 'EN_ROUTE',
               tempsRestant: this.tempsRestant,
@@ -431,7 +431,7 @@ export class ChauffeurTrackingComponent implements OnInit, AfterViewInit, OnDest
       this.arretLat = (this.lastLat || 36.8065) + 0.01;
       this.arretLng = (this.lastLng || 10.1815) + 0.01;
     }
-    
+
     await this.genererTrajetDemo(this.arretLat, this.arretLng);
 
     if (!this.trajetsSimule || this.trajetsSimule.length === 0) {

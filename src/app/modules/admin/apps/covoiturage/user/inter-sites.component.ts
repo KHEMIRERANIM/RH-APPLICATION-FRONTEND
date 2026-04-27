@@ -65,4 +65,4 @@ import { Component } from '@angular/core';
     </div>
   `
 })
-export class InterSitesComponent {}
+export class InterSitesComponent { }

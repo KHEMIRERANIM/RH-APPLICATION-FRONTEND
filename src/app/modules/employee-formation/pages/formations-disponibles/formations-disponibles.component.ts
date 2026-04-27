@@ -1,4 +1,4 @@
-﻿// C:\pi\RH-APPLICATION-FRONTEND\src\app\modules\employee\pages\formations-disponibles\formations-disponibles.component.ts
+// C:\pi\RH-APPLICATION-FRONTEND\src\app\modules\employee\pages\formations-disponibles\formations-disponibles.component.ts
 
 import { Component, OnInit } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -56,64 +56,64 @@ export class FormationsDisponiblesComponent implements OnInit {
     recommendationsBadgeCount: number = 0;
 
     types = [
-        { value: 'TECHNIQUE',   label: 'Technique',   color: '#3b82f6', icon: '' },
-        { value: 'MANAGERIAL',  label: 'Managerial',  color: '#10b981', icon: '' },
-        { value: 'RSE',         label: 'RSE',          color: '#8b5cf6', icon: '' },
+        { value: 'TECHNIQUE', label: 'Technique', color: '#3b82f6', icon: '' },
+        { value: 'MANAGERIAL', label: 'Managerial', color: '#10b981', icon: '' },
+        { value: 'RSE', label: 'RSE', color: '#8b5cf6', icon: '' },
         { value: 'SOFT_SKILLS', label: 'Soft Skills', color: '#f59e0b', icon: '' },
-        { value: 'SECURITE',    label: 'Sécurité',    color: '#ef4444', icon: '' },
+        { value: 'SECURITE', label: 'Sécurité', color: '#ef4444', icon: '' },
         { value: 'OBLIGATOIRE', label: 'Obligatoire', color: '#6366f1', icon: '' }
     ];
 
     categoriesParPoste: { [key: string]: string[] } = {
         'Développeur Full Stack': ['TECHNIQUE', 'SOFT_SKILLS', 'SECURITE'],
-        'Développeur Frontend':   ['TECHNIQUE', 'SOFT_SKILLS'],
-        'Développeur Backend':    ['TECHNIQUE', 'SECURITE'],
-        'Développeur Mobile':     ['TECHNIQUE', 'SOFT_SKILLS'],
-        'Développeur Java':       ['TECHNIQUE', 'SECURITE'],
-        'Développeur Python':     ['TECHNIQUE', 'SOFT_SKILLS'],
-        'Data Scientist':         ['TECHNIQUE', 'RSE', 'SOFT_SKILLS'],
-        'Data Analyst':           ['TECHNIQUE', 'SOFT_SKILLS'],
-        'Data Engineer':          ['TECHNIQUE', 'SECURITE'],
-        'DevOps Engineer':        ['TECHNIQUE', 'SECURITE'],
-        'Cloud Architect':        ['TECHNIQUE', 'SECURITE'],
-        'Chef de Projet':         ['MANAGERIAL', 'SOFT_SKILLS', 'SECURITE'],
-        'Scrum Master':           ['MANAGERIAL', 'SOFT_SKILLS'],
-        'Product Owner':          ['MANAGERIAL', 'SOFT_SKILLS'],
-        'Responsable RH':         ['MANAGERIAL', 'RSE', 'SOFT_SKILLS', 'SECURITE'],
-        'Recruteur':              ['MANAGERIAL', 'SOFT_SKILLS'],
-        'Responsable Marketing':  ['MANAGERIAL', 'SOFT_SKILLS', 'RSE'],
-        'Commercial':             ['SOFT_SKILLS', 'MANAGERIAL'],
-        'Comptable':              ['TECHNIQUE', 'SOFT_SKILLS'],
-        'Contrôleur de Gestion':  ['TECHNIQUE', 'MANAGERIAL'],
-        'Technicien Support':     ['TECHNIQUE', 'SECURITE', 'SOFT_SKILLS'],
-        'Assistant Administratif':['SOFT_SKILLS', 'MANAGERIAL'],
-        'default':                ['SOFT_SKILLS', 'MANAGERIAL', 'RSE', 'OBLIGATOIRE']
+        'Développeur Frontend': ['TECHNIQUE', 'SOFT_SKILLS'],
+        'Développeur Backend': ['TECHNIQUE', 'SECURITE'],
+        'Développeur Mobile': ['TECHNIQUE', 'SOFT_SKILLS'],
+        'Développeur Java': ['TECHNIQUE', 'SECURITE'],
+        'Développeur Python': ['TECHNIQUE', 'SOFT_SKILLS'],
+        'Data Scientist': ['TECHNIQUE', 'RSE', 'SOFT_SKILLS'],
+        'Data Analyst': ['TECHNIQUE', 'SOFT_SKILLS'],
+        'Data Engineer': ['TECHNIQUE', 'SECURITE'],
+        'DevOps Engineer': ['TECHNIQUE', 'SECURITE'],
+        'Cloud Architect': ['TECHNIQUE', 'SECURITE'],
+        'Chef de Projet': ['MANAGERIAL', 'SOFT_SKILLS', 'SECURITE'],
+        'Scrum Master': ['MANAGERIAL', 'SOFT_SKILLS'],
+        'Product Owner': ['MANAGERIAL', 'SOFT_SKILLS'],
+        'Responsable RH': ['MANAGERIAL', 'RSE', 'SOFT_SKILLS', 'SECURITE'],
+        'Recruteur': ['MANAGERIAL', 'SOFT_SKILLS'],
+        'Responsable Marketing': ['MANAGERIAL', 'SOFT_SKILLS', 'RSE'],
+        'Commercial': ['SOFT_SKILLS', 'MANAGERIAL'],
+        'Comptable': ['TECHNIQUE', 'SOFT_SKILLS'],
+        'Contrôleur de Gestion': ['TECHNIQUE', 'MANAGERIAL'],
+        'Technicien Support': ['TECHNIQUE', 'SECURITE', 'SOFT_SKILLS'],
+        'Assistant Administratif': ['SOFT_SKILLS', 'MANAGERIAL'],
+        'default': ['SOFT_SKILLS', 'MANAGERIAL', 'RSE', 'OBLIGATOIRE']
     };
 
     private posteIcons: { [key: string]: string } = {
         'Développeur Full Stack': '💻',
-        'Développeur Frontend':   '🎨',
-        'Développeur Backend':    '⚙️',
-        'Développeur Mobile':     '📱',
-        'Développeur Java':       '☕',
-        'Développeur Python':     '🐍',
-        'Data Scientist':         '📊',
-        'Data Analyst':           '📈',
-        'Data Engineer':          '🏗️',
-        'DevOps Engineer':        '',
-        'Cloud Architect':        '☁️',
-        'Chef de Projet':         '📋',
-        'Scrum Master':           '🔄',
-        'Product Owner':          '🎯',
-        'Responsable RH':         '👥',
-        'Recruteur':              '🔍',
-        'Responsable Marketing':  '📢',
-        'Commercial':             '🤝',
-        'Comptable':              '💰',
-        'Contrôleur de Gestion':  '📉',
-        'Technicien Support':     '🔧',
-        'Assistant Administratif':'📎',
-        'default':                '👤'
+        'Développeur Frontend': '🎨',
+        'Développeur Backend': '⚙️',
+        'Développeur Mobile': '📱',
+        'Développeur Java': '☕',
+        'Développeur Python': '🐍',
+        'Data Scientist': '📊',
+        'Data Analyst': '📈',
+        'Data Engineer': '🏗️',
+        'DevOps Engineer': '',
+        'Cloud Architect': '☁️',
+        'Chef de Projet': '📋',
+        'Scrum Master': '🔄',
+        'Product Owner': '🎯',
+        'Responsable RH': '👥',
+        'Recruteur': '🔍',
+        'Responsable Marketing': '📢',
+        'Commercial': '🤝',
+        'Comptable': '💰',
+        'Contrôleur de Gestion': '📉',
+        'Technicien Support': '🔧',
+        'Assistant Administratif': '📎',
+        'default': '👤'
     };
 
     constructor(
@@ -128,7 +128,7 @@ export class FormationsDisponiblesComponent implements OnInit {
         private recommendationService: RecommendationService,
         private voteService: VotePropositionService
 
-    ) {}
+    ) { }
 
     ngOnInit(): void {
         this.checkAuthStatus();
@@ -138,22 +138,22 @@ export class FormationsDisponiblesComponent implements OnInit {
             this.loadUserInscriptions();
             this.loadUserPoints();
             this.loadPersonalizedRecommendations();
-                    this.loadPropositionsVote(); // ← Ajoutez cette ligne
+            this.loadPropositionsVote(); // ← Ajoutez cette ligne
 
         }
     }
 
     // ========== MÉTHODES RECOMMANDATIONS ==========
-    
+
     loadPersonalizedRecommendations(): void {
         this.isLoadingRecommendations = true;
         const employeId = this.getCurrentUserId();
-        
+
         if (!employeId) {
             this.isLoadingRecommendations = false;
             return;
         }
-        
+
         this.recommendationService.getPersonalizedRecommendations(employeId).subscribe({
             next: (recommendation) => {
                 this.personalizedRecommendation = recommendation;
@@ -168,7 +168,7 @@ export class FormationsDisponiblesComponent implements OnInit {
             }
         });
     }
-    
+
     loadMockRecommendations(): void {
         this.personalizedRecommendation = {
             employeId: this.getCurrentUserId(),
@@ -194,30 +194,30 @@ export class FormationsDisponiblesComponent implements OnInit {
         };
         this.recommendationsBadgeCount = this.personalizedRecommendation.suggestionsFormations.length;
     }
-    
+
     getTopRecommendations(limit: number = 2): any[] {
         if (!this.personalizedRecommendation?.suggestionsFormations) return [];
         return this.personalizedRecommendation.suggestionsFormations.slice(0, limit);
     }
-    
+
     getTechGaps(): string[] {
         if (!this.personalizedRecommendation?.technologiesRecommandees) return [];
         return this.personalizedRecommendation.technologiesRecommandees.slice(0, 4);
     }
-    
+
     getNextLevel(): string {
         return this.personalizedRecommendation?.prochainNiveau || 'DÉBUTANT';
     }
-    
+
     getNextLevelClass(): string {
         const level = this.getNextLevel().toLowerCase();
-        switch(level) {
+        switch (level) {
             case 'expert': return 'text-purple-600';
             case 'intermédiaire': return 'text-orange-600';
             default: return 'text-blue-600';
         }
     }
-    
+
     getCompetenceScore(): number {
         const connues = this.personalizedRecommendation?.technologiesConnues?.length || 0;
         const recommandees = this.personalizedRecommendation?.technologiesRecommandees?.length || 0;
@@ -225,7 +225,7 @@ export class FormationsDisponiblesComponent implements OnInit {
         if (total === 0) return 50;
         return Math.round((connues / total) * 100);
     }
-    
+
     suggestFormation(tech: string): void {
         this.dialogService.confirm({
             title: 'Proposer une formation',
@@ -244,13 +244,13 @@ export class FormationsDisponiblesComponent implements OnInit {
             }
         });
     }
-    
+
     openRecommendationsPage(): void {
         this.router.navigate(['/employee/recommendations']);
     }
 
     // ========== MÉTHODES EXISTANTES (à garder) ==========
-    
+
     trackByFn(index: number, item: any): any {
         return item.id || index;
     }
@@ -258,7 +258,7 @@ export class FormationsDisponiblesComponent implements OnInit {
     checkAuthStatus(): void {
         this.isLoggedIn = !!localStorage.getItem('userId');
         this.userRole = localStorage.getItem('userRole');
-        
+
         if (!this.userRole && localStorage.getItem('currentUser')) {
             try {
                 const currentUser = JSON.parse(localStorage.getItem('currentUser')!);
@@ -266,9 +266,9 @@ export class FormationsDisponiblesComponent implements OnInit {
                     this.userRole = currentUser.role;
                     localStorage.setItem('userRole', this.userRole);
                 }
-            } catch (e) {}
+            } catch (e) { }
         }
-        
+
         if (this.isLoggedIn && !this.userRole) {
             this.userRole = 'EMPLOYE';
             localStorage.setItem('userRole', 'EMPLOYE');
@@ -315,7 +315,7 @@ export class FormationsDisponiblesComponent implements OnInit {
             try {
                 const currentUser = JSON.parse(currentUserStr);
                 if (currentUser.id) userId = currentUser.id;
-            } catch(e) {}
+            } catch (e) { }
         }
         return userId || '1';
     }
@@ -324,7 +324,7 @@ export class FormationsDisponiblesComponent implements OnInit {
         const userId = localStorage.getItem('userId');
         const currentUserStr = localStorage.getItem('currentUser');
         const email = currentUserStr ? JSON.parse(currentUserStr).email : null;
-        
+
         if (!userId && !email) return;
 
         this.formateurService.getFormateurs().subscribe({
@@ -334,23 +334,23 @@ export class FormationsDisponiblesComponent implements OnInit {
                 );
                 this.isFormateurFlag = !!formateur;
             },
-            error: (err) => { 
+            error: (err) => {
                 console.error('Erreur vérification formateur:', err);
-                this.isFormateurFlag = false; 
+                this.isFormateurFlag = false;
             }
         });
     }
 
     loadUserPoints(): void {
         let userId = this.getCurrentUserId();
-        
+
         if (!userId) {
             this.userPoints = 0;
             return;
         }
 
         this.isLoadingPoints = true;
-        
+
         this.userService.getUserPoints(userId).subscribe({
             next: (response: any) => {
                 this.userPoints = response.solde || response || 0;
@@ -378,7 +378,7 @@ export class FormationsDisponiblesComponent implements OnInit {
 
     loadUserInscriptions(): void {
         let employeId = this.getCurrentUserId();
-        
+
         if (employeId) {
             this.formationService.getMesInscriptions(employeId).subscribe({
                 next: (inscriptions) => {
@@ -411,7 +411,7 @@ export class FormationsDisponiblesComponent implements OnInit {
     }
 
     chargerMesFormationsAnimateur(): void {
-        this.mesFormationsAnimateur = this.formations.filter(formation => 
+        this.mesFormationsAnimateur = this.formations.filter(formation =>
             this.estFormateurDeLaFormation(formation)
         );
     }
@@ -489,7 +489,7 @@ export class FormationsDisponiblesComponent implements OnInit {
 
     applyFilters(): void {
         const allowedTypes = this.categoriesParPoste[this.userPoste] ?? this.categoriesParPoste['default'];
-        
+
         let result = this.formations.filter(f =>
             f.active !== false && allowedTypes.includes(f.type) && !this.estDejaInscrit(f.id!)
         );
@@ -508,7 +508,7 @@ export class FormationsDisponiblesComponent implements OnInit {
         }
 
         this.filteredFormations = result;
-        
+
         const middleIndex = Math.ceil(allowedTypes.length / 2);
         this.recommendedFormations = result.filter(f => allowedTypes.slice(0, middleIndex).includes(f.type));
         this.parcoursFormations = result.filter(f => allowedTypes.slice(middleIndex).includes(f.type));
@@ -536,12 +536,12 @@ export class FormationsDisponiblesComponent implements OnInit {
         if (!this.inscriptionPossible(formation)) {
             const statut = this.getStatutInscription(formation);
             const messages: { [k: string]: string } = {
-                'CONNEXION_REQUISE':    'Veuillez vous connecter en tant qu\'employé pour vous inscrire.',
-                'DEJA_INSCRIT':         'Vous êtes déjà inscrit à cette formation.',
-                'PREREQUIS_MANQUANT':   `Vous devez d'abord compléter la formation "${this.getTitrePrerequisManquant(formation)}" avant de vous inscrire à celle-ci.`,
-                'COMPLET':              'Cette formation n\'a plus de places disponibles.',
+                'CONNEXION_REQUISE': 'Veuillez vous connecter en tant qu\'employé pour vous inscrire.',
+                'DEJA_INSCRIT': 'Vous êtes déjà inscrit à cette formation.',
+                'PREREQUIS_MANQUANT': `Vous devez d'abord compléter la formation "${this.getTitrePrerequisManquant(formation)}" avant de vous inscrire à celle-ci.`,
+                'COMPLET': 'Cette formation n\'a plus de places disponibles.',
                 'DATE_LIMITE_DEPASSEE': 'La date limite d\'inscription est dépassée.',
-                'POINTS_INSUFFISANTS':  `Points insuffisants. Vous avez ${this.userPoints} points, besoin de ${this.coutFormation} points.`
+                'POINTS_INSUFFISANTS': `Points insuffisants. Vous avez ${this.userPoints} points, besoin de ${this.coutFormation} points.`
             };
             this.dialogService.alert({
                 title: 'Inscription impossible',
@@ -628,7 +628,7 @@ export class FormationsDisponiblesComponent implements OnInit {
             this.snackBar.open('Veuillez vous connecter', 'Fermer', { duration: 3000 });
             return;
         }
-        
+
         this.selectedPoints = points;
         this.selectedAmount = amount;
         this.showPaymentModal = true;
@@ -655,78 +655,78 @@ export class FormationsDisponiblesComponent implements OnInit {
     }
 
     // Ajoutez ces propriétés
-propositionsVote: any[] = [];
-isLoadingVotes: boolean = false;
+    propositionsVote: any[] = [];
+    isLoadingVotes: boolean = false;
 
-// Ajoutez ces méthodes
-loadPropositionsVote(): void {
-    this.isLoadingVotes = true;
-    this.voteService.getPropositionsOuvertesVote().subscribe({
-        next: (data) => {
-            this.propositionsVote = data;
-            // Vérifier pour chaque proposition si l'utilisateur a voté
-            this.propositionsVote.forEach(p => {
-                this.checkIfVoted(p.id);
-                this.loadVoteStats(p.id);
-            });
-            this.isLoadingVotes = false;
-        },
-        error: (err) => {
-            console.error('Erreur chargement votes:', err);
-            this.isLoadingVotes = false;
-        }
-    });
-}
-
-checkIfVoted(propositionId: string): void {
-    this.voteService.hasEmployeVoted(propositionId).subscribe({
-        next: (data) => {
-            const proposition = this.propositionsVote.find(p => p.id === propositionId);
-            if (proposition) {
-                proposition.aVote = data.aVote;
+    // Ajoutez ces méthodes
+    loadPropositionsVote(): void {
+        this.isLoadingVotes = true;
+        this.voteService.getPropositionsOuvertesVote().subscribe({
+            next: (data) => {
+                this.propositionsVote = data;
+                // Vérifier pour chaque proposition si l'utilisateur a voté
+                this.propositionsVote.forEach(p => {
+                    this.checkIfVoted(p.id);
+                    this.loadVoteStats(p.id);
+                });
+                this.isLoadingVotes = false;
+            },
+            error: (err) => {
+                console.error('Erreur chargement votes:', err);
+                this.isLoadingVotes = false;
             }
-        },
-        error: (err) => console.error(err)
-    });
-}
+        });
+    }
 
-loadVoteStats(propositionId: string): void {
-    this.voteService.getStatsVote(propositionId).subscribe({
-        next: (data) => {
-            const proposition = this.propositionsVote.find(p => p.id === propositionId);
-            if (proposition) {
-                proposition.votesPour = data.votesPour;
-                proposition.votesContre = data.votesContre;
-                proposition.pourcentagePour = data.pourcentagePour;
-                proposition.totalVotes = data.totalVotes;
+    checkIfVoted(propositionId: string): void {
+        this.voteService.hasEmployeVoted(propositionId).subscribe({
+            next: (data) => {
+                const proposition = this.propositionsVote.find(p => p.id === propositionId);
+                if (proposition) {
+                    proposition.aVote = data.aVote;
+                }
+            },
+            error: (err) => console.error(err)
+        });
+    }
+
+    loadVoteStats(propositionId: string): void {
+        this.voteService.getStatsVote(propositionId).subscribe({
+            next: (data) => {
+                const proposition = this.propositionsVote.find(p => p.id === propositionId);
+                if (proposition) {
+                    proposition.votesPour = data.votesPour;
+                    proposition.votesContre = data.votesContre;
+                    proposition.pourcentagePour = data.pourcentagePour;
+                    proposition.totalVotes = data.totalVotes;
+                }
+            },
+            error: (err) => console.error(err)
+        });
+    }
+
+    voterProposition(propositionId: string, vote: string): void {
+        this.voteService.voter(propositionId, vote, '').subscribe({
+            next: () => {
+                this.dialogService.alert({
+                    title: 'Vote enregistré',
+                    message: 'Merci pour votre participation !',
+                    type: 'success',
+                    confirmText: 'Fermer'
+                });
+                this.loadPropositionsVote();
+            },
+            error: (err) => {
+                this.dialogService.alert({
+                    title: 'Erreur',
+                    message: err.error?.message || 'Impossible d\'enregistrer votre vote',
+                    type: 'error',
+                    confirmText: 'Fermer'
+                });
             }
-        },
-        error: (err) => console.error(err)
-    });
-}
+        });
+    }
 
-voterProposition(propositionId: string, vote: string): void {
-    this.voteService.voter(propositionId, vote, '').subscribe({
-        next: () => {
-            this.dialogService.alert({
-                title: 'Vote enregistré',
-                message: 'Merci pour votre participation !',
-                type: 'success',
-                confirmText: 'Fermer'
-            });
-            this.loadPropositionsVote();
-        },
-        error: (err) => {
-            this.dialogService.alert({
-                title: 'Erreur',
-                message: err.error?.message || 'Impossible d\'enregistrer votre vote',
-                type: 'error',
-                confirmText: 'Fermer'
-            });
-        }
-    });
-}
-
-// Appelez loadPropositionsVote() dans ngOnInit()
+    // Appelez loadPropositionsVote() dans ngOnInit()
 
 }

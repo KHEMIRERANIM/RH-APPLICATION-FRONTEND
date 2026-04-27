@@ -15,7 +15,8 @@
         <h1 class="text-white font-semibold text-sm leading-tight">Paiement de réservation</h1>
         <p class="text-xs leading-tight" style="color: rgba(255,255,255,0.65)" *ngIf="reservation">
           {{ reservation.type === 'navette' ? 'Navette' : 'Covoiturage' }}
-          &mdash; {{ formatAddress(reservation.departure || trajet?.adresseDepart) }} &rarr; {{ formatAddress(reservation.arrival ||
+          &mdash; {{ formatAddress(reservation.departure || trajet?.adresseDepart) }} &rarr; {{
+          formatAddress(reservation.arrival ||
           trajet?.adresseArrivee) }}
         </p>
       </div>
@@ -143,260 +144,271 @@
             </div>
 
             <!-- ITINÉRAIRE REDESIGN (VERTICAL TIMELINE) -->
-            <div class="p-6 mb-5 space-y-4" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 1.25rem;">
+            <div class="p-6 mb-5 space-y-4"
+              style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 1.25rem;">
               <div class="relative pl-8">
                 <!-- Vertical Line -->
                 <div class="absolute left-[11px] top-2 bottom-2 w-0.5 bg-gray-200"></div>
 
                 <!-- Departure Point -->
                 <div class="relative mb-6">
-                  <div class="absolute -left-[29px] top-1 w-5 h-5 rounded-full bg-white border-4 border-[#1D9E75] shadow-sm z-10"></div>
+                  <div
+                    class="absolute -left-[29px] top-1 w-5 h-5 rounded-full bg-white border-4 border-[#1D9E75] shadow-sm z-10">
+                  </div>
                   <div>
-                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">DÉPART</label>
-                    <p class="text-sm font-bold text-[#1A1A2E] leading-snug">{{ formatAddress(reservation.departure || trajet?.adresseDepart) }}</p>
-                    <p class="text-[10px] text-gray-400 mt-0.5 truncate max-w-[300px]">{{ reservation.departure || trajet?.adresseDepart }}</p>
+                    <label
+                      class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">DÉPART</label>
+                    <p class="text-sm font-bold text-[#1A1A2E] leading-snug">{{ formatAddress(reservation.departure ||
+                      trajet?.adresseDepart) }}</p>
+                    <p class="text-[10px] text-gray-400 mt-0.5 truncate max-w-[300px]">{{ reservation.departure ||
+                      trajet?.adresseDepart }}</p>
                   </div>
                 </div>
 
                 <!-- Arrival Point -->
                 <div class="relative">
-                  <div class="absolute -left-[29px] top-1 w-5 h-5 rounded-full bg-white border-4 border-[#0F3460] shadow-sm z-10"></div>
+                  <div
+                    class="absolute -left-[29px] top-1 w-5 h-5 rounded-full bg-white border-4 border-[#0F3460] shadow-sm z-10">
+                  </div>
                   <div>
-                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">ARRIVÉE</label>
-                    <p class="text-sm font-bold text-[#1A1A2E] leading-snug">{{ formatAddress(reservation.arrival || trajet?.adresseArrivee) }}</p>
-                    <p class="text-[10px] text-gray-400 mt-0.5 truncate max-w-[300px]">{{ reservation.arrival || trajet?.adresseArrivee }}</p>
+                    <label
+                      class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">ARRIVÉE</label>
+                    <p class="text-sm font-bold text-[#1A1A2E] leading-snug">{{ formatAddress(reservation.arrival ||
+                      trajet?.adresseArrivee) }}</p>
+                    <p class="text-[10px] text-gray-400 mt-0.5 truncate max-w-[300px]">{{ reservation.arrival ||
+                      trajet?.adresseArrivee }}</p>
                   </div>
                 </div>
               </div>
             </div>
-              <div class="flex justify-between items-center px-4 py-3.5 text-sm"
-                style="border-bottom: 1px solid #f1f5f9">
-                <span class="flex items-center gap-2" style="color: #64748b">
-                  <mat-icon svgIcon="feather:clock" class="icon-size-4" style="color: #0F3460"></mat-icon>
-                  Heure de départ
-                </span>
-                <span class="font-semibold" style="color: #1A1A2E">{{ reservation.time || trajet?.heureDepart }}</span>
-              </div>
-              <div class="flex justify-between items-center px-4 py-3.5 text-sm">
-                <span class="flex items-center gap-2" style="color: #64748b">
-                  Date de paiement
-                </span>
-                <span class="font-semibold" style="color: #1A1A2E">{{ today | date:'dd/MM/yyyy' }}</span>
-              </div>
+            <div class="flex justify-between items-center px-4 py-3.5 text-sm" style="border-bottom: 1px solid #f1f5f9">
+              <span class="flex items-center gap-2" style="color: #64748b">
+                <mat-icon svgIcon="feather:clock" class="icon-size-4" style="color: #0F3460"></mat-icon>
+                Heure de départ
+              </span>
+              <span class="font-semibold" style="color: #1A1A2E">{{ reservation.time || trajet?.heureDepart }}</span>
             </div>
+            <div class="flex justify-between items-center px-4 py-3.5 text-sm">
+              <span class="flex items-center gap-2" style="color: #64748b">
+                Date de paiement
+              </span>
+              <span class="font-semibold" style="color: #1A1A2E">{{ today | date:'dd/MM/yyyy' }}</span>
+            </div>
+          </div>
 
-            <div class="rounded-2xl p-5 mb-5 relative overflow-hidden"
-              style="background: linear-gradient(135deg, #0F3460 0%, #1a4a7a 100%)">
-              <div class="absolute top-0 right-0 w-32 h-32 rounded-full opacity-10"
-                style="background: #fff; transform: translate(30%,-30%)"></div>
-              <div class="flex items-center justify-between relative">
-                <div>
-                  <p class="text-xs mb-1" style="color: rgba(255,255,255,0.65)">Montant à payer</p>
-                  <p class="font-bold" style="color: #fff; font-size: 2rem; line-height: 1">
-                    {{ (reservation.price || trajet?.prix)?.toFixed(2) }}
-                    <span class="text-base font-semibold" style="color: rgba(255,255,255,0.75)"> TND</span>
-                  </p>
-                </div>
-                <div class="text-right">
-                  <div class="flex items-center gap-1.5 justify-end mb-1">
-                    <div class="w-5 h-5 rounded-full flex items-center justify-center"
-                      style="background: rgba(29,158,117,0.3)">
-                      <mat-icon svgIcon="feather:lock" class="icon-size-3" style="color: #5DCAA5"></mat-icon>
-                    </div>
-                    <span class="text-xs" style="color: rgba(255,255,255,0.75)">Paiement sécurisé</span>
+          <div class="rounded-2xl p-5 mb-5 relative overflow-hidden"
+            style="background: linear-gradient(135deg, #0F3460 0%, #1a4a7a 100%)">
+            <div class="absolute top-0 right-0 w-32 h-32 rounded-full opacity-10"
+              style="background: #fff; transform: translate(30%,-30%)"></div>
+            <div class="flex items-center justify-between relative">
+              <div>
+                <p class="text-xs mb-1" style="color: rgba(255,255,255,0.65)">Montant à payer</p>
+                <p class="font-bold" style="color: #fff; font-size: 2rem; line-height: 1">
+                  {{ (reservation.price || trajet?.prix)?.toFixed(2) }}
+                  <span class="text-base font-semibold" style="color: rgba(255,255,255,0.75)"> TND</span>
+                </p>
+              </div>
+              <div class="text-right">
+                <div class="flex items-center gap-1.5 justify-end mb-1">
+                  <div class="w-5 h-5 rounded-full flex items-center justify-center"
+                    style="background: rgba(29,158,117,0.3)">
+                    <mat-icon svgIcon="feather:lock" class="icon-size-3" style="color: #5DCAA5"></mat-icon>
                   </div>
-                  <p class="text-xs" style="color: rgba(255,255,255,0.5)">Cryptage SSL 256-bit</p>
+                  <span class="text-xs" style="color: rgba(255,255,255,0.75)">Paiement sécurisé</span>
                 </div>
+                <p class="text-xs" style="color: rgba(255,255,255,0.5)">Cryptage SSL 256-bit</p>
               </div>
             </div>
-
-            <button (click)="nextStep()"
-              class="w-full h-12 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2 transition-all border-none cursor-pointer hover:opacity-90"
-              style="background: linear-gradient(135deg, #0F3460, #1a4a7a); box-shadow: 0 4px 15px rgba(15,52,96,0.3)">
-              Continuer vers le paiement
-              <mat-icon svgIcon="feather:arrow-right" class="icon-size-5"></mat-icon>
-            </button>
           </div>
 
-          <div class="flex items-center justify-center gap-6 py-2">
-            <div class="flex items-center gap-1.5 text-xs" style="color: #94a3b8">
-              <mat-icon svgIcon="feather:shield" class="icon-size-4" style="color: #1D9E75"></mat-icon>
-              Données chiffrées
-            </div>
-            <div class="w-px h-4" style="background: #e2e8f0"></div>
-            <div class="flex items-center gap-1.5 text-xs" style="color: #94a3b8">
-              <mat-icon svgIcon="feather:credit-card" class="icon-size-4" style="color: #1D9E75"></mat-icon>
-              Paiement sécurisé
-            </div>
-            <div class="w-px h-4" style="background: #e2e8f0"></div>
-            <div class="flex items-center gap-1.5 text-xs" style="color: #94a3b8">
-              <mat-icon svgIcon="feather:check-circle" class="icon-size-4" style="color: #1D9E75"></mat-icon>
-              Confirmé instantanément
-            </div>
-          </div>
+          <button (click)="nextStep()"
+            class="w-full h-12 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2 transition-all border-none cursor-pointer hover:opacity-90"
+            style="background: linear-gradient(135deg, #0F3460, #1a4a7a); box-shadow: 0 4px 15px rgba(15,52,96,0.3)">
+            Continuer vers le paiement
+            <mat-icon svgIcon="feather:arrow-right" class="icon-size-5"></mat-icon>
+          </button>
         </div>
 
-        <!-- ===== ÉTAPE 2 : PAIEMENT ===== -->
-        <div *ngIf="currentStep === 'payment'" class="space-y-4 animate-fade-in">
-          <div class="bg-white rounded-2xl shadow-sm border p-6 space-y-5" style="border-color: #e2e8f0">
-
-            <div class="flex items-center gap-3 pb-5" style="border-bottom: 1px solid #f1f5f9">
-              <div class="w-10 h-10 rounded-xl flex items-center justify-center"
-                style="background: rgba(29,158,117,0.1)">
-                <mat-icon svgIcon="feather:credit-card" class="icon-size-5" style="color: #1D9E75"></mat-icon>
-              </div>
-              <div>
-                <h2 class="font-semibold text-base" style="color: #1A1A2E">Informations de paiement</h2>
-                <p class="text-xs" style="color: #94a3b8">Saisissez vos coordonnées bancaires</p>
-              </div>
-              <div class="ml-auto text-right">
-                <p class="text-xs" style="color: #94a3b8">Total</p>
-                <p class="font-bold text-base" style="color: #0F3460">{{ (reservation.price || trajet?.prix)?.toFixed(2)
-                  }} EUR</p>
-              </div>
-            </div>
-
-            <div>
-              <label class="block text-xs font-semibold mb-2" style="color: #374151; letter-spacing: 0.05em">ADRESSE
-                E-MAIL</label>
-              <div class="relative">
-                <mat-icon svgIcon="feather:mail" class="icon-size-4 absolute left-3 top-3"
-                  style="color: #94a3b8"></mat-icon>
-                <input type="email" [(ngModel)]="email" (ngModelChange)="autoFillUserData($event)" placeholder="votre@email.com"
-                  class="w-full h-11 pl-10 pr-4 rounded-xl text-sm outline-none border transition-all"
-                  style="border: 1.5px solid #e2e8f0; background: #fafbfc; color: #1A1A2E;"
-                  (focus)="$any($event.target).style.borderColor='#0F3460'"
-                  (blur)="$any($event.target).style.borderColor='#e2e8f0'" />
-              </div>
-            </div>
-
-            <div class="flex items-center gap-3">
-              <div class="flex-1 h-px" style="background: #f1f5f9"></div>
-              <span class="text-xs font-semibold" style="color: #94a3b8">CARTE BANCAIRE</span>
-              <div class="flex gap-1">
-                <div class="h-5 px-2 rounded flex items-center justify-center text-white text-[9px] font-bold"
-                  style="background: #1A1876">VISA</div>
-                <div class="h-5 w-8 rounded" style="background: linear-gradient(90deg,#EB001B 50%,#F79E1B 50%)"></div>
-              </div>
-              <div class="flex-1 h-px" style="background: #f1f5f9"></div>
-            </div>
-
-            <div>
-              <label class="block text-xs font-semibold mb-2" style="color: #374151; letter-spacing: 0.05em">NUMÉRO DE
-                CARTE</label>
-              <div class="relative">
-                <mat-icon svgIcon="feather:credit-card" class="icon-size-4 absolute left-3 top-3"
-                  style="color: #94a3b8; z-index: 10"></mat-icon>
-                <input type="text" [(ngModel)]="cardNumber" (input)="formatCardNumber($event)" placeholder="4242 4242 4242 4242"
-                  class="w-full h-11 pl-10 pr-4 rounded-xl text-sm outline-none border transition-all"
-                  style="border: 1.5px solid #e2e8f0; background: #fafbfc; color: #1A1A2E;"
-                  (focus)="$any($event.target).style.borderColor='#0F3460'"
-                  (blur)="$any($event.target).style.borderColor='#e2e8f0'" />
-              </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <label class="block text-xs font-semibold mb-2" style="color: #374151; letter-spacing: 0.05em">DATE
-                  D'EXPIRATION</label>
-                <input type="text" [(ngModel)]="expiry" (input)="formatExpiry($event)" placeholder="MM / YY"
-                  class="w-full h-11 px-4 rounded-xl text-sm outline-none border transition-all"
-                  style="border: 1.5px solid #e2e8f0; background: #fafbfc; color: #1A1A2E;"
-                  (focus)="$any($event.target).style.borderColor='#0F3460'"
-                  (blur)="$any($event.target).style.borderColor='#e2e8f0'" />
-              </div>
-              <div>
-                <label class="block text-xs font-semibold mb-2" style="color: #374151; letter-spacing: 0.05em">CODE
-                  CVC</label>
-                <div class="relative">
-                  <input type="text" [(ngModel)]="cvc" (input)="formatCvc($event)" placeholder="123"
-                    class="w-full h-11 px-4 rounded-xl text-sm outline-none border transition-all"
-                    style="border: 1.5px solid #e2e8f0; background: #fafbfc; color: #1A1A2E;"
-                    (focus)="$any($event.target).style.borderColor='#0F3460'"
-                    (blur)="$any($event.target).style.borderColor='#e2e8f0'" />
-                  <mat-icon svgIcon="feather:help-circle" class="icon-size-4 absolute right-3 top-3"
-                    style="color: #cbd5e1"></mat-icon>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <label class="block text-xs font-semibold mb-2" style="color: #374151; letter-spacing: 0.05em">NOM DU
-                TITULAIRE</label>
-              <div class="relative">
-                <mat-icon svgIcon="feather:user" class="icon-size-4 absolute left-3 top-3"
-                  style="color: #94a3b8"></mat-icon>
-                <input type="text" [(ngModel)]="cardName" placeholder="Prénom Nom"
-                  class="w-full h-11 pl-10 pr-4 rounded-xl text-sm"
-                  style="border: 1.5px solid #e2e8f0; background: #fafbfc; color: #1A1A2E; outline: none;"
-                  (focus)="$any($event.target).style.borderColor='#0F3460'"
-                  (blur)="$any($event.target).style.borderColor='#e2e8f0'" />
-              </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <label class="block text-xs font-semibold mb-2"
-                  style="color: #374151; letter-spacing: 0.05em">PAYS</label>
-                <select [(ngModel)]="country"
-                  class="w-full h-11 px-4 rounded-xl text-sm outline-none border transition-all"
-                  style="border: 1.5px solid #e2e8f0; background: #fafbfc; color: #1A1A2E; appearance: none;">
-                  <option>Tunisie</option>
-                  <option>France</option>
-                  <option>Canada</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-xs font-semibold mb-2" style="color: #374151; letter-spacing: 0.05em">CODE
-                  POSTAL</label>
-                <input type="text" [(ngModel)]="postalCode" placeholder="1000"
-                  class="w-full h-11 px-4 rounded-xl text-sm outline-none border transition-all"
-                  style="border: 1.5px solid #e2e8f0; background: #fafbfc; color: #1A1A2E;"
-                  (focus)="$any($event.target).style.borderColor='#0F3460'"
-                  (blur)="$any($event.target).style.borderColor='#e2e8f0'" />
-              </div>
-            </div>
-
-            <div class="flex gap-3 pt-1">
-              <button (click)="prevStep()"
-                class="h-12 px-6 rounded-xl font-semibold text-sm flex items-center gap-2 border-none cursor-pointer hover:opacity-80"
-                style="background: #f1f5f9; color: #64748b">
-                <mat-icon svgIcon="feather:arrow-left" class="icon-size-4"></mat-icon>
-                Retour
-              </button>
-              <button (click)="handlePayment()" [disabled]="isProcessing"
-                class="flex-1 h-12 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2 border-none cursor-pointer hover:opacity-90"
-                style="background: linear-gradient(135deg, #1D9E75, #168567); box-shadow: 0 4px 15px rgba(29,158,117,0.3);"
-                [style.opacity]="isProcessing ? '0.6' : '1'">
-                <mat-icon *ngIf="!isProcessing" svgIcon="feather:lock" class="icon-size-4"></mat-icon>
-                <span *ngIf="isProcessing"
-                  class="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin mr-1"></span>
-                {{ isProcessing ? 'Traitement en cours...' : 'Payer ' + (reservation.price || trajet?.prix)?.toFixed(2)
-                +
-                ' TND' }}
-              </button>
-            </div>
+        <div class="flex items-center justify-center gap-6 py-2">
+          <div class="flex items-center gap-1.5 text-xs" style="color: #94a3b8">
+            <mat-icon svgIcon="feather:shield" class="icon-size-4" style="color: #1D9E75"></mat-icon>
+            Données chiffrées
+          </div>
+          <div class="w-px h-4" style="background: #e2e8f0"></div>
+          <div class="flex items-center gap-1.5 text-xs" style="color: #94a3b8">
+            <mat-icon svgIcon="feather:credit-card" class="icon-size-4" style="color: #1D9E75"></mat-icon>
+            Paiement sécurisé
+          </div>
+          <div class="w-px h-4" style="background: #e2e8f0"></div>
+          <div class="flex items-center gap-1.5 text-xs" style="color: #94a3b8">
+            <mat-icon svgIcon="feather:check-circle" class="icon-size-4" style="color: #1D9E75"></mat-icon>
+            Confirmé instantanément
           </div>
         </div>
-
-        <!-- ===== ÉTAPE 3 : CONFIRMATION ===== -->
-        <div *ngIf="currentStep === 'confirmation'" class="animate-fade-in text-center space-y-8">
-          <div class="bg-white rounded-2xl shadow-sm border p-8 space-y-6" style="border-color: #e2e8f0">
-            <div class="w-20 h-20 rounded-full bg-emerald-500 flex items-center justify-center mx-auto shadow-xl">
-              <mat-icon svgIcon="feather:check" class="text-white icon-size-10"></mat-icon>
-            </div>
-            <div>
-              <h2 class="text-2xl font-bold text-slate-800">Paiement confirmé !</h2>
-              <p class="text-slate-500">Votre réservation a été payée avec succès.</p>
-            </div>
-            <button (click)="handleConfirm()"
-              class="w-full h-12 rounded-xl font-semibold text-sm text-white border-none cursor-pointer hover:opacity-90"
-              style="background: linear-gradient(135deg, #0F3460, #1a4a7a);">
-              Retour à mes réservations
-            </button>
-          </div>
-        </div>
-
       </div>
+
+      <!-- ===== ÉTAPE 2 : PAIEMENT ===== -->
+      <div *ngIf="currentStep === 'payment'" class="space-y-4 animate-fade-in">
+        <div class="bg-white rounded-2xl shadow-sm border p-6 space-y-5" style="border-color: #e2e8f0">
+
+          <div class="flex items-center gap-3 pb-5" style="border-bottom: 1px solid #f1f5f9">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: rgba(29,158,117,0.1)">
+              <mat-icon svgIcon="feather:credit-card" class="icon-size-5" style="color: #1D9E75"></mat-icon>
+            </div>
+            <div>
+              <h2 class="font-semibold text-base" style="color: #1A1A2E">Informations de paiement</h2>
+              <p class="text-xs" style="color: #94a3b8">Saisissez vos coordonnées bancaires</p>
+            </div>
+            <div class="ml-auto text-right">
+              <p class="text-xs" style="color: #94a3b8">Total</p>
+              <p class="font-bold text-base" style="color: #0F3460">{{ (reservation.price || trajet?.prix)?.toFixed(2)
+                }} EUR</p>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold mb-2" style="color: #374151; letter-spacing: 0.05em">ADRESSE
+              E-MAIL</label>
+            <div class="relative">
+              <mat-icon svgIcon="feather:mail" class="icon-size-4 absolute left-3 top-3"
+                style="color: #94a3b8"></mat-icon>
+              <input type="email" [(ngModel)]="email" (ngModelChange)="autoFillUserData($event)"
+                placeholder="votre@email.com"
+                class="w-full h-11 pl-10 pr-4 rounded-xl text-sm outline-none border transition-all"
+                style="border: 1.5px solid #e2e8f0; background: #fafbfc; color: #1A1A2E;"
+                (focus)="$any($event.target).style.borderColor='#0F3460'"
+                (blur)="$any($event.target).style.borderColor='#e2e8f0'" />
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <div class="flex-1 h-px" style="background: #f1f5f9"></div>
+            <span class="text-xs font-semibold" style="color: #94a3b8">CARTE BANCAIRE</span>
+            <div class="flex gap-1">
+              <div class="h-5 px-2 rounded flex items-center justify-center text-white text-[9px] font-bold"
+                style="background: #1A1876">VISA</div>
+              <div class="h-5 w-8 rounded" style="background: linear-gradient(90deg,#EB001B 50%,#F79E1B 50%)"></div>
+            </div>
+            <div class="flex-1 h-px" style="background: #f1f5f9"></div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold mb-2" style="color: #374151; letter-spacing: 0.05em">NUMÉRO DE
+              CARTE</label>
+            <div class="relative">
+              <mat-icon svgIcon="feather:credit-card" class="icon-size-4 absolute left-3 top-3"
+                style="color: #94a3b8; z-index: 10"></mat-icon>
+              <input type="text" [(ngModel)]="cardNumber" (input)="formatCardNumber($event)"
+                placeholder="4242 4242 4242 4242"
+                class="w-full h-11 pl-10 pr-4 rounded-xl text-sm outline-none border transition-all"
+                style="border: 1.5px solid #e2e8f0; background: #fafbfc; color: #1A1A2E;"
+                (focus)="$any($event.target).style.borderColor='#0F3460'"
+                (blur)="$any($event.target).style.borderColor='#e2e8f0'" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold mb-2" style="color: #374151; letter-spacing: 0.05em">DATE
+                D'EXPIRATION</label>
+              <input type="text" [(ngModel)]="expiry" (input)="formatExpiry($event)" placeholder="MM / YY"
+                class="w-full h-11 px-4 rounded-xl text-sm outline-none border transition-all"
+                style="border: 1.5px solid #e2e8f0; background: #fafbfc; color: #1A1A2E;"
+                (focus)="$any($event.target).style.borderColor='#0F3460'"
+                (blur)="$any($event.target).style.borderColor='#e2e8f0'" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold mb-2" style="color: #374151; letter-spacing: 0.05em">CODE
+                CVC</label>
+              <div class="relative">
+                <input type="text" [(ngModel)]="cvc" (input)="formatCvc($event)" placeholder="123"
+                  class="w-full h-11 px-4 rounded-xl text-sm outline-none border transition-all"
+                  style="border: 1.5px solid #e2e8f0; background: #fafbfc; color: #1A1A2E;"
+                  (focus)="$any($event.target).style.borderColor='#0F3460'"
+                  (blur)="$any($event.target).style.borderColor='#e2e8f0'" />
+                <mat-icon svgIcon="feather:help-circle" class="icon-size-4 absolute right-3 top-3"
+                  style="color: #cbd5e1"></mat-icon>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold mb-2" style="color: #374151; letter-spacing: 0.05em">NOM DU
+              TITULAIRE</label>
+            <div class="relative">
+              <mat-icon svgIcon="feather:user" class="icon-size-4 absolute left-3 top-3"
+                style="color: #94a3b8"></mat-icon>
+              <input type="text" [(ngModel)]="cardName" placeholder="Prénom Nom"
+                class="w-full h-11 pl-10 pr-4 rounded-xl text-sm"
+                style="border: 1.5px solid #e2e8f0; background: #fafbfc; color: #1A1A2E; outline: none;"
+                (focus)="$any($event.target).style.borderColor='#0F3460'"
+                (blur)="$any($event.target).style.borderColor='#e2e8f0'" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold mb-2"
+                style="color: #374151; letter-spacing: 0.05em">PAYS</label>
+              <select [(ngModel)]="country"
+                class="w-full h-11 px-4 rounded-xl text-sm outline-none border transition-all"
+                style="border: 1.5px solid #e2e8f0; background: #fafbfc; color: #1A1A2E; appearance: none;">
+                <option>Tunisie</option>
+                <option>France</option>
+                <option>Canada</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold mb-2" style="color: #374151; letter-spacing: 0.05em">CODE
+                POSTAL</label>
+              <input type="text" [(ngModel)]="postalCode" placeholder="1000"
+                class="w-full h-11 px-4 rounded-xl text-sm outline-none border transition-all"
+                style="border: 1.5px solid #e2e8f0; background: #fafbfc; color: #1A1A2E;"
+                (focus)="$any($event.target).style.borderColor='#0F3460'"
+                (blur)="$any($event.target).style.borderColor='#e2e8f0'" />
+            </div>
+          </div>
+
+          <div class="flex gap-3 pt-1">
+            <button (click)="prevStep()"
+              class="h-12 px-6 rounded-xl font-semibold text-sm flex items-center gap-2 border-none cursor-pointer hover:opacity-80"
+              style="background: #f1f5f9; color: #64748b">
+              <mat-icon svgIcon="feather:arrow-left" class="icon-size-4"></mat-icon>
+              Retour
+            </button>
+            <button (click)="handlePayment()" [disabled]="isProcessing"
+              class="flex-1 h-12 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2 border-none cursor-pointer hover:opacity-90"
+              style="background: linear-gradient(135deg, #1D9E75, #168567); box-shadow: 0 4px 15px rgba(29,158,117,0.3);"
+              [style.opacity]="isProcessing ? '0.6' : '1'">
+              <mat-icon *ngIf="!isProcessing" svgIcon="feather:lock" class="icon-size-4"></mat-icon>
+              <span *ngIf="isProcessing"
+                class="w-4 h-4 rounded-full border-2 border-white border-t-transparent animate-spin mr-1"></span>
+              {{ isProcessing ? 'Traitement en cours...' : 'Payer ' + (reservation.price || trajet?.prix)?.toFixed(2)
+              +
+              ' TND' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== ÉTAPE 3 : CONFIRMATION ===== -->
+      <div *ngIf="currentStep === 'confirmation'" class="animate-fade-in text-center space-y-8">
+        <div class="bg-white rounded-2xl shadow-sm border p-8 space-y-6" style="border-color: #e2e8f0">
+          <div class="w-20 h-20 rounded-full bg-emerald-500 flex items-center justify-center mx-auto shadow-xl">
+            <mat-icon svgIcon="feather:check" class="text-white icon-size-10"></mat-icon>
+          </div>
+          <div>
+            <h2 class="text-2xl font-bold text-slate-800">Paiement confirmé !</h2>
+            <p class="text-slate-500">Votre réservation a été payée avec succès.</p>
+          </div>
+          <button (click)="handleConfirm()"
+            class="w-full h-12 rounded-xl font-semibold text-sm text-white border-none cursor-pointer hover:opacity-90"
+            style="background: linear-gradient(135deg, #0F3460, #1a4a7a);">
+            Retour à mes réservations
+          </button>
+        </div>
+      </div>
+
     </div>
   </div>
+</div>

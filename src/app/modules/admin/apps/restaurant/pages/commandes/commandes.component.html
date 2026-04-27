@@ -1,7 +1,7 @@
 <div class="flex flex-col flex-auto min-w-0">
 
   <!-- HEADER Fuse -->
-  <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-6 sm:px-10 border-b bg-card shadow-sm" style="background: linear-gradient(135deg, #4c1d95 0%, #6d28d9 50%, #8b5cf6 100%);">
+  <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-6 sm:px-10 border-b bg-card shadow-sm" style="background: linear-gradient(135deg, #172554 0%, #1e3a8a 50%, #1e40af 100%);">
     <div class="flex items-center min-w-0">
       <div class="flex items-center justify-center w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm shadow-lg border border-white/20">
         <mat-icon svgIcon="heroicons_outline:shopping-cart" class="icon-size-7 text-white"></mat-icon>
@@ -10,7 +10,7 @@
         <h2 class="text-2xl font-bold text-white tracking-tight truncate">
           {{ roleService.isAdmin() ? 'Gestion des Commandes' : 'Mes Commandes' }}
         </h2>
-        <p class="text-purple-200 text-sm truncate">
+        <p class="text-blue-200 text-sm truncate">
           {{ roleService.isAdmin() ? 'Suivez et gérez toutes les commandes' : 'Passez et suivez vos commandes' }}
         </p>
       </div>
@@ -20,7 +20,7 @@
         <mat-icon svgIcon="heroicons_outline:arrow-down-tray" class="icon-size-5 mr-1"></mat-icon>
         Exporter PDF
       </button>
-      <button *ngIf="roleService.isEmploye()" mat-flat-button class="bg-white text-purple-700 font-bold shadow-lg hover:bg-purple-50" (click)="ouvrirFormulaire()">
+      <button *ngIf="roleService.isEmploye()" mat-flat-button class="bg-white text-[#1e3a8a] font-bold shadow-lg hover:bg-blue-50" (click)="ouvrirFormulaire()">
         <mat-icon svgIcon="heroicons_outline:plus" class="icon-size-5 mr-1"></mat-icon>
         Nouvelle Commande
       </button>
@@ -58,15 +58,15 @@
           <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-5 flex items-center justify-between">
             <div>
               <p class="text-xs text-secondary uppercase tracking-wide mb-0.5">Montant - encaisser</p>
-              <p class="text-2xl font-extrabold text-primary">
+              <p class="text-2xl font-extrabold text-[#1e3a8a]">
                 {{ commandeEnCoursDePaiement.montantTotal | number:'1.2-2' }} TND
               </p>
-              <p *ngIf="commandeEnCoursDePaiement.reductionAppliquee" class="text-xs text-purple-600 mt-0.5">
+              <p *ngIf="commandeEnCoursDePaiement.reductionAppliquee" class="text-xs text-blue-600 mt-0.5">
                 Réduction de {{ commandeEnCoursDePaiement.montantReduction | number:'1.2-2' }} TND appliquée
               </p>
             </div>
             <div class="text-center">
-              <div class="w-16 h-16 bg-primary rounded-xl flex items-center justify-center">
+              <div class="w-16 h-16 bg-[#1e3a8a] rounded-xl flex items-center justify-center">
                 <span class="text-white font-black text-xl tracking-widest font-mono">
                   {{ getCodeRetrait(commandeEnCoursDePaiement) }}
                 </span>
@@ -83,14 +83,14 @@
               Espèces
             </button>
             <button (click)="modePaiementSelectionne = 'salaire'"
-              [ngClass]="modePaiementSelectionne === 'salaire' ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-gray-200 bg-white text-gray-600 hover:border-indigo-300'"
+              [ngClass]="modePaiementSelectionne === 'salaire' ? 'border-[#1e3a8a] bg-blue-50 text-[#1e3a8a]' : 'border-gray-200 bg-white text-gray-600 hover:border-blue-300'"
               class="flex flex-col items-center gap-2 p-4 border-2 rounded-xl transition-all font-semibold text-sm">
               <mat-icon svgIcon="heroicons_outline:document-text" class="icon-size-6"></mat-icon>
               Déduction salaire
             </button>
           </div>
           <p *ngIf="modePaiementSelectionne === 'salaire'"
-            class="text-xs text-indigo-600 bg-indigo-50 border border-indigo-100 rounded-lg px-3 py-2 mb-4">
+            class="text-xs text-[#1e3a8a] bg-blue-50 border border-blue-100 rounded-lg px-3 py-2 mb-4">
             Le montant sera déduit automatiquement du prochain versement de salaire.
           </p>
           <div class="flex gap-3">
@@ -147,36 +147,36 @@
 
     <!-- STATS EMPLOYE -->
     <div *ngIf="roleService.isEmploye()" class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-      <div class="rounded-2xl p-5 text-center shadow-lg" style="background: linear-gradient(135deg, #4c1d95, #7c3aed);">
+      <div class="rounded-2xl p-5 text-center shadow-lg" style="background: linear-gradient(135deg, #172554, #1e3a8a);">
         <p class="text-4xl font-semibold text-white">{{ commandes.length }}</p>
-        <p class="text-sm text-purple-200 mt-1 uppercase tracking-wide">Commandes</p>
+        <p class="text-sm text-blue-100 mt-1 uppercase tracking-wide">Commandes</p>
       </div>
       <div class="rounded-2xl p-5 text-center shadow-lg" style="background: linear-gradient(135deg, #d97706, #fbbf24);">
         <p class="text-4xl font-semibold text-white">{{ getCountByStatut('en_attente') }}</p>
         <p class="text-sm text-amber-100 mt-1 uppercase tracking-wide">En attente</p>
       </div>
-      <div class="rounded-2xl p-5 text-center shadow-lg" style="background: linear-gradient(135deg, #4f46e5, #818cf8);">
+      <div class="rounded-2xl p-5 text-center shadow-lg" style="background: linear-gradient(135deg, #1e3a8a, #1e40af);">
         <p class="text-4xl font-semibold text-white">{{ getTotalMontant() | number:'1.2-2' }} TND</p>
-        <p class="text-sm text-indigo-200 mt-1 uppercase tracking-wide">Total dépensé</p>
+        <p class="text-sm text-blue-100 mt-1 uppercase tracking-wide">Total dépensé</p>
       </div>
-      <div *ngIf="fidelite" class="rounded-2xl p-5 text-center shadow-lg" style="background: linear-gradient(135deg, #7c3aed, #a78bfa);">
+      <div *ngIf="fidelite" class="rounded-2xl p-5 text-center shadow-lg" style="background: linear-gradient(135deg, #1e40af, #60a5fa);">
         <p class="text-4xl font-semibold text-white">{{ fidelite.points }}</p>
-        <p class="text-sm text-purple-200 mt-1 uppercase tracking-wide">Points fidélité</p>
+        <p class="text-sm text-blue-100 mt-1 uppercase tracking-wide">Points fidélité</p>
       </div>
     </div>
 
     <!-- WIDGET FIDELITE EMPLOYE -->
     <div *ngIf="roleService.isEmploye() && fidelite" class="mb-6">
       <div *ngIf="fidelite.reductionDisponible"
-        class="bg-card shadow rounded-2xl p-5 flex items-center gap-4 border-l-4 border-purple-500">
-        <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
-          <mat-icon svgIcon="heroicons_outline:gift" class="icon-size-5 text-purple-600"></mat-icon>
+        class="bg-card shadow rounded-2xl p-5 flex items-center gap-4 border-l-4 border-blue-500">
+        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+          <mat-icon svgIcon="heroicons_outline:gift" class="icon-size-5 text-blue-600"></mat-icon>
         </div>
         <div>
           <p class="text-sm font-semibold text-gray-900">Réduction disponible !</p>
           <p class="text-xs text-secondary mt-0.5">
             {{ fidelite.points }} points é
-            <span class="font-bold text-purple-700">-{{ fidelite.montantReduction }} TND</span>
+            <span class="font-bold text-[#1e3a8a]">-{{ fidelite.montantReduction }} TND</span>
             sera déduite automatiquement de votre prochaine commande
           </p>
         </div>
@@ -184,11 +184,11 @@
       <div *ngIf="!fidelite.reductionDisponible" class="bg-card shadow rounded-2xl p-5">
         <div class="flex items-center justify-between mb-3">
           <div class="flex items-center gap-2">
-            <mat-icon svgIcon="heroicons_outline:star" class="icon-size-5 text-primary"></mat-icon>
+            <mat-icon svgIcon="heroicons_outline:star" class="icon-size-5 text-[#1e3a8a]"></mat-icon>
             <p class="text-sm font-semibold text-gray-900">Programme fidélité</p>
             <span class="text-xs text-secondary">- 1 TND = 10 pts - 500 pts = 5 TND</span>
           </div>
-          <p class="text-xs text-secondary">encore <span class="font-bold text-primary">{{ getPointsVersProchain() }} pts</span></p>
+          <p class="text-xs text-secondary">encore <span class="font-bold text-[#1e3a8a]">{{ getPointsVersProchain() }} pts</span></p>
         </div>
         <div class="w-full bg-gray-100 rounded-full h-2">
           <div class="bg-primary h-2 rounded-full transition-all" [style.width.%]="getPointsProgression()"></div>
@@ -204,12 +204,12 @@
       <div *ngFor="let s of statuts"
         (click)="selectedStatut = selectedStatut === s ? '' : s"
         class="bg-card shadow-md rounded-2xl p-5 cursor-pointer transition-all duration-300 hover:shadow-lg"
-        [ngClass]="selectedStatut === s ? 'ring-2 ring-primary' : ''">
+        [ngClass]="selectedStatut === s ? 'ring-2 ring-[#1e3a8a]' : ''">
         <p class="text-4xl font-semibold mb-1"
           [ngClass]="{
             'text-amber-500': s === 'en_attente',
-            'text-blue-600': s === 'confirmee',
-            'text-indigo-600': s === 'prete',
+            'text-blue-400': s === 'confirmee',
+            'text-[#1e3a8a]': s === 'prete',
             'text-green-600': s === 'livree'
           }">{{ getCountByStatut(s) }}</p>
         <p class="text-xs text-secondary font-medium uppercase tracking-wide">{{ s }}</p>
@@ -221,7 +221,7 @@
       <button (click)="showHistorique = !showHistorique"
         class="w-full flex items-center justify-between p-4 bg-card shadow rounded-2xl hover:shadow-md transition-all">
         <div class="flex items-center gap-2">
-          <mat-icon svgIcon="heroicons_outline:shield-check" class="icon-size-5 text-primary"></mat-icon>
+          <mat-icon svgIcon="heroicons_outline:shield-check" class="icon-size-5 text-[#1e3a8a]"></mat-icon>
           <span class="text-sm font-semibold text-gray-900">Mes allergies - Vérification IA</span>
           <span *ngIf="allergiesEmploye.length > 0" class="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-medium">{{ allergiesEmploye.length }}</span>
           <span *ngIf="alertesAllergie.length > 0" class="text-xs px-2 py-0.5 bg-red-100 text-red-600 rounded-full font-medium">{{ alertesAllergie.length }} alerte(s)</span>
@@ -295,7 +295,7 @@
               <p class="text-sm font-semibold text-gray-900 truncate">{{ getUserNom(f.userId) }}</p>
               <div class="w-full bg-gray-100 rounded-full h-1.5 mt-1.5">
                 <div class="h-1.5 rounded-full transition-all"
-                  [ngClass]="f.reductionDisponible ? 'bg-purple-500' : 'bg-primary'"
+                  [ngClass]="f.reductionDisponible ? 'bg-blue-500' : 'bg-[#1e3a8a]'"
                   [style.width.%]="f.reductionDisponible ? 100 : ((f.points % 500) / 500 * 100)"></div>
               </div>
               <p class="text-xs text-secondary mt-0.5">{{ f.totalDepense | number:'1.2-2' }} TND dépensé</p>
@@ -307,7 +307,7 @@
             </div>
             <div class="flex-shrink-0 w-32 text-right">
               <span *ngIf="f.reductionDisponible"
-                class="px-2 py-1 bg-purple-100 text-purple-700 border border-purple-200 rounded-full text-xs font-bold">
+                class="px-2 py-1 bg-blue-100 text-[#1e3a8a] border border-blue-200 rounded-full text-xs font-bold">
                 ?? Réduction dispo
               </span>
               <span *ngIf="!f.reductionDisponible"
@@ -359,11 +359,11 @@
       </div>
       <div class="flex border-b border-gray-100">
         <div class="flex-1 py-3 text-center text-sm font-semibold"
-          [ngClass]="step === 1 ? 'bg-primary text-white' : 'bg-gray-50 text-secondary'">
+          [ngClass]="step === 1 ? 'bg-[#1e3a8a] text-white' : 'bg-gray-50 text-secondary'">
           1 - Choisir un menu
         </div>
         <div class="flex-1 py-3 text-center text-sm font-semibold"
-          [ngClass]="step === 2 ? 'bg-primary text-white' : 'bg-gray-50 text-secondary'">
+          [ngClass]="step === 2 ? 'bg-[#1e3a8a] text-white' : 'bg-gray-50 text-secondary'">
           2 - Choisir les plats
         </div>
       </div>
@@ -376,7 +376,7 @@
             <div *ngFor="let m of menus"
               (click)="!isMenuDejaCommande(m.id!) && (newCommande.menuId = m.id!) && onMenuChange()"
               [ngClass]="{
-                'ring-2 ring-primary bg-primary-50': newCommande.menuId === m.id,
+                'ring-2 ring-[#1e3a8a] bg-blue-50': newCommande.menuId === m.id,
                 'opacity-50 cursor-not-allowed': isMenuDejaCommande(m.id!),
                 'hover:shadow-md cursor-pointer': !isMenuDejaCommande(m.id!)
               }"
@@ -384,10 +384,10 @@
               <div class="flex items-center justify-between mb-2">
                 <h4 class="font-semibold text-gray-900">{{ m.titre }}</h4>
                 <span *ngIf="isMenuDejaCommande(m.id!)" class="text-xs px-2 py-1 bg-gray-200 text-secondary rounded-full">Déjà commandé</span>
-                <span *ngIf="!isMenuDejaCommande(m.id!) && newCommande.menuId === m.id" class="text-xs px-2 py-1 bg-primary text-white rounded-full">Sélectionné</span>
+                <span *ngIf="!isMenuDejaCommande(m.id!) && newCommande.menuId === m.id" class="text-xs px-2 py-1 bg-[#1e3a8a] text-white rounded-full">Sélectionné</span>
               </div>
               <p class="text-xs text-secondary">{{ m.date }}</p>
-              <p class="text-xs text-primary font-semibold mt-1">{{ m.plats?.length || 0 }} plat(s)</p>
+              <p class="text-xs text-[#1e3a8a] font-semibold mt-1">{{ m.plats?.length || 0 }} plat(s)</p>
             </div>
           </div>
           <button (click)="showForm = false; commandeEnModification = null" mat-stroked-button class="mt-4 text-sm">Annuler</button>
@@ -398,13 +398,13 @@
           <div class="flex items-center gap-3 mb-4">
             <button *ngIf="!commandeEnModification" (click)="step = 1; platsSelectionnes = []" mat-button [color]="'primary'" class="text-sm font-semibold">Changer de menu</button>
             <span *ngIf="!commandeEnModification" class="text-gray-300">|</span>
-            <p class="text-sm text-secondary">Menu : <span class="text-primary font-semibold">{{ getMenuTitre(newCommande.menuId) }}</span></p>
+            <p class="text-sm text-secondary">Menu : <span class="text-[#1e3a8a] font-semibold">{{ getMenuTitre(newCommande.menuId) }}</span></p>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
             <div *ngFor="let plat of platsDisponibles"
               class="flex items-center gap-3 p-3 border rounded-2xl transition-all bg-card shadow-sm"
               [ngClass]="{
-                'border-primary ring-1 ring-primary': isPlatSelected(plat.platId!),
+                'border-[#1e3a8a] ring-1 ring-[#1e3a8a]': isPlatSelected(plat.platId!),
                 'border-gray-200': !isPlatSelected(plat.platId!) && (plat.quantite || 0) > 0,
                 'border-gray-100 opacity-50': (plat.quantite || 0) <= 0 || !plat.disponible
               }">
@@ -423,12 +423,12 @@
                   <span *ngIf="(plat.quantite || 0) <= 0 || !plat.disponible"
                     class="text-xs px-1.5 py-0.5 bg-red-50 text-red-500 border border-red-200 rounded-full font-semibold">Épuisé</span>
                 </div>
-                <p class="text-primary font-bold text-sm mt-1">{{ plat.prix }} TND</p>
+                <p class="text-[#1e3a8a] font-bold text-sm mt-1">{{ plat.prix }} TND</p>
               </div>
               <div class="flex flex-col items-center gap-1 flex-shrink-0">
                 <ng-container *ngIf="(plat.quantite || 0) > 0 && plat.disponible; else epuise">
                   <button (click)="incrementerPlat(plat.platId!)" [disabled]="!isPlatCommandable(plat.platId!)"
-                    [ngClass]="isPlatCommandable(plat.platId!) ? 'bg-primary hover:opacity-80 text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed'"
+                    [ngClass]="isPlatCommandable(plat.platId!) ? 'bg-[#1e3a8a] hover:opacity-80 text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed'"
                     class="w-8 h-8 rounded-full text-lg font-bold flex items-center justify-center transition-all leading-none">+</button>
                   <span class="text-sm font-bold text-gray-800 w-5 text-center leading-none py-1">{{ getQuantiteSelectionnee(plat.platId!) }}</span>
                   <button (click)="decrementerPlat(plat.platId!)" [disabled]="getQuantiteSelectionnee(plat.platId!) === 0"
@@ -443,9 +443,9 @@
               </div>
             </div>
           </div>
-          <div *ngIf="platsSelectionnes.length > 0" class="p-4 bg-primary-50 border border-primary-200 rounded-2xl mb-4 flex justify-between items-center">
+          <div *ngIf="platsSelectionnes.length > 0" class="p-4 bg-blue-50 border border-blue-200 rounded-2xl mb-4 flex justify-between items-center">
             <span class="font-semibold text-gray-700">{{ platsSelectionnes.length }} unité(s)</span>
-            <span class="text-xl font-bold text-primary">{{ getMontantPreview() | number:'1.2-2' }} TND</span>
+            <span class="text-xl font-bold text-[#1e3a8a]">{{ getMontantPreview() | number:'1.2-2' }} TND</span>
           </div>
           <div class="flex gap-3">
             <button (click)="submitCommande()" [disabled]="platsSelectionnes.length === 0" mat-flat-button [color]="'primary'"
@@ -498,13 +498,13 @@
                 <p class="text-xs text-secondary uppercase tracking-wide mb-1">Date</p>
                 <p class="font-semibold text-gray-900 text-sm">{{ c.dateCommande }}</p>
               </div>
-              <div class="bg-gray-50 rounded-xl p-3">
+              <div class="bg-blue-50 rounded-xl p-3">
                 <p class="text-xs text-secondary uppercase tracking-wide mb-1">Menu</p>
                 <p class="font-semibold text-gray-900 text-sm">{{ getMenuTitre(c.menuId) }}</p>
               </div>
-              <div class="bg-primary-50 rounded-xl p-3">
-                <p class="text-xs text-primary uppercase tracking-wide mb-1">Montant</p>
-                <p class="font-bold text-primary text-lg">{{ c.montantTotal | number:'1.2-2' }} TND</p>
+              <div class="bg-blue-100 rounded-xl p-3">
+                <p class="text-xs text-[#1e3a8a] uppercase tracking-wide mb-1">Montant</p>
+                <p class="font-bold text-[#1e3a8a] text-lg">{{ c.montantTotal | number:'1.2-2' }} TND</p>
               </div>
             </div>
             <div *ngIf="c.plats?.length" class="flex flex-wrap gap-1">

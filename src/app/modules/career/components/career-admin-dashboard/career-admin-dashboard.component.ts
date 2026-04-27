@@ -96,7 +96,7 @@ export class CareerAdminDashboardComponent implements OnInit, OnDestroy {
     private http: HttpClient,
     private dialog: MatDialog,
     private snackBar: MatSnackBar
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadStats();
@@ -140,8 +140,8 @@ export class CareerAdminDashboardComponent implements OnInit, OnDestroy {
         this.totalPlans = safePlans.length;
         this.avgProgress = safePlans.length
           ? Math.round(
-              safePlans.reduce((sum, plan) => sum + (plan.scoreGlobal ?? 0), 0) / safePlans.length
-            )
+            safePlans.reduce((sum, plan) => sum + (plan.scoreGlobal ?? 0), 0) / safePlans.length
+          )
           : 0;
 
         const statusMap: Record<string, number> = {};

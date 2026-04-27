@@ -6,8 +6,8 @@
     <div class="bg-card shadow-2xl rounded-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-full">
       <div class="flex items-center justify-between px-8 py-6 border-b">
         <div class="flex items-center">
-          <div class="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center mr-4">
-            <mat-icon svgIcon="heroicons_outline:pencil-alt" class="text-primary-600"></mat-icon>
+          <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-4">
+            <mat-icon svgIcon="heroicons_outline:pencil-alt" class="text-[#1e3a8a]"></mat-icon>
           </div>
           <h3 class="text-xl font-semibold text-gray-900">Modifier — {{ platEnEdition.nom }}</h3>
         </div>
@@ -20,65 +20,65 @@
           <div>
             <label class="block text-sm font-medium text-secondary mb-2">Nom</label>
             <input [(ngModel)]="platEnEdition.nom" type="text"
-              class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-gray-50" />
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] bg-gray-50" />
           </div>
           <div>
             <label class="block text-sm font-medium text-secondary mb-2">Prix (TND)</label>
             <input [(ngModel)]="platEnEdition.prix" type="number" min="0"
-              class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-gray-50" />
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] bg-gray-50" />
           </div>
         </div>
         <div>
           <label class="block text-sm font-medium text-secondary mb-2">Description</label>
           <textarea [(ngModel)]="platEnEdition.description" rows="2"
-            class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-gray-50 resize-none"></textarea>
+            class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] bg-gray-50 resize-none"></textarea>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div>
             <label class="block text-sm font-medium text-secondary mb-2">Quantité</label>
             <input [(ngModel)]="platEnEdition.quantite" type="number" min="0"
-              class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-gray-50" />
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] bg-gray-50" />
           </div>
           <div>
             <label class="block text-sm font-medium text-secondary mb-2">Calories</label>
             <input [(ngModel)]="platEnEdition.calories" type="number"
-              class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-gray-50" />
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] bg-gray-50" />
           </div>
         </div>
         <div>
           <label class="block text-sm font-medium text-secondary mb-2">Image URL</label>
           <input [(ngModel)]="platEnEdition.image" type="text"
-            class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-gray-50" />
+            class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] bg-gray-50" />
         </div>
         <div>
           <label class="block text-sm font-medium text-secondary mb-2">Ingrédients</label>
           <input [(ngModel)]="platEnEdition.ingredients" type="text"
-            class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-gray-50" />
+            class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] bg-gray-50" />
         </div>
         <div class="grid grid-cols-3 gap-4">
           <div>
             <label class="block text-sm font-medium text-secondary mb-2">Protéines (g)</label>
             <input [(ngModel)]="platEnEdition.proteines" type="number"
-              class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-gray-50" />
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] bg-gray-50" />
           </div>
           <div>
             <label class="block text-sm font-medium text-secondary mb-2">Glucides (g)</label>
             <input [(ngModel)]="platEnEdition.glucides" type="number"
-              class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-gray-50" />
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] bg-gray-50" />
           </div>
           <div>
             <label class="block text-sm font-medium text-secondary mb-2">Lipides (g)</label>
             <input [(ngModel)]="platEnEdition.lipides" type="number"
-              class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 bg-gray-50" />
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] bg-gray-50" />
           </div>
         </div>
         <div class="flex items-center gap-8 pt-2">
           <label class="flex items-center gap-3 text-sm font-semibold text-gray-700 cursor-pointer">
-            <input type="checkbox" [(ngModel)]="platEnEdition.disponible" class="w-5 h-5 text-primary-600 rounded border-gray-300 focus:ring-primary-500" />
+            <input type="checkbox" [(ngModel)]="platEnEdition.disponible" class="w-5 h-5 text-[#1e3a8a] rounded border-gray-300 focus:ring-[#1e3a8a]" />
             Disponible
           </label>
           <label class="flex items-center gap-3 text-sm font-semibold text-gray-700 cursor-pointer">
-            <input type="checkbox" [(ngModel)]="platEnEdition.pmrAdapte" class="w-5 h-5 text-primary-600 rounded border-gray-300 focus:ring-primary-500" />
+            <input type="checkbox" [(ngModel)]="platEnEdition.pmrAdapte" class="w-5 h-5 text-[#1e3a8a] rounded border-gray-300 focus:ring-[#1e3a8a]" />
             PMR Adapté
           </label>
         </div>
@@ -95,14 +95,14 @@
     </div>
   </div>
 
-  <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-8 sm:px-10 mb-8 rounded-2xl" style="background: linear-gradient(135deg, #4c1d95 0%, #6d28d9 50%, #8b5cf6 100%);">
+  <div class="flex flex-col sm:flex-row flex-0 sm:items-center sm:justify-between p-8 sm:px-10 mb-8 rounded-2xl" style="background: linear-gradient(135deg, #172554 0%, #1e3a8a 50%, #1e40af 100%);">
     <div class="flex flex-1 items-center">
       <div class="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mr-5 shadow-lg border border-white/20">
         <mat-icon svgIcon="heroicons_outline:view-grid" class="text-white icon-size-7"></mat-icon>
       </div>
       <div>
         <h1 class="text-2xl font-bold text-white tracking-tight">Catalogue des Plats</h1>
-        <p class="text-purple-200 mt-1 text-sm">
+        <p class="text-blue-200 mt-1 text-sm">
           {{ roleService.isEmploye() ? 'Survolez un plat pour voir ses apports nutritionnels' : 'Vue globale de tous les plats disponibles' }}
         </p>
       </div>
@@ -126,35 +126,35 @@
 
   <!-- Stats -->
   <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-    <div class="rounded-2xl p-6 text-center shadow-lg" style="background: linear-gradient(135deg, #4c1d95, #7c3aed);">
+    <div class="rounded-2xl p-6 text-center shadow-lg" style="background: linear-gradient(135deg, #172554, #1e3a8a);">
       <p class="text-4xl font-extrabold text-white">{{ allPlats.length }}</p>
-      <p class="text-sm font-medium text-purple-200 mt-2 uppercase tracking-wider">Total plats</p>
+      <p class="text-sm font-medium text-blue-100 mt-2 uppercase tracking-wider">Total plats</p>
     </div>
     <div class="rounded-2xl p-6 text-center shadow-lg" style="background: linear-gradient(135deg, #059669, #34d399);">
       <p class="text-4xl font-extrabold text-white">{{ getTotalDispos() }}</p>
       <p class="text-sm font-medium text-green-200 mt-2 uppercase tracking-wider">Disponibles</p>
     </div>
-    <div class="rounded-2xl p-6 text-center shadow-lg" style="background: linear-gradient(135deg, #7c3aed, #a78bfa);">
+    <div class="rounded-2xl p-6 text-center shadow-lg" style="background: linear-gradient(135deg, #1e3a8a, #1e40af);">
       <p class="text-4xl font-extrabold text-white">{{ getPrixMoyen() | number:'1.2-2' }} <span class="text-xl">TND</span></p>
-      <p class="text-sm font-medium text-purple-200 mt-2 uppercase tracking-wider">Prix moyen</p>
+      <p class="text-sm font-medium text-blue-100 mt-2 uppercase tracking-wider">Prix moyen</p>
     </div>
   </div>
 
   <!-- Filtres -->
   <div class="bg-card shadow rounded-2xl p-5 mb-8 flex flex-col sm:flex-row gap-4 items-center">
-    <div class="flex items-center flex-1 w-full px-4 py-2 border rounded-xl focus-within:ring-2 focus-within:ring-primary-500">
+    <div class="flex items-center flex-1 w-full px-4 py-2 border rounded-xl focus-within:ring-2 focus-within:ring-[#1e3a8a]">
       <mat-icon svgIcon="heroicons_outline:search" class="text-secondary mr-2"></mat-icon>
       <input type="text" placeholder="Rechercher un plat..." [(ngModel)]="searchTerm" (ngModelChange)="applyFilters()"
         class="w-full text-sm outline-none bg-transparent" />
     </div>
     <select [(ngModel)]="filterDispo" (ngModelChange)="applyFilters()"
-      class="px-4 py-3 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 w-full sm:w-auto">
+      class="px-4 py-3 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] w-full sm:w-auto">
       <option value="tous">Tous statuts</option>
       <option value="dispo">Disponibles</option>
       <option value="indispo">Indisponibles</option>
     </select>
     <select [(ngModel)]="filterTag" (ngModelChange)="applyFilters()"
-      class="px-4 py-3 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 w-full sm:w-auto">
+      class="px-4 py-3 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] w-full sm:w-auto">
       <option value="">Tous les tags</option>
       <option *ngFor="let tag of allTags" [value]="tag">{{ tag }}</option>
     </select>
@@ -193,7 +193,7 @@
       <!-- Contenu -->
       <div class="p-5 flex flex-col flex-1">
         <p class="font-bold text-lg text-gray-900 truncate mb-1">{{ plat.nom }}</p>
-        <p class="text-sm font-medium text-primary-600 truncate mb-3">{{ plat.menuTitre }}</p>
+        <p class="text-sm font-medium text-[#1e3a8a] truncate mb-3">{{ plat.menuTitre }}</p>
         
         <div class="flex flex-wrap gap-2 mb-4">
           <span *ngFor="let tag of plat.tags"
@@ -206,9 +206,9 @@
 
         <!-- Prix + quantite -->
         <div class="flex items-center justify-between mt-auto mb-4">
-          <span class="font-extrabold text-xl text-primary-700">{{ plat.prix }} TND</span>
+          <span class="font-extrabold text-xl text-[#1e3a8a]">{{ plat.prix }} TND</span>
           <span class="px-3 py-1 rounded-full text-xs font-bold"
-            [ngClass]="(plat.quantite != null && plat.quantite <= 0) ? 'text-red-700 bg-red-100' : 'text-primary-700 bg-primary-100'">
+            [ngClass]="(plat.quantite != null && plat.quantite <= 0) ? 'text-red-700 bg-red-100' : 'text-[#1e3a8a] bg-blue-50'">
             {{ libelleQuantiteRestante(plat) }}
           </span>
         </div>
@@ -225,7 +225,7 @@
 
         <!-- Boutons admin -->
         <div *ngIf="roleService.isAdmin()" class="flex gap-3 mt-2">
-          <button (click)="ouvrirEditionPlat(plat)" mat-stroked-button class="flex-1 border-primary-200 text-primary-700 hover:bg-primary-50">
+          <button (click)="ouvrirEditionPlat(plat)" mat-stroked-button class="flex-1 border-blue-100 text-[#1e3a8a] hover:bg-blue-50">
             <mat-icon svgIcon="heroicons_outline:pencil-alt" class="icon-size-4 mr-1"></mat-icon>
             Éditer
           </button>

@@ -53,7 +53,7 @@ import { AcademyService } from '../../academy.service'; // Ajout de l'import
                 </tr>
                 <tr class="border-t-2 border-b-2">
                     <td class="py-3 font-bold">Salaire NET</td>
-                    <td class="py-3 text-right font-bold text-green-600 text-xl">
+                    <td class="py-3 text-right font-bold text-[#1e3a8a] text-xl">
                         {{bulletin.salaireNet | number:'1.2-2'}} TND
                     </td>
                 </tr>

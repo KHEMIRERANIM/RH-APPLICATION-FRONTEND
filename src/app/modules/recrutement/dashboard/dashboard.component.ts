@@ -35,14 +35,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
   // Graphiques
   funnelChartOptions: Partial<ChartOptions> = {};
   radarChartOptions: Partial<ChartOptions> = {};
-  
+
   // Données
   offres: Offre[] = [];
   tousEntretiens: Entretien[] = [];
   topCandidats: any[] = [];
   smartAlerts: any[] = [];
   registrationHistory: any[] = [];
-  
+
   // État de l'interface
   loading: boolean = true;
   showDetails: boolean = false;
@@ -51,7 +51,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   aiInsight: string = "";
   recruitmentEfficiency: number = 0;
   totalAcceptedCandidates: number = 0;
-  
+
   private _alertInterval: any;
   private _entretienAlertedIds: Set<string> = new Set();
 
@@ -63,7 +63,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private _snackBar: MatSnackBar,
     private authService: AuthService,
     private router: Router,
-  ) {}
+  ) { }
 
   // Getters pour les statistiques
   get totalOffres(): number { return this.offres.length; }
@@ -96,7 +96,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           forkJoin(candRequests).subscribe(allCands => {
             const flatCands = allCands.flat();
             this.totalAcceptedCandidates = flatCands.filter((c: any) => c.statut === 'ACCEPTE').length;
-            
+
             this.generateTopCandidatsReal(flatCands);
             this.generateSmartAlertsReal(flatCands);
             this.initCharts();
@@ -127,7 +127,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       xaxis: { categories: ["Candidatures", "Entretiens", "Embauches"] }
     };
 
-    this.recruitmentEfficiency = this.totalCandidatures > 0 
+    this.recruitmentEfficiency = this.totalCandidatures > 0
       ? Math.round((this.totalAcceptedCandidates / this.totalCandidatures) * 100) : 0;
 
     this.radarChartOptions = {
@@ -181,49 +181,49 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   creerOffre(): void { this.router.navigate(['/recrutement/admin/offres/creer']); }
-  
+
   voirPipeline(item: any): void {
     const id = typeof item === 'string' ? item : (item?.id || 'all');
     this.router.navigate(['/recrutement/admin/pipeline', id]);
   }
 
   editerOffre(offre: Offre): void {
-      this.router.navigate(['/recrutement/admin/offres/modifier', offre.id]);
+    this.router.navigate(['/recrutement/admin/offres/modifier', offre.id]);
   }
 
   publierOffre(offre: Offre): void {
-      this.offreService.publierOffre(offre.id).subscribe({
-          next: () => {
-              this._snackBar.open('Offre publiée avec succès !', 'OK', { duration: 3000 });
-              this.loadDashboardData();
-          },
-          error: () => {
-              this._snackBar.open('Erreur lors de la publication.', 'Réessayer', { duration: 3000 });
-          }
-      });
+    this.offreService.publierOffre(offre.id).subscribe({
+      next: () => {
+        this._snackBar.open('Offre publiée avec succès !', 'OK', { duration: 3000 });
+        this.loadDashboardData();
+      },
+      error: () => {
+        this._snackBar.open('Erreur lors de la publication.', 'Réessayer', { duration: 3000 });
+      }
+    });
   }
 
   exporterRapportIA(): void {
     this._snackBar.open('Génération du rapport IA en cours...', 'OK', { duration: 3000 });
     // Simulation d'une action complexe
     setTimeout(() => {
-        window.print();
+      window.print();
     }, 1000);
   }
 
   supprimerOffre(offre: Offre, event: MouseEvent): void {
     event.stopPropagation(); // Évite de déclencher d'éventuels clics sur le parent
-    
+
     if (confirm(`Êtes-vous sûr de vouloir supprimer l'offre "${offre.titre}" ?`)) {
-        this.offreService.deleteOffre(offre.id).subscribe({
-            next: () => {
-                this._snackBar.open('Offre supprimée avec succès', 'Fermer', { duration: 3000 });
-                this.loadDashboardData();
-            },
-            error: () => {
-                this._snackBar.open('Erreur lors de la suppression', 'Réessayer', { duration: 3000 });
-            }
-        });
+      this.offreService.deleteOffre(offre.id).subscribe({
+        next: () => {
+          this._snackBar.open('Offre supprimée avec succès', 'Fermer', { duration: 3000 });
+          this.loadDashboardData();
+        },
+        error: () => {
+          this._snackBar.open('Erreur lors de la suppression', 'Réessayer', { duration: 3000 });
+        }
+      });
     }
   }
 

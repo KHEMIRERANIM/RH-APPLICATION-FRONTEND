@@ -2,31 +2,36 @@
 // ADMIN DASHBOARD — Styles
 // ============================================================
 
-$primary   : #6366f1;
-$green     : #10b981;
-$red       : #ef4444;
-$amber     : #f59e0b;
+$primary : #1e3a8a; // Navy Blue
+$green   : #1e3a8a; // Unified to Navy
+$red     : #1e3a8a; // Unified to Navy
+$amber   : #1e3a8a; // Unified to Navy
 $text-main : #0f172a;
 $text-muted: #64748b;
-$border    : #e2e8f0;
-$bg-light  : #f8fafc;
+$border : #e2e8f0;
+$bg-light : #f8fafc;
 
-:host { display: block; }
+:host {
+    display: block;
+}
 
 .admin-page {
     min-height: 100vh;
     background: $bg-light;
-    .dark & { background: #0f172a; }
+
+    .dark & {
+        background: #0f172a;
+    }
 }
 
 // ── HEADER ───────────────────────────────────────────────
 .admin-header {
-    background     : white;
-    padding        : 2rem 2.5rem;
-    border-bottom  : 1px solid $border;
-    display        : flex;
+    background: white;
+    padding: 2rem 2.5rem;
+    border-bottom: 1px solid $border;
+    display: flex;
     justify-content: space-between;
-    align-items    : flex-start;
+    align-items: flex-start;
 
     .dark & {
         background: #1e293b;
@@ -40,39 +45,57 @@ $bg-light  : #f8fafc;
     }
 
     .back-btn {
-        background   : #f1f5f9;
+        background: #f1f5f9;
         border-radius: 12px;
-        margin-top   : 0.2rem;
-        transition   : all 0.2s ease;
+        margin-top: 0.2rem;
+        transition: all 0.2s ease;
 
-        .dark & { background: #334155; color: white; }
-        &:hover { background: #e2e8f0; transform: translateX(-2px); }
+        .dark & {
+            background: #334155;
+            color: white;
+        }
+
+        &:hover {
+            background: #e2e8f0;
+            transform: translateX(-2px);
+        }
     }
 
     .admin-badge {
-        display        : inline-flex;
-        align-items    : center;
-        gap            : 0.4rem;
-        background     : #eff6ff;
-        color          : #2563eb;
-        padding        : 0.35rem 0.85rem;
-        border-radius  : 100px;
-        font-size      : 0.75rem;
-        font-weight    : 700;
-        text-transform : uppercase;
-        letter-spacing : 0.05em;
-        margin-bottom  : 0.75rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        background: #eff6ff;
+        color: #2563eb;
+        padding: 0.35rem 0.85rem;
+        border-radius: 100px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.75rem;
 
-        mat-icon { font-size: 14px; width: 14px; height: 14px; }
-        .dark & { background: rgba(37, 99, 235, 0.2); color: #60a5fa; }
+        mat-icon {
+            font-size: 14px;
+            width: 14px;
+            height: 14px;
+        }
+
+        .dark & {
+            background: rgba(37, 99, 235, 0.2);
+            color: #60a5fa;
+        }
     }
 
     .admin-title {
-        font-size  : 1.75rem;
+        font-size: 1.75rem;
         font-weight: 800;
-        margin     : 0;
-        color      : $text-main;
-        .dark & { color: white; }
+        margin: 0;
+        color: $text-main;
+
+        .dark & {
+            color: white;
+        }
     }
 }
 
@@ -90,37 +113,42 @@ $bg-light  : #f8fafc;
 
     ::ng-deep .mat-mdc-tab {
         border-radius: 12px 12px 0 0;
-        min-width    : 140px;
-        padding      : 0 1.5rem;
-        font-weight  : 600;
+        min-width: 140px;
+        padding: 0 1.5rem;
+        font-weight: 600;
 
         .mdc-tab__text-label {
-            display    : flex;
+            display: flex;
             align-items: center;
-            gap        : 0.5rem;
-            color      : $text-muted;
+            gap: 0.5rem;
+            color: $text-muted;
         }
 
         &.mdc-tab--active {
-            .mdc-tab__text-label { color: $primary; }
-            .tab-icon { color: $primary; }
+            .mdc-tab__text-label {
+                color: $primary;
+            }
+
+            .tab-icon {
+                color: $primary;
+            }
         }
     }
 
     .tab-icon {
         font-size: 20px;
-        width    : 20px;
-        height   : 20px;
+        width: 20px;
+        height: 20px;
     }
 }
 
 .tab-content {
-    background   : white;
+    background: white;
     border-radius: 16px;
-    box-shadow   : 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.05);
-    border       : 1px solid $border;
-    overflow     : hidden;
-    min-height   : 400px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    border: 1px solid $border;
+    overflow: hidden;
+    min-height: 400px;
 
     .dark & {
         background: #1e293b;
@@ -130,12 +158,12 @@ $bg-light  : #f8fafc;
 
 // ── TOOLBAR DE TABLE ─────────────────────────────────────
 .table-toolbar {
-    display        : flex;
+    display: flex;
     justify-content: space-between;
-    align-items    : center;
-    padding        : 1.25rem 1.5rem;
-    border-bottom  : 1px solid $border;
-    background     : #f8fafc;
+    align-items: center;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid $border;
+    background: #f8fafc;
 
     .dark & {
         background: #0f172a;
@@ -143,30 +171,30 @@ $bg-light  : #f8fafc;
     }
 
     .search-box {
-        position   : relative;
-        display    : flex;
+        position: relative;
+        display: flex;
         align-items: center;
-        width      : 300px;
+        width: 300px;
 
         .search-icon {
             position: absolute;
-            left    : 12px;
-            color   : $text-muted;
-            width   : 20px;
-            height  : 20px;
+            left: 12px;
+            color: $text-muted;
+            width: 20px;
+            height: 20px;
             font-size: 20px;
         }
 
         input {
-            width        : 100%;
-            height       : 40px;
-            padding      : 0 1rem 0 2.5rem;
-            border       : 1px solid $border;
+            width: 100%;
+            height: 40px;
+            padding: 0 1rem 0 2.5rem;
+            border: 1px solid $border;
             border-radius: 8px;
-            font-size    : 0.875rem;
-            transition   : all 0.2s;
-            outline      : none;
-            background   : white;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+            outline: none;
+            background: white;
 
             .dark & {
                 background: #1e293b;
@@ -176,46 +204,54 @@ $bg-light  : #f8fafc;
 
             &:focus {
                 border-color: $primary;
-                box-shadow  : 0 0 0 3px rgba(99, 102, 241, 0.1);
+                box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
             }
         }
     }
 
     .btn-add {
-        background   : $primary;
-        color        : white;
+        background: $primary;
+        color: white;
         border-radius: 8px;
-        font-weight  : 600;
-        height       : 40px;
+        font-weight: 600;
+        height: 40px;
 
-        mat-icon { margin-right: 0.4rem; }
-        &:hover { background: darken($primary, 5%); }
+        mat-icon {
+            margin-right: 0.4rem;
+        }
+
+        &:hover {
+            background: darken($primary, 5%);
+        }
     }
 }
 
 // ── TABLE ────────────────────────────────────────────────
 .loader-row {
-    display        : flex;
+    display: flex;
     justify-content: center;
-    padding        : 4rem 0;
+    padding: 4rem 0;
 }
 
 .table-container {
-    width   : 100%;
+    width: 100%;
     overflow: auto;
 
     .admin-table {
         width: 100%;
-        .dark & { background: #1e293b; }
+
+        .dark & {
+            background: #1e293b;
+        }
 
         th.mat-header-cell {
-            font-size     : 0.75rem;
-            font-weight   : 600;
-            color         : $text-muted;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: $text-muted;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            padding       : 1rem 1.5rem;
-            border-bottom : 1px solid $border;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid $border;
 
             .dark & {
                 color: #94a3b8;
@@ -224,9 +260,9 @@ $bg-light  : #f8fafc;
         }
 
         td.mat-cell {
-            padding      : 1rem 1.5rem;
-            font-size    : 0.875rem;
-            color        : $text-main;
+            padding: 1rem 1.5rem;
+            font-size: 0.875rem;
+            color: $text-main;
             border-bottom: 1px solid #f1f5f9;
 
             .dark & {
@@ -237,100 +273,139 @@ $bg-light  : #f8fafc;
 
         .table-row {
             transition: background-color 0.2s;
-            &:hover { background-color: #f8fafc; }
-            .dark &:hover { background-color: #334155; }
+
+            &:hover {
+                background-color: #f8fafc;
+            }
+
+            .dark &:hover {
+                background-color: #334155;
+            }
         }
 
         .no-data {
             text-align: center;
-            padding   : 3rem !important;
-            color     : $text-muted;
-            font-size : 0.9rem;
+            padding: 3rem !important;
+            color: $text-muted;
+            font-size: 0.9rem;
         }
     }
 }
 
 // ── ÉLÉMENTS DE CELLULE ──────────────────────────────────
 .partner-name-cell {
-    display    : flex;
+    display: flex;
     align-items: center;
-    gap        : 0.75rem;
+    gap: 0.75rem;
     font-weight: 600;
 
     .partner-avatar {
-        width          : 36px;
-        height         : 36px;
-        border-radius  : 8px;
-        display        : flex;
-        align-items    : center;
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
         justify-content: center;
-        color          : white;
-        font-size      : 1.1rem;
-        font-weight    : 700;
+        color: white;
+        font-size: 1.1rem;
+        font-weight: 700;
     }
 }
 
 .offer-cell {
-    display    : flex;
+    display: flex;
     align-items: center;
-    gap        : 0.75rem;
+    gap: 0.75rem;
     font-weight: 600;
-    max-width  : 300px;
+    max-width: 300px;
     white-space: nowrap;
-    overflow   : hidden;
+    overflow: hidden;
     text-overflow: ellipsis;
 
     .offer-thumb {
-        width        : 44px;
-        height       : 32px;
+        width: 44px;
+        height: 32px;
         border-radius: 6px;
-        overflow     : hidden;
-        flex-shrink  : 0;
+        overflow: hidden;
+        flex-shrink: 0;
 
-        img { width: 100%; height: 100%; object-fit: cover; }
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
     }
 }
 
 .cat-chip {
-    display        : inline-flex;
-    padding        : 0.25rem 0.6rem;
-    border-radius  : 100px;
-    font-size      : 0.7rem;
-    font-weight    : 700;
-    text-transform : uppercase;
+    display: inline-flex;
+    padding: 0.25rem 0.6rem;
+    border-radius: 100px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
 
-    &.cat-voyage { background: #e0e7ff; color: #4f46e5; }
-    &.cat-hotel  { background: #e0f2fe; color: #0284c7; }
-    &.cat-festival{ background: #fef3c7; color: #d97706; }
+    &.cat-voyage {
+        background: #e0e7ff;
+        color: #4f46e5;
+    }
+
+    &.cat-hotel {
+        background: #e0f2fe;
+        color: #0284c7;
+    }
+
+    &.cat-festival {
+        background: #fef3c7;
+        color: #d97706;
+    }
 
     .dark & {
-        &.cat-voyage { background: rgba(79, 70, 229, 0.2); color: #818cf8; }
-        &.cat-hotel  { background: rgba(2, 132, 199, 0.2); color: #38bdf8; }
-        &.cat-festival{ background: rgba(217, 119, 6, 0.2); color: #fbbf24; }
+        &.cat-voyage {
+            background: rgba(79, 70, 229, 0.2);
+            color: #818cf8;
+        }
+
+        &.cat-hotel {
+            background: rgba(2, 132, 199, 0.2);
+            color: #38bdf8;
+        }
+
+        &.cat-festival {
+            background: rgba(217, 119, 6, 0.2);
+            color: #fbbf24;
+        }
     }
 }
 
 .price-cell {
     font-weight: 700;
-    color      : $primary;
-    .dark & { color: #a78bfa; }
+    color: $primary;
+
+    .dark & {
+        color: #a78bfa;
+    }
 }
 
 .user-id {
     font-family: monospace;
-    background : #f1f5f9;
-    padding    : 0.2rem 0.4rem;
+    background: #f1f5f9;
+    padding: 0.2rem 0.4rem;
     border-radius: 4px;
-    color      : #475569;
-    .dark & { background: #334155; color: #cbd5e1; }
+    color: #475569;
+
+    .dark & {
+        background: #334155;
+        color: #cbd5e1;
+    }
 }
 
 .badge-ref {
     font-family: monospace;
     font-weight: 700;
-    color      : $primary;
-    background : rgba(99, 102, 241, 0.1);
-    padding    : 0.25rem 0.5rem;
+    color: $primary;
+    background: rgba(99, 102, 241, 0.1);
+    padding: 0.25rem 0.5rem;
     border-radius: 6px;
     letter-spacing: 0.05em;
 
@@ -340,38 +415,86 @@ $bg-light  : #f8fafc;
     }
 }
 
-.low-stock { color: $amber; font-weight: 600; }
-.out-stock { color: $red; font-weight: 700; }
+.low-stock {
+    color: $amber;
+    font-weight: 600;
+}
+
+.out-stock {
+    color: $red;
+    font-weight: 700;
+}
 
 .status-badge {
-    padding      : 0.25rem 0.6rem;
+    padding: 0.25rem 0.6rem;
     border-radius: 100px;
-    font-size    : 0.7rem;
-    font-weight  : 700;
+    font-size: 0.7rem;
+    font-weight: 700;
 
-    &.badge-confirmee { background: #d1fae5; color: #065f46; }
-    &.badge-annulee   { background: #fee2e2; color: #991b1b; }
+    &.badge-confirmee {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    &.badge-annulee {
+        background: #fee2e2;
+        color: #991b1b;
+    }
 
     .dark & {
-        &.badge-confirmee { background: rgba(6, 95, 70, 0.3); color: #34d399; }
-        &.badge-annulee   { background: rgba(153, 27, 27, 0.3); color: #f87171; }
+        &.badge-confirmee {
+            background: rgba(6, 95, 70, 0.3);
+            color: #34d399;
+        }
+
+        &.badge-annulee {
+            background: rgba(153, 27, 27, 0.3);
+            color: #f87171;
+        }
     }
 }
 
 .action-btns {
     display: flex;
-    gap    : 0.25rem;
+    gap: 0.25rem;
 
-    .btn-edit { color: $text-muted; &:hover { color: $primary; background: #e0e7ff; } }
-    .btn-delete { color: $text-muted; &:hover { color: $red; background: #fee2e2; } }
+    .btn-edit {
+        color: $text-muted;
+
+        &:hover {
+            color: $primary;
+            background: #e0e7ff;
+        }
+    }
+
+    .btn-delete {
+        color: $text-muted;
+
+        &:hover {
+            color: $red;
+            background: #fee2e2;
+        }
+    }
 
     .dark & {
-        .btn-edit:hover { background: rgba(79, 70, 229, 0.2); color: #818cf8; }
-        .btn-delete:hover { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+        .btn-edit:hover {
+            background: rgba(79, 70, 229, 0.2);
+            color: #818cf8;
+        }
+
+        .btn-delete:hover {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+        }
     }
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to   { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }

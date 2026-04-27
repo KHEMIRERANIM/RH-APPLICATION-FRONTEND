@@ -1,19 +1,24 @@
 <div class="flex flex-col flex-auto min-w-0 p-6 sm:p-10">
 
-  <div class="inline-flex items-center gap-2 text-sm font-semibold text-secondary mb-8 cursor-pointer hover:text-blue-600 transition-colors px-4 py-2 rounded-full hover:bg-blue-50/50 w-max" (click)="retour()">
+  <div
+    class="inline-flex items-center gap-2 text-sm font-semibold text-secondary mb-8 cursor-pointer hover:text-blue-600 transition-colors px-4 py-2 rounded-full hover:bg-blue-50/50 w-max"
+    (click)="retour()">
     <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:arrow-left'"></mat-icon>
     Retour
   </div>
 
   <div class="max-w-4xl mx-auto w-full">
-    <h2 class="text-4xl font-extrabold mb-10 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-indigo-700">Créer une offre d'emploi</h2>
+    <h2
+      class="text-4xl font-extrabold mb-10 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-indigo-700">
+      Créer une offre d'emploi</h2>
 
     <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-6">
 
       <!-- Section 1 -->
       <div class="bg-white rounded-3xl shadow-lg ring-1 ring-black/5 p-8 transition-shadow hover:shadow-xl">
         <h3 class="font-bold text-xl mb-6 flex items-center gap-3 text-gray-800">
-          <span class="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold shadow-md">1</span>
+          <span
+            class="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold shadow-md">1</span>
           Informations générales
         </h3>
         <div class="flex flex-col gap-4">
@@ -64,12 +69,14 @@
       </div>
 
       <!-- Section 2 -->
-      <div class="bg-white rounded-3xl shadow-lg ring-1 ring-black/5 p-8 transition-shadow hover:shadow-xl relative overflow-hidden">
+      <div
+        class="bg-white rounded-3xl shadow-lg ring-1 ring-black/5 p-8 transition-shadow hover:shadow-xl relative overflow-hidden">
         <h3 class="font-bold text-xl mb-6 flex items-center gap-3 text-gray-800">
-          <span class="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold shadow-md">2</span>
+          <span
+            class="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold shadow-md">2</span>
           Description & Coach Inclusivité (RSE)
         </h3>
-        
+
         <div class="flex flex-col lg:flex-row gap-6">
           <div class="flex-auto">
             <mat-form-field class="w-full">
@@ -82,22 +89,26 @@
           </div>
 
           <!-- Coach RSE Panel -->
-          <div class="w-full lg:w-80 bg-gray-50 rounded-2xl p-5 shadow-inner border-2 transition-colors duration-500" 
-               [ngClass]="inclusionScore >= 70 ? 'border-green-200' : 'border-red-400'">
+          <div class="w-full lg:w-80 bg-gray-50 rounded-2xl p-5 shadow-inner border-2 transition-colors duration-500"
+            [ngClass]="inclusionScore >= 70 ? 'border-green-200' : 'border-red-400'">
             <div class="flex items-center gap-2 mb-4">
               <div class="p-1.5 rounded-lg" [ngClass]="inclusionScore >= 70 ? 'bg-green-100' : 'bg-red-100'">
-                 <mat-icon [class.text-green-600]="inclusionScore >= 70" [class.text-red-600]="inclusionScore < 70" class="icon-size-5" [svgIcon]="'heroicons_outline:scale'"></mat-icon>
+                <mat-icon [class.text-green-600]="inclusionScore >= 70" [class.text-red-600]="inclusionScore < 70"
+                  class="icon-size-5" [svgIcon]="'heroicons_outline:scale'"></mat-icon>
               </div>
               <h4 class="font-black text-gray-800 tracking-tight text-sm">Détecteur de Biais Cognitifs</h4>
             </div>
-            
+
             <div class="mb-5">
               <div class="flex justify-between text-xs font-black mb-1.5 uppercase tracking-wider">
                 <span class="text-gray-500">Score Législatif</span>
-                <span [class.text-red-600]="inclusionScore < 70" [class.text-green-600]="inclusionScore >= 70">{{ inclusionScore }}%</span>
+                <span [class.text-red-600]="inclusionScore < 70" [class.text-green-600]="inclusionScore >= 70">{{
+                  inclusionScore }}%</span>
               </div>
               <div class="h-2.5 w-full bg-gray-200 rounded-full overflow-hidden shadow-inner">
-                <div class="h-full transition-all duration-300" [style.width.%]="inclusionScore" [ngClass]="inclusionScore >= 70 ? 'bg-gradient-to-r from-green-400 to-green-500' : 'bg-gradient-to-r from-orange-500 to-red-600'"></div>
+                <div class="h-full transition-all duration-300" [style.width.%]="inclusionScore"
+                  [ngClass]="inclusionScore >= 70 ? 'bg-gradient-to-r from-green-400 to-green-500' : 'bg-gradient-to-r from-orange-500 to-red-600'">
+                </div>
               </div>
             </div>
 
@@ -108,12 +119,14 @@
             </div>
 
             <div *ngIf="aiAnalysis && !aiLoading" class="mt-4 flex flex-col gap-3">
-              <p class="text-xs text-blue-700 font-bold uppercase flex items-center gap-1 border-t border-blue-100 pt-3">
+              <p
+                class="text-xs text-blue-700 font-bold uppercase flex items-center gap-1 border-t border-blue-100 pt-3">
                 <mat-icon class="icon-size-3" [svgIcon]="'heroicons_outline:sparkles'"></mat-icon>
                 Analyse Intelligente :
               </p>
               <div class="flex flex-col gap-2">
-                <div *ngFor="let sug of aiAnalysis.suggestions" class="p-2 bg-blue-50 rounded-lg border border-blue-100 text-[10px] leading-relaxed">
+                <div *ngFor="let sug of aiAnalysis.suggestions"
+                  class="p-2 bg-blue-50 rounded-lg border border-blue-100 text-[10px] leading-relaxed">
                   <p class="text-gray-600 italic">"{{ sug.problem }}"</p>
                   <p class="text-blue-700 font-bold mt-1">💡 Suggestion : {{ sug.suggestion }}</p>
                 </div>
@@ -122,8 +135,9 @@
                 {{ aiAnalysis.conclusion }}
               </p>
             </div>
-            
-            <div *ngIf="!aiLoading && !aiAnalysis && form.get('description')?.value" class="flex flex-col items-center justify-center p-3 text-center border border-green-200 rounded-xl bg-white mt-4">
+
+            <div *ngIf="!aiLoading && !aiAnalysis && form.get('description')?.value"
+              class="flex flex-col items-center justify-center p-3 text-center border border-green-200 rounded-xl bg-white mt-4">
               <mat-icon [svgIcon]="'heroicons_outline:check-badge'" class="text-green-500 mb-1 icon-size-6"></mat-icon>
               <span class="text-xs font-extrabold text-green-700 uppercase">En attente d'analyse IA...</span>
             </div>
@@ -134,7 +148,8 @@
       <!-- Section 3 -->
       <div class="bg-white rounded-3xl shadow-lg ring-1 ring-black/5 p-8 transition-shadow hover:shadow-xl">
         <h3 class="font-bold text-xl mb-6 flex items-center gap-3 text-gray-800">
-          <span class="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold shadow-md">3</span>
+          <span
+            class="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold shadow-md">3</span>
           Compétences & avantages
         </h3>
         <div class="mb-5">
@@ -145,10 +160,8 @@
                 {{ c }}<button matChipRemove><mat-icon [svgIcon]="'heroicons_outline:x-circle'"></mat-icon></button>
               </mat-chip-row>
             </mat-chip-grid>
-            <input placeholder="Appuyez sur Entrée..."
-              [matChipInputFor]="chipComp"
-              [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-              (matChipInputTokenEnd)="addCompetence($event)">
+            <input placeholder="Appuyez sur Entrée..." [matChipInputFor]="chipComp"
+              [matChipInputSeparatorKeyCodes]="separatorKeysCodes" (matChipInputTokenEnd)="addCompetence($event)">
           </mat-form-field>
         </div>
         <div>
@@ -159,10 +172,8 @@
                 {{ a }}<button matChipRemove><mat-icon [svgIcon]="'heroicons_outline:x-circle'"></mat-icon></button>
               </mat-chip-row>
             </mat-chip-grid>
-            <input placeholder="Ex: Télétravail, Tickets repas..."
-              [matChipInputFor]="chipAv"
-              [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-              (matChipInputTokenEnd)="addAvantage($event)">
+            <input placeholder="Ex: Télétravail, Tickets repas..." [matChipInputFor]="chipAv"
+              [matChipInputSeparatorKeyCodes]="separatorKeysCodes" (matChipInputTokenEnd)="addAvantage($event)">
           </mat-form-field>
         </div>
       </div>
@@ -170,7 +181,8 @@
       <!-- Section 4 -->
       <div class="bg-white rounded-3xl shadow-lg ring-1 ring-black/5 p-8 transition-shadow hover:shadow-xl">
         <h3 class="font-bold text-xl mb-6 flex items-center gap-3 text-gray-800">
-          <span class="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold shadow-md">4</span>
+          <span
+            class="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold shadow-md">4</span>
           Conditions & publication
         </h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -185,7 +197,8 @@
             <mat-error *ngIf="form.get('salaireMax')?.hasError('required')">Salaire max requis</mat-error>
           </mat-form-field>
           <div class="sm:col-span-2 -mt-4 mb-2" *ngIf="form.hasError('salaryInconsistent')">
-            <p class="text-red-500 text-xs font-semibold">Le salaire maximum doit être supérieur ou égal au salaire minimum.</p>
+            <p class="text-red-500 text-xs font-semibold">Le salaire maximum doit être supérieur ou égal au salaire
+              minimum.</p>
           </div>
           <mat-form-field>
             <mat-label>Nombre de postes</mat-label>
@@ -196,7 +209,8 @@
             <mat-label>Date d'expiration</mat-label>
             <input matInput type="datetime-local" formControlName="dateExpiration">
             <mat-error *ngIf="form.get('dateExpiration')?.hasError('required')">Date requise</mat-error>
-            <mat-error *ngIf="form.get('dateExpiration')?.hasError('pastDate')">La date doit être dans le futur</mat-error>
+            <mat-error *ngIf="form.get('dateExpiration')?.hasError('pastDate')">La date doit être dans le
+              futur</mat-error>
           </mat-form-field>
         </div>
       </div>
@@ -204,8 +218,11 @@
       <fuse-alert *ngIf="errorMsg" type="error" [appearance]="'outline'" class="rounded-xl">{{ errorMsg }}</fuse-alert>
 
       <div class="flex gap-4 mt-4">
-        <button mat-stroked-button type="button" class="flex-1 rounded-full py-6 text-lg font-bold border-2 hover:bg-gray-50 transition-colors" (click)="retour()">Annuler</button>
-        <button mat-flat-button type="submit" class="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full py-6 text-lg font-bold shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
+        <button mat-stroked-button type="button"
+          class="flex-1 rounded-full py-6 text-lg font-bold border-2 hover:bg-gray-50 transition-colors"
+          (click)="retour()">Annuler</button>
+        <button mat-flat-button type="submit"
+          class="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full py-6 text-lg font-bold shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
           [disabled]="loading || form.invalid" [class.opacity-50]="loading || form.invalid">
           {{ loading ? 'Création en cours...' : "Créer l'offre" }}
         </button>

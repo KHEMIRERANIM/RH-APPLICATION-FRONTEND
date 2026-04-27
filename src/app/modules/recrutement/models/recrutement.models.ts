@@ -57,6 +57,6 @@ export const STATUT_COLORS: Record<StatutCandidature, string> = {
   ACCEPTE: 'bg-green-100 text-green-800', REFUSE: 'bg-red-100 text-red-800',
 };
 export const KANBAN_COLUMNS: StatutCandidature[] = [
-  'NOUVEAU','EN_COURS_ANALYSE','ENTRETIEN_RH','ENTRETIEN_TECHNIQUE',
-  'TEST_TECHNIQUE','OFFRE_ENVOYEE','ACCEPTE','REFUSE'
+  'NOUVEAU', 'EN_COURS_ANALYSE', 'ENTRETIEN_RH', 'ENTRETIEN_TECHNIQUE',
+  'TEST_TECHNIQUE', 'OFFRE_ENVOYEE', 'ACCEPTE', 'REFUSE'
 ];

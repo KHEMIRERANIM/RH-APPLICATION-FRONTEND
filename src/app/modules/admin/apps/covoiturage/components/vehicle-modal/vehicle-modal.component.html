@@ -7,11 +7,7 @@
         <mat-icon svgIcon="feather:truck" class="text-[#1D9E75] icon-size-8"></mat-icon>
         <h2 class="text-3xl font-bold text-[#0F3460]">Mes Véhicules</h2>
       </div>
-      <button
-        type="button"
-        (click)="handleClose()"
-        class="text-gray-500 hover:text-gray-700 transition-colors"
-      >
+      <button type="button" (click)="handleClose()" class="text-gray-500 hover:text-gray-700 transition-colors">
         <mat-icon svgIcon="feather:x" class="icon-size-8"></mat-icon>
       </button>
     </div>
@@ -21,20 +17,19 @@
       <div *ngIf="!showForm">
         <div class="space-y-4 mb-6">
           <div *ngIf="vehicles.length === 0" class="text-center text-gray-500 py-4">
-             Aucun véhicule enregistré.
+            Aucun véhicule enregistré.
           </div>
-          
-          <div
-            *ngFor="let vehicle of vehicles"
-            class="border border-gray-200 rounded-lg p-5 hover:shadow-md transition-shadow"
-          >
+
+          <div *ngFor="let vehicle of vehicles"
+            class="border border-gray-200 rounded-lg p-5 hover:shadow-md transition-shadow">
             <div class="flex items-start justify-between">
               <div class="flex-1">
                 <div class="flex items-center gap-2 mb-2">
                   <h3 class="font-semibold text-xl text-[#0F3460]">
                     {{vehicle.marque}} {{vehicle.modele}}
                   </h3>
-                  <span *ngIf="vehicle.isDefault" class="px-2 py-1 bg-[#F5A623] text-white text-[10px] font-bold uppercase rounded-full flex items-center gap-1">
+                  <span *ngIf="vehicle.isDefault"
+                    class="px-2 py-1 bg-[#F5A623] text-white text-[10px] font-bold uppercase rounded-full flex items-center gap-1">
                     <mat-icon svgIcon="feather:star" class="icon-size-3 text-white"></mat-icon>
                     Défaut
                   </span>
@@ -48,26 +43,21 @@
                     <span>{{vehicle.nbPlaces}} places</span>
                   </div>
                   <div class="flex items-center gap-1 font-medium">
-                    <mat-icon [svgIcon]="vehicle.typeCarburant === 'ELECTRIQUE' ? 'feather:zap' : 'feather:battery'" class="icon-size-5"></mat-icon>
+                    <mat-icon [svgIcon]="vehicle.typeCarburant === 'ELECTRIQUE' ? 'feather:zap' : 'feather:battery'"
+                      class="icon-size-5"></mat-icon>
                     <span>{{vehicle.typeCarburant}}</span>
                   </div>
                 </div>
               </div>
               <div class="flex gap-2">
-                <button
-                  type="button"
-                  (click)="openEditForm(vehicle)"
+                <button type="button" (click)="openEditForm(vehicle)"
                   class="p-5 text-[#1D9E75] hover:bg-green-50 rounded-lg transition-colors border border-transparent hover:border-green-100"
-                  title="Modifier"
-                >
+                  title="Modifier">
                   <mat-icon svgIcon="feather:edit-2" class="icon-size-6"></mat-icon>
                 </button>
-                <button
-                  type="button"
-                  (click)="triggerDelete(vehicle.id)"
+                <button type="button" (click)="triggerDelete(vehicle.id)"
                   class="p-5 text-[#E94560] hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-100"
-                  title="Supprimer"
-                >
+                  title="Supprimer">
                   <mat-icon svgIcon="feather:trash-2" class="icon-size-6"></mat-icon>
                 </button>
               </div>
@@ -75,11 +65,8 @@
           </div>
         </div>
 
-        <button
-          type="button"
-          (click)="openAddForm()"
-          class="w-full py-3 px-4 bg-[#1D9E75] text-white rounded-lg hover:bg-[#178f66] transition-colors flex items-center justify-center gap-2 font-medium shadow-sm"
-        >
+        <button type="button" (click)="openAddForm()"
+          class="w-full py-3 px-4 bg-[#1D9E75] text-white rounded-lg hover:bg-[#178f66] transition-colors flex items-center justify-center gap-2 font-medium shadow-sm">
           <mat-icon svgIcon="feather:plus-circle" class="icon-size-6"></mat-icon>
           Ajouter un véhicule
         </button>
@@ -92,46 +79,35 @@
             <label class="block text-base font-medium text-gray-700 mb-1">
               Marque
             </label>
-            <input
-              type="text"
-              formControlName="marque"
+            <input type="text" formControlName="marque"
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1D9E75]"
-              placeholder="Ex: Peugeot"
-            />
+              placeholder="Ex: Peugeot" />
           </div>
 
           <div>
             <label class="block text-base font-medium text-gray-700 mb-1">
               Modèle
             </label>
-            <input
-              type="text"
-              formControlName="modele"
+            <input type="text" formControlName="modele"
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1D9E75]"
-              placeholder="Ex: 308"
-            />
+              placeholder="Ex: 308" />
           </div>
 
           <div>
             <label class="block text-base font-medium text-gray-700 mb-1">
               Immatriculation
             </label>
-            <input
-              type="text"
-              formControlName="immatriculation"
+            <input type="text" formControlName="immatriculation"
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1D9E75] font-mono"
-              placeholder="AB 123 CD"
-            />
+              placeholder="AB 123 CD" />
           </div>
 
           <div>
             <label class="block text-base font-medium text-gray-700 mb-1">
               Nombre de places (conducteur inclus)
             </label>
-            <select
-              formControlName="nbPlaces"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1D9E75]"
-            >
+            <select formControlName="nbPlaces"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1D9E75]">
               <option [value]="2">2 places</option>
               <option [value]="3">3 places</option>
               <option [value]="4">4 places</option>
@@ -147,10 +123,8 @@
             <label class="block text-base font-medium text-gray-700 mb-1">
               Type de carburant
             </label>
-            <select
-              formControlName="typeCarburant"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1D9E75]"
-            >
+            <select formControlName="typeCarburant"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1D9E75]">
               <option value="ESSENCE">Essence</option>
               <option value="DIESEL">Diesel</option>
               <option value="ELECTRIQUE">Électrique</option>
@@ -159,30 +133,20 @@
           </div>
 
           <div class="flex items-center gap-2 pt-2">
-            <input
-              type="checkbox"
-              id="isDefault"
-              formControlName="isDefault"
-              class="w-4 h-4 text-[#1D9E75] border-gray-300 rounded focus:ring-[#1D9E75]"
-            />
+            <input type="checkbox" id="isDefault" formControlName="isDefault"
+              class="w-4 h-4 text-[#1D9E75] border-gray-300 rounded focus:ring-[#1D9E75]" />
             <label htmlFor="isDefault" class="text-base text-gray-700">
               Véhicule par défaut
             </label>
           </div>
 
           <div class="flex gap-3 pt-4">
-            <button
-              type="button"
-              (click)="cancelForm()"
-              class="flex-1 py-2 px-4 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium shadow-sm"
-            >
+            <button type="button" (click)="cancelForm()"
+              class="flex-1 py-2 px-4 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium shadow-sm">
               Annuler
             </button>
-            <button
-              type="submit"
-              [disabled]="vehicleForm.invalid"
-              class="flex-1 py-2 px-4 bg-[#1D9E75] text-white rounded-lg hover:bg-[#178f66] transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-            >
+            <button type="submit" [disabled]="vehicleForm.invalid"
+              class="flex-1 py-2 px-4 bg-[#1D9E75] text-white rounded-lg hover:bg-[#178f66] transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
               {{ editingId ? 'Modifier' : 'Ajouter' }}
             </button>
           </div>

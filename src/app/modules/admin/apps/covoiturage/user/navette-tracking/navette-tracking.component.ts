@@ -309,7 +309,7 @@ export class NavetteTrackingComponent implements OnInit, AfterViewInit, OnDestro
               }
 
               this.updateNavettePosition(lat, lng);
-              
+
               // Utilisation directe des données du conducteur pour éviter les calculs OSRM lents
               this.tempsRestant = pos.tempsRestant;
               this.distance = pos.distance;
