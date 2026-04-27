@@ -1,0 +1,41 @@
+<div class="reward-dialog-container">
+  <div class="celebration-header">
+    <div class="confetti">🎉</div>
+    <h2>Félicitations !</h2>
+    <p class="subtitle">Vous avez atteint le palier d'excellence de <strong>100 points RSE</strong> !</p>
+  </div>
+
+  <div class="reward-content">
+    <p class="intro-text">
+      Votre engagement remarquable mérite d'être récompensé. Choisissez l'un des cadeaux ci-dessous pour célébrer cette étape exceptionnelle :
+    </p>
+
+    <div class="rewards-grid">
+      <div 
+        *ngFor="let reward of rewards; let i = index" 
+        class="reward-card" 
+        [class.selected]="selectedReward === i"
+        (click)="selectReward(i)">
+        
+        <div class="reward-icon">{{ reward.icon }}</div>
+        <h3>{{ reward.title }}</h3>
+        <p>{{ reward.desc }}</p>
+        
+        <div class="check-badge" *ngIf="selectedReward === i">
+          <mat-icon>check_circle</mat-icon>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dialog-actions">
+    <button mat-button (click)="close()">Plus tard</button>
+    <button 
+      mat-raised-button 
+      color="primary" 
+      [disabled]="selectedReward === null" 
+      (click)="claimReward()">
+      Réclamer mon cadeau
+    </button>
+  </div>
+</div>

@@ -38,17 +38,17 @@ export class MobilityDashboardComponent implements OnInit {
   ];
 
   statusColors: Record<MobilityStatus, string> = {
-    [MobilityStatus.PENDING]:  'background:#fef9c3; color:#854d0e;',
+    [MobilityStatus.PENDING]: 'background:#fef9c3; color:#854d0e;',
     [MobilityStatus.APPROVED]: 'background:#dcfce7; color:#166534;',
     [MobilityStatus.REJECTED]: 'background:#fee2e2; color:#991b1b;',
-    [MobilityStatus.ON_HOLD]:  'background:#e0e7ff; color:#3730a3;'
+    [MobilityStatus.ON_HOLD]: 'background:#e0e7ff; color:#3730a3;'
   };
 
   statusLabels: Record<MobilityStatus, string> = {
-    [MobilityStatus.PENDING]:  '⏳ En attente',
+    [MobilityStatus.PENDING]: '⏳ En attente',
     [MobilityStatus.APPROVED]: '✅ Approuvé',
     [MobilityStatus.REJECTED]: '❌ Refusé',
-    [MobilityStatus.ON_HOLD]:  '⏸️ En suspens'
+    [MobilityStatus.ON_HOLD]: '⏸️ En suspens'
   };
 
   constructor(
@@ -57,12 +57,12 @@ export class MobilityDashboardComponent implements OnInit {
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
     private http: HttpClient
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadAll();
     this.careerService.getAll().subscribe(data => this.careers = data);
-    
+
   }
 
   loadAll(): void {
@@ -110,6 +110,20 @@ export class MobilityDashboardComponent implements OnInit {
       next: () => {
         this.snackBar.open('Demande mise à jour', 'OK', { duration: 3000 });
         this.loadAll();
+
+        if (status === MobilityStatus.APPROVED) {
+          const token = localStorage.getItem('accessToken');
+          const headers = new HttpHeaders({ Authorization: `Bearer ${token || ''}` });
+          const payload = {
+            destinataireId: req.employeeId,
+            type: 'MOBILITY_APPROVED',
+            title: 'Mobilité approuvée',
+            message: 'Votre demande de mobilité a été approuvée.',
+            read: false,
+            lu: false
+          };
+          this.http.post('http://localhost:8081/api/notifications', payload, { headers }).subscribe();
+        }
       },
       error: () => {
         this.snackBar.open('Erreur', 'Fermer', { duration: 3000 });
@@ -129,15 +143,15 @@ export class MobilityDashboardComponent implements OnInit {
   }
 
   openPreview(req: MobilityRequest): void {
-  this.dialog.open(MotivationPreviewDialogComponent, {
-    width: '92vw',
-    height: '92vh',
-    maxWidth: '92vw',
-    maxHeight: '92vh',
-    data: req,
-    panelClass: 'preview-dialog-fullsize'
-  });
-}
+    this.dialog.open(MotivationPreviewDialogComponent, {
+      width: '92vw',
+      height: '92vh',
+      maxWidth: '92vw',
+      maxHeight: '92vh',
+      data: req,
+      panelClass: 'preview-dialog-fullsize'
+    });
+  }
 
   downloadFile(req: MobilityRequest): void {
     this.mobilityService.downloadFile(req.id!).subscribe(blob => {

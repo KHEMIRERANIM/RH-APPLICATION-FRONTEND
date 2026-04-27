@@ -1,0 +1,143 @@
+.reward-dialog-container {
+  padding: 24px;
+  text-align: center;
+  background: linear-gradient(to bottom, #fdfbfb, #ebedee);
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+
+  .celebration-header {
+    margin-bottom: 24px;
+
+    .confetti {
+      font-size: 4rem;
+      margin-bottom: 8px;
+      animation: pop 0.5s ease-out;
+    }
+
+    h2 {
+      font-size: 2.5rem;
+      color: #eab308;
+      margin: 0;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      color: #4b5563;
+      margin-top: 8px;
+
+      strong {
+        color: #16a34a;
+        font-size: 1.2rem;
+      }
+    }
+  }
+
+  .reward-content {
+    .intro-text {
+      color: #374151;
+      font-size: 1rem;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    .rewards-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+
+      .reward-card {
+        background: #ffffff;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        text-align: left;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+
+        &:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+          border-color: #3b82f6;
+        }
+
+        &.selected {
+          border-color: #10b981;
+          background: #f0fdf4;
+          transform: scale(1.02);
+
+          .check-badge {
+            display: flex;
+          }
+        }
+
+        .reward-icon {
+          font-size: 2.5rem;
+          margin-bottom: 12px;
+        }
+
+        h3 {
+          font-size: 1.1rem;
+          margin: 0 0 8px 0;
+          color: #1f2937;
+          font-weight: 700;
+        }
+
+        p {
+          font-size: 0.85rem;
+          color: #6b7280;
+          margin: 0;
+          line-height: 1.4;
+        }
+
+        .check-badge {
+          display: none;
+          position: absolute;
+          top: 12px;
+          right: 12px;
+          color: #10b981;
+
+          mat-icon {
+            font-size: 24px;
+            width: 24px;
+            height: 24px;
+          }
+        }
+      }
+    }
+  }
+
+  .dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+
+    button {
+      padding: 8px 24px;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 8px;
+    }
+  }
+}
+
+@keyframes pop {
+  0% { transform: scale(0.5); opacity: 0; }
+  80% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@media (max-width: 600px) {
+  .reward-dialog-container .reward-content .rewards-grid {
+    grid-template-columns: 1fr;
+  }
+}

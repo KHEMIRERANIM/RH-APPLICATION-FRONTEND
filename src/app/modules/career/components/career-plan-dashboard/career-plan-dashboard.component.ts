@@ -42,7 +42,7 @@ export class CareerPlanDashboardComponent implements OnInit {
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
     private http: HttpClient
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.careerService.getAll().subscribe(data => {
@@ -173,7 +173,7 @@ export class CareerPlanDashboardComponent implements OnInit {
             this.evolutionPlans = this.enrichPlans(safeData);
           });
       },
-      error: () => {}
+      error: () => { }
     });
   }
 
@@ -302,6 +302,18 @@ export class CareerPlanDashboardComponent implements OnInit {
         }
 
         this.snackBar.open('Certif mise à jour ✓', 'OK', { duration: 2500 });
+
+        if (certif.valideParAdmin === true) {
+          const notifPayload = {
+            destinataireId: updatedPlan.employeeId,
+            type: 'CERTIF_VALIDATED',
+            title: 'Certification validée',
+            message: `Votre certification "${certif.nom}" a été validée.`,
+            read: false,
+            lu: false
+          };
+          this.http.post('http://localhost:8081/api/notifications', notifPayload, { headers: this.getHeaders() }).subscribe();
+        }
       },
       error: () => this.snackBar.open('Erreur', 'Fermer', { duration: 3000 })
     });
@@ -343,35 +355,35 @@ export class CareerPlanDashboardComponent implements OnInit {
     } as any)[status] ?? 'certif-not-started';
   }
   openCertificationFile(fileUrl: string): void {
-  if (!fileUrl) {
-    this.snackBar.open('Fichier introuvable', 'Fermer', { duration: 3000 });
-    return;
-  }
-
-  const fullUrl = `http://localhost:8081${fileUrl}`;
-
-  this.http.get(fullUrl, {
-    headers: this.getHeaders(),
-    responseType: 'blob',
-    observe: 'response'
-  }).subscribe({
-    next: (response) => {
-      const blob = response.body;
-      if (!blob) {
-        this.snackBar.open('Impossible d’ouvrir le fichier', 'Fermer', { duration: 3000 });
-        return;
-      }
-
-      const blobUrl = window.URL.createObjectURL(blob);
-      window.open(blobUrl, '_blank');
-
-      setTimeout(() => {
-        window.URL.revokeObjectURL(blobUrl);
-      }, 10000);
-    },
-    error: () => {
-      this.snackBar.open('Accès refusé ou fichier indisponible', 'Fermer', { duration: 3000 });
+    if (!fileUrl) {
+      this.snackBar.open('Fichier introuvable', 'Fermer', { duration: 3000 });
+      return;
     }
-  });
-}
+
+    const fullUrl = `http://localhost:8081${fileUrl}`;
+
+    this.http.get(fullUrl, {
+      headers: this.getHeaders(),
+      responseType: 'blob',
+      observe: 'response'
+    }).subscribe({
+      next: (response) => {
+        const blob = response.body;
+        if (!blob) {
+          this.snackBar.open('Impossible d’ouvrir le fichier', 'Fermer', { duration: 3000 });
+          return;
+        }
+
+        const blobUrl = window.URL.createObjectURL(blob);
+        window.open(blobUrl, '_blank');
+
+        setTimeout(() => {
+          window.URL.revokeObjectURL(blobUrl);
+        }, 10000);
+      },
+      error: () => {
+        this.snackBar.open('Accès refusé ou fichier indisponible', 'Fermer', { duration: 3000 });
+      }
+    });
+  }
 }

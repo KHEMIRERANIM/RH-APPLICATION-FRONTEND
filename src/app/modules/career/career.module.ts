@@ -44,6 +44,7 @@ import { EmployeeAiRecommendationComponent } from './components/employee-ai-reco
 // RSE
 import { RseActionFormComponent } from './components/rse-action-form/rse-action-form.component';
 import { RseAdminDashboardComponent } from './components/rse-action-form/rse-admin-dashboard.component';
+import { RseRewardDialogComponent } from './components/rse-reward-dialog/rse-reward-dialog.component';
 
 @NgModule({
   declarations: [
@@ -61,7 +62,8 @@ import { RseAdminDashboardComponent } from './components/rse-action-form/rse-adm
     EmployeePlanComponent,
     EmployeeAiRecommendationComponent,
     RseActionFormComponent,
-    RseAdminDashboardComponent
+    RseAdminDashboardComponent,
+    RseRewardDialogComponent
   ],
   imports: [
     CommonModule,
