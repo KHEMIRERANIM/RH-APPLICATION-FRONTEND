@@ -39,13 +39,7 @@ export const defaultNavigation: FuseNavigationItem[] = [
                 icon : 'heroicons_outline:calendar',
                 link : '/formations'  // ← CHANGÉ: '/apps/formations' → '/formations'
             },
-            {
-                id   : 'apps.chat',
-                title: 'Chat',
-                type : 'basic',
-                icon : 'heroicons_outline:chat-alt',
-                link : '/apps/chat'
-            },
+
             {
                 id   : 'apps.contacts',
                 title: 'Recrutement',
@@ -53,13 +47,7 @@ export const defaultNavigation: FuseNavigationItem[] = [
                 icon : 'heroicons_outline:user-group',
                 link : '/recrutement/offres'
             },
-            {
-                id   : 'apps.ecommerce',
-                title: 'Paie',
-                type : 'basic',
-                icon : 'heroicons_outline:shopping-cart',
-                link : '/apps/ecommerce/inventory'
-            },
+
             {
                 id   : 'apps.partnerships',
                 title: 'Partnerships',

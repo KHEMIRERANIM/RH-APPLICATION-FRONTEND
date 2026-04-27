@@ -37,6 +37,15 @@
       <span class="admin-tab-btn__indicator"></span>
       <span>RSE</span>
     </button>
+
+    <button
+      type="button"
+      class="admin-tab-btn"
+      [ngClass]="{ 'active': adminTab === 'careers' }"
+      (click)="setAdminTab('careers')">
+      <span class="admin-tab-btn__indicator"></span>
+      <span>Carrières</span>
+    </button>
   </div>
 
   <!-- ===== VUE GLOBALE ===== -->
@@ -295,6 +304,136 @@
   <!-- ===== RSE ===== -->
   <ng-container *ngIf="adminTab === 'rse'">
     <app-rse-admin-dashboard></app-rse-admin-dashboard>
+  </ng-container>
+
+  <!-- ===== CARRIERES ===== -->
+  <ng-container *ngIf="adminTab === 'careers'">
+    <div class="panel" style="margin-top:24px;border:none;box-shadow:0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.01);border-radius:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;padding:8px 0;">
+        <div>
+          <h3 style="margin:0;font-size:20px;font-weight:700;color:#0f172a;letter-spacing:-0.5px;">Gestion des Carrières</h3>
+          <p style="margin:4px 0 0;font-size:13px;color:#64748b;">Gérez les postes, les niveaux et les offres disponibles</p>
+        </div>
+        <button
+          type="button"
+          (click)="openCareerForm()"
+          style="display:flex;align-items:center;background:#1e3a8a;color:white;border:none;border-radius:8px;font-weight:600;padding:10px 20px;font-size:14px;cursor:pointer;box-shadow:0 4px 6px -1px rgba(30, 58, 138, 0.2);transition:all 0.2s;">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width:18px;height:18px;margin-right:8px;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+          Ajouter une carrière
+        </button>
+      </div>
+
+      <div style="overflow-x:auto;border:1px solid #e2e8f0;border-radius:12px;background:white;">
+        <mat-table [dataSource]="careersDataSource" class="career-admin-table" style="min-width:900px;background:transparent;">
+          <!-- Titre -->
+          <ng-container matColumnDef="title">
+            <mat-header-cell *matHeaderCellDef style="color:#0f172a;font-weight:700;font-size:13px;background:#f8fafc;border-bottom:2px solid #e2e8f0;">Titre du Poste</mat-header-cell>
+            <mat-cell *matCellDef="let career" style="padding:16px 0;">
+              <div class="flex flex-col py-2" style="gap:4px;">
+                <span class="font-semibold text-sm" style="color:#1e3a8a;">{{ career.title }}</span>
+                <span *ngIf="career.poste" class="text-xs text-secondary">{{ career.poste }}</span>
+                <div *ngIf="career.certifRequises?.length" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:2px;">
+                  <span *ngFor="let c of career.certifRequises"
+                        [style]="c.type === 'TECHNIQUE'
+                          ? 'font-size:10px;background:#e0e7ff;color:#3730a3;padding:2px 8px;border-radius:9999px;font-weight:600;'
+                          : 'font-size:10px;background:#ffedd5;color:#c2410c;padding:2px 8px;border-radius:9999px;font-weight:600;'">
+                    ★ {{ c.nom }}
+                  </span>
+                </div>
+              </div>
+            </mat-cell>
+          </ng-container>
+
+          <!-- Domaine -->
+          <ng-container matColumnDef="domain">
+            <mat-header-cell *matHeaderCellDef style="color:#0f172a;font-weight:700;font-size:13px;background:#f8fafc;border-bottom:2px solid #e2e8f0;">Domaine</mat-header-cell>
+            <mat-cell *matCellDef="let career">
+              <div class="flex flex-col gap-1 py-2">
+                <span class="px-3 py-1 rounded-full text-xs font-semibold"
+                      style="display:inline-block;width:fit-content;"
+                      [ngClass]="domainColors[career.domain]">
+                  {{ domainLabels[career.domain] }}
+                </span>
+                <span *ngIf="career.departement" class="text-xs text-secondary">{{ career.departement }}</span>
+              </div>
+            </mat-cell>
+          </ng-container>
+
+          <!-- Niveau -->
+          <ng-container matColumnDef="level">
+            <mat-header-cell *matHeaderCellDef style="color:#0f172a;font-weight:700;font-size:13px;background:#f8fafc;border-bottom:2px solid #e2e8f0;">Niveau</mat-header-cell>
+            <mat-cell *matCellDef="let career">
+              <div style="display:flex;align-items:center;gap:6px;" [ngClass]="levelColors[career.level]">
+                <span style="font-size:14px;flex-shrink:0;line-height:1;">{{ levelIcons[career.level] }}</span>
+                <span class="text-sm font-medium">{{ career.level }}</span>
+              </div>
+            </mat-cell>
+          </ng-container>
+
+          <!-- Salaire -->
+          <ng-container matColumnDef="salary">
+            <mat-header-cell *matHeaderCellDef style="color:#0f172a;font-weight:700;font-size:13px;background:#f8fafc;border-bottom:2px solid #e2e8f0;">Salaire</mat-header-cell>
+            <mat-cell *matCellDef="let career">
+              <span class="text-sm text-gray-600 font-medium">{{ formatSalary(career) }}</span>
+            </mat-cell>
+          </ng-container>
+
+          <!-- Options -->
+          <ng-container matColumnDef="options">
+            <mat-header-cell *matHeaderCellDef style="color:#0f172a;font-weight:700;font-size:13px;background:#f8fafc;border-bottom:2px solid #e2e8f0;">Avantages</mat-header-cell>
+            <mat-cell *matCellDef="let career">
+              <div style="display:flex;flex-direction:column;gap:4px;">
+                <span *ngIf="career.isRemoteFriendly"
+                      style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;
+                             border-radius:9999px;font-size:11px;font-weight:600;
+                             background:#e0e7ff;color:#3730a3;width:fit-content;">
+                  🌐 Télétravail
+                </span>
+                <span *ngIf="career.isAccessibleForDisabled"
+                      style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;
+                             border-radius:9999px;font-size:11px;font-weight:600;
+                             background:#dcfce7;color:#15803d;width:fit-content;">
+                  ♿ Accessibilité
+                </span>
+              </div>
+            </mat-cell>
+          </ng-container>
+
+          <!-- Actions -->
+          <ng-container matColumnDef="actions">
+            <mat-header-cell *matHeaderCellDef style="justify-content:flex-end;color:#0f172a;font-weight:700;font-size:13px;background:#f8fafc;border-bottom:2px solid #e2e8f0;">Actions</mat-header-cell>
+            <mat-cell *matCellDef="let career" style="justify-content:flex-end;gap:8px;">
+              <button (click)="openCareerForm(career)" style="background:white;border:1px solid #cbd5e1;border-radius:6px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#475569;transition:all 0.2s;" onmouseover="this.style.borderColor='#1e3a8a';this.style.color='#1e3a8a'" onmouseout="this.style.borderColor='#cbd5e1';this.style.color='#475569'" title="Modifier">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:16px;height:16px;">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.89 1.14l-2.8 1.4a.75.75 0 01-.98-.98l1.4-2.8a4.5 4.5 0 011.14-1.89l13.11-13.11z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 7.125L16.875 4.5" />
+                </svg>
+              </button>
+              <button (click)="deleteCareer(career.id)" style="background:white;border:1px solid #cbd5e1;border-radius:6px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#475569;transition:all 0.2s;" onmouseover="this.style.borderColor='#dc2626';this.style.color='#dc2626'" onmouseout="this.style.borderColor='#cbd5e1';this.style.color='#475569'" title="Supprimer">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:16px;height:16px;">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                </svg>
+              </button>
+            </mat-cell>
+          </ng-container>
+
+          <mat-header-row *matHeaderRowDef="displayedCareerColumns; sticky: true" style="min-height:48px;"></mat-header-row>
+          <mat-row *matRowDef="let row; columns: displayedCareerColumns;" class="career-row" style="border-bottom:1px solid #f1f5f9;transition:background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'"></mat-row>
+
+          <!-- Pas de données -->
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell" [attr.colspan]="displayedCareerColumns.length" style="text-align:center;padding:48px;color:#64748b;">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" style="width:48px;height:48px;margin:0 auto 16px;color:#cbd5e1;">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0112 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 01-.673-.38m0 0A2.18 2.18 0 013 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 013.413-.387m7.5 0V5.25A2.25 2.25 0 0013.5 3h-3a2.25 2.25 0 00-2.25 2.25v.894m7.5 0a48.667 48.667 0 00-7.5 0M12 12.75h.008v.008H12v-.008z" />
+              </svg>
+              Aucune carrière n'a été ajoutée pour le moment.
+            </td>
+          </tr>
+        </mat-table>
+      </div>
+    </div>
   </ng-container>
 
 </div>

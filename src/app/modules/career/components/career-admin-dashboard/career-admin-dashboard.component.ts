@@ -2,10 +2,15 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { of, Subscription, interval } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatTableDataSource } from '@angular/material/table';
 import { CareerService } from '../../services/career.service';
 import { EvolutionPlanService } from '../../services/evolution-plan.service';
+import { CareerFormComponent } from '../career-form/career-form.component';
+import { CareerDomain, CareerLevel } from '../../models/career.model';
 
-type AdminTab = 'overview' | 'mobility' | 'plans' | 'rse';
+type AdminTab = 'overview' | 'mobility' | 'plans' | 'rse' | 'careers';
 
 @Component({
   selector: 'app-career-admin-dashboard',
@@ -13,6 +18,9 @@ type AdminTab = 'overview' | 'mobility' | 'plans' | 'rse';
   styleUrls: ['./career-admin-dashboard.component.scss']
 })
 export class CareerAdminDashboardComponent implements OnInit, OnDestroy {
+  allCareers: any[] = [];
+  careersDataSource = new MatTableDataSource<any>([]);
+  displayedCareerColumns: string[] = ['title', 'domain', 'level', 'salary', 'options', 'actions'];
   totalPositions = 0;
   totalPlans = 0;
   totalMobilities = 0;
@@ -32,12 +40,62 @@ export class CareerAdminDashboardComponent implements OnInit, OnDestroy {
   isLoading = true;
   adminTab: AdminTab = 'overview';
 
+  domainLabels: Record<CareerDomain, string> = {
+    [CareerDomain.IT]: 'Informatique',
+    [CareerDomain.FINANCE]: 'Finance',
+    [CareerDomain.RH]: 'Ressources Humaines',
+    [CareerDomain.MARKETING]: 'Marketing',
+    [CareerDomain.LEGAL]: 'Juridique',
+    [CareerDomain.OPERATIONS]: 'Opérations',
+    [CareerDomain.SALES]: 'Commercial',
+    [CareerDomain.ENGINEERING]: 'Ingénierie',
+    [CareerDomain.HEALTH]: 'Santé',
+    [CareerDomain.EDUCATION]: 'Éducation'
+  };
+
+  domainColors: Record<CareerDomain, string> = {
+    [CareerDomain.IT]: 'bg-blue-100 text-blue-700',
+    [CareerDomain.FINANCE]: 'bg-green-100 text-green-700',
+    [CareerDomain.RH]: 'bg-pink-100 text-pink-700',
+    [CareerDomain.MARKETING]: 'bg-purple-100 text-purple-700',
+    [CareerDomain.LEGAL]: 'bg-yellow-100 text-yellow-700',
+    [CareerDomain.OPERATIONS]: 'bg-orange-100 text-orange-700',
+    [CareerDomain.SALES]: 'bg-teal-100 text-teal-700',
+    [CareerDomain.ENGINEERING]: 'bg-indigo-100 text-indigo-700',
+    [CareerDomain.HEALTH]: 'bg-red-100 text-red-700',
+    [CareerDomain.EDUCATION]: 'bg-cyan-100 text-cyan-700'
+  };
+
+  levelColors: Record<CareerLevel, string> = {
+    [CareerLevel.INTERN]: 'text-gray-400',
+    [CareerLevel.JUNIOR]: 'text-gray-500',
+    [CareerLevel.MID]: 'text-blue-500',
+    [CareerLevel.SENIOR]: 'text-indigo-600',
+    [CareerLevel.LEAD]: 'text-purple-600',
+    [CareerLevel.MANAGER]: 'text-orange-600',
+    [CareerLevel.DIRECTOR]: 'text-red-600',
+    [CareerLevel.EXECUTIVE]: 'text-rose-700'
+  };
+
+  levelIcons: Record<CareerLevel, string> = {
+    [CareerLevel.INTERN]: '○',
+    [CareerLevel.JUNIOR]: '◔',
+    [CareerLevel.MID]: '◑',
+    [CareerLevel.SENIOR]: '◕',
+    [CareerLevel.LEAD]: '★',
+    [CareerLevel.MANAGER]: '▲',
+    [CareerLevel.DIRECTOR]: '◆',
+    [CareerLevel.EXECUTIVE]: '♛'
+  };
+
   private refreshSubscription?: Subscription;
 
   constructor(
     private careerService: CareerService,
     private evolutionPlanService: EvolutionPlanService,
-    private http: HttpClient
+    private http: HttpClient,
+    private dialog: MatDialog,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
@@ -65,9 +123,13 @@ export class CareerAdminDashboardComponent implements OnInit, OnDestroy {
     this.careerService.getAll().subscribe({
       next: (careers: any[]) => {
         this.totalPositions = careers?.length || 0;
+        this.allCareers = careers || [];
+        this.careersDataSource.data = this.allCareers;
       },
       error: () => {
         this.totalPositions = 0;
+        this.allCareers = [];
+        this.careersDataSource.data = [];
       }
     });
 
@@ -184,5 +246,47 @@ export class CareerAdminDashboardComponent implements OnInit, OnDestroy {
 
   setAdminTab(tab: AdminTab): void {
     this.adminTab = tab;
+  }
+
+  // --- Gestion des Carrieres ---
+
+  openCareerForm(career?: any): void {
+    const dialogRef = this.dialog.open(CareerFormComponent, {
+      width: '700px',
+      maxWidth: '95vw',
+      data: career || null,
+      panelClass: 'career-dialog'
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.loadStats();
+      }
+    });
+  }
+
+  deleteCareer(id: string): void {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cette carrière ?')) {
+      return;
+    }
+
+    this.careerService.delete(id).subscribe({
+      next: () => {
+        this.snackBar.open('Carrière supprimée avec succès', 'OK', { duration: 3000 });
+        this.loadStats();
+      },
+      error: () => {
+        this.snackBar.open('Erreur lors de la suppression', 'Fermer', { duration: 3000 });
+      }
+    });
+  }
+
+  formatSalary(career: any): string {
+    if (!career.salaryMin && !career.salaryMax) return '—';
+    if (career.salaryMin && career.salaryMax) {
+      return `${career.salaryMin.toLocaleString()} – ${career.salaryMax.toLocaleString()} TND`;
+    }
+    if (career.salaryMin) return `À partir de ${career.salaryMin.toLocaleString()} TND`;
+    return `Jusqu'à ${career.salaryMax!.toLocaleString()} TND`;
   }
 }

@@ -360,20 +360,8 @@ export class CareerPlanDashboardComponent implements OnInit {
       return;
     }
 
-    const fullUrl = `http://localhost:8081${fileUrl}`;
-
-    this.http.get(fullUrl, {
-      headers: this.getHeaders(),
-      responseType: 'blob',
-      observe: 'response'
-    }).subscribe({
-      next: (response) => {
-        const blob = response.body;
-        if (!blob) {
-          this.snackBar.open('Impossible d’ouvrir le fichier', 'Fermer', { duration: 3000 });
-          return;
-        }
-
+    this.evolutionPlanService.downloadFile(fileUrl).subscribe({
+      next: (blob) => {
         const blobUrl = window.URL.createObjectURL(blob);
         window.open(blobUrl, '_blank');
 
@@ -382,7 +370,7 @@ export class CareerPlanDashboardComponent implements OnInit {
         }, 10000);
       },
       error: () => {
-        this.snackBar.open('Accès refusé ou fichier indisponible', 'Fermer', { duration: 3000 });
+        this.snackBar.open('Accès refusé ou fichier indisponible (Erreur 401/403)', 'Fermer', { duration: 3000 });
       }
     });
   }

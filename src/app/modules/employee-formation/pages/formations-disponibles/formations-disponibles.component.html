@@ -1,7 +1,7 @@
-﻿<div class="absolute inset-0 flex flex-col min-w-0 overflow-y-auto">
+<div class="absolute inset-0 flex flex-col min-w-0 overflow-y-auto">
 
     <!-- Header -->
-    <div class="relative flex-0 py-8 px-4 sm:py-16 sm:px-16 overflow-hidden" style="background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 40%, #312e81 100%);">
+    <div class="relative flex-0 py-8 px-4 sm:py-16 sm:px-16 overflow-hidden" style="background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #172554 100%);">
         
         <!-- Background decorations -->
         <div class="absolute inset-0 POINTS_INSUFFISANTSer-events-none overflow-hidden">
@@ -31,7 +31,7 @@
 
             <!-- Badge employé -->
             <div *ngIf="isLoggedIn && userRole === 'EMPLOYE'" class="mt-6 flex items-center gap-4" style="background:rgba(255,255,255,0.07);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.12);border-radius:20px;padding:12px 20px;">
-                <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:18px;box-shadow:0 4px 12px rgba(99,102,241,0.4);">
+                <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#1e3a8a,#1e40af);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:18px;box-shadow:0 4px 12px rgba(30,58,138,0.4);">
                     {{getInitiale()}}
                 </div>
                 <div class="flex flex-col">
@@ -41,15 +41,15 @@
                         <span class="text-xs" style="color:rgba(186,230,253,0.7);">{{getNomPoste()}}</span>
                     </div>
                 </div>
-                <div class="ml-2 flex items-center gap-2" style="background:rgba(245,158,11,0.2);border:1px solid rgba(245,158,11,0.3);border-radius:20px;padding:6px 14px;">
-                    <span style="color:#fbbf24;font-size:14px;"></span>
+                <div class="ml-2 flex items-center gap-2" style="background:rgba(30,58,138,0.2);border:1px solid rgba(30,58,138,0.3);border-radius:20px;padding:6px 14px;">
+                    <span style="color:#60a5fa;font-size:14px;"></span>
                     <span class="text-white font-bold text-sm">{{userPoints}} pts</span>
                 </div>
             </div>
 <!-- Bouton Acheter des points -->
 <div *ngIf="isLoggedIn && userRole === 'EMPLOYE'">
     <button
-        style="display:flex;align-items:center;gap:8px;padding:10px 22px;background:linear-gradient(135deg,#f59e0b,#d97706);color:white;border:none;border-radius:12px;font-weight:600;font-size:14px;cursor:pointer;box-shadow:0 4px 16px rgba(245,158,11,0.35);transition:all 0.2s;"
+        style="display:flex;align-items:center;gap:8px;padding:10px 22px;background:linear-gradient(135deg,#1e3a8a,#1e40af);color:white;border:none;border-radius:12px;font-weight:600;font-size:14px;cursor:pointer;box-shadow:0 4px 16px rgba(30,58,138,0.35);transition:all 0.2s;"
         (click)="openBuyPointsDialog()">
         <span></span>
         <span>Acheter des points</span>
@@ -61,7 +61,7 @@
                 <!-- Bouton Formateur -->
                 <div *ngIf="isFormateur()">
                     <button
-                        style="display:flex;align-items:center;gap:8px;padding:10px 22px;background:linear-gradient(135deg,#059669,#10b981);color:white;border:none;border-radius:12px;font-weight:600;font-size:14px;cursor:pointer;box-shadow:0 4px 16px rgba(16,185,129,0.35);transition:all 0.2s;"
+                        style="display:flex;align-items:center;gap:8px;padding:10px 22px;background:linear-gradient(135deg,#1e3a8a,#1e40af);color:white;border:none;border-radius:12px;font-weight:600;font-size:14px;cursor:pointer;box-shadow:0 4px 16px rgba(30,58,138,0.35);transition:all 0.2s;"
                         (click)="goToMesFormationsFormateur()">
                         <span></span>
                         <span>Mes Formations à animer</span>
@@ -132,11 +132,11 @@
                                 <!-- Boutons vote -->
                                 <div *ngIf="!proposition.aVote" class="flex gap-2 mt-3">
                                     <button (click)="voterProposition(proposition.id, 'POUR')" 
-                                            class="flex-1 py-1.5 bg-green-500/80 hover:bg-green-500 text-white rounded-lg text-xs font-semibold transition">
+                                            class="flex-1 py-1.5 bg-blue-700/80 hover:bg-blue-600 text-white rounded-lg text-xs font-semibold transition">
                                         👍 Pour
                                     </button>
                                     <button (click)="voterProposition(proposition.id, 'CONTRE')" 
-                                            class="flex-1 py-1.5 bg-red-500/80 hover:bg-red-500 text-white rounded-lg text-xs font-semibold transition">
+                                            class="flex-1 py-1.5 bg-blue-900/80 hover:bg-blue-950 text-white rounded-lg text-xs font-semibold transition">
                                         👎 Contre
                                     </button>
                                 </div>
@@ -186,7 +186,7 @@
                     </div>
                     <button *ngIf="selectedType || searchKeyword"
                             class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all"
-                            style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;"
+                            style="background:#f1f5f9;color:#1e3a8a;border:1px solid #1e3a8a;"
                             (click)="resetFilters()">
                         <span>🔄</span> Réinitialiser
                     </button>
@@ -196,12 +196,12 @@
             <!-- Section Formations où je suis formateur -->
             <div *ngIf="!loading && isLoggedIn && isFormateur() && mesFormationsAnimateur.length > 0" class="mb-10">
                 <div class="flex items-center gap-3 mb-5">
-                    <div style="width:4px;height:28px;background:linear-gradient(180deg,#f59e0b,#ea580c);border-radius:4px;"></div>
+                    <div style="width:4px;height:28px;background:linear-gradient(180deg,#1e3a8a,#172554);border-radius:4px;"></div>
                     <div>
                         <h2 class="text-base font-bold text-gray-800">🎓 Formations que j'anime</h2>
                         <p class="text-xs text-gray-400 mt-0.5">En tant que formateur, vous animez ces formations</p>
                     </div>
-                    <div class="ml-auto text-xs px-2.5 py-1 rounded-full font-semibold" style="background:#fed7aa;color:#9a3412;">
+                    <div class="ml-auto text-xs px-2.5 py-1 rounded-full font-semibold" style="background:#dbeafe;color:#1e3a8a;">
                         {{mesFormationsAnimateur.length}} formation{{mesFormationsAnimateur.length > 1 ? 's' : ''}}
                     </div>
                 </div>
@@ -256,7 +256,7 @@
 
                         <div class="px-4 py-3 border-t border-gray-100" style="background:#fafafa;">
                             <div class="w-full py-2 rounded-xl text-sm font-semibold text-center"
-                                 style="background:linear-gradient(135deg,#f59e0b,#d97706);color:white;">
+                                 style="background:linear-gradient(135deg,#1e3a8a,#1e40af);color:white;">
                                 🎯 Tu es l'animateur de cette formation
                             </div>
                         </div>
@@ -270,12 +270,12 @@
             <!-- Section Recommandées -->
             <div *ngIf="!loading && isLoggedIn && userRole === 'EMPLOYE' && recommendedFormations.length > 0" class="mb-10">
                 <div class="flex items-center gap-3 mb-5">
-                    <div style="width:4px;height:28px;background:linear-gradient(180deg,#6366f1,#8b5cf6);border-radius:4px;"></div>
+                    <div style="width:4px;height:28px;background:linear-gradient(180deg,#1e3a8a,#1e40af);border-radius:4px;"></div>
                     <div>
                         <h2 class="text-base font-bold text-gray-800">{{getPosteIcon()}} Recommandées pour votre poste — {{getNomPoste()}}</h2>
                         <p class="text-xs text-gray-400 mt-0.5">Sélectionnées pour <strong class="text-gray-600">{{getNomEmploye()}}</strong></p>
                     </div>
-                    <div class="ml-auto text-xs px-2.5 py-1 rounded-full font-semibold" style="background:#ede9fe;color:#5b21b6;">
+                    <div class="ml-auto text-xs px-2.5 py-1 rounded-full font-semibold" style="background:#dbeafe;color:#1e3a8a;">
                         {{recommendedFormations.length}} formation{{recommendedFormations.length > 1 ? 's' : ''}}
                     </div>
                 </div>
@@ -328,43 +328,38 @@
                                         {{formation.placesDisponibles}} / {{formation.nombrePlaces}}
                                     </span>
                                 </div>
-                                <div class="h-1.5 rounded-full overflow-hidden" style="background:#f1f5f9;">
-                                    <div class="h-full rounded-full transition-all duration-500"
-                                         [style.width]="((formation.nombrePlaces - formation.placesDisponibles) / formation.nombrePlaces * 100) + '%'"
-                                         [style.backgroundColor]="getPlaceColor(formation.placesDisponibles, formation.nombrePlaces)"></div>
-                                </div>
                             </div>
                         </div>
 
                         <div class="px-4 py-3 border-t border-gray-100" style="background:#fafafa;">
                             <!-- Vérification si l'utilisateur est le formateur de cette formation -->
-                            <div *ngIf="estFormateurDeLaFormation(formation)" class="w-full py-2 rounded-xl text-sm font-semibold text-center" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:white;">
+                            <div *ngIf="estFormateurDeLaFormation(formation)" class="w-full py-2 rounded-xl text-sm font-semibold text-center" style="background:linear-gradient(135deg,#1e3a8a,#1e40af);color:white;">
                                 🎯 Tu es l'animateur de cette formation
                             </div>
                             <button *ngIf="!estFormateurDeLaFormation(formation) && inscriptionPossible(formation)"
                                     class="w-full py-2 rounded-xl text-sm font-semibold text-white transition-all duration-200"
-                                    style="background:linear-gradient(135deg,#3b82f6,#2563eb);box-shadow:0 2px 8px rgba(59,130,246,0.3);"
+                                    style="background:linear-gradient(135deg,#1e3a8a,#1e40af);box-shadow:0 2px 8px rgba(30,58,138,0.3);"
                                     (click)="inscrire(formation)">
                                  S'inscrire →
-                            </button>
+                             </button>
                             <button *ngIf="!estFormateurDeLaFormation(formation) && getStatutInscription(formation) === 'PREREQUIS_MANQUANT'"
                                     class="w-full py-2 rounded-xl text-sm font-semibold text-center cursor-not-allowed opacity-70"
-                                    style="background:#fef3c7;color:#92400e;" disabled>
+                                    style="background:#dbeafe;color:#1e3a8a;" disabled>
                                 🔗 Prérequis non complété
                             </button>
                             <div *ngIf="!estFormateurDeLaFormation(formation) && getStatutInscription(formation) === 'POINTS_INSUFFISANTS'"
                                  class="w-full py-2 rounded-xl text-sm font-semibold text-center"
-                                 style="background:#fef3c7;color:#92400e;">
+                                 style="background:#dbeafe;color:#1e3a8a;">
                                  Points insuffisants (besoin de {{coutFormation}} pts)
                             </div>
                             <div *ngIf="!estFormateurDeLaFormation(formation) && getStatutInscription(formation) === 'DEJA_INSCRIT'"
                                  class="w-full py-2 rounded-xl text-sm font-semibold text-center"
-                                 style="background:#d1fae5;color:#065f46;">
+                                 style="background:#d1fae5;color:#1e3a8a;">
                                  Déjà inscrit
                             </div>
                             <div *ngIf="!estFormateurDeLaFormation(formation) && getStatutInscription(formation) === 'COMPLET'"
                                  class="w-full py-2 rounded-xl text-sm font-semibold text-center"
-                                 style="background:#fee2e2;color:#991b1b;">
+                                 style="background:#fee2e2;color:#1e3a8a;">
                                 ❌ Complet
                             </div>
                         </div>

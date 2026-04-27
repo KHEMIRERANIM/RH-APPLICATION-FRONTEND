@@ -7,8 +7,8 @@
   padding: 24px;
 
   background:
-    radial-gradient(1100px 360px at 10% -10%, rgba(59, 130, 246, 0.16), transparent 55%),
-    radial-gradient(820px 340px at 90% 0%, rgba(37, 99, 235, 0.12), transparent 55%);
+    radial-gradient(1100px 360px at 10% -10%, rgba(30, 58, 138, 0.16), transparent 55%),
+    radial-gradient(820px 340px at 90% 0%, rgba(23, 37, 84, 0.12), transparent 55%);
   border-radius: 18px;
 
   &__header {
@@ -99,9 +99,9 @@
     letter-spacing: -0.6px;
   }
 
-  &--pending  .mobility-kpi__value { color: #d97706; }
-  &--approved .mobility-kpi__value { color: #16a34a; }
-  &--rejected .mobility-kpi__value { color: #dc2626; }
+  &--pending  .mobility-kpi__value { color: #1e3a8a; }
+  &--approved .mobility-kpi__value { color: #1e40af; }
+  &--rejected .mobility-kpi__value { color: #172554; }
 }
 
 .segmented-btn {
@@ -133,8 +133,8 @@
   }
 
   &--active {
-    background: linear-gradient(135deg, career.$career-blue-600, career.$career-indigo-600);
-    border-color: rgba(59, 130, 246, 0.35);
+    background: linear-gradient(135deg, career.$career-navy, career.$career-navy-dark);
+    border-color: rgba(30, 58, 138, 0.35);
     color: white;
 
   }
@@ -166,12 +166,12 @@
     width: 44px;
     height: 44px;
     border-radius: 12px;
-    background: rgba(59, 130, 246, 0.14);
+    background: rgba(30, 58, 138, 0.14);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    border: 1px solid rgba(59, 130, 246, 0.18);
+    border: 1px solid rgba(30, 58, 138, 0.18);
 
     .request-card__emoji {
       font-size: 18px;
@@ -207,7 +207,7 @@
     color: #94a3b8;
   }
 
-  &__target { color: career.$career-blue-600; }
+  &__target { color: career.$career-navy; }
 
   &__files {
     display: flex;
@@ -285,8 +285,8 @@
   }
 
   &--primary {
-    color: career.$career-blue-600;
-    border-color: rgba(37, 99, 235, 0.35);
+    color: career.$career-navy;
+    border-color: rgba(30, 58, 138, 0.35);
   }
 
   &--success {

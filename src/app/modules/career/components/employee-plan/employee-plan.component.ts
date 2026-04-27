@@ -391,11 +391,18 @@ export class EmployeePlanComponent implements OnInit {
       return;
     }
 
-    const fullUrl = fileUrl.startsWith('http')
-      ? fileUrl
-      : `http://localhost:8081${fileUrl}`;
-
-    window.open(fullUrl, '_blank');
+    this.planService.downloadFile(fileUrl).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        window.open(url, '_blank');
+        // Optionnel: révoquer l'URL après un certain temps
+        // setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+      },
+      error: (err) => {
+        console.error('Erreur lors du téléchargement du fichier:', err);
+        this.snack('Erreur lors de l\'ouverture du fichier (vérifiez votre connexion)', true);
+      }
+    });
   }
 
   private resetNewCertifForm(): void {

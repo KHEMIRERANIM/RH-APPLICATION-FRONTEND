@@ -1,4 +1,4 @@
-﻿import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { EvolutionPlan, Competence } from '../models/evolution-plan.model';
@@ -7,7 +7,7 @@ import { EmployeeCertification } from '../models/certification.model';
 @Injectable({ providedIn: 'root' })
 export class EvolutionPlanService {
 
-  private apiUrl = 'http://localhost:8081/api/evolution_plans';
+  private apiUrl = '/api/evolution_plans';
 
   constructor(private http: HttpClient) {}
 
@@ -73,6 +73,21 @@ export class EvolutionPlanService {
         headers: this.getHeaders()
       }
     );
+  }
+
+  downloadFile(fileUrl: string): Observable<Blob> {
+    // Si fileUrl commence par /api, on le garde tel quel (relatif au proxy)
+    // Sinon, on s'assure qu'il commence par /api si c'est ce qu'attend le backend
+    const url = fileUrl.startsWith('http') 
+      ? fileUrl 
+      : fileUrl.startsWith('/api') 
+        ? fileUrl 
+        : `/api${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}`;
+    
+    return this.http.get(url, {
+      headers: this.getHeaders(),
+      responseType: 'blob'
+    });
   }
 
   getAll(): Observable<EvolutionPlan[]> {

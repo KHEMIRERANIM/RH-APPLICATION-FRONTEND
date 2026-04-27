@@ -1,6 +1,7 @@
 <div class="flex flex-col flex-auto min-w-0 bg-[#f8fafc]">
 
-    <header class="flex flex-col sm:flex-row items-center justify-between px-8 py-10 bg-white border-b border-slate-200">
+    <header
+        class="flex flex-col sm:flex-row items-center justify-between px-8 py-10 bg-white border-b border-slate-200">
         <div>
             <h2 class="text-3xl font-bold text-slate-900 tracking-tight">
                 Dashboard <span class="text-indigo-600 font-medium">Recrutement</span>
@@ -12,7 +13,9 @@
         </div>
 
         <div class="flex items-center gap-3 mt-6 sm:mt-0">
-            <button mat-flat-button class="rounded-xl bg-indigo-600 text-white h-12 px-8 shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all font-bold" (click)="creerOffre()">
+            <button mat-flat-button
+                class="rounded-xl bg-indigo-600 text-white h-12 px-8 shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all font-bold"
+                (click)="creerOffre()">
                 <mat-icon [svgIcon]="'heroicons_outline:plus'" class="icon-size-5 mr-2"></mat-icon>
                 Nouvelle Offre
             </button>
@@ -23,7 +26,8 @@
         <ng-container *ngIf="!loading; else skeleton">
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm cursor-pointer hover:border-indigo-400 transition-colors" routerLink="/recrutement/offres">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm cursor-pointer hover:border-indigo-400 transition-colors"
+                    routerLink="/recrutement/offres">
                     <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Offres Actives</p>
                     <div class="flex items-end justify-between mt-2">
                         <span class="text-3xl font-bold text-slate-900">{{ totalOffres }}</span>
@@ -43,7 +47,8 @@
                     </div>
                 </div>
 
-                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm cursor-pointer hover:border-indigo-400 transition-colors" routerLink="/recrutement/calendrier">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm cursor-pointer hover:border-indigo-400 transition-colors"
+                    routerLink="/recrutement/calendrier">
                     <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Entretiens</p>
                     <div class="flex items-end justify-between mt-2">
                         <span class="text-3xl font-bold text-slate-900">{{ entretiensAVenir.length }}</span>
@@ -65,24 +70,21 @@
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                
+
                 <div class="lg:col-span-8 space-y-8">
-                    
+
                     <section class="bg-white rounded-3xl border border-slate-200 shadow-sm p-8">
                         <div class="flex items-center justify-between mb-6">
                             <h3 class="text-lg font-bold text-slate-900">Conversion du Pipeline</h3>
-                            <button (click)="exporterRapportIA()" class="text-indigo-600 text-sm font-semibold hover:bg-indigo-50 px-3 py-1 rounded-lg transition-colors">
+                            <button (click)="exporterRapportIA()"
+                                class="text-indigo-600 text-sm font-semibold hover:bg-indigo-50 px-3 py-1 rounded-lg transition-colors">
                                 Exporter Rapport
                             </button>
                         </div>
                         <div class="h-80">
-                            <apx-chart 
-                                [series]="funnelChartOptions.series!" 
-                                [chart]="funnelChartOptions.chart!"
-                                [plotOptions]="funnelChartOptions.plotOptions!" 
-                                [colors]="funnelChartOptions.colors!"
-                                [xaxis]="funnelChartOptions.xaxis!" 
-                                [dataLabels]="funnelChartOptions.dataLabels!">
+                            <apx-chart [series]="funnelChartOptions.series!" [chart]="funnelChartOptions.chart!"
+                                [plotOptions]="funnelChartOptions.plotOptions!" [colors]="funnelChartOptions.colors!"
+                                [xaxis]="funnelChartOptions.xaxis!" [dataLabels]="funnelChartOptions.dataLabels!">
                             </apx-chart>
                         </div>
                     </section>
@@ -90,12 +92,17 @@
                     <section>
                         <div class="flex items-center justify-between mb-6">
                             <h3 class="text-lg font-bold text-slate-900">Missions en cours</h3>
-                            <button (click)="showMissionDrawer = true" class="text-indigo-600 text-sm font-bold hover:underline">Gérer tout ({{ offres.length }})</button>
+                            <button (click)="showMissionDrawer = true"
+                                class="text-indigo-600 text-sm font-bold hover:underline">Gérer tout ({{ offres.length
+                                }})</button>
                         </div>
-                        
+
                         <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-                            <div *ngFor="let o of offres.slice(0,3); let last = last" class="flex items-center p-5 hover:bg-slate-50 transition-colors cursor-pointer border-b border-slate-100" [class.border-b-0]="last" (click)="voirPipeline(o)">
-                                <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mr-4">
+                            <div *ngFor="let o of offres.slice(0,3); let last = last"
+                                class="flex items-center p-5 hover:bg-slate-50 transition-colors cursor-pointer border-b border-slate-100"
+                                [class.border-b-0]="last" (click)="voirPipeline(o)">
+                                <div
+                                    class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mr-4">
                                     <mat-icon class="icon-size-5">work_outline</mat-icon>
                                 </div>
                                 <div class="flex-1 min-w-0">
@@ -103,16 +110,21 @@
                                     <p class="text-xs text-slate-500">{{ o.departement }} • {{ o.typeContrat }}</p>
                                 </div>
                                 <div class="flex items-center gap-3">
-                                    <span *ngIf="o.statut === 'PUBLIEE'" class="px-2 py-1 rounded-md bg-emerald-50 text-emerald-600 text-[10px] font-bold">PUBLIÉE</span>
-                                    <span *ngIf="o.statut === 'BROUILLON'" class="px-2 py-1 rounded-md bg-amber-50 text-amber-600 text-[10px] font-bold">BROUILLON</span>
+                                    <span *ngIf="o.statut === 'PUBLIEE'"
+                                        class="px-2 py-1 rounded-md bg-emerald-50 text-emerald-600 text-[10px] font-bold">PUBLIÉE</span>
+                                    <span *ngIf="o.statut === 'BROUILLON'"
+                                        class="px-2 py-1 rounded-md bg-amber-50 text-amber-600 text-[10px] font-bold">BROUILLON</span>
                                     <mat-icon class="icon-size-4 text-slate-300">chevron_right</mat-icon>
                                 </div>
                             </div>
                         </div>
 
                         <div class="mt-4">
-                            <button mat-stroked-button class="w-full rounded-2xl h-12 border-slate-200 text-slate-600 font-bold" (click)="showMissionDrawer = true">
-                                <mat-icon class="icon-size-5 mr-2" [svgIcon]="'heroicons_outline:adjustments-horizontal'"></mat-icon>
+                            <button mat-stroked-button
+                                class="w-full rounded-2xl h-12 border-slate-200 text-slate-600 font-bold"
+                                (click)="showMissionDrawer = true">
+                                <mat-icon class="icon-size-5 mr-2"
+                                    [svgIcon]="'heroicons_outline:adjustments-horizontal'"></mat-icon>
                                 Centre de Gestion des Missions
                             </button>
                         </div>
@@ -120,23 +132,27 @@
                 </div>
 
                 <div class="lg:col-span-4 space-y-8">
-                    
-                    <section class="bg-gradient-to-br from-indigo-600 to-indigo-800 rounded-3xl p-8 text-white shadow-xl relative overflow-hidden">
+
+                    <section
+                        class="bg-gradient-to-br from-indigo-600 to-indigo-800 rounded-3xl p-8 text-white shadow-xl relative overflow-hidden">
                         <mat-icon class="absolute -right-4 -bottom-4 icon-size-24 text-white/10">auto_awesome</mat-icon>
-                        <p class="text-xs font-bold text-indigo-200 uppercase tracking-widest mb-3">Conseil Stratégique IA</p>
+                        <p class="text-xs font-bold text-indigo-200 uppercase tracking-widest mb-3">Conseil Stratégique
+                            IA</p>
                         <p class="text-sm font-medium leading-relaxed italic">"{{ aiInsight }}"</p>
                     </section>
 
                     <section class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6">
                         <h3 class="font-bold text-slate-900 mb-6">Top Talents (Elite)</h3>
                         <div class="space-y-4">
-                            <div *ngFor="let t of topCandidats" (click)="openCandidatDetails(t)" class="flex items-center gap-4 p-3 rounded-2xl hover:bg-slate-50 cursor-pointer transition-colors border border-transparent hover:border-slate-100">
+                            <div *ngFor="let t of topCandidats" (click)="openCandidatDetails(t)"
+                                class="flex items-center gap-4 p-3 rounded-2xl hover:bg-slate-50 cursor-pointer transition-colors border border-transparent hover:border-slate-100">
                                 <img [src]="t.avatar" class="w-12 h-12 rounded-xl object-cover shadow-sm">
                                 <div class="flex-1 min-w-0">
                                     <p class="text-sm font-bold text-slate-900 truncate">{{ t.name }}</p>
                                     <p class="text-xs text-slate-500 truncate">{{ t.role }}</p>
                                 </div>
-                                <div class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-lg">{{ t.score }}%</div>
+                                <div class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-lg">{{
+                                    t.score }}%</div>
                             </div>
                         </div>
                     </section>
@@ -146,8 +162,10 @@
                         <div class="space-y-4" *ngIf="entretiensAVenir.length > 0">
                             <div *ngFor="let e of entretiensAVenir.slice(0,3)" class="flex gap-4">
                                 <div class="flex flex-col items-center min-w-[40px]">
-                                    <span class="text-xs font-bold text-indigo-600">{{ e.dateHeure | date:'HH:mm' }}</span>
-                                    <span class="text-[10px] text-slate-400 uppercase font-medium">{{ e.dateHeure | date:'dd MMM' }}</span>
+                                    <span class="text-xs font-bold text-indigo-600">{{ e.dateHeure | date:'HH:mm'
+                                        }}</span>
+                                    <span class="text-[10px] text-slate-400 uppercase font-medium">{{ e.dateHeure |
+                                        date:'dd MMM' }}</span>
                                 </div>
                                 <div class="flex-1 border-l-2 border-slate-100 pl-4 pb-4">
                                     <p class="text-sm font-bold text-slate-800">{{ e.type }}</p>
@@ -165,21 +183,26 @@
                         <div class="flex items-center justify-between mb-6">
                             <h3 class="font-bold text-slate-900">Historique Inscriptions</h3>
                             <button (click)="loadRegistrationHistory()" class="p-1 hover:bg-slate-100 rounded-full">
-                                <mat-icon class="icon-size-4 text-slate-400" [svgIcon]="'heroicons_outline:refresh'"></mat-icon>
+                                <mat-icon class="icon-size-4 text-slate-400"
+                                    [svgIcon]="'heroicons_outline:refresh'"></mat-icon>
                             </button>
                         </div>
                         <div class="space-y-4 max-h-80 overflow-y-auto pr-2">
-                            <div *ngFor="let item of registrationHistory" class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                            <div *ngFor="let item of registrationHistory"
+                                class="p-3 bg-slate-50 rounded-xl border border-slate-100">
                                 <div class="flex items-center justify-between mb-1">
-                                    <span class="text-[10px] font-bold text-indigo-600 uppercase tracking-tight">{{ item.date | date:'dd MMM, HH:mm' }}</span>
-                                    <span class="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-[9px] font-bold rounded-md">EXPORT</span>
+                                    <span class="text-[10px] font-bold text-indigo-600 uppercase tracking-tight">{{
+                                        item.date | date:'dd MMM, HH:mm' }}</span>
+                                    <span
+                                        class="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-[9px] font-bold rounded-md">EXPORT</span>
                                 </div>
                                 <p class="text-sm font-bold text-slate-800 truncate">{{ item.name }}</p>
                                 <p class="text-[11px] text-slate-500 truncate">{{ item.email }}</p>
                                 <p class="text-[10px] text-slate-400 mt-1 italic leading-tight">{{ item.details }}</p>
                             </div>
                             <div *ngIf="registrationHistory.length === 0" class="text-center py-6">
-                                <mat-icon class="icon-size-10 text-slate-200 mb-2" [svgIcon]="'heroicons_outline:clipboard-document-list'"></mat-icon>
+                                <mat-icon class="icon-size-10 text-slate-200 mb-2"
+                                    [svgIcon]="'heroicons_outline:clipboard-document-list'"></mat-icon>
                                 <p class="text-xs text-slate-400 italic">Aucune inscription récente</p>
                             </div>
                         </div>
@@ -188,41 +211,58 @@
             </div>
 
             <!-- PANEL GESTION MISSIONS (Drawer-style) -->
-            <div *ngIf="showMissionDrawer" class="fixed inset-0 z-[1000] flex justify-end bg-slate-900/40 backdrop-blur-sm" (click)="showMissionDrawer = false">
-                <div class="w-full max-w-[500px] bg-slate-50 h-full shadow-2xl flex flex-col" (click)="$event.stopPropagation()">
+            <div *ngIf="showMissionDrawer"
+                class="fixed inset-0 z-[1000] flex justify-end bg-slate-900/40 backdrop-blur-sm"
+                (click)="showMissionDrawer = false">
+                <div class="w-full max-w-[500px] bg-slate-50 h-full shadow-2xl flex flex-col"
+                    (click)="$event.stopPropagation()">
                     <div class="p-8 bg-white border-b border-slate-200 flex items-center justify-between">
                         <div>
                             <h3 class="text-xl font-black text-slate-900 tracking-tight">Gestion des Missions</h3>
-                            <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">{{ offres.length }} Postes actifs</p>
+                            <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">{{ offres.length
+                                }} Postes actifs</p>
                         </div>
-                        <button (click)="showMissionDrawer = false" class="p-2 hover:bg-slate-100 rounded-full transition-colors flex items-center justify-center">
+                        <button (click)="showMissionDrawer = false"
+                            class="p-2 hover:bg-slate-100 rounded-full transition-colors flex items-center justify-center">
                             <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
                         </button>
                     </div>
 
                     <div class="flex-1 overflow-y-auto p-6 space-y-4">
-                        <div *ngFor="let o of offres" class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:border-indigo-400 transition-all group">
+                        <div *ngFor="let o of offres"
+                            class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:border-indigo-400 transition-all group">
                             <div class="flex items-start justify-between mb-4">
                                 <div class="flex-1 min-w-0">
                                     <h4 class="font-bold text-slate-900 text-lg leading-tight">{{ o.titre }}</h4>
-                                    <p class="text-xs text-slate-500 mt-1 uppercase font-bold tracking-tighter">{{ o.departement }} • {{ o.typeContrat }}</p>
+                                    <p class="text-xs text-slate-500 mt-1 uppercase font-bold tracking-tighter">{{
+                                        o.departement }} • {{ o.typeContrat }}</p>
                                 </div>
                                 <div class="flex -space-x-1">
-                                    <span class="px-2 py-1 rounded bg-slate-100 text-slate-600 text-[9px] font-black">{{ o.nombreCandidatures }} CANDIDATS</span>
+                                    <span class="px-2 py-1 rounded bg-slate-100 text-slate-600 text-[9px] font-black">{{
+                                        o.nombreCandidatures }} CANDIDATS</span>
                                 </div>
                             </div>
 
                             <div class="flex items-center gap-2">
-                                <button mat-flat-button class="flex-1 bg-indigo-50 text-indigo-700 rounded-xl h-10 px-0 font-bold text-xs" (click)="voirPipeline(o)">
+                                <button mat-flat-button
+                                    class="flex-1 bg-indigo-50 text-indigo-700 rounded-xl h-10 px-0 font-bold text-xs"
+                                    (click)="voirPipeline(o)">
                                     Explorer
                                 </button>
-                                <button mat-flat-button class="w-10 h-10 bg-slate-50 text-slate-600 rounded-xl px-0 min-w-10 flex items-center justify-center" (click)="editerOffre(o)">
+                                <button mat-flat-button
+                                    class="w-10 h-10 bg-slate-50 text-slate-600 rounded-xl px-0 min-w-10 flex items-center justify-center"
+                                    (click)="editerOffre(o)">
                                     <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:pencil'"></mat-icon>
                                 </button>
-                                <button *ngIf="o.statut === 'BROUILLON'" mat-flat-button class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl px-0 min-w-10 flex items-center justify-center" (click)="publierOffre(o)">
-                                    <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:check-circle'"></mat-icon>
+                                <button *ngIf="o.statut === 'BROUILLON'" mat-flat-button
+                                    class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl px-0 min-w-10 flex items-center justify-center"
+                                    (click)="publierOffre(o)">
+                                    <mat-icon class="icon-size-5"
+                                        [svgIcon]="'heroicons_outline:check-circle'"></mat-icon>
                                 </button>
-                                <button mat-flat-button class="w-10 h-10 bg-red-50 text-red-500 rounded-xl px-0 min-w-10 flex items-center justify-center" (click)="supprimerOffre(o, $event)">
+                                <button mat-flat-button
+                                    class="w-10 h-10 bg-red-50 text-red-500 rounded-xl px-0 min-w-10 flex items-center justify-center"
+                                    (click)="supprimerOffre(o, $event)">
                                     <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:trash'"></mat-icon>
                                 </button>
                             </div>
@@ -231,27 +271,31 @@
                 </div>
             </div>
 
-            <div *ngIf="selectedCandidat && showDetails" class="fixed inset-0 z-[1000] flex justify-end bg-slate-900/20 backdrop-blur-sm" (click)="closeDetails()">
-                <div class="w-full max-w-[450px] bg-white h-full shadow-2xl p-10 flex flex-col overflow-y-auto" (click)="$event.stopPropagation()">
-                    <button (click)="closeDetails()" class="self-start p-2 bg-slate-100 rounded-full mb-8 hover:bg-slate-200 transition-colors">
+            <div *ngIf="selectedCandidat && showDetails"
+                class="fixed inset-0 z-[1000] flex justify-end bg-slate-900/20 backdrop-blur-sm"
+                (click)="closeDetails()">
+                <div class="w-full max-w-[450px] bg-white h-full shadow-2xl p-10 flex flex-col overflow-y-auto"
+                    (click)="$event.stopPropagation()">
+                    <button (click)="closeDetails()"
+                        class="self-start p-2 bg-slate-100 rounded-full mb-8 hover:bg-slate-200 transition-colors">
                         <mat-icon>close</mat-icon>
                     </button>
-                    
+
                     <div class="text-center mb-10">
-                        <img [src]="selectedCandidat.avatar" class="w-24 h-24 rounded-3xl mx-auto shadow-xl mb-4 border-4 border-white">
+                        <img [src]="selectedCandidat.avatar"
+                            class="w-24 h-24 rounded-3xl mx-auto shadow-xl mb-4 border-4 border-white">
                         <h3 class="text-2xl font-bold text-slate-900">{{ selectedCandidat.name }}</h3>
-                        <p class="text-sm font-bold text-indigo-600 uppercase tracking-widest">{{ selectedCandidat.role }}</p>
+                        <p class="text-sm font-bold text-indigo-600 uppercase tracking-widest">{{ selectedCandidat.role
+                            }}</p>
                     </div>
 
                     <div class="space-y-8">
                         <section>
-                            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Profil Psychométrique</p>
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Profil
+                                Psychométrique</p>
                             <div class="h-64">
-                                <apx-chart 
-                                    [series]="radarChartOptions.series!" 
-                                    [chart]="radarChartOptions.chart!"
-                                    [xaxis]="radarChartOptions.xaxis!" 
-                                    [colors]="radarChartOptions.colors!"
+                                <apx-chart [series]="radarChartOptions.series!" [chart]="radarChartOptions.chart!"
+                                    [xaxis]="radarChartOptions.xaxis!" [colors]="radarChartOptions.colors!"
                                     [fill]="radarChartOptions.fill!">
                                 </apx-chart>
                             </div>
@@ -259,10 +303,12 @@
 
                         <section class="bg-slate-50 p-6 rounded-2xl border border-slate-100">
                             <p class="text-xs font-bold text-indigo-600 uppercase mb-2">Verdict IA</p>
-                            <p class="text-sm text-slate-600 leading-relaxed italic">"{{ selectedCandidat.explanation }}"</p>
+                            <p class="text-sm text-slate-600 leading-relaxed italic">"{{ selectedCandidat.explanation
+                                }}"</p>
                         </section>
 
-                        <button mat-flat-button class="w-full bg-indigo-600 text-white rounded-xl py-6 font-bold" (click)="voirPipeline(selectedCandidat.original.offreId)">
+                        <button mat-flat-button class="w-full bg-indigo-600 text-white rounded-xl py-6 font-bold"
+                            (click)="voirPipeline(selectedCandidat.original.offreId)">
                             Consulter Dossier Complet
                         </button>
                     </div>
