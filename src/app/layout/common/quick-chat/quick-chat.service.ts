@@ -7,16 +7,14 @@ import { Chat } from 'app/layout/common/quick-chat/quick-chat.types';
 @Injectable({
     providedIn: 'root'
 })
-export class QuickChatService
-{
+export class QuickChatService {
     private _chat: BehaviorSubject<Chat> = new BehaviorSubject(null);
     private _chats: BehaviorSubject<Chat[]> = new BehaviorSubject<Chat[]>(null);
 
     /**
      * Constructor
      */
-    constructor(private _httpClient: HttpClient)
-    {
+    constructor(private _httpClient: HttpClient) {
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -26,16 +24,14 @@ export class QuickChatService
     /**
      * Getter for chat
      */
-    get chat$(): Observable<Chat>
-    {
+    get chat$(): Observable<Chat> {
         return this._chat.asObservable();
     }
 
     /**
      * Getter for chat
      */
-    get chats$(): Observable<Chat[]>
-    {
+    get chats$(): Observable<Chat[]> {
         return this._chats.asObservable();
     }
 
@@ -46,8 +42,7 @@ export class QuickChatService
     /**
      * Get chats
      */
-    getChats(): Observable<any>
-    {
+    getChats(): Observable<any> {
         return this._httpClient.get<Chat[]>('api/apps/chat/chats').pipe(
             tap((response: Chat[]) => {
                 this._chats.next(response);
@@ -60,9 +55,8 @@ export class QuickChatService
      *
      * @param id
      */
-    getChatById(id: string): Observable<any>
-    {
-        return this._httpClient.get<Chat>('api/apps/chat/chat', {params: {id}}).pipe(
+    getChatById(id: string): Observable<any> {
+        return this._httpClient.get<Chat>('api/apps/chat/chat', { params: { id } }).pipe(
             map((chat) => {
 
                 // Update the chat
@@ -73,8 +67,7 @@ export class QuickChatService
             }),
             switchMap((chat) => {
 
-                if ( !chat )
-                {
+                if (!chat) {
                     return throwError('Could not found chat with id of ' + id + '!');
                 }
 

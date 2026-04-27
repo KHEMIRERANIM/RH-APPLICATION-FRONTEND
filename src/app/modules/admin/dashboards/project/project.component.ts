@@ -99,6 +99,11 @@ export class ProjectComponent implements OnInit, OnDestroy {
     chartCareer: ApexOptions = {};
     chartTransport: ApexOptions = {};
 
+    // Empty state flags
+    restaurantEmpty: boolean = false;
+    transportEmpty: boolean = false;
+    avantagesEmpty: boolean = false;
+
     // Upload
     selectedFile: File | null = null;
     imagePreview: string | null = null;
@@ -210,7 +215,7 @@ export class ProjectComponent implements OnInit, OnDestroy {
         // Recrutements
         this._http.get<any[]>('/api/recrutement/offres').subscribe({
             next: (data) => {
-                if (data) {
+                if (data && data.length > 0) {
                     this.offresOuvertes = data.length;
                     this.recrutementsPourvusMois = Math.floor(data.length * 0.3);
 
@@ -220,12 +225,26 @@ export class ProjectComponent implements OnInit, OnDestroy {
                         contratCounts[type] = (contratCounts[type] || 0) + 1;
                     });
 
-                    this.chartBudgetDistribution.series = [{
-                        name: 'Offres',
-                        data: Object.values(contratCounts) as number[]
-                    }];
-                    this.chartBudgetDistribution.xaxis = {
-                        categories: Object.keys(contratCounts)
+                    this.chartBudgetDistribution = {
+                        chart: { type: 'bar', height: 350, toolbar: { show: false } },
+                        colors: ['#3B82F6'],
+                        plotOptions: {
+                            bar: {
+                                horizontal: true, borderRadius: 6, barHeight: '55%',
+                                dataLabels: { position: 'top' }
+                            }
+                        },
+                        dataLabels: {
+                            enabled: true, offsetX: 20,
+                            style: { fontSize: '12px', colors: ['#334155'] }
+                        },
+                        series: [{ name: 'Offres', data: Object.values(contratCounts) as number[] }],
+                        xaxis: {
+                            categories: Object.keys(contratCounts),
+                            labels: { style: { colors: '#64748B' } }
+                        },
+                        grid: { borderColor: '#E2E8F0', strokeDashArray: 4 },
+                        tooltip: { theme: 'light' }
                     };
                 }
             },
@@ -260,7 +279,8 @@ export class ProjectComponent implements OnInit, OnDestroy {
         // Transport
         this._http.get<any[]>('/api/trajets').subscribe({
             next: (data) => {
-                if (data) {
+                if (data && data.length > 0) {
+                    this.transportEmpty = false;
                     this.totalTrajets = data.length;
                     const statusCounts: any = {};
                     data.forEach(t => {
@@ -273,25 +293,32 @@ export class ProjectComponent implements OnInit, OnDestroy {
                         series: Object.values(statusCounts) as number[],
                         legend: { position: 'bottom' }
                     };
+                } else {
+                    this.transportEmpty = true;
                 }
-            }
+            },
+            error: () => { this.transportEmpty = true; }
         });
 
         // Mutuelle / Avantages
         this._http.get<any[]>('/api/avantages/stats/par-categorie').subscribe({
             next: (data: any) => {
                 if (data && data.length > 0) {
+                    this.avantagesEmpty = false;
                     this.totalAvantages = data.reduce((acc, curr) => acc + (curr.nombreOffres || curr.count || 0), 0);
                     this.chartAvantages = {
                         chart: { type: 'donut', height: 350 },
-                        colors: ['#6366F1', '#EC4899', '#8B5CF6', '#10B981', '#F59E0B'],
+                        colors: ['#6366F1', '#1E3A8A', '#2563EB', '#7DD3FC', '#0EA5E9'],
                         labels: data.map(d => d.nomCategorie || d.categorie || 'Autre'),
                         series: data.map(d => d.nombreOffres || d.count || 0),
                         legend: { position: 'bottom' },
                         plotOptions: { pie: { donut: { size: '75%', labels: { show: true, total: { show: true, label: 'Total', formatter: () => this.totalAvantages.toString() } } } } }
                     };
+                } else {
+                    this.avantagesEmpty = true;
                 }
-            }
+            },
+            error: () => { this.avantagesEmpty = true; }
         });
 
         // Restaurant
@@ -310,13 +337,13 @@ export class ProjectComponent implements OnInit, OnDestroy {
                 // Now fetch stats
                 this._http.get<any>('/api/commandes/stats/plats').subscribe({
                     next: (data) => {
-                        if (data) {
-                            const platIds = Object.keys(data);
-                            const counts = Object.values(data) as number[];
+                        const platIds = data ? Object.keys(data) : [];
+                        const counts = data ? Object.values(data) as number[] : [];
+
+                        if (counts.length > 0) {
+                            this.restaurantEmpty = false;
                             this.totalCommandesRestaurant = counts.reduce((acc: number, curr: number) => acc + curr, 0);
-
                             const platNames = platIds.map(id => this._platNamesMap.get(id) || id);
-
                             this.chartRestaurant = {
                                 chart: { type: 'bar', height: 350, toolbar: { show: false } },
                                 colors: ['#F59E0B'],
@@ -326,8 +353,11 @@ export class ProjectComponent implements OnInit, OnDestroy {
                                 grid: { borderColor: '#E2E8F0', strokeDashArray: 4 },
                                 dataLabels: { enabled: false }
                             };
+                        } else {
+                            this.restaurantEmpty = true;
                         }
-                    }
+                    },
+                    error: () => { this.restaurantEmpty = true; }
                 });
             }
         });
@@ -335,18 +365,48 @@ export class ProjectComponent implements OnInit, OnDestroy {
         // Carrière
         this._http.get<any[]>('/api/mobility').subscribe({
             next: (data) => {
-                if (data) {
+                if (data && data.length > 0) {
                     this.totalMobilityRequests = data.length;
                     const statusCounts: any = {};
                     data.forEach(r => {
                         const status = r.status || 'AUTRE';
                         statusCounts[status] = (statusCounts[status] || 0) + 1;
                     });
+
+                    const labels = Object.keys(statusCounts);
+                    const values = Object.values(statusCounts) as number[];
+                    const total = values.reduce((a, b) => a + b, 0);
+                    const percentages = values.map(v => Math.round((v / total) * 100));
+
                     this.chartCareer = {
-                        chart: { type: 'area', height: 300 },
-                        series: [{ name: 'Demandes', data: Object.values(statusCounts) as number[] }],
-                        xaxis: { categories: Object.keys(statusCounts) },
-                        stroke: { curve: 'smooth' }
+                        chart: { type: 'radialBar', height: 350 },
+                        colors: ['#06B6D4', '#3B82F6', '#6366F1', '#10B981', '#F59E0B'],
+                        plotOptions: {
+                            radialBar: {
+                                offsetY: 0,
+                                startAngle: -120,
+                                endAngle: 120,
+                                hollow: { size: '35%' },
+                                dataLabels: {
+                                    name: { fontSize: '14px', fontWeight: '600' },
+                                    value: {
+                                        fontSize: '20px', fontWeight: '700',
+                                        formatter: (val: number) => `${val}%`
+                                    },
+                                    total: {
+                                        show: true, label: 'Total',
+                                        formatter: () => `${total}`
+                                    }
+                                },
+                                track: { background: '#E2E8F0', strokeWidth: '97%' }
+                            }
+                        },
+                        series: percentages,
+                        labels: labels,
+                        legend: {
+                            show: true, position: 'bottom',
+                            markers: { width: 10, height: 10, radius: 5 }
+                        }
                     };
                 }
             }
