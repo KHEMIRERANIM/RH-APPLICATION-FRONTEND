@@ -1,0 +1,13 @@
+node_modules
+dist
+.angular
+.env
+.env.*
+*.log
+.git
+.gitignore
+README.md
+coverage
+.DS_Store
+.vscode
+.editorconfig
