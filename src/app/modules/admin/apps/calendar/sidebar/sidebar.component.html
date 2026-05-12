@@ -1,21 +1,21 @@
-﻿<!-- C:\pi\RH-APPLICATION-FRONTEND\src\app\modules\admin\apps\calendar\sidebar\sidebar.component.html -->
+<!-- C:\pi\RH-APPLICATION-FRONTEND\src\app\modules\admin\apps\calendar\sidebar\sidebar.component.html -->
 
 <div class="flex flex-col h-full overflow-y-auto">
     
     <!-- Header -->
     <div class="bg-gradient-to-r from-blue-600 to-bleu-600 p-4 text-white">
-        <h2 class="text-lg font-bold">📅 Administration</h2>
-        <p class="text-xs text-white/80">Gérez les formations et les votes</p>
+        <h2 class="text-lg font-bold">?? Administration</h2>
+        <p class="text-xs text-white/80">G�rez les formations et les votes</p>
     </div>
 
     <!-- ========== SECTION 1: RECOMMANDATIONS IA ========== -->
     <div class="p-4 border-b border-gray-200">
         <div class="flex items-center justify-between mb-3">
-            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">🤖 Recommandations IA</h3>
+            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">?? Recommandations IA</h3>
             <button (click)="loadRecommendations()" 
                     class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-lg hover:bg-blue-200 transition"
                     title="Actualiser">
-                🔄
+                ??
             </button>
         </div>
         
@@ -37,7 +37,7 @@
                         <h4 class="text-sm font-semibold text-gray-800">{{ rec.technologie }}</h4>
                         <div class="flex gap-2 mt-1">
                             <span class="text-[10px] text-gray-500"> Score: {{ rec.score }}%</span>
-                            <span class="text-[10px] text-gray-500">📡 {{ rec.source }}</span>
+                            <span class="text-[10px] text-gray-500">?? {{ rec.source }}</span>
                         </div>
                     </div>
                     <span class="text-xs px-2 py-0.5 rounded-full"
@@ -51,7 +51,7 @@
                 </div>
                 <button (click)="creerPropositionDepuisRecommandation(rec)" 
                         class="mt-2 w-full py-1 bg-blue-900 text-white rounded text-xs hover:bg-blue-800 transition duration-200">
-                     Créer une proposition
+                     Cr�er une proposition
                 </button>
             </div>
         </div>
@@ -60,7 +60,7 @@
     <!-- ========== SECTION 2: PROPOSITIONS AVEC VOTES ========== -->
     <div class="p-4 border-b border-gray-200">
         <div class="flex items-center justify-between mb-3">
-            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">📋 Propositions en cours</h3>
+            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">?? Propositions en cours</h3>
             <span class="text-xs bg-bleu-100 text-bleu-700 px-2 py-0.5 rounded-full">{{ propositionsVote.length }}</span>
         </div>
         
@@ -72,7 +72,7 @@
         <div *ngIf="!isLoadingVotes && propositionsVote.length === 0" class="text-center py-4 text-gray-400">
             <span class="text-2xl"></span>
             <p class="text-xs mt-1">Aucune proposition</p>
-            <p class="text-[10px] mt-1">Créez une proposition depuis les recommandations IA</p>
+            <p class="text-[10px] mt-1">Cr�ez une proposition depuis les recommandations IA</p>
         </div>
 
         <div *ngIf="!isLoadingVotes && propositionsVote.length > 0" class="space-y-3 max-h-80 overflow-y-auto">
@@ -99,8 +99,8 @@
                 <!-- Barre de progression des votes -->
                 <div class="mt-2" *ngIf="prop.totalVotes > 0 || prop.statutVote === 'OUVERT'">
                     <div class="flex justify-between text-[10px] mb-1">
-                        <span class="text-green-600">👍 {{ prop.votesPour || 0 }}</span>
-                        <span class="text-red-600">👎 {{ prop.votesContre || 0 }}</span>
+                        <span class="text-green-600">?? {{ prop.votesPour || 0 }}</span>
+                        <span class="text-red-600">?? {{ prop.votesContre || 0 }}</span>
                         <span class="font-semibold">{{ prop.pourcentagePour || 0 }}%</span>
                     </div>
                     <div class="h-1.5 bg-gray-200 rounded-full overflow-hidden">
@@ -119,12 +119,12 @@
                     <button *ngIf="prop.statutVote !== 'OUVERT' && prop.statutVote !== 'CLOTURE'" 
                             (click)="ouvrirVote(prop)" 
                             class="flex-1 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600">
-                        🗳️ Ouvrir vote
+                        ??? Ouvrir vote
                     </button>
                     <button *ngIf="prop.statutVote === 'OUVERT'" 
                             (click)="cloturerVote(prop)" 
                             class="flex-1 py-1 bg-orange-500 text-white rounded text-xs hover:bg-orange-600">
-                        🔒 Clôturer
+                        ?? Cl�turer
                     </button>
                     <button *ngIf="prop.statutVote === 'CLOTURE' && prop.pourcentagePour >= 50" 
                             (click)="publierFormation(prop)" 
@@ -155,7 +155,7 @@
     <!-- Avis en attente -->
     <div class="p-4 border-b border-gray-200">
         <div class="flex items-center justify-between mb-3">
-            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">📝 Avis à valider</h3>
+            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">?? Avis � valider</h3>
             <span class="bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full">{{avisEnAttente.length}}</span>
         </div>
         
@@ -179,7 +179,7 @@
                     <p class="text-xs font-medium text-gray-700">{{avis.titre}}</p>
                     <p class="text-xs text-gray-500 line-clamp-2">{{avis.commentaire}}</p>
                     <div class="flex items-center gap-1 mt-1">
-                        <span *ngFor="let s of [1,2,3,4,5]" class="text-xs">⭐</span>
+                        <span *ngFor="let s of [1,2,3,4,5]" class="text-xs">?</span>
                         <span class="text-xs font-bold ml-1">{{avis.note}}/5</span>
                     </div>
                 </div>
@@ -187,23 +187,23 @@
             <div class="flex gap-2 mt-2">
                 <button class="flex-1 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded text-xs font-medium"
                         (click)="validerAvis(avis.id)">
-                    ✓ Valider
+                    ? Valider
                 </button>
                 <button class="flex-1 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded text-xs font-medium"
                         (click)="rejeterAvis(avis.id)">
-                    ✗ Rejeter
+                    ? Rejeter
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Formations terminées -->
+    <!-- Formations termin�es -->
     <div class="p-4 flex-1">
-        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3"> Formations terminées</h3>
+        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3"> Formations termin�es</h3>
         
         <div *ngIf="formationsTerminees.length === 0" class="text-center py-6 text-gray-400">
             <span class="text-4xl"></span>
-            <p class="text-xs mt-2">Aucune formation terminée</p>
+            <p class="text-xs mt-2">Aucune formation termin�e</p>
         </div>
 
         <div *ngFor="let formation of formationsTerminees" 
@@ -214,7 +214,7 @@
                     <div class="flex-1">
                         <h4 class="text-sm font-semibold text-gray-800 line-clamp-1">{{formation.titre}}</h4>
                         <p class="text-[10px] text-gray-500 mt-1">
-                            {{formation.dateDebut | date:'dd/MM/yyyy'}} → {{formation.dateFin | date:'dd/MM/yyyy'}}
+                            {{formation.dateDebut | date:'dd/MM/yyyy'}} ? {{formation.dateFin | date:'dd/MM/yyyy'}}
                         </p>
                     </div>
                     <span class="text-xs px-2 py-0.5 rounded-full" 
@@ -223,13 +223,13 @@
                               'bg-orange-100 text-orange-700': (formation.stats?.moyenne || 0) >= 3,
                               'bg-red-100 text-red-700': (formation.stats?.moyenne || 0) < 3
                           }">
-                        {{formation.stats?.moyenne || 0}}/5 ★
+                        {{formation.stats?.moyenne || 0}}/5 ?
                     </span>
                 </div>
             </div>
             <div class="p-2 bg-gray-50 flex justify-around">
                 <div class="text-center"><div class="text-sm font-bold">{{formation.stats?.total || 0}}</div><div class="text-[10px] text-gray-500">Total avis</div></div>
-                <div class="text-center"><div class="text-sm font-bold text-green-600">{{formation.stats?.valides || 0}}</div><div class="text-[10px] text-gray-500">Validés</div></div>
+                <div class="text-center"><div class="text-sm font-bold text-green-600">{{formation.stats?.valides || 0}}</div><div class="text-[10px] text-gray-500">Valid�s</div></div>
                 <div class="text-center"><div class="text-sm font-bold text-yellow-600">{{formation.stats?.enAttente || 0}}</div><div class="text-[10px] text-gray-500">En attente</div></div>
             </div>
         </div>

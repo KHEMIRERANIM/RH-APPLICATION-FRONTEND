@@ -1,4 +1,4 @@
-﻿<div class="document-upload">
+<div class="document-upload">
     <div class="upload-area" 
          [class.drag-over]="dragOver"
          (dragover)="onDragOver($event)" 
@@ -8,13 +8,13 @@
         <input type="file" #fileInput (change)="onFileSelected($event)" style="display: none" multiple>
         <div class="upload-content">
             <mat-icon class="upload-icon">cloud_upload</mat-icon>
-            <p>Glissez-déposez vos fichiers ici ou cliquez pour sélectionner</p>
+            <p>Glissez-d�posez vos fichiers ici ou cliquez pour s�lectionner</p>
             <p class="upload-hint">PDF, DOC, PPT, images (max 10MB)</p>
         </div>
     </div>
     
     <div class="uploaded-files" *ngIf="files.length > 0">
-        <h4>Fichiers sélectionnés ({{files.length}})</h4>
+        <h4>Fichiers s�lectionn�s ({{files.length}})</h4>
         <div class="file-list">
             <div class="file-item" *ngFor="let file of files">
                 <mat-icon>insert_drive_file</mat-icon>
@@ -42,8 +42,8 @@
             <mat-form-field appearance="outline" class="full-width">
                 <mat-label>Type de document</mat-label>
                 <mat-select [(ngModel)]="documentType">
-                    <mat-option value="COURS">📚 Cours</mat-option>
-                    <mat-option value="EXERCICE">✍️ Exercice</mat-option>
+                    <mat-option value="COURS">?? Cours</mat-option>
+                    <mat-option value="EXERCICE">?? Exercice</mat-option>
                 
                 </mat-select>
             </mat-form-field>

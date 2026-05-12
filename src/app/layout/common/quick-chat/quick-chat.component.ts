@@ -4,6 +4,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { QuickChatService } from 'app/layout/common/quick-chat/quick-chat.service';
 import { Chat } from 'app/layout/common/quick-chat/quick-chat.types';
+import { AuthService } from 'app/core/auth/auth.service';
 
 @Component({
     selector     : 'quick-chat',
@@ -22,6 +23,7 @@ export class QuickChatComponent implements OnInit, OnDestroy
     private _scrollStrategy: ScrollStrategy = this._scrollStrategyOptions.block();
     private _overlay: HTMLElement;
     private _unsubscribeAll: Subject<any> = new Subject<any>();
+    isCandidat: boolean = false;
 
     /**
      * Constructor
@@ -31,9 +33,14 @@ export class QuickChatComponent implements OnInit, OnDestroy
         private _renderer2: Renderer2,
         private _ngZone: NgZone,
         private _quickChatService: QuickChatService,
-        private _scrollStrategyOptions: ScrollStrategyOptions
+        private _scrollStrategyOptions: ScrollStrategyOptions,
+        private _authService: AuthService
     )
     {
+        const user = this._authService.currentUser;
+        if (user && user.role === 'CANDIDAT') {
+            this.isCandidat = true;
+        }
     }
 
     // -----------------------------------------------------------------------------------------------------
@@ -123,6 +130,8 @@ export class QuickChatComponent implements OnInit, OnDestroy
      */
     open(): void
     {
+        if ( this.isCandidat ) return;
+
         // Return if the panel has already opened
         if ( this.opened )
         {
@@ -175,6 +184,28 @@ export class QuickChatComponent implements OnInit, OnDestroy
 
         // Get the chat data
         this._quickChatService.getChatById(id).subscribe();
+    }
+
+    /**
+     * Send message
+     */
+    sendMessage(): void
+    {
+        const message = this.messageInput.nativeElement.value.trim();
+
+        if ( !message || !this.selectedChat )
+        {
+            return;
+        }
+
+        // Send the message
+        this._quickChatService.sendMessage(this.selectedChat.id, message).subscribe(() => {
+            // Clear the input
+            this.messageInput.nativeElement.value = '';
+
+            // Focus on the input
+            this.messageInput.nativeElement.focus();
+        });
     }
 
     /**

@@ -1,4 +1,4 @@
-Ôªø<div class="absolute inset-0 flex flex-col min-w-0 overflow-hidden cal-root">
+<div class="absolute inset-0 flex flex-col min-w-0 overflow-hidden cal-root">
 
     <mat-drawer-container class="flex-auto h-full bg-transparent">
         
@@ -24,24 +24,24 @@
                     </div>
 
                     <div class="flex items-center gap-1 cal-nav-group bg-white border border-slate-200 rounded-full px-1 py-0.5 shadow-sm">
-                        <button class="w-7 h-7 rounded-full text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 transition-all flex items-center justify-center text-sm" (click)="previous()" matTooltip="Pr√©c√©dent">‚óÄ</button>
-                        <button class="cal-today-btn font-medium text-slate-700 hover:bg-slate-100 rounded-lg px-2 h-7 text-xs normal-case flex items-center gap-1" (click)="today()">üìÖ Aujourd'hui</button>
-                        <button class="w-7 h-7 rounded-full text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 transition-all flex items-center justify-center text-sm" (click)="next()" matTooltip="Suivant">‚ñ∂</button>
+                        <button class="w-7 h-7 rounded-full text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 transition-all flex items-center justify-center text-sm" (click)="previous()" matTooltip="PrÈcÈdent">?</button>
+                        <button class="cal-today-btn font-medium text-slate-700 hover:bg-slate-100 rounded-lg px-2 h-7 text-xs normal-case flex items-center gap-1" (click)="today()">?? Aujourd'hui</button>
+                        <button class="w-7 h-7 rounded-full text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 transition-all flex items-center justify-center text-sm" (click)="next()" matTooltip="Suivant">?</button>
                     </div>
 
                     <div class="flex items-center gap-2">
 
-                        <!-- üîç BARRE DE RECHERCHE RAPIDE -->
+                        <!-- ?? BARRE DE RECHERCHE RAPIDE -->
                         <div class="adv-search-bar flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1">
-                            <span class="text-slate-400 text-xs">üîç</span>
+                            <span class="text-slate-400 text-xs">??</span>
                             <input type="text" [(ngModel)]="searchQuery" (input)="applyFilters()" placeholder="Rechercher..." class="bg-transparent text-xs text-slate-700 outline-none w-32 placeholder-slate-400">
-                            <button *ngIf="searchQuery" (click)="resetFilters()" class="text-slate-400 hover:text-slate-600 text-xs">‚úï</button>
+                            <button *ngIf="searchQuery" (click)="resetFilters()" class="text-slate-400 hover:text-slate-600 text-xs">?</button>
                         </div>
 
-                        <!-- üîî CLOCHE NOTIFICATIONS -->
+                        <!-- ?? CLOCHE NOTIFICATIONS -->
                         <div class="relative">
                             <button class="notif-bell w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-all shadow-sm relative" (click)="toggleNotifications()" matTooltip="Notifications">
-                                <span class="text-sm">üîî</span>
+                                <span class="text-sm">??</span>
                                 <span *ngIf="unreadNotificationsCount > 0" class="notif-badge absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
                                     {{unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount}}
                                 </span>
@@ -53,7 +53,7 @@
                                 </div>
                                 <div class="notif-list max-h-64 overflow-y-auto divide-y divide-slate-50">
                                     <div *ngFor="let n of notifications" class="notif-item px-3 py-2 hover:bg-slate-50 cursor-pointer transition-colors flex gap-2 items-start" [class.unread-notif]="!n.read" (click)="markNotificationRead(n)">
-                                        <span class="text-sm mt-0.5 flex-shrink-0">{{n.icon || (n.type === 'error' ? 'üî¥' : n.type === 'warning' ? '‚ö†Ô∏è' : '‚ÑπÔ∏è')}}</span>
+                                        <span class="text-sm mt-0.5 flex-shrink-0">{{n.icon || (n.type === 'error' ? '??' : n.type === 'warning' ? '??' : '??')}}</span>
                                         <div class="flex-1 min-w-0">
                                             <p class="text-[11px] font-semibold text-slate-700">{{n.titre}}</p>
                                             <p class="text-[10px] text-slate-500 leading-relaxed">{{n.message}}</p>
@@ -66,7 +66,7 @@
                             </div>
                         </div>
 
-                        <!-- üìä BOUTON DASHBOARD -->
+                        <!-- ?? BOUTON DASHBOARD -->
                         <button class="dash-btn flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-semibold transition-all shadow-sm" [class.dash-btn--active]="showDashboard" (click)="toggleDashboard()" matTooltip="Tableau de bord">
                             <span></span> <span>Stats</span>
                         </button>
@@ -80,29 +80,29 @@
     {{getAlertesCount()}}
 </span>
     </button>
-                        <!-- ‚¨áÔ∏è BOUTON EXPORT -->
+                        <!-- ?? BOUTON EXPORT -->
                         <div class="relative">
                             <button class="export-btn flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white transition-all shadow-sm" (click)="showExportMenu = !showExportMenu" matTooltip="Exporter">
-                                <span>‚¨á</span> <span>Export</span>
+                                <span>?</span> <span>Export</span>
                             </button>
                             <div *ngIf="showExportMenu" class="export-menu absolute right-0 top-9 w-44 bg-white rounded-xl border border-slate-200 shadow-xl z-50 overflow-hidden">
-                                <button (click)="exportToCSV()" class="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2 transition-colors">üìÑ Exporter CSV</button>
-                                <button (click)="exportToJSON()" class="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2 transition-colors border-t border-slate-50">üóÇÔ∏è Exporter JSON</button>
-                                <button (click)="printCalendar()" class="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2 transition-colors border-t border-slate-50">üñ®Ô∏è Imprimer</button>
+                                <button (click)="exportToCSV()" class="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2 transition-colors">?? Exporter CSV</button>
+                                <button (click)="exportToJSON()" class="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2 transition-colors border-t border-slate-50">??? Exporter JSON</button>
+                                <button (click)="printCalendar()" class="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2 transition-colors border-t border-slate-50">??? Imprimer</button>
                             </div>
                         </div>
 
                         <!-- ADMIN FORMATEURS -->
-                        <button *ngIf="isAdmin" class="admin-btn bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded-lg text-xs font-medium flex items-center gap-1 transition-all shadow-sm" (click)="openFormateurManagement()" matTooltip="G√©rer les formateurs">
+                        <button *ngIf="isAdmin" class="admin-btn bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded-lg text-xs font-medium flex items-center gap-1 transition-all shadow-sm" (click)="openFormateurManagement()" matTooltip="GÈrer les formateurs">
                             Formateurs
                         </button>
                         
                         <!-- VUES -->
                         <div class="view-tabs bg-slate-100 p-0.5 rounded-lg flex gap-0.5">
-                            <button class="view-tab text-xs px-2 py-1 rounded" [class.active]="view === 'dayGridMonth'" (click)="changeView('dayGridMonth')">üìÖ Mois</button>
-                            <button class="view-tab text-xs px-2 py-1 rounded" [class.active]="view === 'timeGridWeek'" (click)="changeView('timeGridWeek')">üìÜ Semaine</button>
-                            <button class="view-tab text-xs px-2 py-1 rounded" [class.active]="view === 'timeGridDay'" (click)="changeView('timeGridDay')">üóìÔ∏è Jour</button>
-                            <button class="view-tab text-xs px-2 py-1 rounded" [class.active]="view === 'listYear'" (click)="changeView('listYear')">üìã Liste</button>
+                            <button class="view-tab text-xs px-2 py-1 rounded" [class.active]="view === 'dayGridMonth'" (click)="changeView('dayGridMonth')">?? Mois</button>
+                            <button class="view-tab text-xs px-2 py-1 rounded" [class.active]="view === 'timeGridWeek'" (click)="changeView('timeGridWeek')">?? Semaine</button>
+                            <button class="view-tab text-xs px-2 py-1 rounded" [class.active]="view === 'timeGridDay'" (click)="changeView('timeGridDay')">??? Jour</button>
+                            <button class="view-tab text-xs px-2 py-1 rounded" [class.active]="view === 'listYear'" (click)="changeView('listYear')">?? Liste</button>
                         </div>
                     </div>
                 </div>
@@ -110,8 +110,8 @@
                 <!-- DASHBOARD STATS PANEL -->
                 <div *ngIf="showDashboard" class="dash-panel mx-3 mt-2 rounded-xl overflow-hidden border border-slate-200 shadow-lg animate-slide-down">
                     <div class="dash-panel-header flex items-center justify-between px-4 py-2 bg-gradient-to-r from-indigo-600 to-bleu-400">
-                        <div class="flex items-center gap-2"><span class="text-white text-sm">üìä</span><span class="text-white text-xs font-bold">Tableau de bord ‚Äî Vue d'ensemble</span></div>
-                        <button (click)="showDashboard = false" class="text-white/70 hover:text-white text-sm transition-colors">‚úï</button>
+                        <div class="flex items-center gap-2"><span class="text-white text-sm">??</span><span class="text-white text-xs font-bold">Tableau de bord ó Vue d'ensemble</span></div>
+                        <button (click)="showDashboard = false" class="text-white/70 hover:text-white text-sm transition-colors">?</button>
                     </div>
                     <div class="dash-content bg-white p-3" style="max-height: 550px; overflow-y: auto;">
                         <div class="grid grid-cols-4 gap-2 mb-3">
@@ -134,7 +134,7 @@
                         </div>
                         <div class="grid grid-cols-3 gap-3">
                             <div class="dash-section bg-slate-50 rounded-xl p-3 border border-slate-100">
-                                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">R√©partition par cat√©gorie</p>
+                                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">RÈpartition par catÈgorie</p>
                                 <div class="space-y-1.5">
                                     <ng-container *ngFor="let cat of ['TECHNIQUE','MANAGERIAL','RSE','SOFT_SKILLS','SECURITE']">
                                         <div *ngIf="dashboardStats.formationsParCategorie[cat]" class="flex items-center gap-2">
@@ -171,25 +171,25 @@
 <div *ngIf="showKPIsPanel" class="kpis-ia-panel mx-3 mt-2 rounded-xl overflow-hidden border border-slate-200 shadow-lg animate-slide-down">
     <div class="kpis-panel-header flex items-center justify-between px-4 py-2 bg-gradient-to-r from-violet-600 to-indigo-600">
         <div class="flex items-center gap-2">
-            <span class="text-white text-xs font-bold">KPIs & Intelligence Artificielle ‚Äî Pr√©diction d'√©chec</span>
+            <span class="text-white text-xs font-bold">KPIs & Intelligence Artificielle ó PrÈdiction d'Èchec</span>
         </div>
-        <button (click)="showKPIsPanel = false" class="text-white/70 hover:text-white text-sm transition-colors">‚úï</button>
+        <button (click)="showKPIsPanel = false" class="text-white/70 hover:text-white text-sm transition-colors">?</button>
     </div>
     
     <div class="kpis-content bg-white p-4" *ngIf="!isLoadingKPIs && kpisData; else loadingKPIs">
-        <!-- Dans le panel KPIs, modifier l'en-t√™te -->
+        <!-- Dans le panel KPIs, modifier l'en-tÍte -->
 <div class="kpis-panel-header flex items-center justify-between px-4 py-2 bg-gradient-to-r from-violet-600 to-indigo-600">
     <div class="flex items-center gap-2">
-        <span class="text-white text-xs font-bold">KPIs & Intelligence Artificielle ‚Äî Pr√©diction d'√©chec</span>
+        <span class="text-white text-xs font-bold">KPIs & Intelligence Artificielle ó PrÈdiction d'Èchec</span>
     </div>
      <div class="flex items-center gap-2">
             <!-- BOUTON RAPPORT IA -->
             <button (click)="genererRapportIA()" 
                     class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded-lg text-white text-[11px] font-medium transition-all flex items-center gap-1.5 shadow-sm">
-                <span>ü§ñ</span>
+                <span>??</span>
                 <span>Rapport IA</span>
             </button>
-            <button (click)="showKPIsPanel = false" class="text-white/70 hover:text-white text-sm transition-colors">‚úï</button>
+            <button (click)="showKPIsPanel = false" class="text-white/70 hover:text-white text-sm transition-colors">?</button>
         </div>
 </div>
         <!-- 4 CARTES KPI GLOBAUX -->
@@ -212,7 +212,7 @@
                       'text-amber-500': kpisData.tauxRisqueEchecGlobal >= 40 && kpisData.tauxRisqueEchecGlobal < 70,
                       'text-green-500': kpisData.tauxRisqueEchecGlobal < 40
                    }">
-                    ‚ö†Ô∏è Risque √©chec (IA)
+                    ?? Risque Èchec (IA)
                 </p>
                 <p class="text-2xl font-bold"
                    [ngClass]="{
@@ -228,17 +228,17 @@
                       'text-amber-400': kpisData.tauxRisqueEchecGlobal >= 40 && kpisData.tauxRisqueEchecGlobal < 70,
                       'text-green-400': kpisData.tauxRisqueEchecGlobal < 40
                    }">
-                    Pr√©diction IA
+                    PrÈdiction IA
                 </p>
             </div>
             <div class="kpi-card bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-3 border border-slate-200">
-                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">üí∞ CA estim√©</p>
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">?? CA estimÈ</p>
                 <p class="text-2xl font-bold text-slate-700">{{kpisData.chiffreAffairesTotal | number}} DT</p>
                 <p class="text-[9px] text-slate-400 mt-1">NPS: {{kpisData.npsMoyen}}/100</p>
             </div>
-            <!-- Carte Employ√© le plus actif -->
+            <!-- Carte EmployÈ le plus actif -->
 <div class="kpi-card bg-gradient-to-br from-bleu-50 to-pink-100 rounded-xl p-3 border border-bleu-200">
-    <p class="text-[10px] font-boldtext-blue-500 mt-0.5 uppercase tracking-wider mb-1"> Employ√© du mois</p>
+    <p class="text-[10px] font-boldtext-blue-500 mt-0.5 uppercase tracking-wider mb-1"> EmployÈ du mois</p>
     <div *ngIf="kpisData?.employeLePlusActif; else noEmploye">
         <p class="text-sm font-bold text-blue-900 mt-0.5">
             {{kpisData.employeLePlusActif.prenom}} {{kpisData.employeLePlusActif.nom}}
@@ -263,7 +263,7 @@
     <!-- Graphique 1: Taux de remplissage par formation (avec scroll horizontal) -->
     <div class="chart-card bg-slate-50 rounded-xl p-3 border border-slate-100">
         <div class="flex items-center justify-between mb-2">
-            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">üìä Taux de remplissage par formation</p>
+            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">?? Taux de remplissage par formation</p>
             <span class="text-[9px] text-slate-400">{{formations.length}} formations</span>
         </div>
         
@@ -283,15 +283,15 @@
         <!-- Indicateur de scroll -->
         <div class="scroll-indicator text-center mt-2">
             <span class="text-[9px] text-slate-400 inline-flex items-center gap-1">
-                <span>‚óÄ</span> Glisser horizontalement pour voir toutes les formations <span>‚ñ∂</span>
+                <span>?</span> Glisser horizontalement pour voir toutes les formations <span>?</span>
             </span>
         </div>
     </div>
 
-    <!-- Graphique 2: Risque d'√©chec par formation -->
+    <!-- Graphique 2: Risque d'Èchec par formation -->
     <div class="chart-card bg-slate-50 rounded-xl p-3 border border-slate-100">
         <div class="flex items-center justify-between mb-2">
-            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">‚ö†Ô∏è Risque d'√©chec par formation (IA)</p>
+            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">?? Risque d'Èchec par formation (IA)</p>
             <span class="text-[9px] text-slate-400">{{formations.length}} formations</span>
         </div>
         
@@ -311,19 +311,19 @@
         <!-- Indicateur de scroll -->
         <div class="scroll-indicator text-center mt-2">
             <span class="text-[9px] text-slate-400 inline-flex items-center gap-1">
-                <span>‚óÄ</span> Glisser horizontalement pour voir toutes les formations <span>‚ñ∂</span>
+                <span>?</span> Glisser horizontalement pour voir toutes les formations <span>?</span>
             </span>
         </div>
     </div>
 
 </div>
 
-<!-- Deuxi√®me ligne: Donut + Jauge -->
+<!-- DeuxiËme ligne: Donut + Jauge -->
 <div class="grid grid-cols-2 gap-4 mb-5">
     
-    <!-- Graphique 3: Donut (r√©partition) -->
+    <!-- Graphique 3: Donut (rÈpartition) -->
     <div class="chart-card bg-slate-50 rounded-xl p-3 border border-slate-100">
-        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">üç© R√©partition des inscriptions</p>
+        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">?? RÈpartition des inscriptions</p>
         <div class="flex justify-center">
             <canvas *ngIf="kpiDonutChartData && kpiDonutChartData.datasets" 
                     baseChart
@@ -335,14 +335,14 @@
         </div>
         <div class="flex justify-center gap-4 mt-2 text-[9px]">
             <div class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-blue-500"></div> Inscrits: {{kpisData?.totalInscrits || 0}}</div>
-            <div class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-green-500"></div> Certifi√©s: {{kpisData?.totalCertifies || 0}}</div>
+            <div class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-green-500"></div> CertifiÈs: {{kpisData?.totalCertifies || 0}}</div>
             <div class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-red-500"></div> Abandons: {{kpisData?.totalAbandons || 0}}</div>
         </div>
     </div>
 
     <!-- Jauge de risque globale -->
     <div class="gauge-card bg-slate-50 rounded-xl p-3 border border-slate-100">
-        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">üéØ Jauge de risque globale</p>
+        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">?? Jauge de risque globale</p>
         <div class="flex flex-col items-center">
             <div class="w-full bg-slate-200 rounded-full h-4 mb-2">
                 <div class="h-4 rounded-full transition-all duration-500 flex items-center justify-center text-[9px] font-bold text-white"
@@ -361,9 +361,9 @@
                   'text-amber-600': (kpisData?.tauxRisqueEchecGlobal || 0) >= 40 && (kpisData?.tauxRisqueEchecGlobal || 0) < 70,
                   'text-green-600': (kpisData?.tauxRisqueEchecGlobal || 0) < 40
                }">
-                <span *ngIf="(kpisData?.tauxRisqueEchecGlobal || 0) >= 70">üî¥ Risque critique - Intervention n√©cessaire</span>
-                <span *ngIf="(kpisData?.tauxRisqueEchecGlobal || 0) >= 40 && (kpisData?.tauxRisqueEchecGlobal || 0) < 70">üü° Risque mod√©r√© - √Ä surveiller</span>
-                <span *ngIf="(kpisData?.tauxRisqueEchecGlobal || 0) < 40">üü¢ Risque faible - Bonne performance</span>
+                <span *ngIf="(kpisData?.tauxRisqueEchecGlobal || 0) >= 70">?? Risque critique - Intervention nÈcessaire</span>
+                <span *ngIf="(kpisData?.tauxRisqueEchecGlobal || 0) >= 40 && (kpisData?.tauxRisqueEchecGlobal || 0) < 70">?? Risque modÈrÈ - ¿ surveiller</span>
+                <span *ngIf="(kpisData?.tauxRisqueEchecGlobal || 0) < 40">?? Risque faible - Bonne performance</span>
             </p>
         </div>
     </div>
@@ -371,18 +371,18 @@
 <div *ngIf="showRapportModal" class="rapport-modal-overlay fixed inset-0 bg-black/60 z-[10000] flex items-center justify-center p-4 animate-fadeIn" (click)="closeRapportModal()">
     <div class="rapport-modal bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col animate-slideUp" (click)="$event.stopPropagation()">
         
-        <!-- En-t√™te -->
+        <!-- En-tÍte -->
         <div class="rapport-modal-header bg-gradient-to-r from-blue-900 to-indigo-900 px-6 py-4 flex justify-between items-center">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                    <span class="text-xl">ü§ñ</span>
+                    <span class="text-xl">??</span>
                 </div>
                 <div>
-                    <h3 class="text-white font-bold text-lg">Rapport IA - Analyse Strat√©gique</h3>
-                    <p class="text-white/70 text-xs">G√©n√©r√© par Intelligence Artificielle (DeepSeek)</p>
+                    <h3 class="text-white font-bold text-lg">Rapport IA - Analyse StratÈgique</h3>
+                    <p class="text-white/70 text-xs">GÈnÈrÈ par Intelligence Artificielle (DeepSeek)</p>
                 </div>
             </div>
-            <button (click)="closeRapportModal()" class="text-white/70 hover:text-white text-xl transition-colors">‚úï</button>
+            <button (click)="closeRapportModal()" class="text-white/70 hover:text-white text-xl transition-colors">?</button>
         </div>
         
         <!-- Corps -->
@@ -391,22 +391,22 @@
             <!-- Loading -->
             <div *ngIf="isGeneratingRapport" class="flex flex-col items-center justify-center py-16">
                 <div class="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
-                <p class="text-gray-600 font-medium">G√©n√©ration du rapport IA en cours...</p>
-                <p class="text-gray-400 text-sm mt-1">DeepSeek analyse vos donn√©es de formation</p>
+                <p class="text-gray-600 font-medium">GÈnÈration du rapport IA en cours...</p>
+                <p class="text-gray-400 text-sm mt-1">DeepSeek analyse vos donnÈes de formation</p>
             </div>
             
             <!-- Contenu du rapport -->
             <div *ngIf="!isGeneratingRapport && rapportContent" class="rapport-content">
-<!-- Apr√®s -->
+<!-- AprËs -->
 <div [innerHTML]="rapportContent"></div>
             </div>
             
             <!-- Erreur -->
             <div *ngIf="!isGeneratingRapport && rapportError && !rapportContent" class="text-center py-12">
-                <div class="text-6xl mb-4">‚ö†Ô∏è</div>
+                <div class="text-6xl mb-4">??</div>
                 <p class="text-red-600 font-medium">{{rapportError}}</p>
                 <button (click)="genererRapportIA()" class="mt-4 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-all">
-                    üîÑ R√©essayer
+                    ?? RÈessayer
                 </button>
             </div>
         </div>
@@ -414,18 +414,18 @@
         <!-- Pied de page -->
         <div class="rapport-modal-footer border-t border-gray-200 px-6 py-3 flex justify-between items-center bg-white">
             <div class="flex items-center gap-2">
-                <span class="text-[10px] text-gray-400">ü§ñ G√©n√©r√© par IA</span>
+                <span class="text-[10px] text-gray-400">?? GÈnÈrÈ par IA</span>
                 <span class="w-1 h-1 rounded-full bg-gray-300"></span>
                 <span class="text-[10px] text-gray-400">{{ dateGeneration | date:'dd/MM/yyyy HH:mm' }}</span>
             </div>
             <div class="flex gap-2">
                 <button (click)="exporterRapportWord()" 
                         class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded-lg transition-all flex items-center gap-1">
-                    üìÑ Word
+                    ?? Word
                 </button>
                 <button (click)="imprimerRapport()" 
                         class="px-3 py-1.5 bg-gray-600 hover:bg-gray-700 text-white text-xs rounded-lg transition-all flex items-center gap-1">
-                    üñ®Ô∏è Imprimer
+                    ??? Imprimer
                 </button>
                 <button (click)="closeRapportModal()" 
                         class="px-3 py-1.5 border border-gray-300 hover:bg-gray-100 text-gray-700 text-xs rounded-lg transition-all">
@@ -447,27 +447,27 @@
                 <div *ngFor="let alerte of getAlertesArray()" 
                      class="alerte-card bg-red-50 border-l-4 border-red-500 rounded-lg p-3">
                     <div class="flex items-center gap-2 mb-1">
-                        <span class="text-sm">‚ö†Ô∏è</span>
+                        <span class="text-sm">??</span>
                         <strong class="text-xs text-red-700">{{alerte.formation}}</strong>
                     </div>
                     <p class="text-[11px] text-red-600">Risque: <strong>{{alerte.data.risque}}%</strong></p>
                     <p class="text-[10px] text-red-500 mt-1">{{alerte.data.recommandation}}</p>
-                    <p class="text-[9px] text-red-400 mt-1">üí° {{alerte.data.action}}</p>
+                    <p class="text-[9px] text-red-400 mt-1">?? {{alerte.data.action}}</p>
                 </div>
             </div>
         </div>
 
-        <!-- TABLEAU D√âTAILL√â -->
+        <!-- TABLEAU D…TAILL… -->
         <div class="table-section mt-4">
-            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2"> D√©tail par formation</p>
+            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2"> DÈtail par formation</p>
             <div class="overflow-x-auto">
                 <table class="w-full text-xs">
                     <thead class="bg-slate-50">
                         <tr>
                             <th class="px-2 py-2 text-left text-[10px] font-semibold text-slate-500">Formation</th>
                             <th class="px-2 py-2 text-center text-[10px] font-semibold text-slate-500">Taux remplissage</th>
-                            <th class="px-2 py-2 text-center text-[10px] font-semibold text-slate-500">Taux r√©ussite</th>
-                            <th class="px-2 py-2 text-center text-[10px] font-semibold text-slate-500">‚ö†Ô∏è Risque IA</th>
+                            <th class="px-2 py-2 text-center text-[10px] font-semibold text-slate-500">Taux rÈussite</th>
+                            <th class="px-2 py-2 text-center text-[10px] font-semibold text-slate-500">?? Risque IA</th>
                             <th class="px-2 py-2 text-center text-[10px] font-semibold text-slate-500">Statut</th>
                         </tr>
                     </thead>
@@ -500,9 +500,9 @@
                                 </span>
                             </td>
                             <td class="px-2 py-2 text-center">
-                                <span *ngIf="(kpisData?.risqueEchecParFormation[formation.titre] || 0) >= 70" class="text-red-600 text-[10px] font-medium">üî¥ Critique</span>
-                                <span *ngIf="(kpisData?.risqueEchecParFormation[formation.titre] || 0) >= 40 && (kpisData?.risqueEchecParFormation[formation.titre] || 0) < 70" class="text-amber-600 text-[10px] font-medium">üü° √Ä surveiller</span>
-                                <span *ngIf="(kpisData?.risqueEchecParFormation[formation.titre] || 0) < 40" class="text-green-600 text-[10px] font-medium">üü¢ Bon</span>
+                                <span *ngIf="(kpisData?.risqueEchecParFormation[formation.titre] || 0) >= 70" class="text-red-600 text-[10px] font-medium">?? Critique</span>
+                                <span *ngIf="(kpisData?.risqueEchecParFormation[formation.titre] || 0) >= 40 && (kpisData?.risqueEchecParFormation[formation.titre] || 0) < 70" class="text-amber-600 text-[10px] font-medium">?? ¿ surveiller</span>
+                                <span *ngIf="(kpisData?.risqueEchecParFormation[formation.titre] || 0) < 40" class="text-green-600 text-[10px] font-medium">?? Bon</span>
                             </td>
                         </tr>
                     </tbody>
@@ -514,7 +514,7 @@
         <div class="text-right mt-4 pt-3 border-t border-slate-100">
             <button class="text-[10px] font-semibold text-indigo-600 hover:text-indigo-700 transition-colors flex items-center gap-1 ml-auto"
                     (click)="exportKPIsToCSV()">
-                <span>üìé</span> Exporter les KPIs (CSV)
+                <span>??</span> Exporter les KPIs (CSV)
             </button>
         </div>
     </div>
@@ -528,21 +528,21 @@
 </div>
                 <!-- BARRE FILTRES -->
                 <div class="filter-bar flex items-center gap-2 px-3 py-1.5 bg-white border-b border-slate-100" *ngIf="formations.length > 0">
-                    <button (click)="showFilters = !showFilters" class="flex items-center gap-1 text-[10px] font-semibold text-slate-500 hover:text-indigo-600 transition-colors px-2 py-1 rounded-lg hover:bg-indigo-50">‚öôÔ∏è Filtres</button>
+                    <button (click)="showFilters = !showFilters" class="flex items-center gap-1 text-[10px] font-semibold text-slate-500 hover:text-indigo-600 transition-colors px-2 py-1 rounded-lg hover:bg-indigo-50">?? Filtres</button>
                     <div *ngIf="showFilters" class="flex items-center gap-2 flex-1">
                         <select [(ngModel)]="filterCategory" (change)="applyFilters()" class="filter-select text-[10px] px-2 py-1 border border-slate-200 rounded-lg bg-white">
-                            <option value="">Toutes cat√©gories</option>
+                            <option value="">Toutes catÈgories</option>
                             <option value="TECHNIQUE">Technique</option>
                             <option value="MANAGERIAL">Managerial</option>
                             <option value="RSE">RSE</option>
                             <option value="SOFT_SKILLS">Soft Skills</option>
-                            <option value="SECURITE">S√©curit√©</option>
+                            <option value="SECURITE">SÈcuritÈ</option>
                         </select>
                         <select [(ngModel)]="filterFormateur" (change)="applyFilters()" class="filter-select text-[10px] px-2 py-1 border border-slate-200 rounded-lg bg-white">
                             <option value="">Tous formateurs</option>
                             <option *ngFor="let f of getUniqueFormateurs()" [value]="f">{{f}}</option>
                         </select>
-                        <button *ngIf="filterCategory || filterFormateur || filterStatus || searchQuery" (click)="resetFilters()" class="text-[10px] font-semibold text-red-500 hover:text-red-700">‚úï R√©initialiser</button>
+                        <button *ngIf="filterCategory || filterFormateur || filterStatus || searchQuery" (click)="resetFilters()" class="text-[10px] font-semibold text-red-500 hover:text-red-700">? RÈinitialiser</button>
                     </div>
                 </div>
 
@@ -564,13 +564,13 @@
 <div>
     <span class="text-white/80 text-[10px] font-bold uppercase">Participants</span>
     <h3 class="text-white font-bold text-sm mt-0.5">{{selectedFormationParticipants.titre}}</h3>
-    <!-- ‚úÖ Correction : utiliser les vrais nombres -->
+    <!-- ? Correction : utiliser les vrais nombres -->
     <p class="text-white/70 text-[10px]">
         {{getOccupancyPercent(selectedFormationParticipants)}}% - 
         {{getNombreInscrits(selectedFormationParticipants)}} / {{selectedFormationParticipants.nombrePlaces || 0}} inscrits
     </p>
 </div>
-                    <button (click)="showParticipantsModal = false" class="text-white/70 hover:text-white text-lg leading-none">‚úï</button>
+                    <button (click)="showParticipantsModal = false" class="text-white/70 hover:text-white text-lg leading-none">?</button>
                 </div>
                 <div class="mt-2 bg-white/20 rounded-full h-1.5"><div class="bg-white rounded-full h-1.5 transition-all" [style.width.%]="getOccupancyPercent(selectedFormationParticipants)"></div></div>
             </div>
@@ -581,11 +581,11 @@
     </div>
     
     <ng-container *ngIf="!isLoadingParticipants">
-        <!-- Participants confirm√©s/pr√©sents -->
+        <!-- Participants confirmÈs/prÈsents -->
         <div class="mb-4">
             <div class="flex items-center justify-between mb-2">
                 <p class="text-[10px] font-bold text-slate-500 uppercase">
-                    üë• Participants
+                    ?? Participants
                 </p>
                 <span class="text-[10px] font-bold px-2 py-0.5 bg-emerald-100 text-emerald-600 rounded-full">
                     {{participantsList.length}}
@@ -611,26 +611,26 @@
                     <div class="flex flex-col items-end gap-1">
                         <span class="text-[10px] font-bold px-2 py-1 rounded-full"
                               [ngClass]="{
-                                  'bg-emerald-100 text-emerald-700': p.statut === 'Confirm√©',
-                                  'bg-blue-100 text-blue-700': p.statut === 'Pr√©sent',
+                                  'bg-emerald-100 text-emerald-700': p.statut === 'ConfirmÈ',
+                                  'bg-blue-100 text-blue-700': p.statut === 'PrÈsent',
                                   'bg-red-100 text-red-700': p.statut === 'Absent',
-                                  'bg-bleu-100 text-bleu-700': p.statut === 'Valid√©'
+                                  'bg-bleu-100 text-bleu-700': p.statut === 'ValidÈ'
                               }">
                             {{p.statut}}
                         </span>
                         
-                        <!-- Badge pr√©sence valid√©e -->
+                        <!-- Badge prÈsence validÈe -->
                         <span *ngIf="p.presenceValidee" 
                               class="text-[9px] font-medium text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full">
-                              ‚úì Pr√©sence valid√©e
+                              ? PrÈsence validÈe
                         </span>
                     </div>
                 </div>
                 
                 <div *ngIf="participantsList.length === 0" class="text-center py-6">
-                    <div class="text-3xl mb-2">üë•</div>
+                    <div class="text-3xl mb-2">??</div>
                     <p class="text-xs text-slate-400">Aucun participant inscrit pour le moment</p>
-                    <p class="text-[10px] text-slate-300 mt-1">Les inscriptions appara√Ætront ici</p>
+                    <p class="text-[10px] text-slate-300 mt-1">Les inscriptions apparaÓtront ici</p>
                 </div>
             </div>
         </div>
@@ -639,7 +639,7 @@
         <div *ngIf="listeAttente.length > 0" class="mt-4 pt-3 border-t border-slate-100">
             <div class="flex items-center justify-between mb-2">
                 <p class="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1">
-                    ‚è≥ Liste d'attente
+                    ? Liste d'attente
                 </p>
                 <span class="text-[10px] font-bold px-2 py-0.5 bg-amber-100 text-amber-600 rounded-full">
                     {{listeAttente.length}}
@@ -704,13 +704,13 @@
                             </span>
                             <h2 class="ep-view-title text-white text-sm font-bold mt-1">{{selectedEvent.title}}</h2>
                             <div class="ep-view-dates flex items-center text-white/90 mt-0.5 text-[10px] font-medium">
-                                <span>{{selectedEvent.start | date:'dd/MM/yyyy HH:mm'}} ‚Üí {{selectedEvent.end | date:'dd/MM/yyyy HH:mm'}}</span>
+                                <span>{{selectedEvent.start | date:'dd/MM/yyyy HH:mm'}} ? {{selectedEvent.end | date:'dd/MM/yyyy HH:mm'}}</span>
                             </div>
                         </div>
                         <div class="flex gap-1 relative z-10">
-                            <button class="ep-action-btn w-7 h-7 rounded-full bg-white/20 hover:bg-white/30 transition-all flex items-center justify-center text-sm" (click)="changeEventPanelMode('edit', 'single')" matTooltip="Modifier">‚úèÔ∏è</button>
-                            <button class="ep-action-btn w-7 h-7 rounded-full bg-white/20 hover:bg-blue-500/80 transition-all flex items-center justify-center text-sm" (click)="openParticipantsModal(selectedEvent.formation)" matTooltip="Participants">üë•</button>
-                            <button class="ep-action-btn w-7 h-7 rounded-full bg-white/20 hover:bg-red-500/80 transition-all flex items-center justify-center text-sm" (click)="deleteEvent(selectedEvent)" matTooltip="Supprimer">üóëÔ∏è</button>
+                            <button class="ep-action-btn w-7 h-7 rounded-full bg-white/20 hover:bg-white/30 transition-all flex items-center justify-center text-sm" (click)="changeEventPanelMode('edit', 'single')" matTooltip="Modifier">??</button>
+                            <button class="ep-action-btn w-7 h-7 rounded-full bg-white/20 hover:bg-blue-500/80 transition-all flex items-center justify-center text-sm" (click)="openParticipantsModal(selectedEvent.formation)" matTooltip="Participants">??</button>
+                            <button class="ep-action-btn w-7 h-7 rounded-full bg-white/20 hover:bg-red-500/80 transition-all flex items-center justify-center text-sm" (click)="deleteEvent(selectedEvent)" matTooltip="Supprimer">???</button>
                         </div>
                     </div>
                 </div>
@@ -722,12 +722,12 @@
                     </div>
 
                     <div *ngIf="selectedEvent.formation?.prerequisFormationId" class="mb-3">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Pr√©requis</p>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">PrÈrequis</p>
                         <div class="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-lg p-2">
-                            <span class="text-base">üîó</span>
+                            <span class="text-base">??</span>
                             <div class="flex-1 min-w-0">
-                                <p class="text-xs font-semibold text-amber-800 truncate">{{selectedEvent.formation?.prerequisFormationTitre || 'Formation pr√©requise'}}</p>
-                                <p class="text-[10px] text-amber-600">Doit √™tre compl√©t√©e avant cette formation</p>
+                                <p class="text-xs font-semibold text-amber-800 truncate">{{selectedEvent.formation?.prerequisFormationTitre || 'Formation prÈrequise'}}</p>
+                                <p class="text-[10px] text-amber-600">Doit Ítre complÈtÈe avant cette formation</p>
                             </div>
                         </div>
                     </div>
@@ -742,9 +742,9 @@
                         </div>
 
                         <div class="ep-info-card bg-white p-2 rounded-lg border border-slate-100 shadow-sm flex items-center gap-2">
-                            <span class="text-base">üéØ</span>
+                            <span class="text-base">??</span>
                             <div class="min-w-0">
-                                <p class="ep-info-label text-[10px] text-slate-400 font-semibold uppercase">Disponibilit√©</p>
+                                <p class="ep-info-label text-[10px] text-slate-400 font-semibold uppercase">DisponibilitÈ</p>
                                 <p class="ep-info-value text-xs font-medium"
                                    [ngClass]="{
                                        'text-green-600': (selectedEvent.formation?.placesDisponibles || 0) > 3,
@@ -759,28 +759,28 @@
                         <div class="ep-info-card bg-white p-2 rounded-lg border border-slate-100 shadow-sm flex items-center gap-2">
                             <span class="text-base"></span>
                             <div class="min-w-0">
-                                <p class="ep-info-label text-[10px] text-slate-400 font-semibold uppercase">Dur√©e</p>
-                                <p class="ep-info-value text-xs font-medium text-slate-700">{{selectedEvent.formation?.dureeHeures || '‚Äî'}} h</p>
+                                <p class="ep-info-label text-[10px] text-slate-400 font-semibold uppercase">DurÈe</p>
+                                <p class="ep-info-value text-xs font-medium text-slate-700">{{selectedEvent.formation?.dureeHeures || 'ó'}} h</p>
                             </div>
                         </div>
 
                         <div class="ep-info-card bg-white p-2 rounded-lg border border-slate-100 shadow-sm flex items-center gap-2">
-                            <span class="text-base">üì∂</span>
+                            <span class="text-base">??</span>
                             <div class="min-w-0">
                                 <p class="ep-info-label text-[10px] text-slate-400 font-semibold uppercase">Niveau</p>
-                                <p class="ep-info-value text-xs font-medium text-slate-700">{{selectedEvent.formation?.niveau || '‚Äî'}}</p>
+                                <p class="ep-info-value text-xs font-medium text-slate-700">{{selectedEvent.formation?.niveau || 'ó'}}</p>
                             </div>
                         </div>
                     </div>
 
                     <div *ngIf="selectedEvent.formation?.lieu" class="ep-location-card bg-slate-50 p-2 rounded-lg border border-slate-100 mb-2">
                         <div class="flex gap-2 items-start">
-                            <span class="text-base">üìç</span>
+                            <span class="text-base">??</span>
                             <div class="flex-1 min-w-0">
                                 <p class="ep-info-label text-[10px] text-slate-400 font-bold uppercase mb-0.5">Lieu</p>
                                 <p class="ep-info-value text-xs text-slate-700 font-medium mb-1 truncate">{{selectedEvent.formation?.lieu}}</p>
                                 <div class="flex gap-1 flex-wrap" *ngIf="selectedEvent.formation?.lienGoogleMaps && selectedEvent.formation?.lienGoogleMaps !== ''">
-                                    <a [href]="selectedEvent.formation?.lienGoogleMaps" target="_blank" class="ep-link-btn inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-blue-500 text-white hover:bg-blue-600 transition-all">Itin√©raire</a>
+                                    <a [href]="selectedEvent.formation?.lienGoogleMaps" target="_blank" class="ep-link-btn inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-blue-500 text-white hover:bg-blue-600 transition-all">ItinÈraire</a>
                                     <button class="ep-link-btn inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors" (click)="copierLien(selectedEvent.formation?.lienGoogleMaps)">Copier</button>
                                 </div>
                             </div>
@@ -789,9 +789,9 @@
 
                     <div *ngIf="selectedEvent.formation?.lienVisio" class="ep-visio-card bg-emerald-50 p-2 rounded-lg border border-emerald-100">
                         <div class="flex gap-2 items-start">
-                            <span class="text-base">üé•</span>
+                            <span class="text-base">??</span>
                             <div class="flex-1">
-                                <p class="ep-info-label text-[10px] text-emerald-600 font-bold uppercase mb-0.5">Visioconf√©rence</p>
+                                <p class="ep-info-label text-[10px] text-emerald-600 font-bold uppercase mb-0.5">VisioconfÈrence</p>
                                 <div class="flex gap-1 mt-0.5 flex-wrap">
                                     <a [href]="selectedEvent.formation?.lienVisio" target="_blank" class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-all">Rejoindre</a>
                                     <button class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-white border border-emerald-200 text-emerald-700 hover:bg-emerald-50 transition-colors" (click)="copierLien(selectedEvent.formation?.lienVisio)">Copier</button>
@@ -802,18 +802,18 @@
 
                    <button (click)="openParticipantsModal(selectedEvent.formation)" 
         class="w-full mt-2 py-2 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1">
-    üë• Voir les participants 
+    ?? Voir les participants 
 </button>
                 </div>
             </div>
         </ng-container>
-<!-- MODE AJOUT / √âDITION -->
+<!-- MODE AJOUT / …DITION -->
 <ng-container *ngIf="panelMode === 'add' || panelMode === 'edit'">
     <div class="ep-form">
         
-        <!-- HEADER AVEC D√âCORATION -->
+        <!-- HEADER AVEC D…CORATION -->
         <div class="ep-form-header" [ngClass]="panelMode === 'add' ? 'ep-form-header--add' : 'ep-form-header--edit'">
-            <!-- D√©corations flottantes -->
+            <!-- DÈcorations flottantes -->
             <div class="ep-form-bg-decoration"></div>
             <div class="ep-form-bg-decoration ep-form-bg-decoration-2"></div>
             <div class="ep-form-bg-decoration ep-form-bg-decoration-3"></div>
@@ -821,11 +821,11 @@
             <div class="relative z-10 flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <div class="ep-form-icon">
-                        <span class="text-xl">{{panelMode === 'add' ? '‚ú®' : 'üñäÔ∏è'}}</span>
+                        <span class="text-xl">{{panelMode === 'add' ? '?' : '???'}}</span>
                     </div>
                     <div>
                         <h3 class="ep-form-title">
-                            {{panelMode === 'add' ? 'Cr√©er une formation' : 'Modifier la formation'}}
+                            {{panelMode === 'add' ? 'CrÈer une formation' : 'Modifier la formation'}}
                         </h3>
                         <p class="ep-form-sub">
                             {{panelMode === 'add' ? 'Remplissez les informations ci-dessous' : 'Modifiez les informations de la formation'}}
@@ -833,20 +833,20 @@
                     </div>
                 </div>
                 <button type="button" (click)="dialog.closeAll()" class="ep-form-close" matTooltip="Fermer">
-                    ‚úï
+                    ?
                 </button>
             </div>
         </div>
 
         <form [formGroup]="eventForm" (ngSubmit)="panelMode === 'add' ? addEvent() : updateEvent()" class="ep-form-body">
 
-            <!-- SECTION 1: INFORMATIONS G√âN√âRALES -->
+            <!-- SECTION 1: INFORMATIONS G…N…RALES -->
             <div class="ep-form-section">
                 <div class="ep-form-section-header">
-                    <span class="ep-form-section-icon">üìã</span>
+                    <span class="ep-form-section-icon">??</span>
                     <div>
-                        <h4 class="ep-form-section-title">Informations g√©n√©rales</h4>
-                        <p class="ep-form-section-desc">Titre, description et d√©tails de base</p>
+                        <h4 class="ep-form-section-title">Informations gÈnÈrales</h4>
+                        <p class="ep-form-section-desc">Titre, description et dÈtails de base</p>
                     </div>
                 </div>
                 
@@ -857,24 +857,24 @@
                             <span class="ep-field-label-icon"></span>
                             <span>Titre de la formation <span class="text-red-500">*</span></span>
                         </label>
-                        <input type="text" formControlName="title" placeholder="Ex: Angular Avanc√© - Ma√Ætrise compl√®te" class="ep-field-input">
+                        <input type="text" formControlName="title" placeholder="Ex: Angular AvancÈ - MaÓtrise complËte" class="ep-field-input">
                         <div *ngIf="hasError('title', 'required')" class="ep-field-error">
-                            <span>‚ö†Ô∏è</span> Le titre est requis
+                            <span>??</span> Le titre est requis
                         </div>
                         <div *ngIf="hasError('title', 'minlength')" class="ep-field-error">
-                            <span>‚ö†Ô∏è</span> Minimum 3 caract√®res
+                            <span>??</span> Minimum 3 caractËres
                         </div>
                     </div>
 
                     <!-- Description -->
                     <div class="ep-field-group">
                         <label class="ep-field-label">
-                            <span class="ep-field-label-icon">üìù</span>
+                            <span class="ep-field-label-icon">??</span>
                             <span>Description</span>
                         </label>
-                        <textarea formControlName="description" rows="3" placeholder="D√©crivez les objectifs, le contenu et les pr√©requis de la formation..." class="ep-field-textarea"></textarea>
+                        <textarea formControlName="description" rows="3" placeholder="DÈcrivez les objectifs, le contenu et les prÈrequis de la formation..." class="ep-field-textarea"></textarea>
                         <div class="ep-field-hint">
-                            <span>üí°</span> Une description d√©taill√©e aide les participants √† mieux comprendre la formation
+                            <span>??</span> Une description dÈtaillÈe aide les participants ‡ mieux comprendre la formation
                         </div>
                     </div>
                 </div>
@@ -894,7 +894,7 @@
  <!-- Dates avec Material Datepicker -->
 <div class="grid grid-cols-2 gap-4">
     <mat-form-field appearance="outline" class="ep-field" subscriptSizing="dynamic">
-        <mat-label class="text-slate-500 text-xs"> Date de d√©but *</mat-label>
+        <mat-label class="text-slate-500 text-xs"> Date de dÈbut *</mat-label>
         <input matInput [matDatepicker]="startPicker" formControlName="start" class="text-slate-700 text-sm">
         <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
         <mat-datepicker #startPicker></mat-datepicker>
@@ -909,11 +909,11 @@
 </div>
 
                     <div class="grid grid-cols-2 gap-4">
-                        <!-- Heure d√©but -->
+                        <!-- Heure dÈbut -->
                         <div class="ep-field-group">
                             <label class="ep-field-label">
                                 <span class="ep-field-label-icon"></span>
-                                <span>Heure de d√©but</span>
+                                <span>Heure de dÈbut</span>
                             </label>
                             <div class="ep-time-wrapper">
                                 <input type="time" [value]="startHour | date:'HH:mm'" (change)="onStartHourChange($event)" class="ep-field-input ep-time-input">
@@ -929,30 +929,30 @@
                             </label>
                             <div class="ep-time-wrapper">
                                 <input type="time" [value]="endHour | date:'HH:mm'" (change)="onEndHourChange($event)" class="ep-field-input ep-time-input">
-                                <span class="ep-time-icon">üïê</span>
+                                <span class="ep-time-icon">??</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- SECTION 3: CAT√âGORIE ET FORMATEUR -->
+            <!-- SECTION 3: CAT…GORIE ET FORMATEUR -->
             <div class="ep-form-section">
                 <div class="ep-form-section-header">
                     <span class="ep-form-section-icon"></span>
                     <div>
-                        <h4 class="ep-form-section-title">Cat√©gorie et formateur</h4>
-                        <p class="ep-form-section-desc">Sp√©cifiez le type et l'intervenant</p>
+                        <h4 class="ep-form-section-title">CatÈgorie et formateur</h4>
+                        <p class="ep-form-section-desc">SpÈcifiez le type et l'intervenant</p>
                     </div>
                 </div>
                 
                 <div class="ep-form-section-content">
                     <div class="grid grid-cols-2 gap-4">
-                        <!-- Cat√©gorie -->
+                        <!-- CatÈgorie -->
                         <div class="ep-field-group">
                             <label class="ep-field-label">
                                 <span class="ep-field-label-icon"></span>
-                                <span>Cat√©gorie <span class="text-red-500">*</span></span>
+                                <span>CatÈgorie <span class="text-red-500">*</span></span>
                             </label>
                             <div class="ep-select-wrapper">
                                 <select formControlName="calendarId" class="ep-field-select">
@@ -960,9 +960,9 @@
                                     <option value="2"> Managerial</option>
                                     <option value="3"> RSE</option>
                                     <option value="4"> Soft Skills</option>
-                                    <option value="5"> S√©curit√©</option>
+                                    <option value="5"> SÈcuritÈ</option>
                                 </select>
-                                <span class="ep-select-icon">‚ñº</span>
+                                <span class="ep-select-icon">?</span>
                             </div>
                         </div>
 
@@ -974,24 +974,24 @@
                             </label>
                             <div class="ep-select-wrapper">
                                 <select formControlName="formateurId" class="ep-field-select">
-                                    <option [value]="null">‚Äî S√©lectionner un formateur ‚Äî</option>
+                                    <option [value]="null">ó SÈlectionner un formateur ó</option>
                                     <option *ngFor="let f of formateursList" [value]="f.id">
-                                        {{f.prenom}} {{f.nom}} ‚Äî {{f.specialite}}
+                                        {{f.prenom}} {{f.nom}} ó {{f.specialite}}
                                     </option>
                                 </select>
-                                <span class="ep-select-icon">‚ñº</span>
+                                <span class="ep-select-icon">?</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- SECTION 4: CAPACIT√â -->
+            <!-- SECTION 4: CAPACIT… -->
             <div class="ep-form-section">
                 <div class="ep-form-section-header">
-                    <span class="ep-form-section-icon">üë•</span>
+                    <span class="ep-form-section-icon">??</span>
                     <div>
-                        <h4 class="ep-form-section-title">Capacit√© d'accueil</h4>
+                        <h4 class="ep-form-section-title">CapacitÈ d'accueil</h4>
                         <p class="ep-form-section-desc">Nombre de places disponibles</p>
                     </div>
                 </div>
@@ -1051,7 +1051,7 @@
                             <div *ngIf="mapLoadError" class="ep-map-error">
                                 <span></span>
                                 <p>Carte temporairement indisponible</p>
-                                <button type="button" (click)="initMap()" class="ep-map-retry">R√©essayer</button>
+                                <button type="button" (click)="initMap()" class="ep-map-retry">RÈessayer</button>
                             </div>
                             <div *ngIf="!mapLoading && !mapLoadError" id="location-map" class="ep-map"></div>
                         </div>
@@ -1061,7 +1061,7 @@
                                 <span></span> Centrer Tunisie
                             </button>
                             <button type="button" class="ep-map-btn ep-map-btn-reset" (click)="resetMap()">
-                                <span></span> R√©initialiser
+                                <span></span> RÈinitialiser
                             </button>
                         </div>
                     </div>
@@ -1070,37 +1070,37 @@
                     <div class="ep-field-group">
                         <label class="ep-field-label">
                             <span class="ep-field-label-icon"></span>
-                            <span>Adresse compl√®te</span>
+                            <span>Adresse complËte</span>
                         </label>
-                        <input type="text" formControlName="lieu" placeholder="Cliquez sur la carte pour s√©lectionner l'adresse" class="ep-field-input" readonly>
+                        <input type="text" formControlName="lieu" placeholder="Cliquez sur la carte pour sÈlectionner l'adresse" class="ep-field-input" readonly>
                         <div class="ep-field-hint">
-                            <span></span> Cliquez sur la carte pour d√©finir l'emplacement
+                            <span></span> Cliquez sur la carte pour dÈfinir l'emplacement
                         </div>
                     </div>
 
-                    <!-- Lien Google Maps g√©n√©r√© -->
+                    <!-- Lien Google Maps gÈnÈrÈ -->
                     <div *ngIf="eventForm.get('lienGoogleMaps')?.value" class="ep-link-card">
-                        <span class="ep-link-icon">üó∫Ô∏è</span>
+                        <span class="ep-link-icon">???</span>
                         <div class="ep-link-content">
-                            <p class="ep-link-label">Lien Google Maps g√©n√©r√©</p>
+                            <p class="ep-link-label">Lien Google Maps gÈnÈrÈ</p>
                             <a [href]="eventForm.get('lienGoogleMaps')?.value" target="_blank" class="ep-link-value">
-                                Voir l'itin√©raire ‚Üí
+                                Voir l'itinÈraire ?
                             </a>
                         </div>
                         <button type="button" class="ep-link-copy" (click)="copierLien(eventForm.get('lienGoogleMaps')?.value)" matTooltip="Copier le lien">
-                            üìã
+                            ??
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- SECTION 6: LIENS ET PR√âREQUIS -->
+            <!-- SECTION 6: LIENS ET PR…REQUIS -->
             <div class="ep-form-section">
                 <div class="ep-form-section-header">
-                    <span class="ep-form-section-icon">üîó</span>
+                    <span class="ep-form-section-icon">??</span>
                     <div>
-                        <h4 class="ep-form-section-title">Liens et pr√©requis</h4>
-                        <p class="ep-form-section-desc">Ressources compl√©mentaires</p>
+                        <h4 class="ep-form-section-title">Liens et prÈrequis</h4>
+                        <p class="ep-form-section-desc">Ressources complÈmentaires</p>
                     </div>
                 </div>
                 
@@ -1108,45 +1108,45 @@
                     <!-- Lien Jitsi -->
                     <div class="ep-field-group">
                         <label class="ep-field-label">
-                            <span class="ep-field-label-icon">üé•</span>
-                            <span>Lien de visioconf√©rence</span>
+                            <span class="ep-field-label-icon">??</span>
+                            <span>Lien de visioconfÈrence</span>
                         </label>
                         <div class="ep-link-input-wrapper">
-                            <input type="url" formControlName="lienVisio" readonly placeholder="G√©n√©r√© automatiquement √† partir du titre" class="ep-field-input ep-field-input-readonly">
+                            <input type="url" formControlName="lienVisio" readonly placeholder="GÈnÈrÈ automatiquement ‡ partir du titre" class="ep-field-input ep-field-input-readonly">
                             <button type="button" class="ep-link-input-btn" (click)="copierLien(eventForm.get('lienVisio')?.value)" matTooltip="Copier le lien">
-                                üìã
+                                ??
                             </button>
                         </div>
                         <div class="ep-field-hint">
-                            <span>‚ú®</span> Lien Jitsi g√©n√©r√© automatiquement
+                            <span>?</span> Lien Jitsi gÈnÈrÈ automatiquement
                         </div>
                     </div>
 
-                    <!-- Formation pr√©requise -->
+                    <!-- Formation prÈrequise -->
                     <div class="ep-field-group">
                         <label class="ep-field-label">
                             <span class="ep-field-label-icon"></span>
-                            <span>Formation pr√©requise</span>
+                            <span>Formation prÈrequise</span>
                         </label>
                         <div class="ep-select-wrapper">
                             <select formControlName="prerequisFormationId" class="ep-field-select">
-                                <option [value]="null">‚Äî Aucun pr√©requis ‚Äî</option>
+                                <option [value]="null">ó Aucun prÈrequis ó</option>
                                 <option *ngFor="let f of getFormationsDisponiblesCommePrerequisFor(selectedEvent?.id)" [value]="f.id">
                                     {{f.titre}}
                                 </option>
                             </select>
-                            <span class="ep-select-icon">‚ñº</span>
+                            <span class="ep-select-icon">?</span>
                         </div>
                         <div class="ep-field-hint">
-                            <span>üí°</span> Les participants doivent compl√©ter cette formation avant de s'inscrire
+                            <span>??</span> Les participants doivent complÈter cette formation avant de s'inscrire
                         </div>
                     </div>
 
-                    <!-- Aper√ßu pr√©requis s√©lectionn√© -->
+                    <!-- AperÁu prÈrequis sÈlectionnÈ -->
                     <div *ngIf="getTitrePrerequisSelectionne()" class="ep-prereq-card">
-                        <span class="ep-prereq-icon">üîó</span>
+                        <span class="ep-prereq-icon">??</span>
                         <div class="ep-prereq-content">
-                            <p class="ep-prereq-label">Pr√©requis s√©lectionn√©</p>
+                            <p class="ep-prereq-label">PrÈrequis sÈlectionnÈ</p>
                             <p class="ep-prereq-value">{{getTitrePrerequisSelectionne()}}</p>
                         </div>
                     </div>
@@ -1156,23 +1156,23 @@
             <!-- MESSAGES D'ERREUR -->
             <div class="ep-form-errors">
                 <div *ngIf="eventForm.hasError('sameCategoryOverlap') && (eventForm.dirty || eventForm.touched)" class="ep-error-card ep-error-warning">
-                    <span class="ep-error-icon">‚ö†Ô∏è</span>
+                    <span class="ep-error-icon">??</span>
                     <div class="ep-error-content">
                         <strong>{{getFormErrorMessage()}}</strong>
-                        <p>Consultez le calendrier pour trouver un cr√©neau disponible pour cette cat√©gorie.</p>
+                        <p>Consultez le calendrier pour trouver un crÈneau disponible pour cette catÈgorie.</p>
                     </div>
                 </div>
 
                 <div *ngIf="eventForm.hasError('formateurUnavailable') && (eventForm.dirty || eventForm.touched)" class="ep-error-card ep-error-warning">
-                    <span class="ep-error-icon">‚ö†Ô∏è</span>
+                    <span class="ep-error-icon">??</span>
                     <div class="ep-error-content">
                         <strong>{{getFormErrorMessage()}}</strong>
-                        <p>S√©lectionnez un autre cr√©neau horaire ou un autre formateur.</p>
+                        <p>SÈlectionnez un autre crÈneau horaire ou un autre formateur.</p>
                     </div>
                 </div>
 
                 <div *ngIf="getFormErrorMessage() && !eventForm.hasError('sameCategoryOverlap') && !eventForm.hasError('formateurUnavailable')" class="ep-error-card ep-error-danger">
-                    <span class="ep-error-icon">‚ùå</span>
+                    <span class="ep-error-icon">?</span>
                     <div class="ep-error-content">
                         <strong>{{getFormErrorMessage()}}</strong>
                     </div>
@@ -1182,11 +1182,11 @@
             <!-- ACTIONS -->
             <div class="ep-form-actions">
                 <button type="button" class="ep-btn ep-btn-secondary" (click)="dialog.closeAll()">
-                    <span>‚úï</span> Annuler
+                    <span>?</span> Annuler
                 </button>
                 <button type="submit" class="ep-btn ep-btn-primary" [disabled]="eventForm.invalid">
-                    <span>{{panelMode === 'add' ? '‚ú®' : ''}}</span>
-                    {{panelMode === 'add' ? 'Cr√©er la formation' : 'Enregistrer les modifications'}}
+                    <span>{{panelMode === 'add' ? '?' : ''}}</span>
+                    {{panelMode === 'add' ? 'CrÈer la formation' : 'Enregistrer les modifications'}}
                 </button>
             </div>
 
@@ -1200,7 +1200,7 @@
 <style>
     /* ====== NOUVEAUX STYLES POUR LE FORMULAIRE MODERNE ====== */
 
-/* Header avec d√©corations */
+/* Header avec dÈcorations */
 .ep-form-header {
     position: relative;
     overflow: hidden;
@@ -1446,7 +1446,7 @@
     border-radius: 8px;
 }
 
-/* Barre de capacit√© */
+/* Barre de capacitÈ */
 .ep-capacity-bar {
     margin-top: 16px;
 }
@@ -1650,7 +1650,7 @@
     background: #e2e8f0;
 }
 
-/* Pr√©requis card */
+/* PrÈrequis card */
 .ep-prereq-card {
     display: flex;
     align-items: center;

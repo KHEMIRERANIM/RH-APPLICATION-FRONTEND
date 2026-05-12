@@ -17,6 +17,7 @@ export class MenusComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
   menus: Menu[] = [];
+  filteredMenus: Menu[] = [];
   searchTerm = '';
   filters = ['diabetique', 'sans_gluten', 'vegetarien', 'sans sucre'];
   selectedFilters: string[] = [];
@@ -79,9 +80,15 @@ export class MenusComponent implements OnInit, OnDestroy {
     this.menuService.getAllMenus().subscribe({
       next: (data) => {
         this.menus = this.roleService.isAdmin() ? data : data.filter(m => m.statut === 'publie');
+        // Sort menus initially
+        this.menus.sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime());
+        this.applyFilters();
         this.loading = false;
       },
-      error: () => { this.errorMsg = 'Erreur connexion serveur.'; this.loading = false; }
+      error: (err) => { 
+        this.errorMsg = 'Erreur connexion serveur.'; 
+        this.loading = false; 
+      }
     });
   }
 
@@ -223,23 +230,26 @@ export class MenusComponent implements OnInit, OnDestroy {
     this.selectedFilters.includes(f)
       ? this.selectedFilters = this.selectedFilters.filter(x => x !== f)
       : this.selectedFilters.push(f);
+    this.applyFilters();
   }
 
   toggleMenu(id: string): void {
     this.expandedMenu = this.expandedMenu === id ? null : id;
   }
 
-  getFilteredMenus(): Menu[] {
+  applyFilters(): void {
     let result = this.menus;
     if (this.searchTerm || this.selectedFilters.length > 0) {
       result = this.menus.map(m => ({ ...m, plats: this.filterPlats(m.plats || []) })).filter(m => m.plats.length > 0);
     }
-    return result.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    this.filteredMenus = result;
   }
 
   filterPlats(plats: Plat[]): Plat[] {
-    return plats.filter(p => {
-      const s = !this.searchTerm || p.nom.toLowerCase().includes(this.searchTerm.toLowerCase());
+    return (plats || []).filter(p => {
+      if (!p) return false;
+      const nomStr = p.nom ? p.nom.toLowerCase() : '';
+      const s = !this.searchTerm || nomStr.includes(this.searchTerm.toLowerCase());
       const f = this.selectedFilters.length === 0 || (p.tags && p.tags.some(t => this.selectedFilters.some(sf => t.toLowerCase().includes(sf.toLowerCase()))));
       return s && f;
     });

@@ -1,4 +1,4 @@
-﻿<div class="dashboard-viewport">
+<div class="dashboard-viewport">
   <div class="content-wrapper">
 
     <!-- HEADER -->
@@ -18,7 +18,7 @@
         </div>
         <div class="stat-card upcoming">
           <span class="value">{{ getFormationsAVenir() }}</span>
-          <span class="label">À venir</span>
+          <span class="label">� venir</span>
         </div>
       </div>
     </header>
@@ -27,12 +27,12 @@
     <div class="status-overlay" *ngIf="isLoading || errorMessage">
       <div *ngIf="isLoading" class="spinner-container">
         <div class="spinner"></div>
-        <p>Chargement de vos données...</p>
+        <p>Chargement de vos donn�es...</p>
       </div>
       <div *ngIf="errorMessage" class="error-box">
-        <span class="error-icon">⚠️</span>
+        <span class="error-icon">??</span>
         <p>{{ errorMessage }}</p>
-        <button (click)="retry()" class="btn-retry">Réessayer</button>
+        <button (click)="retry()" class="btn-retry">R�essayer</button>
       </div>
     </div>
 
@@ -61,7 +61,7 @@
               <span class="status-text">{{ getStatusText(formation.dateDebut, formation.dateFin) }}</span>
             </div>
             <div class="info-chips">
-              <span class="chip"> {{ formatDate(formation.dateDebut) }} → {{ formatDate(formation.dateFin) }}</span>
+              <span class="chip"> {{ formatDate(formation.dateDebut) }} ? {{ formatDate(formation.dateFin) }}</span>
               <span class="chip">{{ formation.dureeHeures }}h</span>
               <span class="chip">{{ formation.nombrePlaces }} places</span>
             </div>
@@ -73,19 +73,19 @@
           <button class="btn-action"
                   [class.active]="activeSection[formation.id] === 'participants'"
                   (click)="toggleSection(formation.id, 'participants')">
-            👥 Participants
+            ?? Participants
             <span class="section-indicator" *ngIf="activeSection[formation.id] === 'participants'"></span>
           </button>
           <button class="btn-action"
                   [class.active]="activeSection[formation.id] === 'documents'"
                   (click)="toggleSection(formation.id, 'documents')">
-            📄 Documents
+            ?? Documents
             <span class="section-indicator" *ngIf="activeSection[formation.id] === 'documents'"></span>
           </button>
           <button class="btn-action"
                   [class.active]="activeSection[formation.id] === 'examens'"
                   (click)="toggleSection(formation.id, 'examens')">
-            📝 Examens
+            ?? Examens
             <span class="section-indicator" *ngIf="activeSection[formation.id] === 'examens'"></span>
           </button>
         </div>
@@ -124,7 +124,7 @@
             <p class="desc-text"><strong>Description :</strong> {{ formation.description }}</p>
             <div class="visio-row" *ngIf="formation.lienVisio">
               <a [href]="formation.lienVisio" target="_blank" class="visio-link">
-                🔗 Rejoindre la visio
+                ?? Rejoindre la visio
               </a>
               <button class="btn-copy" (click)="copierLien(formation.lienVisio)">Copier</button>
             </div>
@@ -135,7 +135,7 @@
 
       <!-- EMPTY STATE -->
       <div class="empty-state" *ngIf="formations.length === 0">
-        <p>Aucune formation trouvée pour le moment.</p>
+        <p>Aucune formation trouv�e pour le moment.</p>
       </div>
 
     </div>

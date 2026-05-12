@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnIni
 import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 import { MatButton } from '@angular/material/button';
+import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { Message } from 'app/layout/common/messages/messages.types';
@@ -31,7 +32,8 @@ export class MessagesComponent implements OnInit, OnDestroy
         private _changeDetectorRef: ChangeDetectorRef,
         private _messagesService: MessagesService,
         private _overlay: Overlay,
-        private _viewContainerRef: ViewContainerRef
+        private _viewContainerRef: ViewContainerRef,
+        private _router: Router
     )
     {
     }
@@ -108,6 +110,23 @@ export class MessagesComponent implements OnInit, OnDestroy
     closePanel(): void
     {
         this._overlayRef.detach();
+    }
+
+    /**
+     * Handle click on a message: mark as read, close panel, navigate
+     */
+    handleMessageClick(message: Message): void
+    {
+        // 1. Mark as read if needed
+        if (!message.read) {
+            this.toggleRead(message);
+        }
+        // 2. Close the panel first
+        this.closePanel();
+        // 3. Navigate using the Router (after panel closes)
+        if (message.link) {
+            this._router.navigateByUrl(message.link);
+        }
     }
 
     /**

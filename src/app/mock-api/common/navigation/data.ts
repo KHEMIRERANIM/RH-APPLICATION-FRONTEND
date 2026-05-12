@@ -55,13 +55,7 @@ export const defaultNavigation: FuseNavigationItem[] = [
                 icon : 'iconsmind:handshake',
                 link : '/apps/partnerships'
             },
-            {
-                id   : 'apps.rse',
-                title: 'RSE',
-                type : 'basic',
-                icon : 'heroicons_outline:globe-alt',
-                link : '/apps/rse'
-            },
+
             {
                 id   : 'apps.restaurant',
                 title: 'Restaurant',

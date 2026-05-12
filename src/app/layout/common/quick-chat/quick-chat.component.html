@@ -1,4 +1,4 @@
-<div class="fixed lg:sticky top-0 bottom-0 lg:left-full w-full sm:w-96 lg:w-16 lg:h-screen lg:shadow">
+<div class="fixed lg:sticky top-0 bottom-0 lg:left-full w-full sm:w-96 lg:w-16 lg:h-screen lg:shadow" *ngIf="!isCandidat">
     <div
         class="flex flex-col w-full sm:w-96 h-full transform transition-transform duration-400 ease-drawer bg-card"
         [ngClass]="{'-translate-x-full sm:-translate-x-96 lg:-translate-x-80 shadow': opened, 'translate-x-0': !opened}">
@@ -157,11 +157,13 @@
                                 style="margin: 11px 0 !important; padding: 0 !important;"
                                 [rows]="1"
                                 matInput
-                                #messageInput></textarea>
+                                #messageInput
+                                (keydown.enter)="$event.preventDefault(); sendMessage()"></textarea>
                         </mat-form-field>
                         <div class="flex items-center h-11 my-px ml-4">
                             <button
-                                mat-icon-button>
+                                mat-icon-button
+                                (click)="sendMessage()">
                                 <mat-icon
                                     class="transform rotate-90"
                                     [svgIcon]="'heroicons_outline:paper-airplane'"></mat-icon>

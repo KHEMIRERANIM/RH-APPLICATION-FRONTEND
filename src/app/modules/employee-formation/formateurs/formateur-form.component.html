@@ -1,4 +1,4 @@
-Ôªø<div class="formateur-form-container">
+<div class="formateur-form-container">
     <h2 mat-dialog-title>
         <mat-icon class="title-icon">{{isEdit ? 'edit' : 'person_add'}}</mat-icon>
         {{isEdit ? 'Modifier' : 'Ajouter'}} un formateur
@@ -7,11 +7,11 @@
     <form [formGroup]="formateurForm" (ngSubmit)="onSubmit()">
         <mat-dialog-content>
 
-            <!-- S√©lection de l'employ√© -->
+            <!-- SÈlection de l'employÈ -->
             <div class="employe-selection">
                 <label class="section-label">
                     <mat-icon>people</mat-icon>
-                    S√©lectionner un employ√© *
+                    SÈlectionner un employÈ *
                 </label>
 
                 <div class="search-container" *ngIf="!isLoadingEmployes">
@@ -23,7 +23,7 @@
                             [(ngModel)]="searchEmployeTerm"
                             (input)="filterEmployes()"
                             [ngModelOptions]="{standalone: true}"
-                            placeholder="Rechercher un employ√© par nom, pr√©nom ou email..."
+                            placeholder="Rechercher un employÈ par nom, prÈnom ou email..."
                             [disabled]="isEdit">
                         <button
                             *ngIf="searchEmployeTerm && !isEdit"
@@ -34,7 +34,7 @@
                         </button>
                     </div>
 
-                    <!-- Liste des employ√©s -->
+                    <!-- Liste des employÈs -->
                     <div class="employes-list"
                          *ngIf="filteredEmployes.length > 0 && !formateurForm.get('employeId')?.value && !isEdit">
                         <div class="employe-item"
@@ -42,7 +42,7 @@
                              (click)="onEmployeSelect(employe)">
                             <div class="employe-avatar">
                                 <div class="avatar-default">
-                                    <!-- ‚úÖ firstName / lastName uniquement -->
+                                    <!-- ? firstName / lastName uniquement -->
                                     {{employe.firstName?.charAt(0)?.toUpperCase()}}{{employe.lastName?.charAt(0)?.toUpperCase()}}
                                 </div>
                             </div>
@@ -59,7 +59,7 @@
                         </div>
                     </div>
 
-                    <!-- Employ√© s√©lectionn√© -->
+                    <!-- EmployÈ sÈlectionnÈ -->
                     <div class="selected-employe" *ngIf="formateurForm.get('employeId')?.value">
                         <div class="selected-card">
                             <div class="selected-avatar">
@@ -88,18 +88,18 @@
                         </div>
                     </div>
 
-                    <!-- Message aucun employ√© -->
+                    <!-- Message aucun employÈ -->
                     <div class="no-employes"
                          *ngIf="filteredEmployes.length === 0 && !isLoadingEmployes && !formateurForm.get('employeId')?.value && !isEdit">
                         <mat-icon>people_outline</mat-icon>
-                        <p>Aucun employ√© disponible</p>
-                        <p class="hint">Tous les employ√©s sont d√©j√† formateurs ou aucun employ√© n'est enregistr√©</p>
+                        <p>Aucun employÈ disponible</p>
+                        <p class="hint">Tous les employÈs sont dÈj‡ formateurs ou aucun employÈ n'est enregistrÈ</p>
                     </div>
                 </div>
 
                 <div class="loading-employes" *ngIf="isLoadingEmployes">
                     <mat-spinner diameter="30"></mat-spinner>
-                    <p>Chargement des employ√©s...</p>
+                    <p>Chargement des employÈs...</p>
                 </div>
             </div>
 
@@ -113,7 +113,7 @@
                 <div class="form-grid">
                     <div class="grid-2">
                         <mat-form-field appearance="outline">
-                            <mat-label>Sp√©cialit√© *</mat-label>
+                            <mat-label>SpÈcialitÈ *</mat-label>
                             <mat-select formControlName="specialite">
                                 <mat-option *ngFor="let spec of specialites" [value]="spec">
                                     {{spec}}
@@ -140,7 +140,7 @@
                     <mat-form-field appearance="outline" class="full-width">
                         <mat-label>Biographie</mat-label>
                         <textarea matInput formControlName="bio" rows="3"
-                            placeholder="Pr√©sentation du formateur, ses comp√©tences, son exp√©rience...">
+                            placeholder="PrÈsentation du formateur, ses compÈtences, son expÈrience...">
                         </textarea>
                         <mat-hint align="end">
                             {{formateurForm.get('bio')?.value?.length || 0}} / 500
@@ -169,7 +169,7 @@
                 type="submit"
                 [disabled]="!isFormReady">
                 <mat-icon>{{isEdit ? 'save' : 'add'}}</mat-icon>
-                {{isEdit ? 'Modifier' : 'Cr√©er'}}
+                {{isEdit ? 'Modifier' : 'CrÈer'}}
             </button>
         </mat-dialog-actions>
     </form>
